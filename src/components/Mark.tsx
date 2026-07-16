@@ -1,0 +1,118 @@
+import { Circle, Group, Rect, RegularPolygon, Text } from 'react-konva';
+import type { Mark as MarkModel } from '../types';
+
+interface MarkProps {
+  mark: MarkModel;
+  isSelected: boolean;
+  onMove: (markId: string, pos: { x: number; y: number }) => void;
+  onSelect: (markId: string) => void;
+}
+
+export default function Mark({ mark, isSelected, onMove, onSelect }: MarkProps) {
+  // Render different visual shapes based on mark.shape
+  const renderShape = () => {
+    const strokeColor = isSelected ? '#ffffff' : '#1e293b';
+    const strokeWidth = isSelected ? 3 : 1.5;
+    const shadowColor = 'black';
+    const shadowBlur = 4;
+    const shadowOpacity = 0.3;
+    const shadowOffset = { x: 1, y: 2 };
+
+    switch (mark.shape) {
+      case 'triangle':
+        // Conical buoy
+        return (
+          <RegularPolygon
+            sides={3}
+            radius={16}
+            fill={mark.color}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            shadowColor={shadowColor}
+            shadowBlur={shadowBlur}
+            shadowOpacity={shadowOpacity}
+            shadowOffset={shadowOffset}
+            rotation={0}
+          />
+        );
+      case 'square':
+        // Spar / cylindrical upright buoy
+        return (
+          <Rect
+            x={-12}
+            y={-12}
+            width={24}
+            height={24}
+            fill={mark.color}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            shadowColor={shadowColor}
+            shadowBlur={shadowBlur}
+            shadowOpacity={shadowOpacity}
+            shadowOffset={shadowOffset}
+            cornerRadius={2}
+          />
+        );
+      case 'circle':
+      default:
+        // Round buoy
+        return (
+          <Circle
+            radius={14}
+            fill={mark.color}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            shadowColor={shadowColor}
+            shadowBlur={shadowBlur}
+            shadowOpacity={shadowOpacity}
+            shadowOffset={shadowOffset}
+          />
+        );
+    }
+  };
+
+  return (
+    <Group
+      x={mark.x}
+      y={mark.y}
+      draggable
+      onClick={() => onSelect(mark.id)}
+      onTap={() => onSelect(mark.id)}
+      onDragStart={() => onSelect(mark.id)}
+      onDragEnd={(e) => {
+        onMove(mark.id, {
+          x: e.target.x(),
+          y: e.target.y(),
+        });
+      }}
+    >
+      {/* Visual representation of the buoy */}
+      {renderShape()}
+
+      {/* A tiny flag stick & flag on top of the mark to make it look premium */}
+      <Rect x={-1} y={-22} width={2} height={10} fill="#64748b" />
+      <RegularPolygon
+        x={5}
+        y={-18}
+        sides={3}
+        radius={5}
+        rotation={90}
+        fill="#ef4444"
+      />
+
+      {/* Label for the mark */}
+      <Text
+        text={mark.name}
+        x={-40}
+        y={20}
+        width={80}
+        align="center"
+        fontSize={11}
+        fontStyle="bold"
+        fill="#0f172a"
+        wrap="none"
+        ellipsis={true}
+      />
+    </Group>
+  );
+}

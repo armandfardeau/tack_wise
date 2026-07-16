@@ -1,0 +1,43 @@
+- main [ref=f4e3]:
+  - generic [ref=f4e4]:
+    - generic [ref=f4e5]:
+      - paragraph [ref=f4e6]: Tactical Sailing Trainer
+      - heading "Tack Wise" [level=1] [ref=f4e7]
+    - generic "Selected boat details" [ref=f4e8]:
+      - generic [ref=f4e9]:
+        - term [ref=f4e10]: Name
+        - definition [ref=f4e11]: Alpha
+      - generic [ref=f4e12]:
+        - term [ref=f4e13]: X
+        - definition [ref=f4e14]: "10"
+      - generic [ref=f4e15]:
+        - term [ref=f4e16]: "Y"
+        - definition [ref=f4e17]: "10"
+      - generic [ref=f4e18]:
+        - term [ref=f4e19]: Heading
+        - definition [ref=f4e20]: 35 deg
+  - region "Sailing situation workspace" [ref=f4e21]:
+    - complementary "Animation steps" [ref=f4e22]:
+      - generic [ref=f4e23]:
+        - generic [ref=f4e24]:
+          - paragraph [ref=f4e25]: Animation
+          - heading "Step 1" [level=2] [ref=f4e26]
+          - paragraph [ref=f4e27]: x 10, y 10
+        - button "Edit" [ref=f4e28] [cursor=pointer]
+      - list [ref=f4e29]:
+        - listitem [ref=f4e30]:
+          - button "Step 1 x 10, y 10" [ref=f4e31] [cursor=pointer]:
+            - generic [ref=f4e32]: Step 1
+            - generic [ref=f4e33]: x 10, y 10
+        - listitem [ref=f4e34]:
+          - button "Step 2 x 12, y 10" [ref=f4e35] [cursor=pointer]:
+            - generic [ref=f4e36]: Step 2
+            - generic [ref=f4e37]: x 12, y 10
+        - listitem [ref=f4e38]:
+          - button "Step 3 x 180, y 120" [ref=f4e39] [cursor=pointer]:
+            - generic [ref=f4e40]: Step 3
+            - generic [ref=f4e41]: x 180, y 120
+      - generic [ref=f4e42]:
+        - button "Previous" [disabled] [ref=f4e43]
+        - button "Next" [ref=f4e44] [cursor=pointer]
+    - region "Sailing situation canvas" [ref=f4e45]

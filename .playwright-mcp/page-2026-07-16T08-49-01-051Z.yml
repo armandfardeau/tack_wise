@@ -1,0 +1,16 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - paragraph [ref=e6]: Tactical Sailing Trainer
+      - heading "Tack Wise" [level=1] [ref=e7]
+    - generic "Selected boat details" [ref=e8]:
+      - generic [ref=e9]:
+        - term [ref=e10]: X
+        - definition [ref=e11]: "584"
+      - generic [ref=e12]:
+        - term [ref=e13]: "Y"
+        - definition [ref=e14]: "261"
+      - generic [ref=e15]:
+        - term [ref=e16]: Heading
+        - definition [ref=e17]: 35 deg
+  - region "Sailing situation canvas" [ref=e18]
