@@ -563,6 +563,17 @@ export default function App() {
                   </div>
                 )}
 
+                <div className="form-row flex-row">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={!!selectedBoat.showHeadingLine}
+                      onChange={(e) => updateBoat(selectedBoat.id, { showHeadingLine: e.target.checked })}
+                    />
+                    <span>Show Dotted Path Line</span>
+                  </label>
+                </div>
+
                 <button type="button" className="delete-btn" onClick={handleDeleteSelected}>
                   🗑️ Delete Boat
                 </button>
@@ -625,6 +636,28 @@ export default function App() {
 
               {/* Layer 2: Marks & Boats */}
               <Layer>
+                {/* Render Shadow View of previous frame (f-1) if it exists */}
+                {currentFrameIndex > 0 && frames[currentFrameIndex - 1] && (
+                  <>
+                    {frames[currentFrameIndex - 1].marks.map((mark) => (
+                      <Mark
+                        key={`shadow-${mark.id}`}
+                        mark={mark}
+                        isSelected={false}
+                        isShadow={true}
+                      />
+                    ))}
+                    {frames[currentFrameIndex - 1].boats.map((boat) => (
+                      <Boat
+                        key={`shadow-${boat.id}`}
+                        boat={boat}
+                        isSelected={false}
+                        isShadow={true}
+                      />
+                    ))}
+                  </>
+                )}
+
                 {/* Render Marks */}
                 {activeFrame.marks.map((mark) => (
                   <Mark
@@ -655,14 +688,33 @@ export default function App() {
               </Layer>
             </Stage>
 
-            {/* Quick Wind HUD Overlay */}
-            <div className="wind-hud">
-              <span className="hud-arrow" style={{ transform: `rotate(${activeFrame.windAngle}deg)` }}>
-                ⬇️
-              </span>
-              <span>
-                Wind: {activeFrame.windSpeed} kts @ {activeFrame.windAngle}°
-              </span>
+            {/* Windvane HUD Overlay at top center */}
+            <div className="wind-vane-container">
+              <div className="wind-vane-dial">
+                {/* Windvane needle */}
+                <svg
+                  className="wind-vane-needle"
+                  viewBox="0 0 100 100"
+                  style={{ transform: `rotate(${activeFrame.windAngle}deg)` }}
+                >
+                  {/* Tail of the vane */}
+                  <path d="M 50 80 L 50 50" stroke="#94a3b8" strokeWidth="4" />
+                  <path d="M 42 80 L 50 70 L 58 80 Z" fill="#94a3b8" />
+                  {/* Head of the vane (pointing into the wind) */}
+                  <path d="M 50 20 L 50 50" stroke="#ef4444" strokeWidth="6" />
+                  <polygon points="50,8 40,28 50,23 60,28" fill="#ef4444" />
+                  <circle cx="50" cy="50" r="7" fill="#f8fafc" stroke="#0f172a" strokeWidth="3" />
+                </svg>
+                {/* Compass markers */}
+                <span className="compass-n">N</span>
+                <span className="compass-s">S</span>
+                <span className="compass-e">E</span>
+                <span className="compass-w">W</span>
+              </div>
+              <div className="wind-vane-info">
+                <span className="wind-vane-speed">{activeFrame.windSpeed} KTS</span>
+                <span className="wind-vane-angle">{activeFrame.windAngle}°</span>
+              </div>
             </div>
           </div>
 

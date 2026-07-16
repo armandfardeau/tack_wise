@@ -4,30 +4,72 @@ import type { Boat as BoatModel } from '../types';
 interface BoatProps {
   boat: BoatModel;
   isSelected: boolean;
-  onMove: (boatId: string, pos: { x: number; y: number }) => void;
-  onSelect: (boatId: string) => void;
+  onMove?: (boatId: string, pos: { x: number; y: number }) => void;
+  onSelect?: (boatId: string) => void;
+  isShadow?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onSelect }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onSelect, isShadow = false }: BoatProps) {
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
   const mastY = -12;
   const boomLength = 36;
 
-  // Calculate the boom endpoint. 
-  // In our coordinate system, 0 deg heading is straight up (North, -Y).
-  // The boom extends backwards (180 deg) + the sail angle.
-  // We convert sailAngle to radians.
+  // Calculate the boom endpoint
   const boomRad = ((180 + boat.sailAngle) * Math.PI) / 180;
   const boomEndX = mastX + boomLength * Math.sin(boomRad);
   const boomEndY = mastY - boomLength * Math.cos(boomRad);
 
-  // Curved sail path: starting from mast, curving outwards, ending at the boom tip
-  // The curve control point depends on the sail angle to show wind curvature
+  // Curved sail path
   const ctrlX = mastX + (boomLength / 2) * Math.sin(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
   const ctrlY = mastY - (boomLength / 2) * Math.cos(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
 
   const sailPathData = `M ${mastX} ${mastY} Q ${ctrlX} ${ctrlY} ${boomEndX} ${boomEndY}`;
+
+  if (isShadow) {
+    return (
+      <Group
+        x={boat.x}
+        y={boat.y}
+        rotation={boat.heading}
+        draggable={false}
+        opacity={0.22}
+        listening={false}
+      >
+        {/* Simplified Ghost Heading Line */}
+        {boat.showHeadingLine && (
+          <Line
+            points={[0, -58, 0, -358]}
+            stroke="#94a3b8"
+            strokeWidth={1.5}
+            dash={[6, 6]}
+          />
+        )}
+
+        {/* Simplified Ghost Hull */}
+        <Path
+          data="M 0 -58 C 27 -37 31 21 14 52 L -14 52 C -31 21 -27 -37 0 -58 Z"
+          fill="#475569"
+          stroke="#94a3b8"
+          strokeWidth={2}
+          lineJoin="round"
+        />
+        {/* Simplified Sail */}
+        <Line
+          points={[mastX, mastY, boomEndX, boomEndY]}
+          stroke="#94a3b8"
+          strokeWidth={2}
+        />
+        <Path
+          data={sailPathData}
+          stroke="#cbd5e1"
+          strokeWidth={3}
+          opacity={0.7}
+        />
+        <Circle cx={mastX} cy={mastY} r={3} fill="#94a3b8" />
+      </Group>
+    );
+  }
 
   return (
     <Group
@@ -35,11 +77,11 @@ export default function Boat({ boat, isSelected, onMove, onSelect }: BoatProps) 
       y={boat.y}
       rotation={boat.heading}
       draggable
-      onClick={() => onSelect(boat.id)}
-      onTap={() => onSelect(boat.id)}
-      onDragStart={() => onSelect(boat.id)}
+      onClick={() => onSelect?.(boat.id)}
+      onTap={() => onSelect?.(boat.id)}
+      onDragStart={() => onSelect?.(boat.id)}
       onDragEnd={(e) => {
-        onMove(boat.id, {
+        onMove?.(boat.id, {
           x: e.target.x(),
           y: e.target.y(),
         });
@@ -53,6 +95,16 @@ export default function Boat({ boat, isSelected, onMove, onSelect }: BoatProps) 
           stroke="#06b6d4"
           strokeWidth={4}
           opacity={0.8}
+        />
+      )}
+
+      {/* Projected Heading Line */}
+      {boat.showHeadingLine && (
+        <Line
+          points={[0, -58, 0, -358]}
+          stroke={isSelected ? '#06b6d4' : '#64748b'}
+          strokeWidth={1.5}
+          dash={[6, 6]}
         />
       )}
 

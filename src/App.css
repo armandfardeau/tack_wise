@@ -278,30 +278,72 @@ body {
   border-radius: 4px;
 }
 
-/* HUD Overlay */
-.wind-hud {
+/* Windvane Overlay at Top Center */
+.wind-vane-container {
   position: absolute;
   top: 16px;
-  right: 16px;
-  background-color: rgba(15, 23, 42, 0.8);
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-color);
-  padding: 8px 16px;
-  border-radius: 20px;
+  padding: 8px 20px;
+  border-radius: 36px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-main);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
   pointer-events: none;
+  z-index: 5;
 }
 
-.hud-arrow {
-  display: inline-block;
-  transition: transform 0.3s ease;
-  font-size: 1.1rem;
+.wind-vane-dial {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border: 2.5px solid rgba(148, 163, 184, 0.25);
+  border-radius: 50%;
+  background-color: rgba(9, 13, 22, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wind-vane-needle {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.compass-n, .compass-s, .compass-e, .compass-w {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 900;
+  color: var(--text-muted);
+}
+.compass-n { top: 3px; left: 50%; transform: translateX(-50%); color: var(--accent-red); }
+.compass-s { bottom: 3px; left: 50%; transform: translateX(-50%); }
+.compass-e { right: 4px; top: 50%; transform: translateY(-50%); }
+.compass-w { left: 4px; top: 50%; transform: translateY(-50%); }
+
+.wind-vane-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.wind-vane-speed {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+}
+
+.wind-vane-angle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
 }
 
 /* Timeline & Scrubber */
