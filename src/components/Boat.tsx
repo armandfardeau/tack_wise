@@ -24,8 +24,8 @@ export default function Boat({ boat, isSelected, onMove, onSelect }: BoatProps) 
 
   // Curved sail path: starting from mast, curving outwards, ending at the boom tip
   // The curve control point depends on the sail angle to show wind curvature
-  const ctrlX = mastX + (boomLength / 2) * Math.sin(boomRad - (Math.sign(boat.sailAngle || 1) * 0.4));
-  const ctrlY = mastY - (boomLength / 2) * Math.cos(boomRad - (Math.sign(boat.sailAngle || 1) * 0.4));
+  const ctrlX = mastX + (boomLength / 2) * Math.sin(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
+  const ctrlY = mastY - (boomLength / 2) * Math.cos(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
 
   const sailPathData = `M ${mastX} ${mastY} Q ${ctrlX} ${ctrlY} ${boomEndX} ${boomEndY}`;
 
