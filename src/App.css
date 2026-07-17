@@ -532,6 +532,10 @@ body {
   cursor: pointer;
   transition: all 0.2s ease;
   user-select: none;
+  appearance: none;
+  color: var(--text-main);
+  font-family: inherit;
+  text-align: left;
 }
 
 .frame-thumbnail:hover {

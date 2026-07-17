@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
+    "test": "jest --runInBand",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -17,11 +18,17 @@
     "react-konva": "^19.2.5"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@types/jest": "^30.0.0",
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.3",
+    "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "oxlint": "^1.71.0",
+    "ts-jest": "^29.4.11",
     "typescript": "~6.0.2",
     "vite": "^8.1.1"
   }
