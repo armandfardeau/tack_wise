@@ -60,6 +60,28 @@ function getConnectionLineDash(style?: MarkModel['connectionLineStyle']) {
   return CONNECTION_LINE_DASH[style ?? 'dotted'];
 }
 
+const MIN_CANVAS_ZOOM = 0.5;
+const MAX_CANVAS_ZOOM = 3;
+const CANVAS_ZOOM_STEP = 1.2;
+
+function clampCanvasZoom(zoom: number) {
+  return Math.min(Math.max(zoom, MIN_CANVAS_ZOOM), MAX_CANVAS_ZOOM);
+}
+
+function constrainCanvasPosition(
+  position: { x: number; y: number },
+  zoom: number,
+  stageSize: { width: number; height: number }
+) {
+  const horizontalRange = stageSize.width - stageSize.width * zoom;
+  const verticalRange = stageSize.height - stageSize.height * zoom;
+
+  return {
+    x: Math.min(Math.max(position.x, Math.min(0, horizontalRange)), Math.max(0, horizontalRange)),
+    y: Math.min(Math.max(position.y, Math.min(0, verticalRange)), Math.max(0, verticalRange)),
+  };
+}
+
 function renderMarkConnections(
   marks: MarkModel[],
   options?: { isShadow?: boolean; highlightMarkId?: string | null }
@@ -161,6 +183,8 @@ export default function App() {
 
   // States
   const [stageSize, setStageSize] = useState({ width: 720, height: 500 });
+  const [canvasZoom, setCanvasZoom] = useState(1);
+  const [canvasPosition, setCanvasPosition] = useState({ x: 0, y: 0 });
   const [frames, setFrames] = useState<FrameModel[]>(initialFrames);
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>('boat-1');
@@ -207,6 +231,47 @@ export default function App() {
   }
 
   const activeFrame = frames[currentFrameIndex] || frames[0];
+
+  const zoomCanvasAtPoint = (requestedZoom: number, point: { x: number; y: number }) => {
+    const nextZoom = clampCanvasZoom(requestedZoom);
+    const worldPoint = {
+      x: (point.x - canvasPosition.x) / canvasZoom,
+      y: (point.y - canvasPosition.y) / canvasZoom,
+    };
+
+    setCanvasPosition(
+      constrainCanvasPosition(
+        {
+          x: point.x - worldPoint.x * nextZoom,
+          y: point.y - worldPoint.y * nextZoom,
+        },
+        nextZoom,
+        stageSize
+      )
+    );
+    setCanvasZoom(nextZoom);
+  };
+
+  const zoomCanvasFromCenter = (factor: number) => {
+    zoomCanvasAtPoint(canvasZoom * factor, {
+      x: stageSize.width / 2,
+      y: stageSize.height / 2,
+    });
+  };
+
+  const resetCanvasZoom = () => {
+    setCanvasZoom(1);
+    setCanvasPosition({ x: 0, y: 0 });
+  };
+
+  const handleCanvasWheel = (event: any) => {
+    event.evt.preventDefault();
+    const pointer = stageRef.current?.getPointerPosition();
+    if (!pointer) return;
+
+    const factor = event.evt.deltaY > 0 ? 1 / CANVAS_ZOOM_STEP : CANVAS_ZOOM_STEP;
+    zoomCanvasAtPoint(canvasZoom * factor, pointer);
+  };
 
   // Resize listener
   useEffect(() => {
@@ -765,7 +830,25 @@ export default function App() {
         {/* Center: Canvas Area & Timeline bottom */}
         <section className="canvas-container">
           <div ref={canvasWrapRef} className="canvas-wrap">
-            <Stage ref={stageRef} width={stageSize.width} height={stageSize.height}>
+            <Stage
+              ref={stageRef}
+              width={stageSize.width}
+              height={stageSize.height}
+              x={canvasPosition.x}
+              y={canvasPosition.y}
+              scaleX={canvasZoom}
+              scaleY={canvasZoom}
+              draggable
+              dragBoundFunc={(position) =>
+                constrainCanvasPosition(position, canvasZoom, stageSize)
+              }
+              onDragEnd={() => {
+                const stage = stageRef.current;
+                if (!stage) return;
+                setCanvasPosition({ x: stage.x(), y: stage.y() });
+              }}
+              onWheel={handleCanvasWheel}
+            >
               {/* Layer 1: Water & Wind */}
               <Layer>
                 {/* Oceanic Blue Sea */}
@@ -888,6 +971,41 @@ export default function App() {
                 )}
               </Layer>
             </Stage>
+
+            <div className="canvas-zoom-controls" aria-label="Canvas zoom controls">
+              <button
+                type="button"
+                className="canvas-zoom-btn"
+                onClick={() => zoomCanvasFromCenter(CANVAS_ZOOM_STEP)}
+                disabled={canvasZoom >= MAX_CANVAS_ZOOM}
+                aria-label="Zoom in"
+                title="Zoom in"
+              >
+                +
+              </button>
+              <span className="canvas-zoom-level" aria-live="polite">
+                {Math.round(canvasZoom * 100)}%
+              </span>
+              <button
+                type="button"
+                className="canvas-zoom-btn"
+                onClick={() => zoomCanvasFromCenter(1 / CANVAS_ZOOM_STEP)}
+                disabled={canvasZoom <= MIN_CANVAS_ZOOM}
+                aria-label="Zoom out"
+                title="Zoom out"
+              >
+                −
+              </button>
+              <button
+                type="button"
+                className="canvas-zoom-reset"
+                onClick={resetCanvasZoom}
+                disabled={canvasZoom === 1 && canvasPosition.x === 0 && canvasPosition.y === 0}
+                title="Reset zoom"
+              >
+                Reset
+              </button>
+            </div>
 
             {/* Windvane HUD Overlay at top center */}
             <div className="wind-vane-container">
