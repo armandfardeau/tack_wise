@@ -14,5 +14,8 @@ export const MIN_CANVAS_ZOOM = 0.5;
 export const MAX_CANVAS_ZOOM = 3;
 export const CANVAS_ZOOM_STEP = 1.2;
 export const MOBILE_INITIAL_CANVAS_ZOOM = 0.7;
+// Keep a generous world around the visible viewport so the canvas can be panned
+// in every direction even when it is at its default 100% zoom.
+export const CANVAS_PAN_MARGIN = 2;
 export const GRID_SPACING = 40;
 export const GRID_SNAP_RADIUS = GRID_SPACING * 0.45;

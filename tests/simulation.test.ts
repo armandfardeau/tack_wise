@@ -2,6 +2,7 @@ import {
   calculateAutoSailAngle,
   clampCanvasZoom,
   constrainCanvasPosition,
+  getCanvasWorldBounds,
   getCanvasContentBounds,
   getGridSnap,
   getSnappedPosition,
@@ -31,6 +32,17 @@ describe('simulation utilities', () => {
     expect(constrainCanvasPosition({ x: 100, y: -500 }, 2, { width: 720, height: 500 })).toEqual({
       x: 0,
       y: -500,
+    });
+  });
+
+  it('allows panning through the expanded canvas world at the default zoom', () => {
+    const viewport = { width: 720, height: 500 };
+    const worldBounds = getCanvasWorldBounds(viewport);
+
+    expect(worldBounds).toEqual({ left: -1440, top: -1000, right: 2160, bottom: 1500 });
+    expect(constrainCanvasPosition({ x: 2000, y: -2000 }, 1, viewport, worldBounds)).toEqual({
+      x: 1440,
+      y: -1000,
     });
   });
 

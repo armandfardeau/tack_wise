@@ -10,7 +10,7 @@ import PlacementGrid from './PlacementGrid';
 import SnapIndicator from './SnapIndicator';
 import WindIndicator from './WindIndicator';
 import type { SnapTarget } from '../hooks/useGridSnap';
-import type { Position } from '../utils/simulation';
+import { getCanvasWorldBounds, type Position } from '../utils/simulation';
 
 interface SimulationCanvasProps {
   activeFrame: Frame;
@@ -60,6 +60,11 @@ export default function SimulationCanvas({
   getSnappedPosition,
 }: SimulationCanvasProps) {
   const previousFrame = frames[currentFrameIndex - 1];
+  const worldBounds = getCanvasWorldBounds(stageSize);
+  const worldSize = {
+    width: worldBounds.right - worldBounds.left,
+    height: worldBounds.bottom - worldBounds.top,
+  };
 
   return (
     <Stage
@@ -76,12 +81,24 @@ export default function SimulationCanvas({
       onWheel={onCanvasWheel}
     >
       <Layer>
-        <Rect width={stageSize.width} height={stageSize.height} fill="#0f172a" />
-        {showGrid && <PlacementGrid stageSize={stageSize} />}
+        <Rect
+          x={worldBounds.left}
+          y={worldBounds.top}
+          width={worldSize.width}
+          height={worldSize.height}
+          fill="#0f172a"
+        />
+        {showGrid && (
+          <PlacementGrid
+            origin={{ x: worldBounds.left, y: worldBounds.top }}
+            size={worldSize}
+          />
+        )}
         <WindIndicator
           windAngle={activeFrame.windAngle}
           windSpeed={activeFrame.windSpeed}
-          stageSize={stageSize}
+          origin={{ x: worldBounds.left, y: worldBounds.top }}
+          stageSize={worldSize}
         />
       </Layer>
 

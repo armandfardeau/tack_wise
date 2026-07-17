@@ -1,4 +1,5 @@
 import {
+  CANVAS_PAN_MARGIN,
   GRID_SNAP_RADIUS,
   GRID_SPACING,
   MAX_CANVAS_ZOOM,
@@ -14,6 +15,25 @@ export interface Position {
 export interface CanvasContentBounds {
   maxX: number;
   maxY: number;
+}
+
+export interface CanvasWorldBounds {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+}
+
+export function getCanvasWorldBounds(viewportSize: { width: number; height: number }): CanvasWorldBounds {
+  const horizontalMargin = viewportSize.width * CANVAS_PAN_MARGIN;
+  const verticalMargin = viewportSize.height * CANVAS_PAN_MARGIN;
+
+  return {
+    left: -horizontalMargin,
+    top: -verticalMargin,
+    right: viewportSize.width + horizontalMargin,
+    bottom: viewportSize.height + verticalMargin,
+  };
 }
 
 export function getCanvasContentBounds(frames: Array<Pick<Frame, 'boats' | 'marks'>>): CanvasContentBounds {
@@ -83,12 +103,20 @@ export function constrainCanvasPosition(
   position: Position,
   zoom: number,
   stageSize: { width: number; height: number },
+  worldBounds: CanvasWorldBounds = {
+    left: 0,
+    top: 0,
+    right: stageSize.width,
+    bottom: stageSize.height,
+  },
 ): Position {
-  const horizontalRange = stageSize.width - stageSize.width * zoom;
-  const verticalRange = stageSize.height - stageSize.height * zoom;
+  const minX = stageSize.width - worldBounds.right * zoom;
+  const maxX = -worldBounds.left * zoom || 0;
+  const minY = stageSize.height - worldBounds.bottom * zoom;
+  const maxY = -worldBounds.top * zoom || 0;
 
   return {
-    x: Math.min(Math.max(position.x, Math.min(0, horizontalRange)), Math.max(0, horizontalRange)),
-    y: Math.min(Math.max(position.y, Math.min(0, verticalRange)), Math.max(0, verticalRange)),
+    x: Math.min(Math.max(position.x, minX), maxX),
+    y: Math.min(Math.max(position.y, minY), maxY),
   };
 }

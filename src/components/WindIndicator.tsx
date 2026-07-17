@@ -4,9 +4,10 @@ interface WindIndicatorProps {
   windAngle: number; // direction wind is blowing FROM (0 = North, clockwise)
   windSpeed: number; // wind speed in knots
   stageSize: { width: number; height: number };
+  origin?: { x: number; y: number };
 }
 
-export default function WindIndicator({ windAngle, windSpeed, stageSize }: WindIndicatorProps) {
+export default function WindIndicator({ windAngle, windSpeed, stageSize, origin = { x: 0, y: 0 } }: WindIndicatorProps) {
   const { width, height } = stageSize;
   const centerX = width / 2;
   const centerY = height / 2;
@@ -21,7 +22,7 @@ export default function WindIndicator({ windAngle, windSpeed, stageSize }: WindI
   const spacing = height / (linesCount + 1);
 
   return (
-    <Group>
+    <Group x={origin.x} y={origin.y}>
       {/* Background wind flow lines */}
       <Group x={centerX} y={centerY} rotation={flowAngle}>
         {Array.from({ length: linesCount }).map((_, i) => {

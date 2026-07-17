@@ -9,6 +9,7 @@ import {
 import {
   clampCanvasZoom,
   constrainCanvasPosition,
+  getCanvasWorldBounds,
   type CanvasContentBounds,
   type Position,
 } from '../utils/simulation';
@@ -83,6 +84,7 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
         },
         nextZoom,
         stageSize,
+        getCanvasWorldBounds(stageSize),
       ),
     );
     setCanvasZoom(nextZoom);
@@ -120,7 +122,7 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     canvasWrapRef,
     canvasZoom,
     constrainPosition: (position: Position) =>
-      constrainCanvasPosition(position, canvasZoom, stageSize),
+      constrainCanvasPosition(position, canvasZoom, stageSize, getCanvasWorldBounds(stageSize)),
     handleCanvasDragEnd,
     handleCanvasWheel,
     maxZoom: MAX_CANVAS_ZOOM,
