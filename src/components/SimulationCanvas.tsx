@@ -24,6 +24,7 @@ interface SimulationCanvasProps {
   onCanvasWheel: (event: { evt: { preventDefault: () => void; deltaY: number } }) => void;
   onMoveBoat: (boatId: string, position: Position) => void;
   onMoveMark: (markId: string, position: Position) => void;
+  onOpenControls: () => void;
   onSelectObject: (id: string, type: 'boat' | 'mark') => void;
   onSnapPreview: (target: SnapTarget | null) => void;
   selectedId: string | null;
@@ -47,6 +48,7 @@ export default function SimulationCanvas({
   onCanvasWheel,
   onMoveBoat,
   onMoveMark,
+  onOpenControls,
   onSelectObject,
   onSnapPreview,
   selectedId,
@@ -118,6 +120,7 @@ export default function SimulationCanvas({
                 onSelectObject(id, 'mark');
                 onSnapPreview(null);
               }}
+              onOpenControls={onOpenControls}
               onMove={(id, position) => {
                 onSnapPreview(null);
                 onMoveMark(id, position);
@@ -140,6 +143,7 @@ export default function SimulationCanvas({
               onSelectObject(id, 'boat');
               onSnapPreview(null);
             }}
+            onOpenControls={onOpenControls}
             onMove={(id, position) => {
               onSnapPreview(null);
               onMoveBoat(id, position);

@@ -9,6 +9,7 @@ import {
 import {
   clampCanvasZoom,
   constrainCanvasPosition,
+  type CanvasContentBounds,
   type Position,
 } from '../utils/simulation';
 
@@ -17,14 +18,27 @@ const isMobileViewport = () =>
   typeof window.matchMedia === 'function' &&
   window.matchMedia('(max-width: 768px)').matches;
 
-const getInitialCanvasZoom = () => (isMobileViewport() ? MOBILE_INITIAL_CANVAS_ZOOM : 1);
+const getInitialCanvasZoom = (
+  stageSize: { width: number; height: number },
+  contentBounds?: CanvasContentBounds,
+) => {
+  if (!isMobileViewport()) return 1;
+  if (!contentBounds) return MOBILE_INITIAL_CANVAS_ZOOM;
 
-export function useCanvasViewport() {
+  const fitZoom = Math.min(
+    stageSize.width / Math.max(contentBounds.maxX + 24, stageSize.width),
+    stageSize.height / Math.max(contentBounds.maxY + 24, stageSize.height),
+  );
+
+  return Math.max(MIN_CANVAS_ZOOM, Math.min(MOBILE_INITIAL_CANVAS_ZOOM, fitZoom));
+};
+
+export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
   const canvasWrapRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<KonvaStage | null>(null);
   const hasMeasuredStageRef = useRef(false);
   const [stageSize, setStageSize] = useState({ width: 720, height: 500 });
-  const [canvasZoom, setCanvasZoom] = useState(getInitialCanvasZoom);
+  const [canvasZoom, setCanvasZoom] = useState(() => getInitialCanvasZoom({ width: 720, height: 500 }, contentBounds));
   const [canvasPosition, setCanvasPosition] = useState<Position>({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -41,12 +55,9 @@ export function useCanvasViewport() {
       setStageSize(nextStageSize);
 
       if (!hasMeasuredStageRef.current) {
-        const initialZoom = getInitialCanvasZoom();
+        const initialZoom = getInitialCanvasZoom(nextStageSize, contentBounds);
         setCanvasZoom(initialZoom);
-        setCanvasPosition({
-          x: (nextStageSize.width - nextStageSize.width * initialZoom) / 2,
-          y: (nextStageSize.height - nextStageSize.height * initialZoom) / 2,
-        });
+        setCanvasPosition({ x: 0, y: 0 });
         hasMeasuredStageRef.current = true;
       }
     };
@@ -55,7 +66,7 @@ export function useCanvasViewport() {
     const observer = new ResizeObserver(updateStageSize);
     observer.observe(canvasWrap);
     return () => observer.disconnect();
-  }, []);
+  }, [contentBounds]);
 
   const zoomCanvasAtPoint = (requestedZoom: number, point: Position) => {
     const nextZoom = clampCanvasZoom(requestedZoom);

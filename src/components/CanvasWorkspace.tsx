@@ -22,6 +22,7 @@ interface CanvasWorkspaceProps {
   minZoom: number;
   onMoveBoat: (boatId: string, position: Position) => void;
   onMoveMark: (markId: string, position: Position) => void;
+  onOpenControls: () => void;
   onSelectObject: (id: string, type: 'boat' | 'mark') => void;
   onSnapPreview: (target: SnapTarget | null) => void;
   onZoomIn: () => void;
@@ -52,6 +53,7 @@ export default function CanvasWorkspace({
   minZoom,
   onMoveBoat,
   onMoveMark,
+  onOpenControls,
   onSelectObject,
   onSnapPreview,
   onZoomIn,
@@ -82,6 +84,7 @@ export default function CanvasWorkspace({
           onCanvasWheel={handleCanvasWheel}
           onMoveBoat={onMoveBoat}
           onMoveMark={onMoveMark}
+          onOpenControls={onOpenControls}
           onSelectObject={onSelectObject}
           onSnapPreview={onSnapPreview}
           selectedId={selectedId}

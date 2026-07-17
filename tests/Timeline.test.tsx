@@ -24,6 +24,7 @@ describe('Timeline', () => {
         onAddFrame={onAddFrame}
         onDeleteFrame={onDeleteFrame}
         onDuplicateFrame={onDuplicateFrame}
+        onRenameFrame={jest.fn()}
         onSelectFrame={onSelectFrame}
         onTogglePlaying={onTogglePlaying}
         playSpeed={1000}
@@ -55,6 +56,7 @@ describe('Timeline', () => {
         onAddFrame={jest.fn()}
         onDeleteFrame={jest.fn()}
         onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
         onSelectFrame={jest.fn()}
         onTogglePlaying={jest.fn()}
         playSpeed={1000}
@@ -63,5 +65,110 @@ describe('Timeline', () => {
     );
 
     expect(screen.getByRole('button', { name: /delete/i })).toBeDisabled();
+  });
+
+  it('renames a frame on Enter after double-clicking its title', () => {
+    const onRenameFrame = jest.fn();
+
+    render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={onRenameFrame}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    fireEvent.doubleClick(screen.getByText('2. Upwind Tack'));
+    const titleInput = screen.getByRole('textbox', { name: 'Frame 2 title' });
+    fireEvent.change(titleInput, { target: { value: 'Mark approach' } });
+    fireEvent.keyDown(titleInput, { key: 'Enter' });
+
+    expect(onRenameFrame).toHaveBeenCalledWith(1, 'Mark approach');
+    expect(screen.getByText('2. Upwind Tack')).toBeInTheDocument();
+  });
+
+  it('starts editing when a frame title is tapped on a touch device', () => {
+    render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    const title = screen.getByText('2. Upwind Tack');
+    fireEvent.touchStart(title);
+    fireEvent.click(title);
+
+    expect(screen.getByRole('textbox', { name: 'Frame 2 title' })).toHaveFocus();
+  });
+
+  it('renames a frame on blur and cancels on Escape', () => {
+    const onRenameFrame = jest.fn();
+
+    const { rerender } = render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={onRenameFrame}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    fireEvent.doubleClick(screen.getByText('1. Preparation'));
+    const firstTitleInput = screen.getByRole('textbox', { name: 'Frame 1 title' });
+    fireEvent.change(firstTitleInput, { target: { value: 'Start line' } });
+    fireEvent.blur(firstTitleInput);
+
+    expect(onRenameFrame).toHaveBeenCalledWith(0, 'Start line');
+
+    fireEvent.doubleClick(screen.getByText('2. Upwind Tack'));
+    const secondTitleInput = screen.getByRole('textbox', { name: 'Frame 2 title' });
+    fireEvent.change(secondTitleInput, { target: { value: 'Should not save' } });
+    fireEvent.keyDown(secondTitleInput, { key: 'Escape' });
+
+    expect(onRenameFrame).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('2. Upwind Tack')).toBeInTheDocument();
+
+    rerender(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={onRenameFrame}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByText('1. Preparation')).toBeInTheDocument();
   });
 });

@@ -19,10 +19,22 @@ export default function ExportActions({ className = 'export-actions', isExportin
 
   return (
     <div className={className}>
-      <button type="button" className="action-btn import-btn" onClick={() => fileInputRef.current?.click()} disabled={isExporting}>📂 Import JSON</button>
-      <button type="button" className="action-btn json-btn" onClick={onExportJson} disabled={isExporting}>📄 Export JSON</button>
-      <button type="button" className="action-btn gif-btn" onClick={() => onExport('gif')} disabled={isExporting}>📥 Export GIF</button>
-      <button type="button" className="action-btn mp4-btn" onClick={() => onExport('mp4')} disabled={isExporting}>📹 Export Video (WebM)</button>
+      <button type="button" className="action-btn import-btn" aria-label="Import JSON" onClick={() => fileInputRef.current?.click()} disabled={isExporting}>
+        <span className="action-icon" aria-hidden="true">📂</span>
+        <span className="action-label">Import JSON</span>
+      </button>
+      <button type="button" className="action-btn json-btn" aria-label="Export JSON" onClick={onExportJson} disabled={isExporting}>
+        <span className="action-icon" aria-hidden="true">📄</span>
+        <span className="action-label">Export JSON</span>
+      </button>
+      <button type="button" className="action-btn gif-btn" aria-label="Export GIF" onClick={() => onExport('gif')} disabled={isExporting}>
+        <span className="action-icon" aria-hidden="true">📥</span>
+        <span className="action-label">Export GIF</span>
+      </button>
+      <button type="button" className="action-btn mp4-btn" aria-label="Export Video (WebM)" onClick={() => onExport('mp4')} disabled={isExporting}>
+        <span className="action-icon" aria-hidden="true">📹</span>
+        <span className="action-label">Export Video (WebM)</span>
+      </button>
       <input
         ref={fileInputRef}
         type="file"

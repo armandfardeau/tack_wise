@@ -61,4 +61,21 @@ describe('useScenario', () => {
     expect(result.current.selectedType).toBe('boat');
     expect(result.current.isPlaying).toBe(false);
   });
+
+  it('renames only the requested frame and ignores blank titles', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.renameFrame(1, '  Mark approach  ');
+    });
+
+    expect(result.current.frames[1].name).toBe('Mark approach');
+    expect(result.current.frames[0].name).toBe('1. Preparation');
+
+    act(() => {
+      result.current.renameFrame(1, '   ');
+    });
+
+    expect(result.current.frames[1].name).toBe('Mark approach');
+  });
 });

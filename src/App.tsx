@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import './App.css';
 import AppHeader from './components/AppHeader';
 import CanvasWorkspace from './components/CanvasWorkspace';
@@ -11,10 +11,12 @@ import { useGridSnap } from './hooks/useGridSnap';
 import { useScenario } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
 import { parseScenarioFromJson } from './utils/exporter';
+import { getCanvasContentBounds } from './utils/simulation';
 
 export default function App() {
   const scenario = useScenario();
-  const viewport = useCanvasViewport();
+  const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
+  const viewport = useCanvasViewport(canvasContentBounds);
   const [showGrid, setShowGrid] = useState(true);
   const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -91,6 +93,7 @@ export default function App() {
           minZoom={viewport.minZoom}
           onMoveBoat={scenario.moveBoat}
           onMoveMark={scenario.moveMark}
+          onOpenControls={() => setIsSidebarOpen(true)}
           onSelectObject={scenario.selectObject}
           onSnapPreview={gridSnap.setSnapPreview}
           onZoomIn={() => viewport.zoomCanvasFromCenter(CANVAS_ZOOM_STEP)}
@@ -111,6 +114,7 @@ export default function App() {
             onAddFrame={scenario.addFrame}
             onDeleteFrame={() => scenario.deleteFrame(scenario.currentFrameIndex)}
             onDuplicateFrame={scenario.duplicateFrame}
+            onRenameFrame={scenario.renameFrame}
             onSelectFrame={scenario.selectFrame}
             onTogglePlaying={() => scenario.setIsPlaying(!scenario.isPlaying)}
             playSpeed={scenario.playSpeed}

@@ -4,10 +4,34 @@ import {
   MAX_CANVAS_ZOOM,
   MIN_CANVAS_ZOOM,
 } from '../constants';
+import type { Frame } from '../types';
 
 export interface Position {
   x: number;
   y: number;
+}
+
+export interface CanvasContentBounds {
+  maxX: number;
+  maxY: number;
+}
+
+export function getCanvasContentBounds(frames: Array<Pick<Frame, 'boats' | 'marks'>>): CanvasContentBounds {
+  return frames.reduce<CanvasContentBounds>((bounds, frame) => {
+    frame.boats.forEach((boat) => {
+      const horizontalExtent = boat.showHeadingLine ? 360 : 50;
+      const verticalExtent = boat.showHeadingLine ? 360 : 70;
+      bounds.maxX = Math.max(bounds.maxX, boat.x + horizontalExtent);
+      bounds.maxY = Math.max(bounds.maxY, boat.y + verticalExtent);
+    });
+
+    frame.marks.forEach((mark) => {
+      bounds.maxX = Math.max(bounds.maxX, mark.x + 40);
+      bounds.maxY = Math.max(bounds.maxY, mark.y + 40);
+    });
+
+    return bounds;
+  }, { maxX: 0, maxY: 0 });
 }
 
 export interface GridSnap extends Position {

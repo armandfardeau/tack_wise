@@ -61,6 +61,17 @@ export function useScenario() {
     );
   };
 
+  const renameFrame = (frameIndex: number, name: string) => {
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
+
+    setFrames((previousFrames) =>
+      previousFrames.map((frame, index) =>
+        index === frameIndex ? { ...frame, name: trimmedName } : frame,
+      ),
+    );
+  };
+
   const updateBoat = (boatId: string, changes: Partial<Boat>) => {
     setFrames((previousFrames) =>
       previousFrames.map((frame, index) => {
@@ -226,6 +237,7 @@ export function useScenario() {
     addFrame,
     addMark,
     playSpeed,
+    renameFrame,
     selectFrame,
     selectObject,
     selectedBoat,
