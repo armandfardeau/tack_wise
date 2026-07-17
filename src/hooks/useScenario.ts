@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BOAT_COLORS, MARK_COLORS } from '../constants';
 import { cloneFrames } from '../data/initialFrames';
-import type { Boat, Frame, Mark } from '../types';
+import type { Boat, Frame, Mark, ScenarioExportPayload } from '../types';
 import { calculateAutoSailAngle, type Position } from '../utils/simulation';
 
 export type SelectedType = 'boat' | 'mark' | null;
@@ -138,6 +138,19 @@ export function useScenario() {
     setCurrentFrameIndex(Math.max(0, indexToDelete - 1));
   };
 
+  const importScenario = (payload: ScenarioExportPayload) => {
+    const importedFrames = cloneFrames(payload.frames);
+    const importedFrame = importedFrames[payload.currentFrameIndex];
+    const firstBoat = importedFrame.boats[0];
+    const firstMark = importedFrame.marks[0];
+
+    setIsPlaying(false);
+    setFrames(importedFrames);
+    setCurrentFrameIndex(payload.currentFrameIndex);
+    setSelectedId(firstBoat?.id ?? firstMark?.id ?? null);
+    setSelectedType(firstBoat ? 'boat' : firstMark ? 'mark' : null);
+  };
+
   const addBoat = () => {
     const newBoat: Boat = {
       id: `boat-${Date.now()}`,
@@ -204,6 +217,7 @@ export function useScenario() {
     deleteSelected,
     duplicateFrame,
     isPlaying,
+    importScenario,
     moveBoat,
     moveMark,
     addBoat,

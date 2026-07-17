@@ -10,6 +10,7 @@ import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { useGridSnap } from './hooks/useGridSnap';
 import { useScenario } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
+import { parseScenarioFromJson } from './utils/exporter';
 
 export default function App() {
   const scenario = useScenario();
@@ -27,9 +28,24 @@ export default function App() {
     stageSize: viewport.stageSize,
   });
 
+  const handleImportJson = async (file: File) => {
+    try {
+      const payload = parseScenarioFromJson(await file.text());
+      scenario.importScenario(payload);
+    } catch (error) {
+      console.error('Import error: ', error);
+      window.alert('Could not import scenario. Please select a valid Tack Wise JSON file.');
+    }
+  };
+
   return (
     <main className="app-shell dark-theme">
-      <AppHeader isExporting={exportState.isExporting} onExport={exportState.triggerExport} />
+      <AppHeader
+        isExporting={exportState.isExporting}
+        onExport={exportState.triggerExport}
+        onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
+        onImportJson={handleImportJson}
+      />
 
       <section className="workspace">
         <Sidebar

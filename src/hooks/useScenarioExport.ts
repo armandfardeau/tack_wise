@@ -2,7 +2,7 @@ import { useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import type { Frame } from '../types';
-import { downloadBlob, exportToGif } from '../utils/exporter';
+import { downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
 
 interface UseScenarioExportProps {
   currentFrameIndex: number;
@@ -26,6 +26,10 @@ export function useScenarioExport({
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'gif' | 'mp4' | null>(null);
+
+  const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
+    downloadScenarioJson(exportFrames, exportCurrentFrameIndex);
+  };
 
   const triggerExport = async (type: 'gif' | 'mp4') => {
     setIsPlaying(false);
@@ -101,5 +105,5 @@ export function useScenarioExport({
     }
   };
 
-  return { exportProgress, exportType, isExporting, triggerExport };
+  return { exportProgress, exportType, isExporting, triggerExport, triggerJsonExport };
 }

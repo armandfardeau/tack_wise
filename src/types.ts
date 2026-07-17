@@ -29,3 +29,9 @@ export interface Frame {
   boats: Boat[];
   marks: Mark[];
 }
+
+export interface ScenarioExportPayload {
+  version: 1;
+  frames: Frame[];
+  currentFrameIndex: number;
+}
