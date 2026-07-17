@@ -1,3 +1,5 @@
+import gifshot from 'gifshot';
+
 // Client-side export helper for Tactical Sailing Simulator
 
 export function exportToGif(
@@ -7,12 +9,6 @@ export function exportToGif(
   height: number
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    const gifshot = (window as any).gifshot;
-    if (!gifshot) {
-      reject(new Error('gifshot library is not loaded.'));
-      return;
-    }
-
     gifshot.createGIF(
       {
         images: images,

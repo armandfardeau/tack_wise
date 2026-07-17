@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Layer, Rect, Stage, Circle, Group, Line } from 'react-konva';
 import type { Boat as BoatModel, Mark as MarkModel, Frame as FrameModel } from './types';
 import Boat from './components/Boat';
@@ -63,6 +64,59 @@ function getConnectionLineDash(style?: MarkModel['connectionLineStyle']) {
 const MIN_CANVAS_ZOOM = 0.5;
 const MAX_CANVAS_ZOOM = 3;
 const CANVAS_ZOOM_STEP = 1.2;
+const GRID_SPACING = 40;
+const GRID_SNAP_RADIUS = GRID_SPACING * 0.45;
+
+function getGridSnap(position: { x: number; y: number }) {
+  const x = Math.round(position.x / GRID_SPACING) * GRID_SPACING;
+  const y = Math.round(position.y / GRID_SPACING) * GRID_SPACING;
+
+  return {
+    x,
+    y,
+    distance: Math.hypot(position.x - x, position.y - y),
+  };
+}
+
+function renderPlacementGrid(stageSize: { width: number; height: number }) {
+  const verticalLineCount = Math.ceil(stageSize.width / GRID_SPACING) + 1;
+  const horizontalLineCount = Math.ceil(stageSize.height / GRID_SPACING) + 1;
+
+  return (
+    <>
+      {Array.from({ length: verticalLineCount }, (_, index) => {
+        const x = index * GRID_SPACING;
+        const isMajorLine = index % 5 === 0;
+
+        return (
+          <Line
+            key={`grid-v-${x}`}
+            points={[x, 0, x, stageSize.height]}
+            stroke={isMajorLine ? '#155e75' : '#1e3a4f'}
+            strokeWidth={isMajorLine ? 1.5 : 1}
+            opacity={isMajorLine ? 0.42 : 0.28}
+            listening={false}
+          />
+        );
+      })}
+      {Array.from({ length: horizontalLineCount }, (_, index) => {
+        const y = index * GRID_SPACING;
+        const isMajorLine = index % 5 === 0;
+
+        return (
+          <Line
+            key={`grid-h-${y}`}
+            points={[0, y, stageSize.width, y]}
+            stroke={isMajorLine ? '#155e75' : '#1e3a4f'}
+            strokeWidth={isMajorLine ? 1.5 : 1}
+            opacity={isMajorLine ? 0.42 : 0.28}
+            listening={false}
+          />
+        );
+      })}
+    </>
+  );
+}
 
 function clampCanvasZoom(zoom: number) {
   return Math.min(Math.max(zoom, MIN_CANVAS_ZOOM), MAX_CANVAS_ZOOM);
@@ -189,7 +243,6 @@ export default function App() {
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>('boat-1');
   const [selectedType, setSelectedType] = useState<'boat' | 'mark' | null>('boat');
-  const [editingFrameId, setEditingFrameId] = useState<string | null>(null);
   
   // Simulation play state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -204,31 +257,62 @@ export default function App() {
   // Auto sail calculation flag
   const [autoSailTrim, setAutoSailTrim] = useState(true);
 
+  // Placement grid controls
+  const [showGrid, setShowGrid] = useState(true);
+  const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
+
   // ── Magnetic-snap state ──────────────────────────────────────────────────
-  // When dragging a boat that has a heading line in f-1, we compute the
-  // closest point on that projected line and snap when within SNAP_RADIUS px.
-  const SNAP_RADIUS = 40;
+  // The preview is shared by boats and marks so either object type gets the
+  // same visual feedback while it is being dragged.
   const [snapTarget, setSnapTarget] = useState<{
-    boatId: string;
+    objectId: string;
     x: number;
     y: number;
     active: boolean; // true when within snap radius
   } | null>(null);
 
-  /** Return the closest point on the semi-infinite ray from (px,py) in
-   *  direction heading (degrees, 0=up/north, clockwise) to point (cx,cy). */
-  function closestPointOnHeadingRay(
-    px: number, py: number, heading: number,
-    cx: number, cy: number
-  ): { x: number; y: number; dist: number; t: number } {
-    const rad = (heading * Math.PI) / 180;
-    const dx = Math.sin(rad);
-    const dy = -Math.cos(rad);
-    const t = Math.max(0, (cx - px) * dx + (cy - py) * dy);
-    const sx = px + t * dx;
-    const sy = py + t * dy;
-    return { x: sx, y: sy, dist: Math.hypot(cx - sx, cy - sy), t };
-  }
+  const setSnapPreview = (nextTarget: {
+    objectId: string;
+    x: number;
+    y: number;
+    active: boolean;
+  } | null) => {
+    setSnapTarget((previousTarget) => {
+      if (!nextTarget && !previousTarget) return previousTarget;
+      if (
+        nextTarget &&
+        previousTarget &&
+        nextTarget.objectId === previousTarget.objectId &&
+        nextTarget.x === previousTarget.x &&
+        nextTarget.y === previousTarget.y &&
+        nextTarget.active === previousTarget.active
+      ) {
+        return previousTarget;
+      }
+      return nextTarget;
+    });
+  };
+
+  const getGridSnappedPosition = (objectId: string, rawPosition: { x: number; y: number }) => {
+    if (!gridSnapEnabled) {
+      setSnapPreview(null);
+      return rawPosition;
+    }
+
+    const gridSnap = getGridSnap(rawPosition);
+    if (gridSnap.distance <= GRID_SNAP_RADIUS) {
+      setSnapPreview({
+        objectId,
+        x: gridSnap.x,
+        y: gridSnap.y,
+        active: true,
+      });
+      return { x: gridSnap.x, y: gridSnap.y };
+    }
+
+    setSnapPreview(null);
+    return rawPosition;
+  };
 
   const activeFrame = frames[currentFrameIndex] || frames[0];
 
@@ -494,21 +578,26 @@ export default function App() {
     const capturedImages: string[] = [];
     const originalFrame = currentFrameIndex;
 
-    // We need to wait between rendering frames
     const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+    const waitForPaint = () =>
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      });
 
     try {
       if (type === 'gif') {
         // Capture frames one by one
         for (let i = 0; i < frames.length; i++) {
-          setCurrentFrameIndex(i);
-          setExportProgress(Math.round((i / frames.length) * 50));
-          await delay(250); // Allow react-konva to redraw
+          flushSync(() => {
+            setCurrentFrameIndex(i);
+            setExportProgress(Math.round((i / frames.length) * 50));
+          });
+          await waitForPaint();
           
-          if (stageRef.current) {
-            const dataUrl = stageRef.current.toDataURL({ pixelRatio: 1.5 });
-            capturedImages.push(dataUrl);
-          }
+          const stage = stageRef.current;
+          if (!stage) throw new Error('Canvas stage not found.');
+          stage.draw();
+          capturedImages.push(stage.toDataURL({ pixelRatio: 1.5 }));
         }
 
         setExportProgress(60);
@@ -643,6 +732,32 @@ export default function App() {
             <button type="button" className="add-btn add-mark" onClick={handleAddMark}>
               📍 Add Mark
             </button>
+          </div>
+
+          {/* Placement Grid */}
+          <div className="control-section">
+            <h3 className="section-title">🧲 Magnetic Grid</h3>
+            <div className="form-row flex-row">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={gridSnapEnabled}
+                  onChange={(e) => setGridSnapEnabled(e.target.checked)}
+                />
+                <span>Snap boats &amp; marks</span>
+              </label>
+            </div>
+            <div className="form-row flex-row">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={showGrid}
+                  onChange={(e) => setShowGrid(e.target.checked)}
+                />
+                <span>Show placement grid</span>
+              </label>
+            </div>
+            <p className="grid-hint">{GRID_SPACING}px spacing · drag near an intersection</p>
           </div>
 
           {/* Selected Item Editor */}
@@ -853,6 +968,8 @@ export default function App() {
               <Layer>
                 {/* Oceanic Blue Sea */}
                 <Rect width={stageSize.width} height={stageSize.height} fill="#0f172a" />
+
+                {showGrid && renderPlacementGrid(stageSize)}
                 
                 {/* Wind flow lines overlay */}
                 <WindIndicator
@@ -897,33 +1014,24 @@ export default function App() {
                     key={mark.id}
                     mark={mark}
                     isSelected={selectedId === mark.id}
+                    snapFn={(pos) => getGridSnappedPosition(mark.id, pos)}
                     onSelect={(id) => {
                       setSelectedId(id);
                       setSelectedType('mark');
+                      setSnapPreview(null);
                     }}
-                    onMove={(id, pos) => updateMark(id, pos)}
+                    onMove={(id, pos) => {
+                      setSnapPreview(null);
+                      updateMark(id, pos);
+                    }}
                   />
                 ))}
 
                 {/* Render Boats */}
                 {activeFrame.boats.map((boat) => {
-                  // Build the snap function for this specific boat (based on its f-1 counterpart)
-                  const prevBoat = currentFrameIndex > 0
-                    ? frames[currentFrameIndex - 1].boats.find(b => b.id === boat.id)
-                    : undefined;
-                  const hasMagnet = prevBoat?.showHeadingLine === true;
-
-                  const snapFn = hasMagnet
-                    ? (rawPos: { x: number; y: number }) => {
-                        const snap = closestPointOnHeadingRay(
-                          prevBoat!.x, prevBoat!.y, prevBoat!.heading,
-                          rawPos.x, rawPos.y
-                        );
-                        const isSnapping = snap.dist < SNAP_RADIUS;
-                        // Update indicator — note: called inside dragBoundFunc so keep it minimal
-                        setSnapTarget({ boatId: boat.id, x: snap.x, y: snap.y, active: isSnapping });
-                        return isSnapping ? { x: snap.x, y: snap.y } : rawPos;
-                      }
+                  const snapFn = gridSnapEnabled
+                    ? (rawPos: { x: number; y: number }) =>
+                        getGridSnappedPosition(boat.id, rawPos)
                     : undefined;
 
                   return (
@@ -935,9 +1043,10 @@ export default function App() {
                       onSelect={(id) => {
                         setSelectedId(id);
                         setSelectedType('boat');
+                        setSnapPreview(null);
                       }}
                       onMove={(id, pos) => {
-                        setSnapTarget(null);
+                        setSnapPreview(null);
                         updateBoat(id, pos); // pos is already snapped via dragBoundFunc
                       }}
                     />

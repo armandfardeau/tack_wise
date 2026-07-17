@@ -229,6 +229,13 @@ body {
   accent-color: var(--accent-cyan);
 }
 
+.grid-hint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin: 10px 0 0;
+}
+
 .delete-btn {
   margin-top: 8px;
   background-color: rgba(244, 63, 94, 0.1);
