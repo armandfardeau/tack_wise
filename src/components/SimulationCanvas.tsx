@@ -1,10 +1,11 @@
-import type { RefObject } from 'react';
+import { Fragment, type RefObject } from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import type { Frame } from '../types';
 import Boat from './Boat';
 import Mark from './Mark';
 import MarkConnections from './MarkConnections';
+import MarkRotationArrow from './MarkRotationArrow';
 import PlacementGrid from './PlacementGrid';
 import SnapIndicator from './SnapIndicator';
 import WindIndicator from './WindIndicator';
@@ -87,7 +88,10 @@ export default function SimulationCanvas({
           <>
             <MarkConnections marks={previousFrame.marks} isShadow />
             {previousFrame.marks.map((mark) => (
-              <Mark key={`shadow-${mark.id}`} mark={mark} isSelected={false} isShadow />
+              <Fragment key={`shadow-${mark.id}`}>
+                <MarkRotationArrow mark={mark} isShadow />
+                <Mark mark={mark} isSelected={false} isShadow />
+              </Fragment>
             ))}
             {previousFrame.boats.map((boat) => (
               <Boat key={`shadow-${boat.id}`} boat={boat} isSelected={false} isShadow />
@@ -101,20 +105,25 @@ export default function SimulationCanvas({
         />
 
         {activeFrame.marks.map((mark) => (
-          <Mark
-            key={mark.id}
-            mark={mark}
-            isSelected={selectedId === mark.id}
-            snapFn={(position) => getSnappedPosition(mark.id, position)}
-            onSelect={(id) => {
-              onSelectObject(id, 'mark');
-              onSnapPreview(null);
-            }}
-            onMove={(id, position) => {
-              onSnapPreview(null);
-              onMoveMark(id, position);
-            }}
-          />
+          <Fragment key={mark.id}>
+            <MarkRotationArrow
+              mark={mark}
+              isSelected={selectedId === mark.id}
+            />
+            <Mark
+              mark={mark}
+              isSelected={selectedId === mark.id}
+              snapFn={(position) => getSnappedPosition(mark.id, position)}
+              onSelect={(id) => {
+                onSelectObject(id, 'mark');
+                onSnapPreview(null);
+              }}
+              onMove={(id, position) => {
+                onSnapPreview(null);
+                onMoveMark(id, position);
+              }}
+            />
+          </Fragment>
         ))}
 
         {activeFrame.boats.map((boat) => (

@@ -16,6 +16,8 @@ export interface Mark {
   x: number;
   y: number;
   shape: 'circle' | 'triangle' | 'square';
+  showRotationArrow?: boolean;
+  rotationDirection?: 'clockwise' | 'counterclockwise';
   connectedToMarkId?: string | null;
   connectionLineColor?: string;
   connectionLineStyle?: 'dotted' | 'dashed' | 'solid';

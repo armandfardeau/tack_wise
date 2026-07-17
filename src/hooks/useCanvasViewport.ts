@@ -1,17 +1,30 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import { CANVAS_ZOOM_STEP, MAX_CANVAS_ZOOM, MIN_CANVAS_ZOOM } from '../constants';
+import {
+  CANVAS_ZOOM_STEP,
+  MAX_CANVAS_ZOOM,
+  MIN_CANVAS_ZOOM,
+  MOBILE_INITIAL_CANVAS_ZOOM,
+} from '../constants';
 import {
   clampCanvasZoom,
   constrainCanvasPosition,
   type Position,
 } from '../utils/simulation';
 
+const isMobileViewport = () =>
+  typeof window !== 'undefined' &&
+  typeof window.matchMedia === 'function' &&
+  window.matchMedia('(max-width: 768px)').matches;
+
+const getInitialCanvasZoom = () => (isMobileViewport() ? MOBILE_INITIAL_CANVAS_ZOOM : 1);
+
 export function useCanvasViewport() {
   const canvasWrapRef = useRef<HTMLDivElement | null>(null);
   const stageRef = useRef<KonvaStage | null>(null);
+  const hasMeasuredStageRef = useRef(false);
   const [stageSize, setStageSize] = useState({ width: 720, height: 500 });
-  const [canvasZoom, setCanvasZoom] = useState(1);
+  const [canvasZoom, setCanvasZoom] = useState(getInitialCanvasZoom);
   const [canvasPosition, setCanvasPosition] = useState<Position>({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -20,10 +33,22 @@ export function useCanvasViewport() {
 
     const updateStageSize = () => {
       const { width, height } = canvasWrap.getBoundingClientRect();
-      setStageSize({
+      const nextStageSize = {
         width: Math.max(Math.round(width), 320),
         height: Math.max(Math.round(height), 240),
-      });
+      };
+
+      setStageSize(nextStageSize);
+
+      if (!hasMeasuredStageRef.current) {
+        const initialZoom = getInitialCanvasZoom();
+        setCanvasZoom(initialZoom);
+        setCanvasPosition({
+          x: (nextStageSize.width - nextStageSize.width * initialZoom) / 2,
+          y: (nextStageSize.height - nextStageSize.height * initialZoom) / 2,
+        });
+        hasMeasuredStageRef.current = true;
+      }
     };
 
     updateStageSize();

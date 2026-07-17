@@ -85,6 +85,7 @@ interface MarkInspectorProps {
 
 function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspectorProps) {
   const otherMarks = activeFrame.marks.filter((candidate) => candidate.id !== mark.id);
+  const rotationDirection = mark.rotationDirection ?? 'counterclockwise';
 
   const toggleConnection = (enabled: boolean) => {
     if (!enabled) {
@@ -117,6 +118,32 @@ function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspecto
           <option value="square">Spar (Square)</option>
         </select>
       </div>
+      <div className="form-row flex-row">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            checked={!!mark.showRotationArrow}
+            onChange={(event) => updateMark(mark.id, { showRotationArrow: event.target.checked })}
+          />
+          <span>Show Rotation Arrow</span>
+        </label>
+      </div>
+      {!!mark.showRotationArrow && (
+        <div className="form-row">
+          <label>Rounding Direction</label>
+          <button
+            id="mark-rotation-direction"
+            type="button"
+            className="direction-btn"
+            aria-label={`Reverse direction (${rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})`}
+            onClick={() => updateMark(mark.id, {
+              rotationDirection: rotationDirection === 'clockwise' ? 'counterclockwise' : 'clockwise',
+            })}
+          >
+            ↻ Reverse Direction ({rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})
+          </button>
+        </div>
+      )}
       <div className="form-row flex-row">
         <label className="checkbox-label">
           <input type="checkbox" checked={!!mark.connectedToMarkId} disabled={activeFrame.marks.length <= 1} onChange={(event) => toggleConnection(event.target.checked)} />

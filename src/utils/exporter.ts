@@ -100,6 +100,8 @@ function isMark(value: unknown): value is Mark {
     isFiniteNumber(value.x) &&
     isFiniteNumber(value.y) &&
     (value.shape === 'circle' || value.shape === 'triangle' || value.shape === 'square') &&
+    (value.showRotationArrow === undefined || typeof value.showRotationArrow === 'boolean') &&
+    (value.rotationDirection === undefined || value.rotationDirection === 'clockwise' || value.rotationDirection === 'counterclockwise') &&
     (value.connectedToMarkId === undefined || value.connectedToMarkId === null || typeof value.connectedToMarkId === 'string') &&
     (value.connectionLineColor === undefined || typeof value.connectionLineColor === 'string') &&
     (value.connectionLineStyle === undefined || value.connectionLineStyle === 'dotted' || value.connectionLineStyle === 'dashed' || value.connectionLineStyle === 'solid')

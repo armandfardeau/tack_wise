@@ -60,4 +60,61 @@ describe('scenario JSON export', () => {
     click.mockRestore();
     jest.restoreAllMocks();
   });
+
+  it('round-trips mark rotation settings', () => {
+    const markFrame: Frame = {
+      ...frames[0],
+      marks: [{
+        id: 'mark-1',
+        name: 'Windward Mark',
+        color: '#ef4444',
+        x: 300,
+        y: 120,
+        shape: 'triangle',
+        showRotationArrow: false,
+        rotationDirection: 'counterclockwise',
+      }],
+    };
+
+    const result = parseScenarioFromJson(serializeScenarioToJson([markFrame], 0));
+
+    expect(result.frames[0].marks[0]).toEqual(markFrame.marks[0]);
+  });
+
+  it('accepts legacy marks without rotation settings', () => {
+    const legacyMarkFrame: Frame = {
+      ...frames[0],
+      marks: [{
+        id: 'mark-1',
+        name: 'Windward Mark',
+        color: '#ef4444',
+        x: 300,
+        y: 120,
+        shape: 'triangle',
+      }],
+    };
+
+    expect(parseScenarioFromJson(serializeScenarioToJson([legacyMarkFrame], 0)).frames[0].marks[0]).toEqual(legacyMarkFrame.marks[0]);
+  });
+
+  it('rejects an invalid mark rotation direction', () => {
+    const invalidJson = JSON.stringify({
+      version: 1,
+      currentFrameIndex: 0,
+      frames: [{
+        ...frames[0],
+        marks: [{
+          id: 'mark-1',
+          name: 'Windward Mark',
+          color: '#ef4444',
+          x: 300,
+          y: 120,
+          shape: 'triangle',
+          rotationDirection: 'sideways',
+        }],
+      }],
+    });
+
+    expect(() => parseScenarioFromJson(invalidJson)).toThrow(/valid Tack Wise scenario export/i);
+  });
 });

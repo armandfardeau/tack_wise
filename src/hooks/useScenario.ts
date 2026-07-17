@@ -182,6 +182,8 @@ export function useScenario() {
       x: 150 + Math.random() * 300,
       y: 150 + Math.random() * 200,
       shape: 'circle',
+      showRotationArrow: false,
+      rotationDirection: 'counterclockwise',
     };
 
     setFrames((previousFrames) =>

@@ -1,17 +1,24 @@
 import type { Frame, Boat, Mark } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
+import ExportActions from './ExportActions';
 import Inspector from './Inspector';
 
 interface SidebarProps {
   activeFrame: Frame;
   autoSailTrim: boolean;
   gridSnapEnabled: boolean;
+  isExporting: boolean;
+  isOpen: boolean;
   onAddBoat: () => void;
   onAddMark: () => void;
   onDeleteSelected: () => void;
+  onExport: (type: 'gif' | 'mp4') => void;
+  onExportJson: () => void;
+  onImportJson: (file: File) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
+  onClose: () => void;
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
   selectedType: SelectedType;
@@ -25,12 +32,18 @@ export default function Sidebar({
   activeFrame,
   autoSailTrim,
   gridSnapEnabled,
+  isExporting,
+  isOpen,
   onAddBoat,
   onAddMark,
   onDeleteSelected,
+  onExport,
+  onExportJson,
+  onImportJson,
   onSetAutoSailTrim,
   onSetGridSnapEnabled,
   onSetShowGrid,
+  onClose,
   selectedBoat,
   selectedMark,
   selectedType,
@@ -40,7 +53,16 @@ export default function Sidebar({
   updateMark,
 }: SidebarProps) {
   return (
-    <aside className="step-panel">
+    <>
+      <button type="button" className={`sidebar-backdrop${isOpen ? ' is-open' : ''}`} aria-label="Close controls menu" onClick={onClose} />
+      <aside id="controls-sidebar" className={`step-panel${isOpen ? ' is-open' : ''}`}>
+      <ExportActions
+        className="export-actions mobile-export-actions"
+        isExporting={isExporting}
+        onExport={onExport}
+        onExportJson={onExportJson}
+        onImportJson={onImportJson}
+      />
       <div className="control-section">
         <h3 className="section-title">🌬️ Wind Settings</h3>
         <div className="control-row">
@@ -90,6 +112,7 @@ export default function Sidebar({
         updateBoat={updateBoat}
         updateMark={updateMark}
       />
-    </aside>
+      </aside>
+    </>
   );
 }

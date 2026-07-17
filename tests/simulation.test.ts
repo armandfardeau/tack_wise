@@ -6,6 +6,7 @@ import {
   getSnappedPosition,
   isWithinGridSnapRadius,
 } from '../src/utils/simulation';
+import { MOBILE_INITIAL_CANVAS_ZOOM } from '../src/constants';
 
 describe('simulation utilities', () => {
   it('calculates an auto-trimmed sail angle from heading and wind', () => {
@@ -29,5 +30,9 @@ describe('simulation utilities', () => {
       x: 0,
       y: -500,
     });
+  });
+
+  it('supports a reduced initial zoom for narrow viewports', () => {
+    expect(MOBILE_INITIAL_CANVAS_ZOOM).toBe(0.7);
   });
 });

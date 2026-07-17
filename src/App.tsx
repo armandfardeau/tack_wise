@@ -17,6 +17,7 @@ export default function App() {
   const viewport = useCanvasViewport();
   const [showGrid, setShowGrid] = useState(true);
   const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const gridSnap = useGridSnap(gridSnapEnabled);
   const exportState = useScenarioExport({
     currentFrameIndex: scenario.currentFrameIndex,
@@ -42,9 +43,11 @@ export default function App() {
     <main className="app-shell dark-theme">
       <AppHeader
         isExporting={exportState.isExporting}
+        isSidebarOpen={isSidebarOpen}
         onExport={exportState.triggerExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
         onImportJson={handleImportJson}
+        onToggleSidebar={() => setIsSidebarOpen((isOpen) => !isOpen)}
       />
 
       <section className="workspace">
@@ -52,12 +55,18 @@ export default function App() {
           activeFrame={scenario.activeFrame}
           autoSailTrim={scenario.autoSailTrim}
           gridSnapEnabled={gridSnapEnabled}
+          isExporting={exportState.isExporting}
           onAddBoat={scenario.addBoat}
           onAddMark={scenario.addMark}
           onDeleteSelected={scenario.deleteSelected}
+          onExport={exportState.triggerExport}
+          onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
+          onImportJson={handleImportJson}
           onSetAutoSailTrim={scenario.setAutoSailTrim}
           onSetGridSnapEnabled={setGridSnapEnabled}
           onSetShowGrid={setShowGrid}
+          isOpen={isSidebarOpen}
+          onClose={() => setIsSidebarOpen(false)}
           selectedBoat={scenario.selectedBoat}
           selectedMark={scenario.selectedMark}
           selectedType={scenario.selectedType}
