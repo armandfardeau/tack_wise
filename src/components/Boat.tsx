@@ -6,10 +6,14 @@ interface BoatProps {
   isSelected: boolean;
   onMove?: (boatId: string, pos: { x: number; y: number }) => void;
   onSelect?: (boatId: string) => void;
+  /** Called every drag frame with the (possibly snapped) position */
+  onDragMove?: (boatId: string, pos: { x: number; y: number }) => void;
+  /** Optional function that snaps a raw {x,y} to a constrained position */
+  snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
   isShadow?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onSelect, isShadow = false }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onSelect, onDragMove, snapFn, isShadow = false }: BoatProps) {
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
   const mastY = -12;
@@ -77,9 +81,16 @@ export default function Boat({ boat, isSelected, onMove, onSelect, isShadow = fa
       y={boat.y}
       rotation={boat.heading}
       draggable
+      dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => onSelect?.(boat.id)}
       onTap={() => onSelect?.(boat.id)}
       onDragStart={() => onSelect?.(boat.id)}
+      onDragMove={(e) => {
+        onDragMove?.(boat.id, {
+          x: e.target.x(),
+          y: e.target.y(),
+        });
+      }}
       onDragEnd={(e) => {
         onMove?.(boat.id, {
           x: e.target.x(),

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Layer, Rect, Stage } from 'react-konva';
+import { Layer, Rect, Stage, Circle, Group, Line } from 'react-konva';
 import type { Boat as BoatModel, Mark as MarkModel, Frame as FrameModel } from './types';
 import Boat from './components/Boat';
 import Mark from './components/Mark';
@@ -121,6 +121,7 @@ export default function App() {
   const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>('boat-1');
   const [selectedType, setSelectedType] = useState<'boat' | 'mark' | null>('boat');
+  const [editingFrameId, setEditingFrameId] = useState<string | null>(null);
   
   // Simulation play state
   const [isPlaying, setIsPlaying] = useState(false);
@@ -135,6 +136,32 @@ export default function App() {
   // Auto sail calculation flag
   const [autoSailTrim, setAutoSailTrim] = useState(true);
 
+  // ── Magnetic-snap state ──────────────────────────────────────────────────
+  // When dragging a boat that has a heading line in f-1, we compute the
+  // closest point on that projected line and snap when within SNAP_RADIUS px.
+  const SNAP_RADIUS = 40;
+  const [snapTarget, setSnapTarget] = useState<{
+    boatId: string;
+    x: number;
+    y: number;
+    active: boolean; // true when within snap radius
+  } | null>(null);
+
+  /** Return the closest point on the semi-infinite ray from (px,py) in
+   *  direction heading (degrees, 0=up/north, clockwise) to point (cx,cy). */
+  function closestPointOnHeadingRay(
+    px: number, py: number, heading: number,
+    cx: number, cy: number
+  ): { x: number; y: number; dist: number; t: number } {
+    const rad = (heading * Math.PI) / 180;
+    const dx = Math.sin(rad);
+    const dy = -Math.cos(rad);
+    const t = Math.max(0, (cx - px) * dx + (cy - py) * dy);
+    const sx = px + t * dx;
+    const sy = py + t * dy;
+    return { x: sx, y: sy, dist: Math.hypot(cx - sx, cy - sy), t };
+  }
+
   const activeFrame = frames[currentFrameIndex] || frames[0];
 
   // Resize listener
@@ -143,11 +170,10 @@ export default function App() {
     if (!canvasWrap) return;
 
     const updateStageSize = () => {
-      const { width } = canvasWrap.getBoundingClientRect();
-      // Keep aspect ratio close to 4:3 or 16:10
+      const { width, height } = canvasWrap.getBoundingClientRect();
       setStageSize({
-        width: Math.max(width, 320),
-        height: 500,
+        width: Math.max(Math.round(width), 320),
+        height: Math.max(Math.round(height), 240),
       });
     };
 
@@ -673,18 +699,69 @@ export default function App() {
                 ))}
 
                 {/* Render Boats */}
-                {activeFrame.boats.map((boat) => (
-                  <Boat
-                    key={boat.id}
-                    boat={boat}
-                    isSelected={selectedId === boat.id}
-                    onSelect={(id) => {
-                      setSelectedId(id);
-                      setSelectedType('boat');
-                    }}
-                    onMove={(id, pos) => updateBoat(id, pos)}
-                  />
-                ))}
+                {activeFrame.boats.map((boat) => {
+                  // Build the snap function for this specific boat (based on its f-1 counterpart)
+                  const prevBoat = currentFrameIndex > 0
+                    ? frames[currentFrameIndex - 1].boats.find(b => b.id === boat.id)
+                    : undefined;
+                  const hasMagnet = prevBoat?.showHeadingLine === true;
+
+                  const snapFn = hasMagnet
+                    ? (rawPos: { x: number; y: number }) => {
+                        const snap = closestPointOnHeadingRay(
+                          prevBoat!.x, prevBoat!.y, prevBoat!.heading,
+                          rawPos.x, rawPos.y
+                        );
+                        const isSnapping = snap.dist < SNAP_RADIUS;
+                        // Update indicator — note: called inside dragBoundFunc so keep it minimal
+                        setSnapTarget({ boatId: boat.id, x: snap.x, y: snap.y, active: isSnapping });
+                        return isSnapping ? { x: snap.x, y: snap.y } : rawPos;
+                      }
+                    : undefined;
+
+                  return (
+                    <Boat
+                      key={boat.id}
+                      boat={boat}
+                      isSelected={selectedId === boat.id}
+                      snapFn={snapFn}
+                      onSelect={(id) => {
+                        setSelectedId(id);
+                        setSelectedType('boat');
+                      }}
+                      onMove={(id, pos) => {
+                        setSnapTarget(null);
+                        updateBoat(id, pos); // pos is already snapped via dragBoundFunc
+                      }}
+                    />
+                  );
+                })}
+              </Layer>
+
+              {/* Layer 3: Snap Indicator */}
+              <Layer listening={false}>
+                {snapTarget && (
+                  <Group x={snapTarget.x} y={snapTarget.y}>
+                    {/* Outer pulsing ring */}
+                    <Circle
+                      radius={22}
+                      fill="transparent"
+                      stroke={snapTarget.active ? '#06b6d4' : '#475569'}
+                      strokeWidth={2}
+                      dash={[4, 4]}
+                      opacity={snapTarget.active ? 0.9 : 0.4}
+                    />
+                    {/* Inner dot */}
+                    <Circle
+                      radius={5}
+                      fill={snapTarget.active ? '#06b6d4' : '#475569'}
+                      opacity={snapTarget.active ? 1 : 0.5}
+                    />
+                    {/* Magnet crosshair lines */}
+                    <Line points={[-14, 0, 14, 0]} stroke={snapTarget.active ? '#06b6d4' : '#475569'} strokeWidth={1.5} opacity={0.6} />
+                    <Line points={[0, -14, 0, 14]} stroke={snapTarget.active ? '#06b6d4' : '#475569'} strokeWidth={1.5} opacity={0.6} />
+                  </Group>
+                )}
               </Layer>
             </Stage>
 

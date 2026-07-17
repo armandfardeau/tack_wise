@@ -87,6 +87,8 @@ body {
   display: grid;
   grid-template-columns: 320px 1fr;
   min-height: 0;
+  overflow: hidden;      /* prevent children from busting out */
+  align-items: stretch;  /* both columns fill the full grid row height */
 }
 
 /* Sidebar / Step Panel */
@@ -258,24 +260,26 @@ body {
 .canvas-container {
   display: flex;
   flex-direction: column;
-  min-height: 0;
+  flex: 1;          /* fill the remaining horizontal space next to the sidebar */
+  min-height: 0;    /* allow flex child to shrink below content size */
   position: relative;
   background-color: var(--bg-app);
+  overflow: hidden;
 }
 
 .canvas-wrap {
-  flex: 1;
+  flex: 1;           /* fill all vertical space between header and timeline */
+  min-height: 0;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   background-color: #0f172a;
 }
 
+/* The Konva canvas must fill the wrapper exactly so ResizeObserver drives stage size */
 .canvas-wrap canvas {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Windvane Overlay at Top Center */
