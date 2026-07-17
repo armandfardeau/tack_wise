@@ -16,6 +16,9 @@ export interface Mark {
   x: number;
   y: number;
   shape: 'circle' | 'triangle' | 'square';
+  connectedToMarkId?: string | null;
+  connectionLineColor?: string;
+  connectionLineStyle?: 'dotted' | 'dashed' | 'solid';
 }
 
 export interface Frame {

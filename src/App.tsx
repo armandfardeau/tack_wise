@@ -47,6 +47,50 @@ function calculateAutoSailAngle(heading: number, windAngle: number): number {
   return isStarboardTack ? -trimAngle : trimAngle;
 }
 
+const CONNECTION_LINE_DASH: Record<
+  NonNullable<MarkModel['connectionLineStyle']>,
+  number[] | undefined
+> = {
+  dotted: [4, 6],
+  dashed: [12, 6],
+  solid: undefined,
+};
+
+function getConnectionLineDash(style?: MarkModel['connectionLineStyle']) {
+  return CONNECTION_LINE_DASH[style ?? 'dotted'];
+}
+
+function renderMarkConnections(
+  marks: MarkModel[],
+  options?: { isShadow?: boolean; highlightMarkId?: string | null }
+) {
+  const markById = new Map(marks.map((m) => [m.id, m]));
+
+  return marks.flatMap((mark) => {
+    if (!mark.connectedToMarkId) return [];
+
+    const target = markById.get(mark.connectedToMarkId);
+    if (!target) return [];
+
+    const isHighlighted =
+      !options?.isShadow &&
+      (options?.highlightMarkId === mark.id || options?.highlightMarkId === target.id);
+    const lineColor = mark.connectionLineColor ?? mark.color;
+
+    return [
+      <Line
+        key={`conn-${mark.id}-${target.id}`}
+        points={[mark.x, mark.y, target.x, target.y]}
+        stroke={options?.isShadow ? '#94a3b8' : lineColor}
+        strokeWidth={isHighlighted ? 2.5 : 1.5}
+        dash={getConnectionLineDash(mark.connectionLineStyle)}
+        opacity={options?.isShadow ? 0.22 : 1}
+        listening={false}
+      />,
+    ];
+  });
+}
+
 // Initial default scenario
 const initialFrames: FrameModel[] = [
   {
@@ -364,7 +408,11 @@ export default function App() {
       prev.map((f) => ({
         ...f,
         boats: f.boats.filter((b) => b.id !== selectedId),
-        marks: f.marks.filter((m) => m.id !== selectedId),
+        marks: f.marks
+          .filter((m) => m.id !== selectedId)
+          .map((m) =>
+            m.connectedToMarkId === selectedId ? { ...m, connectedToMarkId: null } : m
+          ),
       }))
     );
     setSelectedId(null);
@@ -633,6 +681,77 @@ export default function App() {
                     <option value="square">Spar (Square)</option>
                   </select>
                 </div>
+
+                <div className="form-row flex-row">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={!!selectedMark.connectedToMarkId}
+                      disabled={activeFrame.marks.length <= 1}
+                      onChange={(e) => {
+                        if (!e.target.checked) {
+                          updateMark(selectedMark.id, { connectedToMarkId: null });
+                          return;
+                        }
+                        const otherMark = activeFrame.marks.find((m) => m.id !== selectedMark.id);
+                        updateMark(selectedMark.id, {
+                          connectedToMarkId: otherMark?.id ?? null,
+                          connectionLineColor: selectedMark.connectionLineColor ?? selectedMark.color,
+                          connectionLineStyle: selectedMark.connectionLineStyle ?? 'dotted',
+                        });
+                      }}
+                    />
+                    <span>Show Dotted Line to Mark</span>
+                  </label>
+                </div>
+
+                {!!selectedMark.connectedToMarkId && (
+                  <>
+                    <div className="form-row">
+                      <label>Connect to</label>
+                      <select
+                        value={selectedMark.connectedToMarkId}
+                        onChange={(e) =>
+                          updateMark(selectedMark.id, { connectedToMarkId: e.target.value })
+                        }
+                      >
+                        {activeFrame.marks
+                          .filter((m) => m.id !== selectedMark.id)
+                          .map((m) => (
+                            <option key={m.id} value={m.id}>
+                              {m.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    <div className="form-row">
+                      <label>Line Color</label>
+                      <input
+                        type="color"
+                        value={selectedMark.connectionLineColor ?? selectedMark.color}
+                        onChange={(e) =>
+                          updateMark(selectedMark.id, { connectionLineColor: e.target.value })
+                        }
+                      />
+                    </div>
+                    <div className="form-row">
+                      <label>Line Style</label>
+                      <select
+                        value={selectedMark.connectionLineStyle ?? 'dotted'}
+                        onChange={(e) =>
+                          updateMark(selectedMark.id, {
+                            connectionLineStyle: e.target.value as MarkModel['connectionLineStyle'],
+                          })
+                        }
+                      >
+                        <option value="dotted">Dotted</option>
+                        <option value="dashed">Dashed</option>
+                        <option value="solid">Solid</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
                 <button type="button" className="delete-btn" onClick={handleDeleteSelected}>
                   🗑️ Delete Mark
                 </button>
@@ -665,6 +784,7 @@ export default function App() {
                 {/* Render Shadow View of previous frame (f-1) if it exists */}
                 {currentFrameIndex > 0 && frames[currentFrameIndex - 1] && (
                   <>
+                    {renderMarkConnections(frames[currentFrameIndex - 1].marks, { isShadow: true })}
                     {frames[currentFrameIndex - 1].marks.map((mark) => (
                       <Mark
                         key={`shadow-${mark.id}`}
@@ -683,6 +803,10 @@ export default function App() {
                     ))}
                   </>
                 )}
+
+                {renderMarkConnections(activeFrame.marks, {
+                  highlightMarkId: selectedType === 'mark' ? selectedId : null,
+                })}
 
                 {/* Render Marks */}
                 {activeFrame.marks.map((mark) => (
