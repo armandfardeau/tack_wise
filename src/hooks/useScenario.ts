@@ -17,7 +17,7 @@ import { calculateAutoSailAngle, interpolateFrame, type Position } from '../util
 import { parseScenarioFromJson } from '../utils/exporter';
 import { deleteScenarioRepositoryItem, listScenarioRepositoryItems, loadScenarioRepositoryItem, saveScenarioRepositoryItem } from '../utils/repository';
 
-export type SelectedType = 'boat' | 'mark' | 'arrow' | 'comment' | 'image' | null;
+export type SelectedType = 'boat' | 'mark' | 'arrow' | 'comment' | 'image' | 'wind' | 'grid' | 'playback' | null;
 
 const AUTOSAVE_KEY = 'tack-wise-autosave';
 const MAX_HISTORY_LENGTH = 50;
@@ -255,19 +255,20 @@ export function useScenario() {
     setCurrentFrameIndex(frames.length);
   };
 
-  const duplicateFrame = () => {
+  const duplicateFrame = (frameIndex = currentFrameIndex) => {
     setIsPlaying(false);
+    const sourceFrame = frames[frameIndex] ?? activeFrame;
     const newFrame: Frame = {
-      ...cloneScenarioFrames([activeFrame])[0],
+      ...cloneScenarioFrames([sourceFrame])[0],
       id: `frame-${Date.now()}`,
-      name: `${activeFrame.name} (Copy)`,
+      name: `${sourceFrame.name} (Copy)`,
     };
     commitFrames((previousFrames) => {
       const nextFrames = [...previousFrames];
-      nextFrames.splice(currentFrameIndex + 1, 0, newFrame);
+      nextFrames.splice(frameIndex + 1, 0, newFrame);
       return nextFrames;
     });
-    setCurrentFrameIndex(currentFrameIndex + 1);
+    setCurrentFrameIndex(frameIndex + 1);
   };
 
   const deleteFrame = (indexToDelete: number) => {
@@ -446,7 +447,10 @@ export function useScenario() {
   };
 
   const deleteSelected = () => {
-    if (!selectedId) return;
+    if (!selectedId || selectedType === 'wind' || selectedType === 'grid' || selectedType === 'playback') {
+      clearSelection();
+      return;
+    }
 
     commitFrames((previousFrames) =>
       previousFrames.map((frame) => ({

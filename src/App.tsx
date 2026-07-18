@@ -4,7 +4,6 @@ import AppHeader from './components/AppHeader';
 import CanvasWorkspace from './components/CanvasWorkspace';
 import ExportOverlay from './components/ExportOverlay';
 import Sidebar from './components/Sidebar';
-import Timeline from './components/Timeline';
 import { CANVAS_ZOOM_STEP } from './constants';
 import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { useGridSnap } from './hooks/useGridSnap';
@@ -12,6 +11,22 @@ import { useScenario } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
 import { createScenarioShareUrl, parseScenarioFromJson, parseScenarioShareUrl } from './utils/exporter';
 import { getCanvasContentBounds } from './utils/simulation';
+import type { Theme } from './types';
+
+const THEME_STORAGE_KEY = 'tack-wise-theme';
+
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'dark';
+
+  try {
+    const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    if (savedTheme === 'light' || savedTheme === 'dark') return savedTheme;
+  } catch {
+    // Fall back to the system preference when storage is unavailable.
+  }
+
+  return window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+}
 
 export default function App() {
   const scenario = useScenario();
@@ -20,6 +35,7 @@ export default function App() {
   const [showGrid, setShowGrid] = useState(true);
   const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const gridSnap = useGridSnap(gridSnapEnabled);
   const { redo, undo } = scenario;
   const { importScenario } = scenario;
@@ -47,6 +63,16 @@ export default function App() {
       window.prompt('Copy this share link:', shareUrl);
     }
   };
+
+  useEffect(() => {
+    document.documentElement.style.colorScheme = theme;
+
+    try {
+      window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      // The theme still applies for this session when storage is unavailable.
+    }
+  }, [theme]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -83,13 +109,14 @@ export default function App() {
   };
 
   return (
-    <main className={`app-shell dark-theme${scenario.settings.presenterMode ? ' presenter-mode' : ''}`}>
+    <main className={`app-shell ${theme}-theme${scenario.settings.presenterMode ? ' presenter-mode' : ''}`}>
       <AppHeader
         canRedo={scenario.canRedo}
         canUndo={scenario.canUndo}
         hasAutosave={scenario.hasAutosave}
         isExporting={exportState.isExporting}
         isSidebarOpen={isSidebarOpen}
+        theme={theme}
         presenterMode={scenario.settings.presenterMode}
         onRedo={scenario.redo}
         onExport={exportState.triggerExport}
@@ -100,31 +127,26 @@ export default function App() {
         onShareScenario={handleShareScenario}
         onToggleSidebar={() => setIsSidebarOpen((isOpen) => !isOpen)}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
+        onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
         onUndo={scenario.undo}
       />
 
       <section className="workspace">
         {!scenario.settings.presenterMode && <Sidebar
-          activeFrame={scenario.activeFrame}
-          gridSnapEnabled={gridSnapEnabled}
+          currentFrameIndex={scenario.currentFrameIndex}
+          frames={scenario.frames}
           isExporting={exportState.isExporting}
-          onAddRule={scenario.addRuleToActiveFrame}
-          libraryItems={scenario.libraryItems}
-          onSaveToLibrary={scenario.saveToLibrary}
-          onLoadFromLibrary={scenario.loadFromLibrary}
-          onDeleteFromLibrary={scenario.deleteFromLibrary}
+          onAddFrame={scenario.addFrame}
+          onDeleteFrame={scenario.deleteFrame}
+          onDuplicateFrame={scenario.duplicateFrame}
           onExport={exportState.triggerExport}
           onExportImage={exportState.triggerImageExport}
           onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
           onImportJson={handleImportJson}
-          onSetGridSnapEnabled={setGridSnapEnabled}
-          onSetShowGrid={setShowGrid}
-          onSetSettings={scenario.updateSettings}
+          onRenameFrame={scenario.renameFrame}
+          onSelectFrame={scenario.selectFrame}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          settings={scenario.settings}
-          showGrid={showGrid}
-          updateActiveFrame={scenario.updateActiveFrame}
         />}
 
         <CanvasWorkspace
@@ -136,27 +158,34 @@ export default function App() {
           constrainPosition={viewport.constrainPosition}
           currentFrameIndex={scenario.currentFrameIndex}
           displayMode={scenario.settings.displayMode}
+          theme={theme}
           frames={scenario.frames}
           getSnappedPosition={gridSnap.getSnappedPosition}
           gridSnapEnabled={gridSnapEnabled}
+          isPlaying={scenario.isPlaying}
           handleCanvasDragEnd={viewport.handleCanvasDragEnd}
           handleCanvasWheel={viewport.handleCanvasWheel}
           maxZoom={viewport.maxZoom}
           minZoom={viewport.minZoom}
+          onAddBoat={scenario.addBoat}
+          onAddMark={scenario.addMark}
+          onAddArrow={scenario.addArrow}
+          onAddComment={scenario.addComment}
+          onAddImage={scenario.addImage}
           onMoveBoat={scenario.moveBoat}
           onRotateBoat={(boatId, heading) => scenario.updateBoat(boatId, { heading })}
           onMoveMark={scenario.moveMark}
           onMoveArrow={scenario.moveArrow}
           onMoveComment={scenario.moveComment}
           onMoveImage={scenario.moveImage}
-          onAddBoat={scenario.addBoat}
-          onAddMark={scenario.addMark}
-          onAddArrow={scenario.addArrow}
-          onAddComment={scenario.addComment}
-          onAddImage={scenario.addImage}
           onDeleteSelected={scenario.deleteSelected}
           onClearSelection={scenario.clearSelection}
           onSetAutoSailTrim={scenario.setAutoSailTrim}
+          onSetGridSnapEnabled={setGridSnapEnabled}
+          onSetShowGrid={setShowGrid}
+          onTogglePlaying={() => scenario.setIsPlaying((isPlaying) => !isPlaying)}
+          onSetPlaySpeed={scenario.setPlaySpeed}
+          playSpeed={scenario.playSpeed}
           onOpenControls={() => setIsSidebarOpen(true)}
           onSelectObject={scenario.selectObject}
           onSnapPreview={gridSnap.setSnapPreview}
@@ -171,6 +200,7 @@ export default function App() {
           selectedComment={scenario.selectedComment}
           selectedImage={scenario.selectedImage}
           updateBoat={scenario.updateBoat}
+          updateActiveFrame={scenario.updateActiveFrame}
           updateMark={scenario.updateMark}
           updateArrow={scenario.updateArrow}
           updateComment={scenario.updateComment}
@@ -180,21 +210,7 @@ export default function App() {
           snapTarget={gridSnap.snapTarget}
           stageRef={viewport.stageRef}
           stageSize={viewport.stageSize}
-        >
-          {!scenario.settings.presenterMode && <Timeline
-            currentFrameIndex={scenario.currentFrameIndex}
-            frames={scenario.frames}
-            isPlaying={scenario.isPlaying}
-            onAddFrame={scenario.addFrame}
-            onDeleteFrame={() => scenario.deleteFrame(scenario.currentFrameIndex)}
-            onDuplicateFrame={scenario.duplicateFrame}
-            onRenameFrame={scenario.renameFrame}
-            onSelectFrame={scenario.selectFrame}
-            onTogglePlaying={() => scenario.setIsPlaying(!scenario.isPlaying)}
-            playSpeed={scenario.playSpeed}
-            onSetPlaySpeed={scenario.setPlaySpeed}
-          />}
-        </CanvasWorkspace>
+        />
       </section>
 
       {exportState.isExporting && (

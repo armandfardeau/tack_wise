@@ -34,8 +34,8 @@ describe('Timeline', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /play/i }));
     fireEvent.click(screen.getByRole('button', { name: /add frame/i }));
-    fireEvent.click(screen.getByRole('button', { name: /duplicate/i }));
-    fireEvent.click(screen.getByRole('button', { name: /delete/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Duplicate frame$/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Delete frame$/ }));
     fireEvent.click(screen.getByRole('button', { name: /2\. Upwind Tack/i }));
     fireEvent.change(screen.getByRole('combobox', { name: /playback speed/i }), { target: { value: '500' } });
 
@@ -64,7 +64,88 @@ describe('Timeline', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: /delete/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /^Delete frame$/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /^Delete frame 1$/ })).toBeDisabled();
+  });
+
+  it('places Add Frame at the bottom of the frame list in the sidebar', () => {
+    const onAddFrame = jest.fn();
+
+    render(
+      <Timeline
+        variant="sidebar"
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={onAddFrame}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    const addFrameButton = screen.getByRole('button', { name: /^Add frame$/ });
+    const frameList = screen.getByLabelText('Scenario frames');
+
+    fireEvent.click(addFrameButton);
+
+    expect(addFrameButton).toHaveClass('sidebar-add-frame-btn');
+    expect(frameList.compareDocumentPosition(addFrameButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /^Play$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: /playback speed/i })).not.toBeInTheDocument();
+    expect(onAddFrame).toHaveBeenCalledTimes(1);
+  });
+
+  it('deletes the frame from its inline delete button', () => {
+    const onDeleteFrame = jest.fn();
+
+    render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={onDeleteFrame}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^Delete frame 2$/ }));
+
+    expect(onDeleteFrame).toHaveBeenCalledWith(1);
+  });
+
+  it('duplicates the frame from its inline duplicate button', () => {
+    const onDuplicateFrame = jest.fn();
+
+    render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        isPlaying={false}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={onDuplicateFrame}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        playSpeed={1000}
+        onSetPlaySpeed={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /^Duplicate frame 2$/ }));
+
+    expect(onDuplicateFrame).toHaveBeenCalledWith(1);
   });
 
   it('renames a frame on Enter after double-clicking its title', () => {

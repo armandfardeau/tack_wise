@@ -4,15 +4,24 @@ import type { SelectedType } from '../hooks/useScenario';
 interface InspectorProps {
   activeFrame: Frame;
   autoSailTrim: boolean;
+  gridSnapEnabled: boolean;
+  isPlaying?: boolean;
   onDelete: () => void;
+  onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
+  onSetShowGrid: (show: boolean) => void;
+  onTogglePlaying?: () => void;
+  onSetPlaySpeed?: (speed: number) => void;
+  playSpeed?: number;
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
   selectedArrow?: TacticalArrow;
   selectedComment?: CommentNote;
   selectedImage?: DiagramImage;
   selectedType: SelectedType;
+  showGrid: boolean;
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
+  updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
@@ -22,15 +31,24 @@ interface InspectorProps {
 export default function Inspector({
   activeFrame,
   autoSailTrim,
+  gridSnapEnabled,
+  isPlaying = false,
   onDelete,
+  onSetGridSnapEnabled,
   onSetAutoSailTrim,
+  onSetShowGrid,
+  onTogglePlaying = () => undefined,
+  onSetPlaySpeed = () => undefined,
+  playSpeed = 1000,
   selectedBoat,
   selectedMark,
   selectedArrow,
   selectedComment,
   selectedImage,
   selectedType,
+  showGrid,
   updateBoat,
+  updateActiveFrame,
   updateMark,
   updateArrow,
   updateComment,
@@ -38,9 +56,27 @@ export default function Inspector({
 }: InspectorProps) {
   return (
     <div className="control-section inspector">
-      <h3 className="section-title">🔍 Inspector</h3>
+      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector">🔍 Inspector</h3>
 
-      {selectedType === 'boat' && selectedBoat ? (
+      {selectedType === 'wind' ? (
+        <WindInspector activeFrame={activeFrame} updateActiveFrame={updateActiveFrame} />
+      ) : selectedType === 'grid' ? (
+        <CanvasSettingsInspector
+          activeFrame={activeFrame}
+          gridSnapEnabled={gridSnapEnabled}
+          onSetGridSnapEnabled={onSetGridSnapEnabled}
+          onSetShowGrid={onSetShowGrid}
+          updateActiveFrame={updateActiveFrame}
+          showGrid={showGrid}
+        />
+      ) : selectedType === 'playback' ? (
+        <PlaybackInspector
+          isPlaying={isPlaying}
+          onSetPlaySpeed={onSetPlaySpeed}
+          onTogglePlaying={onTogglePlaying}
+          playSpeed={playSpeed}
+        />
+      ) : selectedType === 'boat' && selectedBoat ? (
         <div className="editor-form">
           <div className="form-row">
             <label htmlFor="boat-name">Name</label>
@@ -50,37 +86,6 @@ export default function Inspector({
             <label htmlFor="boat-color">Color</label>
             <input id="boat-color" type="color" value={selectedBoat.color} onChange={(event) => updateBoat(selectedBoat.id, { color: event.target.value })} />
           </div>
-          <div className="form-row">
-            <label htmlFor="boat-class">Boat class</label>
-            <select id="boat-class" value={selectedBoat.boatClass ?? 'dinghy'} onChange={(event) => updateBoat(selectedBoat.id, { boatClass: event.target.value as Boat['boatClass'] })}>
-              <option value="dinghy">Dinghy</option>
-              <option value="keelboat">Keelboat</option>
-              <option value="optimist">Optimist</option>
-              <option value="tornado">Tornado</option>
-              <option value="trimaran">Trimaran</option>
-              <option value="custom">Custom</option>
-            </select>
-          </div>
-          <div className="form-row">
-            <label htmlFor="boat-scale">Hull scale ({Math.round((selectedBoat.hullScale ?? 1) * 100)}%)</label>
-            <input id="boat-scale" type="range" min="50" max="200" value={Math.round((selectedBoat.hullScale ?? 1) * 100)} onChange={(event) => updateBoat(selectedBoat.id, { hullScale: Number(event.target.value) / 100 })} />
-          </div>
-          <div className="form-row">
-            <label htmlFor="boat-sail-plan">Sail plan</label>
-            <select id="boat-sail-plan" value={selectedBoat.sailPlan ?? 'main'} onChange={(event) => updateBoat(selectedBoat.id, { sailPlan: event.target.value as Boat['sailPlan'] })}>
-              <option value="main">Main sail</option>
-              <option value="symmetric-spinnaker">Symmetric spinnaker</option>
-              <option value="asymmetric-spinnaker">Asymmetric spinnaker</option>
-            </select>
-          </div>
-          {selectedBoat.sailPlan !== 'main' && (
-            <div className="form-row flex-row">
-              <label className="checkbox-label">
-                <input type="checkbox" checked={!!selectedBoat.spinnakerDeployed} onChange={(event) => updateBoat(selectedBoat.id, { spinnakerDeployed: event.target.checked })} />
-                <span>Deploy spinnaker</span>
-              </label>
-            </div>
-          )}
           <div className="form-row">
             <label htmlFor="boat-heading">Heading ({selectedBoat.heading}°)</label>
             <input id="boat-heading" type="range" min="0" max="359" value={selectedBoat.heading} onChange={(event) => updateBoat(selectedBoat.id, { heading: Number(event.target.value) })} />
@@ -119,8 +124,69 @@ export default function Inspector({
       ) : selectedType === 'image' && selectedImage && updateImage ? (
         <ImageInspector image={selectedImage} onDelete={onDelete} updateImage={updateImage} />
       ) : (
-        <p className="no-selection">Click a boat or mark on the canvas to inspect and edit its properties.</p>
+        <p className="no-selection">Click an object or the wind indicator on the canvas to inspect and edit its properties.</p>
       )}
+    </div>
+  );
+}
+
+function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame; updateActiveFrame: (changes: Partial<Frame>) => void }) {
+  return (
+    <div className="editor-form">
+      <div className="form-row">
+        <label htmlFor="wind-direction">Direction ({activeFrame.windAngle}°)</label>
+        <input id="wind-direction" type="range" min="0" max="359" value={activeFrame.windAngle} onChange={(event) => updateActiveFrame({ windAngle: Number(event.target.value) })} />
+      </div>
+      <div className="form-row">
+        <label htmlFor="wind-speed">Velocity ({activeFrame.windSpeed} kts)</label>
+        <input id="wind-speed" type="range" min="5" max="30" value={activeFrame.windSpeed} onChange={(event) => updateActiveFrame({ windSpeed: Number(event.target.value) })} />
+      </div>
+    </div>
+  );
+}
+
+function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEnabled, onSetShowGrid, showGrid, updateActiveFrame }: { activeFrame: Frame; gridSnapEnabled: boolean; onSetGridSnapEnabled: (enabled: boolean) => void; onSetShowGrid: (show: boolean) => void; showGrid: boolean; updateActiveFrame: (changes: Partial<Frame>) => void }) {
+  return (
+    <div className="editor-form">
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Wind</h4>
+        <WindInspector activeFrame={activeFrame} updateActiveFrame={updateActiveFrame} />
+      </div>
+
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Magnetic Grid</h4>
+        <div className="form-row flex-row">
+          <label className="checkbox-label">
+            <input type="checkbox" checked={gridSnapEnabled} onChange={(event) => onSetGridSnapEnabled(event.target.checked)} />
+            <span>Snap boats &amp; marks</span>
+          </label>
+        </div>
+        <div className="form-row flex-row">
+          <label className="checkbox-label">
+            <input type="checkbox" checked={showGrid} onChange={(event) => onSetShowGrid(event.target.checked)} />
+            <span>Show placement grid</span>
+          </label>
+        </div>
+        <p className="grid-hint">40px spacing · drag near an intersection</p>
+      </div>
+    </div>
+  );
+}
+
+function PlaybackInspector({ isPlaying, onSetPlaySpeed, onTogglePlaying, playSpeed }: { isPlaying: boolean; onSetPlaySpeed: (speed: number) => void; onTogglePlaying: () => void; playSpeed: number }) {
+  return (
+    <div className="editor-form">
+      <div className="form-row">
+        <label htmlFor="playback-speed">Playback speed</label>
+        <select id="playback-speed" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))}>
+          <option value="2000">Slow (2s)</option>
+          <option value="1000">Normal (1s)</option>
+          <option value="500">Fast (0.5s)</option>
+        </select>
+      </div>
+      <button type="button" className="direction-btn" onClick={onTogglePlaying}>
+        {isPlaying ? '⏸️ Pause playback' : '▶️ Play scenario'}
+      </button>
     </div>
   );
 }
@@ -168,10 +234,6 @@ function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspecto
           <option value="obstruction">Obstruction</option>
           <option value="gate">Gate</option>
         </select>
-      </div>
-      <div className="form-row">
-        <label htmlFor="mark-size">Size ({mark.size ?? 28}px)</label>
-        <input id="mark-size" type="range" min="16" max="120" value={mark.size ?? 28} onChange={(event) => updateMark(mark.id, { size: Number(event.target.value) })} />
       </div>
       <div className="form-row flex-row">
         <label className="checkbox-label">

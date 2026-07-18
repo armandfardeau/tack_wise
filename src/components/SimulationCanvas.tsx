@@ -1,7 +1,7 @@
 import { Fragment, type RefObject } from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import type { DisplayMode, Frame } from '../types';
+import type { DisplayMode, Frame, Theme } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import Boat from './Boat';
 import CommentNote from './CommentNote';
@@ -23,6 +23,7 @@ interface SimulationCanvasProps {
   constrainPosition: (position: Position) => Position;
   currentFrameIndex: number;
   displayMode: DisplayMode;
+  theme: Theme;
   frames: Frame[];
   gridSnapEnabled: boolean;
   onCanvasDragEnd: () => void;
@@ -34,6 +35,7 @@ interface SimulationCanvasProps {
   onMoveComment: (commentId: string, position: Position) => void;
   onMoveImage: (imageId: string, position: Position) => void;
   onOpenControls: () => void;
+  onOpenInspector: (id: string, type: Exclude<SelectedType, null>) => void;
   onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
   onSnapPreview: (target: SnapTarget | null) => void;
   selectedId: string | null;
@@ -52,6 +54,7 @@ export default function SimulationCanvas({
   constrainPosition,
   currentFrameIndex,
   displayMode,
+  theme,
   frames,
   gridSnapEnabled,
   onCanvasDragEnd,
@@ -63,6 +66,7 @@ export default function SimulationCanvas({
   onMoveComment,
   onMoveImage,
   onOpenControls,
+  onOpenInspector,
   onSelectObject,
   onSnapPreview,
   selectedId,
@@ -83,6 +87,7 @@ export default function SimulationCanvas({
     width: worldBounds.right - worldBounds.left,
     height: worldBounds.bottom - worldBounds.top,
   };
+  const isLightTheme = theme === 'light';
 
   return (
     <Stage
@@ -104,12 +109,13 @@ export default function SimulationCanvas({
           y={worldBounds.top}
           width={worldSize.width}
           height={worldSize.height}
-          fill="#0f172a"
+          fill={isLightTheme ? '#f8fafc' : '#0f172a'}
         />
         {showGrid && (
           <PlacementGrid
             origin={{ x: worldBounds.left, y: worldBounds.top }}
             size={worldSize}
+            theme={theme}
           />
         )}
         <WindIndicator
@@ -156,9 +162,10 @@ export default function SimulationCanvas({
               mark={mark}
               isSelected={selectedId === mark.id}
             />
-            <Mark
-              mark={mark}
-              isSelected={selectedId === mark.id}
+              <Mark
+                mark={mark}
+                isSelected={selectedId === mark.id}
+                onOpenInspector={() => onOpenInspector(mark.id, 'mark')}
               snapFn={(position) => getSnappedPosition(mark.id, position)}
               onSelect={(id) => {
                 onSelectObject(id, 'mark');
@@ -177,6 +184,7 @@ export default function SimulationCanvas({
             key={boat.id}
             boat={boat}
             isSelected={selectedId === boat.id}
+            onOpenInspector={() => onOpenInspector(boat.id, 'boat')}
             snapFn={
               gridSnapEnabled
                 ? (position) => getSnappedPosition(boat.id, position)
@@ -199,6 +207,7 @@ export default function SimulationCanvas({
             key={arrow.id}
             arrow={arrow}
             isSelected={selectedId === arrow.id}
+            onOpenInspector={() => onOpenInspector(arrow.id, 'arrow')}
             onSelect={(id) => onSelectObject(id, 'arrow')}
             onOpenControls={onOpenControls}
             onMove={onMoveArrow}
@@ -210,6 +219,7 @@ export default function SimulationCanvas({
             key={comment.id}
             comment={comment}
             isSelected={selectedId === comment.id}
+            onOpenInspector={() => onOpenInspector(comment.id, 'comment')}
             onSelect={(id) => onSelectObject(id, 'comment')}
             onOpenControls={onOpenControls}
             onMove={onMoveComment}
@@ -221,6 +231,7 @@ export default function SimulationCanvas({
             key={image.id}
             image={image}
             isSelected={selectedId === image.id}
+            onOpenInspector={() => onOpenInspector(image.id, 'image')}
             onSelect={(id) => onSelectObject(id, 'image')}
             onOpenControls={onOpenControls}
             onMove={onMoveImage}

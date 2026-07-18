@@ -6,11 +6,12 @@ interface TacticalArrowProps {
   isSelected: boolean;
   onMove?: (id: string, points: TacticalArrowModel['points']) => void;
   onOpenControls?: () => void;
+  onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
   isShadow?: boolean;
 }
 
-export default function TacticalArrow({ arrow, isSelected, onMove, onOpenControls, onSelect, isShadow = false }: TacticalArrowProps) {
+export default function TacticalArrow({ arrow, isSelected, onMove, onOpenControls, onOpenInspector, onSelect, isShadow = false }: TacticalArrowProps) {
   const points = arrow.points.flatMap((point) => [point.x, point.y]);
   const color = isShadow ? '#94a3b8' : isSelected ? '#22d3ee' : arrow.color;
 
@@ -35,6 +36,8 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenControl
         onSelect?.(arrow.id);
         onOpenControls?.();
       }}
+      onDblClick={() => onOpenInspector?.()}
+      onDblTap={() => onOpenInspector?.()}
       onDragStart={() => onSelect?.(arrow.id)}
       onDragEnd={(event) => {
         const dx = event.target.x();

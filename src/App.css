@@ -1,4 +1,4 @@
-/* Modern Dark-Themed Styles for Tack Wise Sailing Simulator */
+/* Theme-aware styles for Tack Wise Sailing Simulator */
 
 :root {
   --bg-app: #090d16;
@@ -13,6 +13,27 @@
   --accent-red-hover: #fda4af;
   --accent-green: #10b981;
   --accent-green-hover: #34d399;
+  --canvas-bg: #0f172a;
+  --canvas-grid-major: #155e75;
+  --canvas-grid-minor: #1e3a4f;
+}
+
+.app-shell.light-theme {
+  --bg-app: #eef4f3;
+  --bg-sidebar: #ffffff;
+  --bg-card: #f7faf9;
+  --border-color: #d5e1df;
+  --text-main: #142326;
+  --text-muted: #617273;
+  --accent-cyan: #0891b2;
+  --accent-cyan-hover: #0e7490;
+  --accent-red: #dc2626;
+  --accent-red-hover: #b91c1c;
+  --accent-green: #059669;
+  --accent-green-hover: #047857;
+  --canvas-bg: #f8fafc;
+  --canvas-grid-major: #94a3b8;
+  --canvas-grid-minor: #cbd5e1;
 }
 
 body {
@@ -27,6 +48,11 @@ body {
   height: 100vh;
   display: flex;
   flex-direction: column;
+  color-scheme: dark;
+}
+
+.app-shell.light-theme {
+  color-scheme: light;
 }
 
 /* Header */
@@ -166,6 +192,10 @@ body {
   color: var(--accent-cyan-hover);
 }
 
+.theme-toggle-btn {
+  white-space: nowrap;
+}
+
 .header-tool-btn:disabled {
   cursor: not-allowed;
   opacity: 0.4;
@@ -251,7 +281,7 @@ body {
 }
 
 .presenter-mode .canvas-container {
-  background: #020617;
+  background: var(--bg-app);
 }
 
 @media print {
@@ -457,6 +487,25 @@ body {
   margin: 10px 0 0;
 }
 
+.inspector-subsection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspector-subsection + .inspector-subsection {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.inspector-subsection-title {
+  margin: 0;
+  color: var(--accent-cyan-hover);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .delete-btn {
   margin-top: 8px;
   background-color: rgba(244, 63, 94, 0.1);
@@ -500,7 +549,7 @@ body {
   min-height: 0;
   position: relative;
   overflow: hidden;
-  background-color: #0f172a;
+  background-color: var(--canvas-bg);
   cursor: grab;
 }
 
@@ -509,9 +558,7 @@ body {
 }
 
 .floating-inspector {
-  position: absolute;
   z-index: 8;
-  width: 292px;
   max-width: calc(100% - 24px);
   max-height: calc(100% - 24px);
   overflow-y: auto;
@@ -520,6 +567,23 @@ body {
   border-radius: 10px;
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
   pointer-events: auto;
+}
+
+.light-theme .floating-inspector,
+.light-theme .floating-add-actions,
+.light-theme .canvas-zoom-controls,
+.light-theme .wind-vane-container {
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.light-theme .floating-inspector {
+  box-shadow: 0 16px 36px rgba(20, 35, 38, 0.16);
+}
+
+.floating-inspector .inspector-drag-handle {
+  cursor: move;
+  user-select: none;
+  touch-action: none;
 }
 
 .floating-inspector .control-section {
@@ -583,6 +647,11 @@ body {
   border-radius: 10px;
   background: rgba(15, 23, 42, 0.97);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+}
+
+.light-theme .floating-add-actions,
+.light-theme .canvas-zoom-controls {
+  box-shadow: 0 14px 32px rgba(20, 35, 38, 0.16);
 }
 
 .floating-add-action {
@@ -692,8 +761,15 @@ body {
   align-items: center;
   gap: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
   z-index: 5;
+}
+
+.light-theme .wind-vane-container {
+  box-shadow: 0 10px 30px rgba(20, 35, 38, 0.14);
 }
 
 .wind-vane-dial {
@@ -745,6 +821,77 @@ body {
   color: var(--accent-cyan);
 }
 
+.canvas-settings-btn {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: rgba(15, 23, 42, 0.88);
+  color: var(--text-main);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 1.15rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.canvas-settings-btn:hover,
+.canvas-settings-btn:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+.canvas-playback-controls {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.canvas-play-btn {
+  min-width: 86px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.canvas-playback-options-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: rgba(15, 23, 42, 0.88);
+  color: var(--text-main);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.canvas-playback-options-btn:hover,
+.canvas-playback-options-btn:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+.light-theme .canvas-playback-options-btn {
+  background-color: rgba(255, 255, 255, 0.94);
+}
+
 /* Timeline & Scrubber */
 .timeline-bar {
   background-color: var(--bg-sidebar);
@@ -753,6 +900,55 @@ body {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.sidebar-timeline {
+  gap: 12px;
+  padding: 0;
+  border-top: 0;
+}
+
+.sidebar-timeline .playback-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sidebar-timeline .play-pause-btn,
+.sidebar-timeline .speed-selector,
+.sidebar-timeline .timeline-action-btn {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.sidebar-timeline .delete-frame-btn {
+  margin-left: 0;
+}
+
+.sidebar-timeline .timeline-control-label {
+  display: inline;
+}
+
+.sidebar-timeline .frames-scrubber {
+  flex-direction: column;
+  gap: 6px;
+  max-height: 220px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
+.sidebar-timeline .frame-thumbnail {
+  flex: 0 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  height: 44px;
+}
+
+.sidebar-add-frame-btn {
+  width: 100%;
+  margin-top: 4px;
 }
 
 .playback-controls {
@@ -865,9 +1061,85 @@ body {
   text-align: left;
 }
 
+.frame-thumbnail-row {
+  position: relative;
+  display: flex;
+  flex: 0 0 130px;
+  min-width: 0;
+}
+
+.frame-thumbnail-row > .frame-thumbnail {
+  width: 100%;
+  flex: 1 1 auto;
+  padding-right: 70px;
+}
+
+.sidebar-timeline .frame-thumbnail-row {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.frame-duplicate-btn {
+  position: absolute;
+  top: 6px;
+  right: 36px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-cyan-hover);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.frame-duplicate-btn:hover {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+}
+
+.frame-delete-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-red);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.frame-delete-btn:hover:not(:disabled) {
+  border-color: var(--accent-red);
+  background-color: rgba(244, 63, 94, 0.12);
+}
+
+.frame-delete-btn:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
 .frame-thumbnail:hover {
   border-color: #475569;
   background-color: #24334a;
+}
+
+.light-theme .frame-thumbnail:hover {
+  border-color: #94a3b8;
+  background-color: #edf4f3;
 }
 
 .frame-thumbnail.active {
@@ -936,6 +1208,10 @@ body {
   justify-content: center;
 }
 
+.light-theme .export-overlay {
+  background-color: rgba(238, 244, 243, 0.85);
+}
+
 .export-spinner-box {
   background-color: var(--bg-sidebar);
   border: 1px solid var(--border-color);
@@ -991,11 +1267,6 @@ body {
   }
 
   .floating-inspector {
-    left: 12px !important;
-    right: 12px;
-    bottom: 12px;
-    width: auto;
-    max-width: none;
     max-height: 45vh;
   }
 

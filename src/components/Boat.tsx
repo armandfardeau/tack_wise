@@ -6,7 +6,7 @@ interface BoatProps {
   isSelected: boolean;
   onMove?: (boatId: string, pos: { x: number; y: number }) => void;
   onRotate?: (boatId: string, heading: number) => void;
-  onOpenControls?: () => void;
+  onOpenInspector?: () => void;
   onSelect?: (boatId: string) => void;
   /** Called every drag frame with the (possibly snapped) position */
   onDragMove?: (boatId: string, pos: { x: number; y: number }) => void;
@@ -15,7 +15,7 @@ interface BoatProps {
   isShadow?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
   const mastY = -12;
@@ -90,12 +90,12 @@ export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelec
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
         onSelect?.(boat.id);
-        onOpenControls?.();
       }}
       onTap={() => {
         onSelect?.(boat.id);
-        onOpenControls?.();
       }}
+      onDblClick={() => onOpenInspector?.()}
+      onDblTap={() => onOpenInspector?.()}
       onDragStart={() => onSelect?.(boat.id)}
       onDragMove={(e) => {
         onDragMove?.(boat.id, {

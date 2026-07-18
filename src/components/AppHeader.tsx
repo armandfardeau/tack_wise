@@ -1,4 +1,5 @@
 import ExportActions from './ExportActions';
+import type { Theme } from '../types';
 
 interface AppHeaderProps {
   canRedo?: boolean;
@@ -6,6 +7,7 @@ interface AppHeaderProps {
   hasAutosave?: boolean;
   isExporting: boolean;
   isSidebarOpen: boolean;
+  theme?: Theme;
   presenterMode?: boolean;
   onRedo?: () => void;
   onExport: (type: 'gif' | 'mp4') => void;
@@ -16,6 +18,7 @@ interface AppHeaderProps {
   onShareScenario?: () => void;
   onToggleSidebar: () => void;
   onTogglePresenter?: () => void;
+  onToggleTheme?: () => void;
   onUndo?: () => void;
 }
 
@@ -25,6 +28,7 @@ export default function AppHeader({
   hasAutosave = false,
   isExporting,
   isSidebarOpen,
+  theme = 'dark',
   presenterMode = false,
   onRedo,
   onExport,
@@ -35,6 +39,7 @@ export default function AppHeader({
   onShareScenario,
   onToggleSidebar,
   onTogglePresenter,
+  onToggleTheme,
   onUndo,
 }: AppHeaderProps) {
   return (
@@ -68,6 +73,15 @@ export default function AppHeader({
         {hasAutosave && <button type="button" className="header-tool-btn recovery-btn" onClick={() => onRestoreAutosave?.()}>Restore autosave</button>}
         <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}>Copy share link</button>
         <button type="button" className="header-tool-btn" onClick={() => onTogglePresenter?.()}>{presenterMode ? 'Exit presenter' : 'Presenter mode'}</button>
+        <button
+          type="button"
+          className="header-tool-btn theme-toggle-btn"
+          onClick={() => onToggleTheme?.()}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+        </button>
       </div>
     </header>
   );

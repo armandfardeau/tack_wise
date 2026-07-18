@@ -27,12 +27,17 @@ function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark) {
     <Inspector
       activeFrame={selectedFrame}
       autoSailTrim
+      gridSnapEnabled
       onDelete={jest.fn()}
+      onSetGridSnapEnabled={jest.fn()}
       onSetAutoSailTrim={jest.fn()}
+      onSetShowGrid={jest.fn()}
       selectedBoat={undefined}
       selectedMark={selectedMark}
       selectedType="mark"
+      showGrid
       updateBoat={jest.fn()}
+      updateActiveFrame={jest.fn()}
       updateMark={updateMark}
     />,
   );
@@ -60,5 +65,108 @@ describe('mark rotation controls', () => {
     fireEvent.click(reverseButton);
 
     expect(updateMark).toHaveBeenCalledWith('mark-1', { rotationDirection: 'clockwise' });
+  });
+});
+
+describe('wind controls', () => {
+  it('edits wind settings from the inspector', () => {
+    const updateActiveFrame = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={frame}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedType="wind"
+        showGrid
+        updateActiveFrame={updateActiveFrame}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/direction \(0°\)/i), { target: { value: '90' } });
+    fireEvent.change(screen.getByLabelText(/velocity \(12 kts\)/i), { target: { value: '18' } });
+
+    expect(updateActiveFrame).toHaveBeenNthCalledWith(1, { windAngle: 90 });
+    expect(updateActiveFrame).toHaveBeenNthCalledWith(2, { windSpeed: 18 });
+  });
+});
+
+describe('magnetic grid controls', () => {
+  it('updates snap and placement-grid settings from the inspector', () => {
+    const onSetGridSnapEnabled = jest.fn();
+    const onSetShowGrid = jest.fn();
+    const updateActiveFrame = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={frame}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={onSetGridSnapEnabled}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={onSetShowGrid}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedType="grid"
+        showGrid
+        updateActiveFrame={updateActiveFrame}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(checkboxes[1]);
+    fireEvent.change(screen.getByLabelText(/direction \(0°\)/i), { target: { value: '90' } });
+
+    expect(onSetGridSnapEnabled).toHaveBeenCalledWith(false);
+    expect(onSetShowGrid).toHaveBeenCalledWith(false);
+    expect(updateActiveFrame).toHaveBeenCalledWith({ windAngle: 90 });
+  });
+});
+
+describe('playback controls', () => {
+  it('updates playback speed and toggles playback from the inspector', () => {
+    const onSetPlaySpeed = jest.fn();
+    const onTogglePlaying = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={frame}
+        autoSailTrim
+        gridSnapEnabled
+        isPlaying={false}
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        onSetPlaySpeed={onSetPlaySpeed}
+        onTogglePlaying={onTogglePlaying}
+        playSpeed={1000}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedType="playback"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText(/playback speed/i), { target: { value: '500' } });
+    fireEvent.click(screen.getByRole('button', { name: /play scenario/i }));
+
+    expect(onSetPlaySpeed).toHaveBeenCalledWith(500);
+    expect(onTogglePlaying).toHaveBeenCalledTimes(1);
   });
 });

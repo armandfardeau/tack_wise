@@ -44,4 +44,24 @@ describe('AppHeader', () => {
 
     expect(onToggleSidebar).toHaveBeenCalledTimes(1);
   });
+
+  it('delegates the theme toggle to the provided handler', () => {
+    const onToggleTheme = jest.fn();
+
+    render(
+      <AppHeader
+        isExporting={false}
+        isSidebarOpen={false}
+        onExport={jest.fn()}
+        onExportJson={jest.fn()}
+        onImportJson={jest.fn()}
+        onToggleSidebar={jest.fn()}
+        onToggleTheme={onToggleTheme}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /switch to light mode/i }));
+
+    expect(onToggleTheme).toHaveBeenCalledTimes(1);
+  });
 });

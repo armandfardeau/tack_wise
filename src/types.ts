@@ -12,6 +12,8 @@ export type AnimationMode = 'step' | 'continuous';
 
 export type DisplayMode = 'single' | 'cumulative';
 
+export type Theme = 'light' | 'dark';
+
 export interface Boat {
   id: string;
   name: string;

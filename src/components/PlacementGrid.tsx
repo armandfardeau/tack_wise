@@ -1,14 +1,19 @@
 import { Line } from 'react-konva';
 import { GRID_SPACING } from '../constants';
+import type { Theme } from '../types';
 
 interface PlacementGridProps {
   origin: { x: number; y: number };
   size: { width: number; height: number };
+  theme: Theme;
 }
 
-export default function PlacementGrid({ origin, size }: PlacementGridProps) {
+export default function PlacementGrid({ origin, size, theme }: PlacementGridProps) {
   const verticalLineCount = Math.ceil(size.width / GRID_SPACING) + 1;
   const horizontalLineCount = Math.ceil(size.height / GRID_SPACING) + 1;
+  const gridColors = theme === 'light'
+    ? { major: '#94a3b8', minor: '#cbd5e1' }
+    : { major: '#155e75', minor: '#1e3a4f' };
 
   return (
     <>
@@ -20,7 +25,7 @@ export default function PlacementGrid({ origin, size }: PlacementGridProps) {
           <Line
             key={`grid-v-${x}`}
             points={[x, origin.y, x, origin.y + size.height]}
-            stroke={isMajorLine ? '#155e75' : '#1e3a4f'}
+            stroke={isMajorLine ? gridColors.major : gridColors.minor}
             strokeWidth={isMajorLine ? 1.5 : 1}
             opacity={isMajorLine ? 0.42 : 0.28}
             listening={false}
@@ -35,7 +40,7 @@ export default function PlacementGrid({ origin, size }: PlacementGridProps) {
           <Line
             key={`grid-h-${y}`}
             points={[origin.x, y, origin.x + size.width, y]}
-            stroke={isMajorLine ? '#155e75' : '#1e3a4f'}
+            stroke={isMajorLine ? gridColors.major : gridColors.minor}
             strokeWidth={isMajorLine ? 1.5 : 1}
             opacity={isMajorLine ? 0.42 : 0.28}
             listening={false}

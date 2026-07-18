@@ -1,11 +1,18 @@
 interface WindHudProps {
   windAngle: number;
   windSpeed: number;
+  onSelect: () => void;
 }
 
-export default function WindHud({ windAngle, windSpeed }: WindHudProps) {
+export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps) {
   return (
-    <div className="wind-vane-container">
+    <button
+      type="button"
+      className="wind-vane-container"
+      aria-label="Select wind indicator"
+      title="Select wind indicator; use canvas settings for wind options"
+      onClick={onSelect}
+    >
       <div className="wind-vane-dial">
         <svg
           className="wind-vane-needle"
@@ -28,6 +35,6 @@ export default function WindHud({ windAngle, windSpeed }: WindHudProps) {
         <span className="wind-vane-speed">{windSpeed} KTS</span>
         <span className="wind-vane-angle">{windAngle}°</span>
       </div>
-    </div>
+    </button>
   );
 }

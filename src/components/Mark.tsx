@@ -5,14 +5,14 @@ interface MarkProps {
   mark: MarkModel;
   isSelected: boolean;
   onMove?: (markId: string, pos: { x: number; y: number }) => void;
-  onOpenControls?: () => void;
+  onOpenInspector?: () => void;
   onSelect?: (markId: string) => void;
   /** Optional function that snaps a raw {x,y} to a constrained position */
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
   isShadow?: boolean;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenControls, onSelect, snapFn, isShadow = false }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, isShadow = false }: MarkProps) {
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
     const strokeColor = isShadow ? '#94a3b8' : isSelected ? '#ffffff' : '#1e293b';
@@ -118,12 +118,12 @@ export default function Mark({ mark, isSelected, onMove, onOpenControls, onSelec
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
         onSelect?.(mark.id);
-        onOpenControls?.();
       }}
       onTap={() => {
         onSelect?.(mark.id);
-        onOpenControls?.();
       }}
+      onDblClick={() => onOpenInspector?.()}
+      onDblTap={() => onOpenInspector?.()}
       onDragStart={() => onSelect?.(mark.id)}
       onDragEnd={(e) => {
         onMove?.(mark.id, {

@@ -6,11 +6,12 @@ interface CommentNoteProps {
   isSelected: boolean;
   onMove?: (id: string, position: { x: number; y: number }) => void;
   onOpenControls?: () => void;
+  onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
   isShadow?: boolean;
 }
 
-export default function CommentNote({ comment, isSelected, onMove, onOpenControls, onSelect, isShadow = false }: CommentNoteProps) {
+export default function CommentNote({ comment, isSelected, onMove, onOpenControls, onOpenInspector, onSelect, isShadow = false }: CommentNoteProps) {
   const width = comment.width ?? 180;
   const fontSize = comment.fontSize ?? 14;
 
@@ -29,6 +30,8 @@ export default function CommentNote({ comment, isSelected, onMove, onOpenControl
         onSelect?.(comment.id);
         onOpenControls?.();
       }}
+      onDblClick={() => onOpenInspector?.()}
+      onDblTap={() => onOpenInspector?.()}
       onDragStart={() => onSelect?.(comment.id)}
       onDragEnd={(event) => onMove?.(comment.id, { x: event.target.x(), y: event.target.y() })}
     >
