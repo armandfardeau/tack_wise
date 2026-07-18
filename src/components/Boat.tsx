@@ -5,6 +5,7 @@ interface BoatProps {
   boat: BoatModel;
   isSelected: boolean;
   onMove?: (boatId: string, pos: { x: number; y: number }) => void;
+  onRotate?: (boatId: string, heading: number) => void;
   onOpenControls?: () => void;
   onSelect?: (boatId: string) => void;
   /** Called every drag frame with the (possibly snapped) position */
@@ -14,7 +15,7 @@ interface BoatProps {
   isShadow?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelect, onDragMove, snapFn, isShadow = false }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
   const mastY = -12;
@@ -33,10 +34,12 @@ export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelec
 
   if (isShadow) {
     return (
-      <Group
+    <Group
         x={boat.x}
         y={boat.y}
         rotation={boat.heading}
+        scaleX={boat.hullScale ?? 1}
+        scaleY={boat.hullScale ?? 1}
         draggable={false}
         opacity={0.22}
         listening={false}
@@ -81,6 +84,8 @@ export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelec
       x={boat.x}
       y={boat.y}
       rotation={boat.heading}
+      scaleX={boat.hullScale ?? 1}
+      scaleY={boat.hullScale ?? 1}
       draggable
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
@@ -113,6 +118,25 @@ export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelec
           stroke="#06b6d4"
           strokeWidth={4}
           opacity={0.8}
+        />
+      )}
+
+      {isSelected && (
+        <Circle
+          x={0}
+          y={-88}
+          radius={7}
+          fill="#22d3ee"
+          stroke="#082f49"
+          strokeWidth={2}
+          draggable
+          onMouseDown={(event) => { event.cancelBubble = true; }}
+          onTouchStart={(event) => { event.cancelBubble = true; }}
+          onDragEnd={(event) => {
+            const angle = (Math.atan2(event.target.x(), -event.target.y()) * 180) / Math.PI;
+            onRotate?.(boat.id, (angle + 360) % 360);
+            event.target.position({ x: 0, y: -88 });
+          }}
         />
       )}
 
@@ -180,6 +204,18 @@ export default function Boat({ boat, isSelected, onMove, onOpenControls, onSelec
         shadowColor="#000"
         shadowBlur={1}
       />
+
+      {boat.spinnakerDeployed && boat.sailPlan !== 'main' && (
+        <Path
+          data={boat.sailPlan === 'asymmetric-spinnaker'
+            ? 'M 0 -12 Q 34 -30 50 24 Q 23 12 0 -12 Z'
+            : 'M 0 -12 Q -38 -20 -46 24 Q -18 12 0 -12 Z'}
+          fill={boat.color}
+          opacity={0.55}
+          stroke="#f8fafc"
+          strokeWidth={2}
+        />
+      )}
 
       {/* Label Text (Unrotated so it's always readable for the user) */}
       <Group rotation={-boat.heading}>

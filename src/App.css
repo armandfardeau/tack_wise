@@ -69,6 +69,7 @@ body {
 
 .export-actions {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
@@ -92,6 +93,189 @@ body {
   border-color: var(--accent-cyan);
   background-color: rgba(6, 182, 212, 0.1);
   transform: translateY(-1px);
+}
+
+.export-dropdown {
+  position: relative;
+}
+
+.export-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.export-menu-chevron {
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.export-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  min-width: 190px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-sidebar);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+.export-dropdown-menu .export-menu-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  text-align: left;
+  transform: none;
+}
+
+.export-dropdown-menu .export-menu-item:hover:not(:disabled) {
+  transform: none;
+}
+
+.header-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+}
+
+.header-tool-btn {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.header-tool-btn:hover:not(:disabled) {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan-hover);
+}
+
+.header-tool-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+.file-add-btn {
+  display: block;
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px dashed var(--accent-cyan);
+  border-radius: 6px;
+  color: var(--accent-cyan);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.file-add-btn:hover {
+  background: rgba(6, 182, 212, 0.12);
+}
+
+.object-toolbar .inline-buttons {
+  margin-bottom: 8px;
+}
+
+.object-toolbar .add-btn {
+  font-size: 0.74rem;
+  padding: 8px 4px;
+}
+
+.rule-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.rule-chip {
+  padding: 4px 7px;
+  border: 1px solid #0e7490;
+  border-radius: 999px;
+  color: #67e8f9;
+  font-size: 0.7rem;
+}
+
+.library-select-row {
+  margin-top: 12px;
+}
+
+.library-items {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.library-delete {
+  overflow: hidden;
+  padding: 5px 7px;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.library-delete:hover {
+  color: var(--accent-red-hover);
+}
+
+.form-row textarea {
+  resize: vertical;
+  min-height: 72px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.presenter-mode .canvas-container {
+  background: #020617;
+}
+
+@media print {
+  body,
+  .app-shell,
+  .workspace,
+  .canvas-container {
+    overflow: visible;
+    background: #fff;
+  }
+
+  .app-header,
+  .step-panel,
+  .timeline-bar,
+  .canvas-zoom-controls,
+  .wind-vane-container,
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .canvas-container {
+    width: 100vw;
+    height: 100vh;
+  }
 }
 
 /* Workspace */
@@ -322,6 +506,106 @@ body {
 
 .canvas-wrap:active {
   cursor: grabbing;
+}
+
+.floating-inspector {
+  position: absolute;
+  z-index: 8;
+  width: 292px;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.97);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 10px;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.floating-inspector .control-section {
+  margin: 0;
+  padding: 16px;
+  border-bottom: 0;
+}
+
+.floating-inspector .section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  color: var(--accent-cyan-hover);
+}
+
+.floating-add-menu {
+  position: absolute;
+  bottom: 80px;
+  right: 16px;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.floating-add-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--accent-cyan-hover);
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  color: #082f49;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  font-size: 1.8rem;
+  line-height: 1;
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.floating-add-button:hover {
+  background: var(--accent-cyan-hover);
+  transform: scale(1.05);
+}
+
+.floating-add-menu.is-open .floating-add-button {
+  transform: rotate(90deg);
+}
+
+.floating-add-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 172px;
+  margin-top: 8px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: rgba(15, 23, 42, 0.97);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
+}
+
+.floating-add-action {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.floating-add-action:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
 }
 
 /* The Konva canvas must fill the wrapper exactly so ResizeObserver drives stage size */
@@ -706,6 +990,20 @@ body {
     transform: translateX(0);
   }
 
+  .floating-inspector {
+    left: 12px !important;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+    max-height: 45vh;
+  }
+
+  .floating-add-menu {
+    bottom: 48px;
+    right: 12px;
+  }
+
   .sidebar-backdrop {
     position: absolute;
     inset: 0;
@@ -763,6 +1061,16 @@ body {
 
   .app-header .export-actions {
     display: none;
+  }
+
+  .header-tools {
+    width: 100%;
+    margin-left: 0;
+    overflow-x: auto;
+  }
+
+  .header-tool-btn {
+    flex: 1 0 auto;
   }
 
   .step-panel .mobile-export-actions {

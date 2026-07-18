@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import AppHeader from './components/AppHeader';
 import CanvasWorkspace from './components/CanvasWorkspace';
@@ -10,7 +10,7 @@ import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { useGridSnap } from './hooks/useGridSnap';
 import { useScenario } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
-import { parseScenarioFromJson } from './utils/exporter';
+import { createScenarioShareUrl, parseScenarioFromJson, parseScenarioShareUrl } from './utils/exporter';
 import { getCanvasContentBounds } from './utils/simulation';
 
 export default function App() {
@@ -21,12 +21,53 @@ export default function App() {
   const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const gridSnap = useGridSnap(gridSnapEnabled);
+  const { redo, undo } = scenario;
+  const { importScenario } = scenario;
+  const loadedShareRef = useRef(false);
+
+  useEffect(() => {
+    if (loadedShareRef.current) return;
+    loadedShareRef.current = true;
+    const sharedScenario = parseScenarioShareUrl();
+    if (sharedScenario) importScenario(sharedScenario);
+  }, [importScenario]);
+
+  const handleShareScenario = async () => {
+    const shareUrl = createScenarioShareUrl({
+      version: 2,
+      frames: scenario.frames,
+      currentFrameIndex: scenario.currentFrameIndex,
+      settings: scenario.settings,
+    });
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      window.alert('Share link copied to clipboard.');
+    } catch {
+      window.prompt('Copy this share link:', shareUrl);
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (!(event.metaKey || event.ctrlKey)) return;
+      if (event.key.toLowerCase() !== 'z') return;
+
+      event.preventDefault();
+      if (event.shiftKey) redo();
+      else undo();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [redo, undo]);
   const exportState = useScenarioExport({
     currentFrameIndex: scenario.currentFrameIndex,
     frames: scenario.frames,
     playSpeed: scenario.playSpeed,
     setCurrentFrameIndex: scenario.setCurrentFrameIndex,
     setIsPlaying: scenario.setIsPlaying,
+    settings: scenario.settings,
     stageRef: viewport.stageRef,
     stageSize: viewport.stageSize,
   });
@@ -42,48 +83,59 @@ export default function App() {
   };
 
   return (
-    <main className="app-shell dark-theme">
+    <main className={`app-shell dark-theme${scenario.settings.presenterMode ? ' presenter-mode' : ''}`}>
       <AppHeader
+        canRedo={scenario.canRedo}
+        canUndo={scenario.canUndo}
+        hasAutosave={scenario.hasAutosave}
         isExporting={exportState.isExporting}
         isSidebarOpen={isSidebarOpen}
+        presenterMode={scenario.settings.presenterMode}
+        onRedo={scenario.redo}
         onExport={exportState.triggerExport}
+        onExportImage={exportState.triggerImageExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
         onImportJson={handleImportJson}
+        onRestoreAutosave={() => scenario.restoreAutosave()}
+        onShareScenario={handleShareScenario}
         onToggleSidebar={() => setIsSidebarOpen((isOpen) => !isOpen)}
+        onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
+        onUndo={scenario.undo}
       />
 
       <section className="workspace">
-        <Sidebar
+        {!scenario.settings.presenterMode && <Sidebar
           activeFrame={scenario.activeFrame}
-          autoSailTrim={scenario.autoSailTrim}
           gridSnapEnabled={gridSnapEnabled}
           isExporting={exportState.isExporting}
-          onAddBoat={scenario.addBoat}
-          onAddMark={scenario.addMark}
-          onDeleteSelected={scenario.deleteSelected}
+          onAddRule={scenario.addRuleToActiveFrame}
+          libraryItems={scenario.libraryItems}
+          onSaveToLibrary={scenario.saveToLibrary}
+          onLoadFromLibrary={scenario.loadFromLibrary}
+          onDeleteFromLibrary={scenario.deleteFromLibrary}
           onExport={exportState.triggerExport}
+          onExportImage={exportState.triggerImageExport}
           onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
           onImportJson={handleImportJson}
-          onSetAutoSailTrim={scenario.setAutoSailTrim}
           onSetGridSnapEnabled={setGridSnapEnabled}
           onSetShowGrid={setShowGrid}
+          onSetSettings={scenario.updateSettings}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          selectedBoat={scenario.selectedBoat}
-          selectedMark={scenario.selectedMark}
-          selectedType={scenario.selectedType}
+          settings={scenario.settings}
           showGrid={showGrid}
           updateActiveFrame={scenario.updateActiveFrame}
-          updateBoat={scenario.updateBoat}
-          updateMark={scenario.updateMark}
-        />
+        />}
 
         <CanvasWorkspace
-          activeFrame={scenario.activeFrame}
+          activeFrame={scenario.displayFrame}
+          inspectorFrame={scenario.activeFrame}
+          autoSailTrim={scenario.autoSailTrim}
           canvasPosition={viewport.canvasPosition}
           canvasZoom={viewport.canvasZoom}
           constrainPosition={viewport.constrainPosition}
           currentFrameIndex={scenario.currentFrameIndex}
+          displayMode={scenario.settings.displayMode}
           frames={scenario.frames}
           getSnappedPosition={gridSnap.getSnappedPosition}
           gridSnapEnabled={gridSnapEnabled}
@@ -92,7 +144,19 @@ export default function App() {
           maxZoom={viewport.maxZoom}
           minZoom={viewport.minZoom}
           onMoveBoat={scenario.moveBoat}
+          onRotateBoat={(boatId, heading) => scenario.updateBoat(boatId, { heading })}
           onMoveMark={scenario.moveMark}
+          onMoveArrow={scenario.moveArrow}
+          onMoveComment={scenario.moveComment}
+          onMoveImage={scenario.moveImage}
+          onAddBoat={scenario.addBoat}
+          onAddMark={scenario.addMark}
+          onAddArrow={scenario.addArrow}
+          onAddComment={scenario.addComment}
+          onAddImage={scenario.addImage}
+          onDeleteSelected={scenario.deleteSelected}
+          onClearSelection={scenario.clearSelection}
+          onSetAutoSailTrim={scenario.setAutoSailTrim}
           onOpenControls={() => setIsSidebarOpen(true)}
           onSelectObject={scenario.selectObject}
           onSnapPreview={gridSnap.setSnapPreview}
@@ -101,13 +165,23 @@ export default function App() {
           onResetZoom={viewport.resetCanvasZoom}
           selectedId={scenario.selectedId}
           selectedType={scenario.selectedType}
+          selectedBoat={scenario.selectedBoat}
+          selectedMark={scenario.selectedMark}
+          selectedArrow={scenario.selectedArrow}
+          selectedComment={scenario.selectedComment}
+          selectedImage={scenario.selectedImage}
+          updateBoat={scenario.updateBoat}
+          updateMark={scenario.updateMark}
+          updateArrow={scenario.updateArrow}
+          updateComment={scenario.updateComment}
+          updateImage={scenario.updateImage}
           canvasWrapRef={viewport.canvasWrapRef}
           showGrid={showGrid}
           snapTarget={gridSnap.snapTarget}
           stageRef={viewport.stageRef}
           stageSize={viewport.stageSize}
         >
-          <Timeline
+          {!scenario.settings.presenterMode && <Timeline
             currentFrameIndex={scenario.currentFrameIndex}
             frames={scenario.frames}
             isPlaying={scenario.isPlaying}
@@ -119,7 +193,7 @@ export default function App() {
             onTogglePlaying={() => scenario.setIsPlaying(!scenario.isPlaying)}
             playSpeed={scenario.playSpeed}
             onSetPlaySpeed={scenario.setPlaySpeed}
-          />
+          />}
         </CanvasWorkspace>
       </section>
 

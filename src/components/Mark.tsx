@@ -1,4 +1,4 @@
-import { Circle, Group, Rect, RegularPolygon, Text } from 'react-konva';
+import { Circle, Group, Line, Rect, RegularPolygon, Text } from 'react-konva';
 import type { Mark as MarkModel } from '../types';
 
 interface MarkProps {
@@ -22,6 +22,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenControls, onSelec
     const shadowBlur = isShadow ? 0 : 4;
     const shadowOpacity = isShadow ? 0 : 0.3;
     const shadowOffset = isShadow ? { x: 0, y: 0 } : { x: 1, y: 2 };
+    const markSize = mark.size ?? 28;
 
     switch (mark.shape) {
       case 'triangle':
@@ -42,10 +43,10 @@ export default function Mark({ mark, isSelected, onMove, onOpenControls, onSelec
       case 'square':
         return (
           <Rect
-            x={-12}
-            y={-12}
-            width={24}
-            height={24}
+            x={-markSize / 2}
+            y={-markSize / 2}
+            width={markSize}
+            height={markSize}
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeWidth}
@@ -56,11 +57,33 @@ export default function Mark({ mark, isSelected, onMove, onOpenControls, onSelec
             cornerRadius={2}
           />
         );
+      case 'obstruction':
+        return (
+          <Circle
+            radius={markSize / 2}
+            fill={fillColor}
+            stroke={strokeColor}
+            strokeWidth={strokeWidth}
+            dash={[6, 5]}
+            shadowColor={shadowColor}
+            shadowBlur={shadowBlur}
+            shadowOpacity={shadowOpacity}
+            shadowOffset={shadowOffset}
+          />
+        );
+      case 'gate':
+        return (
+          <Group>
+            <Line points={[-markSize, 0, markSize, 0]} stroke={strokeColor} strokeWidth={Math.max(2, strokeWidth)} />
+            <Circle radius={markSize / 3} fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} x={-markSize / 2} />
+            <Circle radius={markSize / 3} fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} x={markSize / 2} />
+          </Group>
+        );
       case 'circle':
       default:
         return (
           <Circle
-            radius={14}
+            radius={markSize / 2}
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeWidth}

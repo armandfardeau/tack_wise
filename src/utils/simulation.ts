@@ -5,7 +5,7 @@ import {
   MAX_CANVAS_ZOOM,
   MIN_CANVAS_ZOOM,
 } from '../constants';
-import type { Frame } from '../types';
+import type { Boat, Frame, Mark } from '../types';
 
 export interface Position {
   x: number;
@@ -24,6 +24,51 @@ export interface CanvasWorldBounds {
   bottom: number;
 }
 
+function interpolateNumber(start: number, end: number, progress: number) {
+  return start + (end - start) * progress;
+}
+
+function interpolateAngle(start: number, end: number, progress: number) {
+  const delta = ((end - start + 540) % 360) - 180;
+  return (start + delta * progress + 360) % 360;
+}
+
+function interpolateBoat(start: Boat, end: Boat | undefined, progress: number): Boat {
+  if (!end) return { ...start };
+  return {
+    ...start,
+    x: interpolateNumber(start.x, end.x, progress),
+    y: interpolateNumber(start.y, end.y, progress),
+    heading: interpolateAngle(start.heading, end.heading, progress),
+    sailAngle: interpolateNumber(start.sailAngle, end.sailAngle, progress),
+  };
+}
+
+function interpolateMark(start: Mark, end: Mark | undefined, progress: number): Mark {
+  if (!end) return { ...start };
+  return {
+    ...start,
+    x: interpolateNumber(start.x, end.x, progress),
+    y: interpolateNumber(start.y, end.y, progress),
+  };
+}
+
+export function interpolateFrame(start: Frame, end: Frame | undefined, progress: number): Frame {
+  if (!end || progress <= 0) return start;
+  if (progress >= 1) return end;
+
+  const endBoats = new Map(end.boats.map((boat) => [boat.id, boat]));
+  const endMarks = new Map(end.marks.map((mark) => [mark.id, mark]));
+
+  return {
+    ...start,
+    windAngle: interpolateAngle(start.windAngle, end.windAngle, progress),
+    windSpeed: interpolateNumber(start.windSpeed, end.windSpeed, progress),
+    boats: start.boats.map((boat) => interpolateBoat(boat, endBoats.get(boat.id), progress)),
+    marks: start.marks.map((mark) => interpolateMark(mark, endMarks.get(mark.id), progress)),
+  };
+}
+
 export function getCanvasWorldBounds(viewportSize: { width: number; height: number }): CanvasWorldBounds {
   const horizontalMargin = viewportSize.width * CANVAS_PAN_MARGIN;
   const verticalMargin = viewportSize.height * CANVAS_PAN_MARGIN;
@@ -36,7 +81,7 @@ export function getCanvasWorldBounds(viewportSize: { width: number; height: numb
   };
 }
 
-export function getCanvasContentBounds(frames: Array<Pick<Frame, 'boats' | 'marks'>>): CanvasContentBounds {
+export function getCanvasContentBounds(frames: Array<Pick<Frame, 'boats' | 'marks' | 'arrows' | 'comments' | 'images'>>): CanvasContentBounds {
   return frames.reduce<CanvasContentBounds>((bounds, frame) => {
     frame.boats.forEach((boat) => {
       const horizontalExtent = boat.showHeadingLine ? 360 : 50;
@@ -48,6 +93,23 @@ export function getCanvasContentBounds(frames: Array<Pick<Frame, 'boats' | 'mark
     frame.marks.forEach((mark) => {
       bounds.maxX = Math.max(bounds.maxX, mark.x + 40);
       bounds.maxY = Math.max(bounds.maxY, mark.y + 40);
+    });
+
+    frame.arrows?.forEach((arrow) => {
+      arrow.points.forEach((point) => {
+        bounds.maxX = Math.max(bounds.maxX, point.x + 24);
+        bounds.maxY = Math.max(bounds.maxY, point.y + 24);
+      });
+    });
+
+    frame.comments?.forEach((comment) => {
+      bounds.maxX = Math.max(bounds.maxX, comment.x + (comment.width ?? 180));
+      bounds.maxY = Math.max(bounds.maxY, comment.y + 100);
+    });
+
+    frame.images?.forEach((image) => {
+      bounds.maxX = Math.max(bounds.maxX, image.x + image.width);
+      bounds.maxY = Math.max(bounds.maxY, image.y + image.height);
     });
 
     return bounds;

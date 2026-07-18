@@ -1,57 +1,54 @@
-import type { Frame, Boat, Mark } from '../types';
-import type { SelectedType } from '../hooks/useScenario';
+import { useState } from 'react';
+import type { Frame, RuleReference, ScenarioRepositoryItem, ScenarioSettings } from '../types';
 import ExportActions from './ExportActions';
-import Inspector from './Inspector';
 
 interface SidebarProps {
   activeFrame: Frame;
-  autoSailTrim: boolean;
   gridSnapEnabled: boolean;
   isExporting: boolean;
   isOpen: boolean;
-  onAddBoat: () => void;
-  onAddMark: () => void;
-  onDeleteSelected: () => void;
+  onAddRule?: (rule: RuleReference) => void;
+  libraryItems?: ScenarioRepositoryItem[];
+  onSaveToLibrary?: (title: string) => void;
+  onLoadFromLibrary?: (id: string) => void;
+  onDeleteFromLibrary?: (id: string) => void;
   onExport: (type: 'gif' | 'mp4') => void;
+  onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
-  onSetAutoSailTrim: (enabled: boolean) => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
+  onSetSettings?: (changes: Partial<ScenarioSettings>) => void;
+  settings?: ScenarioSettings;
   onClose: () => void;
-  selectedBoat: Boat | undefined;
-  selectedMark: Mark | undefined;
-  selectedType: SelectedType;
   showGrid: boolean;
   updateActiveFrame: (changes: Partial<Frame>) => void;
-  updateBoat: (boatId: string, changes: Partial<Boat>) => void;
-  updateMark: (markId: string, changes: Partial<Mark>) => void;
 }
 
 export default function Sidebar({
   activeFrame,
-  autoSailTrim,
   gridSnapEnabled,
   isExporting,
   isOpen,
-  onAddBoat,
-  onAddMark,
-  onDeleteSelected,
+  onAddRule,
   onExport,
+  onExportImage,
   onExportJson,
   onImportJson,
-  onSetAutoSailTrim,
   onSetGridSnapEnabled,
   onSetShowGrid,
+  onSetSettings,
+  libraryItems,
+  onSaveToLibrary,
+  onLoadFromLibrary,
+  onDeleteFromLibrary,
   onClose,
-  selectedBoat,
-  selectedMark,
-  selectedType,
+  settings,
   showGrid,
   updateActiveFrame,
-  updateBoat,
-  updateMark,
 }: SidebarProps) {
+  const [libraryTitle, setLibraryTitle] = useState('');
+
   return (
     <>
       <button type="button" className={`sidebar-backdrop${isOpen ? ' is-open' : ''}`} aria-label="Close controls menu" onClick={onClose} />
@@ -60,6 +57,7 @@ export default function Sidebar({
         className="export-actions mobile-export-actions"
         isExporting={isExporting}
         onExport={onExport}
+        onExportImage={onExportImage}
         onExportJson={onExportJson}
         onImportJson={onImportJson}
       />
@@ -79,11 +77,6 @@ export default function Sidebar({
         </div>
       </div>
 
-      <div className="control-section inline-buttons">
-        <button type="button" className="add-btn add-boat" onClick={onAddBoat}>⛵ Add Boat</button>
-        <button type="button" className="add-btn add-mark" onClick={onAddMark}>📍 Add Mark</button>
-      </div>
-
       <div className="control-section">
         <h3 className="section-title">🧲 Magnetic Grid</h3>
         <div className="form-row flex-row">
@@ -101,17 +94,67 @@ export default function Sidebar({
         <p className="grid-hint">40px spacing · drag near an intersection</p>
       </div>
 
-      <Inspector
-        activeFrame={activeFrame}
-        autoSailTrim={autoSailTrim}
-        onDelete={onDeleteSelected}
-        onSetAutoSailTrim={onSetAutoSailTrim}
-        selectedBoat={selectedBoat}
-        selectedMark={selectedMark}
-        selectedType={selectedType}
-        updateBoat={updateBoat}
-        updateMark={updateMark}
-      />
+      <div className="control-section">
+        <h3 className="section-title">🎬 Presentation</h3>
+        <div className="form-row">
+          <label htmlFor="animation-mode">Animation mode</label>
+          <select id="animation-mode" value={settings?.animationMode ?? 'step'} onChange={(event) => onSetSettings?.({ animationMode: event.target.value as ScenarioSettings['animationMode'] })}>
+            <option value="step">Step by step</option>
+            <option value="continuous">Continuous</option>
+          </select>
+        </div>
+        <div className="form-row">
+          <label htmlFor="display-mode">Frame display</label>
+          <select id="display-mode" value={settings?.displayMode ?? 'single'} onChange={(event) => onSetSettings?.({ displayMode: event.target.value as ScenarioSettings['displayMode'] })}>
+            <option value="single">Current situation</option>
+            <option value="cumulative">Cumulative trail</option>
+          </select>
+        </div>
+        <div className="form-row">
+          <label htmlFor="rule-reference">Rules reference</label>
+          <select id="rule-reference" defaultValue="" onChange={(event) => {
+            const rule = event.target.value;
+            if (!rule) return;
+            onAddRule?.({ id: rule, label: `RRS ${rule}` });
+            event.target.value = '';
+          }}>
+            <option value="">Add a rule…</option>
+            <option value="10">Rule 10 — Opposite tacks</option>
+            <option value="11">Rule 11 — Same tack, overlapped</option>
+            <option value="12">Rule 12 — Same tack, not overlapped</option>
+            <option value="13">Rule 13 — While tacking</option>
+            <option value="18">Rule 18 — Mark-room</option>
+            <option value="19">Rule 19 — Room to pass an obstruction</option>
+          </select>
+        </div>
+        {!!activeFrame.rules?.length && (
+          <div className="rule-list" aria-label="Rules attached to this situation">
+            {activeFrame.rules.map((rule) => <span key={`${rule.id}-${rule.label}`} className="rule-chip">{rule.label}</span>)}
+          </div>
+        )}
+      </div>
+
+      <div className="control-section">
+        <h3 className="section-title">📚 Scenario library</h3>
+        <div className="form-row">
+          <label htmlFor="library-title">Save locally</label>
+          <input id="library-title" type="text" placeholder="Situation title" value={libraryTitle} onChange={(event) => setLibraryTitle(event.target.value)} />
+        </div>
+        <button type="button" className="add-btn" onClick={() => { onSaveToLibrary?.(libraryTitle || activeFrame.name); setLibraryTitle(''); }}>Save to library</button>
+        {!!libraryItems?.length && <>
+          <div className="form-row library-select-row">
+            <label htmlFor="library-scenario">Open saved situation</label>
+            <select id="library-scenario" defaultValue="" onChange={(event) => { if (event.target.value) onLoadFromLibrary?.(event.target.value); }}>
+              <option value="">Choose a scenario…</option>
+              {libraryItems.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
+            </select>
+          </div>
+          <div className="library-items">
+            {libraryItems.slice(0, 4).map((item) => <button key={item.id} type="button" className="library-delete" onClick={() => onDeleteFromLibrary?.(item.id)} title={`Delete ${item.title}`}>× {item.title}</button>)}
+          </div>
+        </>}
+      </div>
+
       </aside>
     </>
   );

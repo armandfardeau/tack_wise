@@ -1,13 +1,17 @@
 import { Fragment, type RefObject } from 'react';
 import { Layer, Rect, Stage } from 'react-konva';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import type { Frame } from '../types';
+import type { DisplayMode, Frame } from '../types';
+import type { SelectedType } from '../hooks/useScenario';
 import Boat from './Boat';
+import CommentNote from './CommentNote';
+import DiagramImage from './DiagramImage';
 import Mark from './Mark';
 import MarkConnections from './MarkConnections';
 import MarkRotationArrow from './MarkRotationArrow';
 import PlacementGrid from './PlacementGrid';
 import SnapIndicator from './SnapIndicator';
+import TacticalArrow from './TacticalArrow';
 import WindIndicator from './WindIndicator';
 import type { SnapTarget } from '../hooks/useGridSnap';
 import { getCanvasWorldBounds, type Position } from '../utils/simulation';
@@ -18,17 +22,22 @@ interface SimulationCanvasProps {
   canvasZoom: number;
   constrainPosition: (position: Position) => Position;
   currentFrameIndex: number;
+  displayMode: DisplayMode;
   frames: Frame[];
   gridSnapEnabled: boolean;
   onCanvasDragEnd: () => void;
   onCanvasWheel: (event: { evt: { preventDefault: () => void; deltaY: number } }) => void;
   onMoveBoat: (boatId: string, position: Position) => void;
+  onRotateBoat: (boatId: string, heading: number) => void;
   onMoveMark: (markId: string, position: Position) => void;
+  onMoveArrow: (arrowId: string, points: NonNullable<Frame['arrows']>[number]['points']) => void;
+  onMoveComment: (commentId: string, position: Position) => void;
+  onMoveImage: (imageId: string, position: Position) => void;
   onOpenControls: () => void;
-  onSelectObject: (id: string, type: 'boat' | 'mark') => void;
+  onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
   onSnapPreview: (target: SnapTarget | null) => void;
   selectedId: string | null;
-  selectedType: 'boat' | 'mark' | null;
+  selectedType: SelectedType;
   showGrid: boolean;
   snapTarget: SnapTarget | null;
   stageRef: RefObject<KonvaStage | null>;
@@ -42,12 +51,17 @@ export default function SimulationCanvas({
   canvasZoom,
   constrainPosition,
   currentFrameIndex,
+  displayMode,
   frames,
   gridSnapEnabled,
   onCanvasDragEnd,
   onCanvasWheel,
   onMoveBoat,
+  onRotateBoat,
   onMoveMark,
+  onMoveArrow,
+  onMoveComment,
+  onMoveImage,
   onOpenControls,
   onSelectObject,
   onSnapPreview,
@@ -59,7 +73,11 @@ export default function SimulationCanvas({
   stageSize,
   getSnappedPosition,
 }: SimulationCanvasProps) {
-  const previousFrame = frames[currentFrameIndex - 1];
+  const previousFrames = displayMode === 'cumulative'
+    ? frames.slice(0, currentFrameIndex)
+    : frames[currentFrameIndex - 1]
+      ? [frames[currentFrameIndex - 1]]
+      : [];
   const worldBounds = getCanvasWorldBounds(stageSize);
   const worldSize = {
     width: worldBounds.right - worldBounds.left,
@@ -103,20 +121,29 @@ export default function SimulationCanvas({
       </Layer>
 
       <Layer>
-        {previousFrame && (
-          <>
+        {previousFrames.map((previousFrame, shadowIndex) => (
+          <Fragment key={`history-${previousFrame.id}`}>
             <MarkConnections marks={previousFrame.marks} isShadow />
             {previousFrame.marks.map((mark) => (
-              <Fragment key={`shadow-${mark.id}`}>
+              <Fragment key={`shadow-${shadowIndex}-${mark.id}`}>
                 <MarkRotationArrow mark={mark} isShadow />
                 <Mark mark={mark} isSelected={false} isShadow />
               </Fragment>
             ))}
             {previousFrame.boats.map((boat) => (
-              <Boat key={`shadow-${boat.id}`} boat={boat} isSelected={false} isShadow />
+              <Boat key={`shadow-${shadowIndex}-${boat.id}`} boat={boat} isSelected={false} isShadow />
             ))}
-          </>
-        )}
+            {(previousFrame.arrows ?? []).map((arrow) => (
+              <TacticalArrow key={`shadow-${shadowIndex}-${arrow.id}`} arrow={arrow} isSelected={false} isShadow />
+            ))}
+            {(previousFrame.comments ?? []).map((comment) => (
+              <CommentNote key={`shadow-${shadowIndex}-${comment.id}`} comment={comment} isSelected={false} isShadow />
+            ))}
+            {(previousFrame.images ?? []).map((image) => (
+              <DiagramImage key={`shadow-${shadowIndex}-${image.id}`} image={image} isSelected={false} isShadow />
+            ))}
+          </Fragment>
+        ))}
 
         <MarkConnections
           marks={activeFrame.marks}
@@ -137,7 +164,6 @@ export default function SimulationCanvas({
                 onSelectObject(id, 'mark');
                 onSnapPreview(null);
               }}
-              onOpenControls={onOpenControls}
               onMove={(id, position) => {
                 onSnapPreview(null);
                 onMoveMark(id, position);
@@ -160,11 +186,44 @@ export default function SimulationCanvas({
               onSelectObject(id, 'boat');
               onSnapPreview(null);
             }}
-            onOpenControls={onOpenControls}
+            onRotate={(id, heading) => onRotateBoat(id, heading)}
             onMove={(id, position) => {
               onSnapPreview(null);
               onMoveBoat(id, position);
             }}
+          />
+        ))}
+
+        {(activeFrame.arrows ?? []).map((arrow) => (
+          <TacticalArrow
+            key={arrow.id}
+            arrow={arrow}
+            isSelected={selectedId === arrow.id}
+            onSelect={(id) => onSelectObject(id, 'arrow')}
+            onOpenControls={onOpenControls}
+            onMove={onMoveArrow}
+          />
+        ))}
+
+        {(activeFrame.comments ?? []).map((comment) => (
+          <CommentNote
+            key={comment.id}
+            comment={comment}
+            isSelected={selectedId === comment.id}
+            onSelect={(id) => onSelectObject(id, 'comment')}
+            onOpenControls={onOpenControls}
+            onMove={onMoveComment}
+          />
+        ))}
+
+        {(activeFrame.images ?? []).map((image) => (
+          <DiagramImage
+            key={image.id}
+            image={image}
+            isSelected={selectedId === image.id}
+            onSelect={(id) => onSelectObject(id, 'image')}
+            onOpenControls={onOpenControls}
+            onMove={onMoveImage}
           />
         ))}
       </Layer>

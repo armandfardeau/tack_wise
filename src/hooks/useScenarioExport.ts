@@ -1,8 +1,8 @@
 import { useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import type { Frame } from '../types';
-import { downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
+import type { Frame, ScenarioSettings } from '../types';
+import { dataUrlToBlob, downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
 
 interface UseScenarioExportProps {
   currentFrameIndex: number;
@@ -10,6 +10,7 @@ interface UseScenarioExportProps {
   playSpeed: number;
   setCurrentFrameIndex: (index: number) => void;
   setIsPlaying: (isPlaying: boolean) => void;
+  settings: ScenarioSettings;
   stageRef: RefObject<KonvaStage | null>;
   stageSize: { width: number; height: number };
 }
@@ -20,6 +21,7 @@ export function useScenarioExport({
   playSpeed,
   setCurrentFrameIndex,
   setIsPlaying,
+  settings,
   stageRef,
   stageSize,
 }: UseScenarioExportProps) {
@@ -28,7 +30,16 @@ export function useScenarioExport({
   const [exportType, setExportType] = useState<'gif' | 'mp4' | null>(null);
 
   const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
-    downloadScenarioJson(exportFrames, exportCurrentFrameIndex);
+    downloadScenarioJson(exportFrames, exportCurrentFrameIndex, settings);
+  };
+
+  const triggerImageExport = (type: 'png' | 'jpeg') => {
+    const stage = stageRef.current;
+    if (!stage) return;
+
+    const mimeType = type === 'png' ? 'image/png' : 'image/jpeg';
+    const dataUrl = stage.toDataURL({ pixelRatio: 1.5, mimeType });
+    downloadBlob(dataUrlToBlob(dataUrl), `tack-wise-diagram-${Date.now()}.${type === 'png' ? 'png' : 'jpg'}`);
   };
 
   const triggerExport = async (type: 'gif' | 'mp4') => {
@@ -105,5 +116,5 @@ export function useScenarioExport({
     }
   };
 
-  return { exportProgress, exportType, isExporting, triggerExport, triggerJsonExport };
+  return { exportProgress, exportType, isExporting, triggerExport, triggerImageExport, triggerJsonExport };
 }

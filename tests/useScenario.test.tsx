@@ -78,4 +78,53 @@ describe('useScenario', () => {
 
     expect(result.current.frames[1].name).toBe('Mark approach');
   });
+
+  it('supports undo and redo for scenario edits', () => {
+    const { result } = renderHook(() => useScenario());
+    const originalName = result.current.selectedBoat?.name;
+
+    act(() => {
+      result.current.updateBoat('boat-1', { name: 'Updated Boat' });
+    });
+    expect(result.current.selectedBoat?.name).toBe('Updated Boat');
+    expect(result.current.canUndo).toBe(true);
+
+    act(() => result.current.undo());
+    expect(result.current.selectedBoat?.name).toBe(originalName);
+    expect(result.current.canRedo).toBe(true);
+
+    act(() => result.current.redo());
+    expect(result.current.selectedBoat?.name).toBe('Updated Boat');
+  });
+
+  it('adds richer diagram objects across every frame', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.addMark('obstruction');
+      result.current.addArrow();
+      result.current.addComment();
+    });
+
+    expect(result.current.frames.every((frame) => frame.marks.some((mark) => mark.shape === 'obstruction'))).toBe(true);
+    expect(result.current.frames.every((frame) => frame.arrows?.length === 1)).toBe(true);
+    expect(result.current.frames.every((frame) => frame.comments?.length === 1)).toBe(true);
+  });
+
+  it('updates presentation settings and restores a saved library scenario', () => {
+    localStorage.clear();
+    const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.updateSettings({ animationMode: 'continuous', displayMode: 'cumulative' });
+      result.current.saveToLibrary('Saved situation');
+    });
+
+    expect(result.current.settings.animationMode).toBe('continuous');
+    expect(result.current.libraryItems[0].title).toBe('Saved situation');
+
+    act(() => result.current.updateBoat('boat-1', { name: 'Changed after save' }));
+    act(() => result.current.loadFromLibrary(result.current.libraryItems[0].id));
+    expect(result.current.selectedBoat?.name).toBe('Alpha');
+  });
 });

@@ -1,4 +1,4 @@
-import { downloadScenarioJson, parseScenarioFromJson, serializeScenarioToJson } from '../src/utils/exporter';
+import { createScenarioShareUrl, downloadScenarioJson, parseScenarioFromJson, parseScenarioShareUrl, serializeScenarioToJson } from '../src/utils/exporter';
 import type { Frame } from '../src/types';
 
 const frames: Frame[] = [
@@ -116,5 +116,34 @@ describe('scenario JSON export', () => {
     });
 
     expect(() => parseScenarioFromJson(invalidJson)).toThrow(/valid Tack Wise scenario export/i);
+  });
+
+  it('round-trips version 2 settings and richer diagram objects', () => {
+    const result = parseScenarioFromJson(serializeScenarioToJson([{
+      ...frames[0],
+      arrows: [{
+        id: 'arrow-1',
+        name: 'Course change',
+        color: '#f97316',
+        points: [{ x: 10, y: 20 }, { x: 30, y: 40 }],
+        curved: true,
+      }],
+      comments: [{ id: 'comment-1', name: 'Note', text: 'Tack here', color: '#fff', x: 10, y: 20 }],
+    }], 0, {
+      animationMode: 'continuous',
+      displayMode: 'cumulative',
+      presenterMode: true,
+    }));
+
+    expect(result.version).toBe(2);
+    expect(result.settings?.presenterMode).toBe(true);
+    expect(result.frames[0].arrows?.[0].curved).toBe(true);
+    expect(result.frames[0].comments?.[0].text).toBe('Tack here');
+  });
+
+  it('round-trips a scenario through a portable share URL', () => {
+    const payload = { version: 2 as const, frames, currentFrameIndex: 1 };
+    const url = createScenarioShareUrl(payload, 'https://example.test/tack-wise');
+    expect(parseScenarioShareUrl(url)).toEqual(payload);
   });
 });
