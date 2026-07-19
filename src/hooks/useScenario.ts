@@ -370,8 +370,6 @@ export function useScenario() {
       y: 200 + Math.random() * 200,
       heading: 0,
       sailAngle: 0,
-      boatClass: 'dinghy',
-      sailPlan: 'main',
     };
 
     updateCurrentAndFutureFrames((frame) => ({

@@ -15,7 +15,6 @@
           "y": 345,
           "heading": 20,
           "sailAngle": -4,
-          "boatClass": "dinghy",
           "showHeadingLine": true
         },
         {
@@ -26,7 +25,6 @@
           "y": 295,
           "heading": 45,
           "sailAngle": -12,
-          "boatClass": "dinghy",
           "showHeadingLine": true
         }
       ],

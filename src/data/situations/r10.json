@@ -15,7 +15,6 @@
           "y": 390,
           "heading": 45,
           "sailAngle": -12,
-          "boatClass": "dinghy",
           "showHeadingLine": true
         },
         {
@@ -26,7 +25,6 @@
           "y": 390,
           "heading": 315,
           "sailAngle": 12,
-          "boatClass": "dinghy",
           "showHeadingLine": true
         }
       ],
@@ -88,8 +86,7 @@
           "x": 245,
           "y": 335,
           "heading": 45,
-          "sailAngle": -12,
-          "boatClass": "dinghy"
+          "sailAngle": -12
         },
         {
           "id": "r10-starboard",
@@ -98,8 +95,7 @@
           "x": 355,
           "y": 335,
           "heading": 315,
-          "sailAngle": 12,
-          "boatClass": "dinghy"
+          "sailAngle": 12
         }
       ],
       "marks": [],
@@ -150,8 +146,7 @@
           "x": 280,
           "y": 300,
           "heading": 45,
-          "sailAngle": -12,
-          "boatClass": "dinghy"
+          "sailAngle": -12
         },
         {
           "id": "r10-starboard",
@@ -160,8 +155,7 @@
           "x": 320,
           "y": 300,
           "heading": 315,
-          "sailAngle": 12,
-          "boatClass": "dinghy"
+          "sailAngle": 12
         }
       ],
       "marks": [],
@@ -210,8 +204,7 @@
           "x": 235,
           "y": 275,
           "heading": 135,
-          "sailAngle": 35,
-          "boatClass": "dinghy"
+          "sailAngle": 35
         },
         {
           "id": "r10-starboard",
@@ -220,8 +213,7 @@
           "x": 365,
           "y": 275,
           "heading": 315,
-          "sailAngle": 12,
-          "boatClass": "dinghy"
+          "sailAngle": 12
         }
       ],
       "marks": [],
@@ -282,8 +274,7 @@
           "x": 165,
           "y": 300,
           "heading": 135,
-          "sailAngle": 35,
-          "boatClass": "dinghy"
+          "sailAngle": 35
         },
         {
           "id": "r10-starboard",
@@ -292,8 +283,7 @@
           "x": 435,
           "y": 190,
           "heading": 315,
-          "sailAngle": 12,
-          "boatClass": "dinghy"
+          "sailAngle": 12
         }
       ],
       "marks": [],

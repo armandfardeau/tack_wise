@@ -4,14 +4,14 @@ Tack Wise is a browser-based Tactical Sailing Situations (TSS) authoring and pre
 
 ## Features
 
-- Wind direction, speed, sail trim, boat headings, and spinnaker states.
-- Boat classes, marks, gates, obstructions, connections, and rounding arrows.
+- Wind direction, speed, sail trim, and boat headings.
+- Boats, marks, gates, obstructions, connections, and rounding arrows.
 - Curved tactical arrows, comments, uploaded diagram images, and rule references.
 - Step-by-step or continuous animation with single-frame or cumulative display.
 - Timeline editing with add, duplicate, rename, delete, playback, and speed control.
 - Canvas pan, zoom, placement grid, magnetic snapping, presenter mode, and print output.
 - Undo/redo, autosave recovery, local scenario library, JSON import/export, and portable share links.
-- PNG/JPG diagram export, animated GIF export, and WebM video export.
+- PNG/JPG diagram export, animated GIF export, and MP4 video export.
 
 ## Development
 

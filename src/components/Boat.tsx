@@ -16,7 +16,7 @@ interface BoatProps {
 }
 
 export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
-  const boatScale = (boat.hullScale ?? 1) * 0.5;
+  const boatScale = 0.5;
 
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
@@ -206,18 +206,6 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         shadowColor="#000"
         shadowBlur={1}
       />
-
-      {boat.spinnakerDeployed && boat.sailPlan !== 'main' && (
-        <Path
-          data={boat.sailPlan === 'asymmetric-spinnaker'
-            ? 'M 0 -12 Q 34 -30 50 24 Q 23 12 0 -12 Z'
-            : 'M 0 -12 Q -38 -20 -46 24 Q -18 12 0 -12 Z'}
-          fill={boat.color}
-          opacity={0.55}
-          stroke="#f8fafc"
-          strokeWidth={2}
-        />
-      )}
 
       {/* Label Text (Unrotated so it's always readable for the user) */}
       <Group rotation={-boat.heading}>

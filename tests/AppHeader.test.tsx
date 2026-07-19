@@ -89,7 +89,7 @@ describe('AppHeader', () => {
 
     expect(screen.getByRole('menuitem', { name: /export json/i })).toHaveAttribute('title', 'Export JSON');
     expect(screen.getByRole('menuitem', { name: /export gif/i })).toHaveAttribute('title', 'Export GIF');
-    expect(screen.getByRole('menuitem', { name: /export video \(webm\)/i })).toHaveAttribute('title', 'Export Video (WebM)');
+    expect(screen.getByRole('menuitem', { name: /export video \(mp4\)/i })).toHaveAttribute('title', 'Export Video (MP4)');
   });
 
   it('disables JSON export while another export is running', () => {

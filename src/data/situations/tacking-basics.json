@@ -15,9 +15,6 @@
           "y": 345,
           "heading": 45,
           "sailAngle": -12,
-          "boatClass": "dinghy",
-          "hullScale": 1,
-          "sailPlan": "main",
           "showHeadingLine": true
         },
         {
@@ -27,11 +24,7 @@
           "x": 270,
           "y": 335,
           "heading": 315,
-          "sailAngle": 12,
-          "boatClass": "keelboat",
-          "hullScale": 1.15,
-          "sailPlan": "asymmetric-spinnaker",
-          "spinnakerDeployed": true
+          "sailAngle": 12
         },
         {
           "id": "boat-3",
@@ -40,10 +33,7 @@
           "x": 390,
           "y": 360,
           "heading": 45,
-          "sailAngle": -12,
-          "boatClass": "optimist",
-          "hullScale": 0.8,
-          "sailPlan": "main"
+          "sailAngle": -12
         },
         {
           "id": "boat-4",
@@ -53,10 +43,6 @@
           "y": 205,
           "heading": 90,
           "sailAngle": 35,
-          "boatClass": "tornado",
-          "hullScale": 1.1,
-          "sailPlan": "symmetric-spinnaker",
-          "spinnakerDeployed": true,
           "showHeadingLine": true
         },
         {
@@ -66,11 +52,7 @@
           "x": 315,
           "y": 180,
           "heading": 135,
-          "sailAngle": 55,
-          "boatClass": "trimaran",
-          "hullScale": 1.3,
-          "sailPlan": "asymmetric-spinnaker",
-          "spinnakerDeployed": true
+          "sailAngle": 55
         },
         {
           "id": "boat-6",
@@ -79,10 +61,7 @@
           "x": 430,
           "y": 220,
           "heading": 225,
-          "sailAngle": -35,
-          "boatClass": "custom",
-          "hullScale": 0.9,
-          "sailPlan": "main"
+          "sailAngle": -35
         }
       ],
       "marks": [

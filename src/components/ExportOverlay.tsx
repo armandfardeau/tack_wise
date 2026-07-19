@@ -8,8 +8,8 @@ export default function ExportOverlay({ exportProgress, exportType }: ExportOver
     <div className="export-overlay" role="status" aria-live="polite">
       <div className="export-spinner-box">
         <div className="spinner" />
-        <h3>Exporting Scenario as {exportType === 'gif' ? 'GIF' : 'WebM Video'}...</h3>
-        <p>Rendering frames... {exportProgress}%</p>
+        <h3>Exporting Scenario as {exportType === 'gif' ? 'GIF' : 'MP4 Video'}...</h3>
+        <p>{exportType === 'mp4' ? 'Preparing video...' : 'Rendering frames...'} {exportProgress}%</p>
       </div>
     </div>
   );

@@ -1,13 +1,3 @@
-export type BoatClass =
-  | 'dinghy'
-  | 'keelboat'
-  | 'optimist'
-  | 'tornado'
-  | 'trimaran'
-  | 'custom';
-
-export type SailPlan = 'main' | 'symmetric-spinnaker' | 'asymmetric-spinnaker';
-
 export type DisplayMode = 'single' | 'cumulative';
 
 export type Theme = 'light' | 'dark';
@@ -20,10 +10,6 @@ export interface Boat {
   y: number;
   heading: number; // heading in degrees (0 = North, clockwise)
   sailAngle: number; // sail angle relative to centerline (-90 to +90 degrees)
-  boatClass?: BoatClass;
-  hullScale?: number;
-  sailPlan?: SailPlan;
-  spinnakerDeployed?: boolean;
   showHeadingLine?: boolean;
 }
 

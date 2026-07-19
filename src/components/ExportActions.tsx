@@ -173,9 +173,9 @@ export default function ExportActions({ className = 'export-actions', isExportin
                 <span className="action-icon" aria-hidden="true"><Download size={16} /></span>
                 <span className="action-label">Export GIF</span>
               </button>
-              <button type="button" className="action-btn file-menu-item mp4-btn" role="menuitem" title="Export Video (WebM)" onClick={() => closeAfterExport(() => onExport('mp4'))}>
+              <button type="button" className="action-btn file-menu-item mp4-btn" role="menuitem" title="Export Video (MP4)" onClick={() => closeAfterExport(() => onExport('mp4'))}>
                 <span className="action-icon" aria-hidden="true"><FileVideoCamera size={16} /></span>
-                <span className="action-label">Export Video (WebM)</span>
+                <span className="action-label">Export Video (MP4)</span>
               </button>
               {onExportImage && <>
                 <button type="button" className="action-btn file-menu-item image-btn" role="menuitem" title="Export PNG" onClick={() => closeAfterExport(() => onExportImage('png'))}>

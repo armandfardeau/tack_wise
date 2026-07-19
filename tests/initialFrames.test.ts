@@ -15,21 +15,6 @@ describe('initial scenario data', () => {
     const marks = frame.marks;
     const arrows = frame.arrows ?? [];
 
-    expect(boats.map((boat) => boat.boatClass)).toEqual(expect.arrayContaining([
-      'dinghy',
-      'keelboat',
-      'optimist',
-      'tornado',
-      'trimaran',
-      'custom',
-    ]));
-    expect(boats.map((boat) => boat.sailPlan)).toEqual(expect.arrayContaining([
-      'main',
-      'symmetric-spinnaker',
-      'asymmetric-spinnaker',
-    ]));
-    expect(boats.some((boat) => boat.spinnakerDeployed)).toBe(true);
-    expect(boats.some((boat) => boat.hullScale !== undefined)).toBe(true);
     expect(boats.some((boat) => boat.showHeadingLine)).toBe(true);
 
     expect(marks.map((mark) => mark.shape)).toEqual(expect.arrayContaining([

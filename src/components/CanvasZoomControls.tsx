@@ -46,6 +46,7 @@ export default function CanvasZoomControls({
         className="canvas-zoom-reset"
         onClick={onReset}
         disabled={canvasZoom === 1 && canvasPosition.x === 0 && canvasPosition.y === 0}
+        aria-label="Reset zoom"
         title="Reset zoom"
       >
         <RotateCcw aria-hidden="true" size={14} />

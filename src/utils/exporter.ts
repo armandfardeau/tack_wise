@@ -112,10 +112,6 @@ function isBoat(value: unknown): value is Boat {
     isFiniteNumber(value.y) &&
     isFiniteNumber(value.heading) &&
     isFiniteNumber(value.sailAngle) &&
-    (value.boatClass === undefined || ['dinghy', 'keelboat', 'optimist', 'tornado', 'trimaran', 'custom'].includes(value.boatClass as string)) &&
-    (value.hullScale === undefined || isFiniteNumber(value.hullScale)) &&
-    (value.sailPlan === undefined || ['main', 'symmetric-spinnaker', 'asymmetric-spinnaker'].includes(value.sailPlan as string)) &&
-    (value.spinnakerDeployed === undefined || typeof value.spinnakerDeployed === 'boolean') &&
     (value.showHeadingLine === undefined || typeof value.showHeadingLine === 'boolean')
   );
 }
