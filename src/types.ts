@@ -8,8 +8,6 @@ export type BoatClass =
 
 export type SailPlan = 'main' | 'symmetric-spinnaker' | 'asymmetric-spinnaker';
 
-export type AnimationMode = 'step' | 'continuous';
-
 export type DisplayMode = 'single' | 'cumulative';
 
 export type Theme = 'light' | 'dark';
@@ -84,11 +82,6 @@ export interface RuleReference {
   url?: string;
 }
 
-export interface FrameTransition {
-  durationMs?: number;
-  animationMode?: AnimationMode;
-}
-
 export interface Frame {
   id: string;
   name: string;
@@ -100,12 +93,10 @@ export interface Frame {
   comments?: CommentNote[];
   images?: DiagramImage[];
   rules?: RuleReference[];
-  transition?: FrameTransition;
 }
 
 export interface ScenarioSettings {
   title?: string;
-  animationMode: AnimationMode;
   displayMode: DisplayMode;
   presenterMode: boolean;
 }

@@ -1,4 +1,8 @@
 import ExportActions from './ExportActions';
+import ViewActions from './ViewActions';
+import type { SituationTemplate } from '../data/situationTemplates';
+import { Copy, Sailboat } from 'lucide-react';
+import type { Theme } from '../types';
 
 interface AppHeaderProps {
   isExporting: boolean;
@@ -8,7 +12,11 @@ interface AppHeaderProps {
   onExportJson: () => void;
   onImportJson: (file: File) => void;
   onShareScenario?: () => void;
+  onToggleTheme?: () => void;
   onTogglePresenter?: () => void;
+  onLoadTemplate?: (template: SituationTemplate) => void;
+  templates?: SituationTemplate[];
+  theme?: Theme;
 }
 
 export default function AppHeader({
@@ -19,26 +27,39 @@ export default function AppHeader({
   onExportJson,
   onImportJson,
   onShareScenario,
+  onToggleTheme,
   onTogglePresenter,
+  onLoadTemplate,
+  templates,
+  theme = 'dark',
 }: AppHeaderProps) {
   return (
     <header className="app-header">
       <div className="header-main">
         <div className="branding">
           <span className="eyebrow">Tactical Sailing Simulator</span>
-          <h1>Tack Wise ⛵</h1>
+          <h1>Tack Wise <Sailboat className="brand-icon" aria-hidden="true" size={24} /></h1>
         </div>
       </div>
-      <ExportActions
-        isExporting={isExporting}
-        onExport={onExport}
-        onExportImage={onExportImage}
-        onExportJson={onExportJson}
-        onImportJson={onImportJson}
-      />
       <div className="header-tools" aria-label="Scenario tools">
-        <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}>Copy share link</button>
-        <button type="button" className="header-tool-btn" onClick={() => onTogglePresenter?.()}>{presenterMode ? 'Exit presenter' : 'Presenter mode'}</button>
+        <ExportActions
+          className="export-actions header-export-actions"
+          isExporting={isExporting}
+          onExport={onExport}
+          onExportImage={onExportImage}
+          onExportJson={onExportJson}
+          onImportJson={onImportJson}
+          onLoadTemplate={onLoadTemplate}
+          templates={templates}
+        />
+        <ViewActions
+          className="view-actions header-view-actions"
+          presenterMode={presenterMode}
+          theme={theme}
+          onToggleTheme={onToggleTheme}
+          onTogglePresenter={onTogglePresenter}
+        />
+        <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
       </div>
     </header>
   );

@@ -10,9 +10,14 @@ import {
   clampCanvasZoom,
   constrainCanvasPosition,
   getCanvasWorldBounds,
+  type CanvasContentRect,
   type CanvasContentBounds,
   type Position,
 } from '../utils/simulation';
+
+const CANVAS_FIT_PADDING = 32;
+const CANVAS_FIT_TOP_CONTROL_OFFSET = 48;
+const CANVAS_FIT_BOTTOM_CONTROL_OFFSET = 48;
 
 const isMobileViewport = () =>
   typeof window !== 'undefined' &&
@@ -102,6 +107,42 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     setCanvasPosition({ x: 0, y: 0 });
   };
 
+  const fitCanvasToContent = (contentRect: CanvasContentRect) => {
+    if (contentRect.minX === contentRect.maxX && contentRect.minY === contentRect.maxY) {
+      resetCanvasZoom();
+      return;
+    }
+
+    const topFitInset = CANVAS_FIT_PADDING + CANVAS_FIT_TOP_CONTROL_OFFSET;
+    const bottomFitInset = CANVAS_FIT_PADDING + CANVAS_FIT_BOTTOM_CONTROL_OFFSET;
+    const availableWidth = Math.max(stageSize.width - CANVAS_FIT_PADDING * 2, 1);
+    const availableHeight = Math.max(stageSize.height - topFitInset - bottomFitInset, 1);
+    const contentWidth = Math.max(contentRect.maxX - contentRect.minX, 1);
+    const contentHeight = Math.max(contentRect.maxY - contentRect.minY, 1);
+    const nextZoom = clampCanvasZoom(Math.min(
+      availableWidth / contentWidth,
+      availableHeight / contentHeight,
+    ));
+    const contentCenter = {
+      x: (contentRect.minX + contentRect.maxX) / 2,
+      y: (contentRect.minY + contentRect.maxY) / 2,
+    };
+    const nextPosition = {
+      x: stageSize.width / 2 - contentCenter.x * nextZoom,
+      y: topFitInset + availableHeight / 2 - contentCenter.y * nextZoom,
+    };
+
+    setCanvasZoom(nextZoom);
+    setCanvasPosition(
+      constrainCanvasPosition(
+        nextPosition,
+        nextZoom,
+        stageSize,
+        getCanvasWorldBounds(stageSize),
+      ),
+    );
+  };
+
   const panCanvasBy = (delta: Position) => {
     setCanvasPosition((position) =>
       constrainCanvasPosition(
@@ -137,6 +178,7 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     canvasZoom,
     constrainPosition: (position: Position) =>
       constrainCanvasPosition(position, canvasZoom, stageSize, getCanvasWorldBounds(stageSize)),
+    fitCanvasToContent,
     handleCanvasDragEnd,
     handleCanvasWheel,
     maxZoom: MAX_CANVAS_ZOOM,

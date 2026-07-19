@@ -2,10 +2,14 @@ import { act, renderHook } from '@testing-library/react';
 import { useScenario } from '../src/hooks/useScenario';
 
 describe('useScenario', () => {
-  it('uses smooth movement by default', () => {
+  it('uses discrete playback by default', () => {
     const { result } = renderHook(() => useScenario());
 
-    expect(result.current.settings.animationMode).toBe('continuous');
+    expect(result.current.settings).toEqual({
+      title: expect.any(String),
+      displayMode: 'single',
+      presenterMode: false,
+    });
   });
 
   it('connects the default committee boat to the pin end', () => {
@@ -126,33 +130,21 @@ describe('useScenario', () => {
     expect(result.current.currentFrameIndex).toBe(result.current.frames.length - 1);
   });
 
-  it('creates frame-to-frame transitions when smooth movement is enabled', () => {
-    const { result } = renderHook(() => useScenario());
-
-    act(() => result.current.setAnimationMode('continuous'));
-
-    expect(result.current.settings.animationMode).toBe('continuous');
-    expect(result.current.frames.slice(0, -1).every((frame) => (
-      frame.transition?.animationMode === 'continuous' && frame.transition.durationMs === 1000
-    ))).toBe(true);
-    expect(result.current.frames.at(-1)?.transition).toBeUndefined();
-  });
-
-  it('interpolates movement during a smooth transition while snapping sail trim', () => {
+  it('advances one complete frame at a time during playback', () => {
     jest.useFakeTimers();
 
     try {
       const { result } = renderHook(() => useScenario());
 
       act(() => {
-        result.current.setAnimationMode('continuous');
         result.current.setIsPlaying(true);
       });
-      act(() => jest.advanceTimersByTime(500));
+      act(() => jest.advanceTimersByTime(999));
+      expect(result.current.currentFrameIndex).toBe(0);
 
-      expect(result.current.frameProgress).toBeCloseTo(0.5);
-      expect(result.current.displayFrame.boats[0].x).toBe(230);
-      expect(result.current.displayFrame.boats[0].sailAngle).toBe(result.current.frames[0].boats[0].sailAngle);
+      act(() => jest.advanceTimersByTime(1));
+      expect(result.current.currentFrameIndex).toBe(1);
+      expect(result.current.displayFrame).toBe(result.current.frames[1]);
     } finally {
       jest.useRealTimers();
     }
@@ -193,6 +185,15 @@ describe('useScenario', () => {
     expect(result.current.frames[0].comments ?? []).toHaveLength(0);
     expect(result.current.frames.slice(1).every((frame) => frame.marks.some((mark) => mark.shape === 'obstruction'))).toBe(true);
     expect(result.current.frames.slice(1).every((frame) => frame.arrows?.length === 1)).toBe(true);
+    const addedArrow = result.current.frames[1].arrows?.[0];
+    expect(addedArrow).toBeDefined();
+    if (!addedArrow) return;
+    expect(addedArrow?.curved).toBe(true);
+    expect(addedArrow?.points).toHaveLength(3);
+    expect(addedArrow?.points[1]).not.toEqual({
+      x: (addedArrow.points[0].x + addedArrow.points[2].x) / 2,
+      y: (addedArrow.points[0].y + addedArrow.points[2].y) / 2,
+    });
     expect(result.current.frames.slice(1).every((frame) => frame.comments?.length === 1)).toBe(true);
   });
 
@@ -201,11 +202,11 @@ describe('useScenario', () => {
     const { result } = renderHook(() => useScenario());
 
     act(() => {
-      result.current.updateSettings({ animationMode: 'continuous', displayMode: 'cumulative' });
+      result.current.updateSettings({ displayMode: 'cumulative' });
       result.current.saveToLibrary('Saved situation');
     });
 
-    expect(result.current.settings.animationMode).toBe('continuous');
+    expect(result.current.settings.displayMode).toBe('cumulative');
     expect(result.current.libraryItems[0].title).toBe('Saved situation');
 
     act(() => result.current.updateBoat('boat-1', { name: 'Changed after save' }));

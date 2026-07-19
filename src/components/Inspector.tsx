@@ -1,5 +1,7 @@
-import type { AnimationMode, CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow, Theme } from '../types';
+import type { CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
+import { ensureCurvedArrowControlPoint } from '../utils/arrows';
+import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
 
 interface InspectorProps {
   activeFrame: Frame;
@@ -10,12 +12,8 @@ interface InspectorProps {
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
-  onToggleTheme?: () => void;
-  theme?: Theme;
   onTogglePlaying?: () => void;
   onSetPlaySpeed?: (speed: number) => void;
-  animationMode?: AnimationMode;
-  onSetAnimationMode?: (mode: AnimationMode) => void;
   playSpeed?: number;
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
@@ -41,12 +39,8 @@ export default function Inspector({
   onSetGridSnapEnabled,
   onSetAutoSailTrim,
   onSetShowGrid,
-  onToggleTheme = () => undefined,
-  theme = 'dark',
   onTogglePlaying = () => undefined,
   onSetPlaySpeed = () => undefined,
-  animationMode = 'step',
-  onSetAnimationMode = () => undefined,
   playSpeed = 1000,
   selectedBoat,
   selectedMark,
@@ -64,31 +58,23 @@ export default function Inspector({
 }: InspectorProps) {
   return (
     <div className="control-section inspector">
-      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector">🔍 Inspector</h3>
+      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector"><Search aria-hidden="true" size={16} /> Inspector</h3>
 
       {selectedType === 'wind' ? (
         <WindInspector activeFrame={activeFrame} updateActiveFrame={updateActiveFrame} />
       ) : selectedType === 'grid' ? (
         <CanvasSettingsInspector
-          activeFrame={activeFrame}
           gridSnapEnabled={gridSnapEnabled}
           onSetGridSnapEnabled={onSetGridSnapEnabled}
           onSetShowGrid={onSetShowGrid}
-          onToggleTheme={onToggleTheme}
-          theme={theme}
-          updateActiveFrame={updateActiveFrame}
           showGrid={showGrid}
         />
       ) : selectedType === 'playback' ? (
         <PlaybackInspector
-          activeFrame={activeFrame}
           isPlaying={isPlaying}
           onSetPlaySpeed={onSetPlaySpeed}
-          animationMode={animationMode}
-          onSetAnimationMode={onSetAnimationMode}
           onTogglePlaying={onTogglePlaying}
           playSpeed={playSpeed}
-          updateActiveFrame={updateActiveFrame}
         />
       ) : selectedType === 'boat' && selectedBoat ? (
         <div className="editor-form">
@@ -102,7 +88,7 @@ export default function Inspector({
           </div>
           <div className="form-row">
             <label htmlFor="boat-heading">Heading ({selectedBoat.heading}°)</label>
-            <input id="boat-heading" type="range" min="0" max="359" value={selectedBoat.heading} onChange={(event) => updateBoat(selectedBoat.id, { heading: Number(event.target.value) })} />
+            <input id="boat-heading" type="range" min="-360" max="360" value={selectedBoat.heading} onChange={(event) => updateBoat(selectedBoat.id, { heading: Number(event.target.value) })} />
           </div>
           <div className="form-row flex-row">
             <label className="checkbox-label">
@@ -122,7 +108,7 @@ export default function Inspector({
               <span>Show Dotted Path Line</span>
             </label>
           </div>
-          <button type="button" className="delete-btn" onClick={onDelete}>🗑️ Delete Boat</button>
+          <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Boat</button>
         </div>
       ) : selectedType === 'mark' && selectedMark ? (
         <MarkInspector
@@ -159,14 +145,9 @@ function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame;
   );
 }
 
-function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEnabled, onSetShowGrid, onToggleTheme, showGrid, theme, updateActiveFrame }: { activeFrame: Frame; gridSnapEnabled: boolean; onSetGridSnapEnabled: (enabled: boolean) => void; onSetShowGrid: (show: boolean) => void; onToggleTheme: () => void; showGrid: boolean; theme: Theme; updateActiveFrame: (changes: Partial<Frame>) => void }) {
+function CanvasSettingsInspector({ gridSnapEnabled, onSetGridSnapEnabled, onSetShowGrid, showGrid }: { gridSnapEnabled: boolean; onSetGridSnapEnabled: (enabled: boolean) => void; onSetShowGrid: (show: boolean) => void; showGrid: boolean }) {
   return (
     <div className="editor-form">
-      <div className="inspector-subsection">
-        <h4 className="inspector-subsection-title">Wind</h4>
-        <WindInspector activeFrame={activeFrame} updateActiveFrame={updateActiveFrame} />
-      </div>
-
       <div className="inspector-subsection">
         <h4 className="inspector-subsection-title">Magnetic Grid</h4>
         <div className="form-row flex-row">
@@ -183,75 +164,24 @@ function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEn
         </div>
         <p className="grid-hint">20px spacing · drag near an intersection</p>
       </div>
-
-      <div className="inspector-subsection">
-        <h4 className="inspector-subsection-title">Appearance</h4>
-        <button
-          type="button"
-          className="direction-btn"
-          onClick={onToggleTheme}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? '☀️ Switch to light mode' : '🌙 Switch to dark mode'}
-        </button>
-      </div>
     </div>
   );
 }
 
 function PlaybackInspector({
-  activeFrame,
-  animationMode,
   isPlaying,
-  onSetAnimationMode,
   onSetPlaySpeed,
   onTogglePlaying,
   playSpeed,
-  updateActiveFrame,
 }: {
-  activeFrame: Frame;
-  animationMode: AnimationMode;
   isPlaying: boolean;
-  onSetAnimationMode: (mode: AnimationMode) => void;
   onSetPlaySpeed: (speed: number) => void;
   onTogglePlaying: () => void;
   playSpeed: number;
-  updateActiveFrame: (changes: Partial<Frame>) => void;
 }) {
-  const transitionDuration = activeFrame.transition?.durationMs ?? playSpeed;
-
-  const setTransitionDuration = (durationMs: number) => {
-    updateActiveFrame({
-      transition: {
-        ...activeFrame.transition,
-        animationMode,
-        durationMs,
-      },
-    });
-  };
-
   return (
     <div className="editor-form">
-      <div className="form-row flex-row">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            aria-label="Smooth movement"
-            checked={animationMode === 'continuous'}
-            onChange={(event) => onSetAnimationMode(event.target.checked ? 'continuous' : 'step')}
-          />
-          <span>Smooth movement</span>
-        </label>
-      </div>
-      <p className="grid-hint">Boats and marks transition between frames; sail trim changes at the frame boundary.</p>
-      <div className="form-row">
-        <label htmlFor="frame-transition-duration">Transition to next frame</label>
-        <select id="frame-transition-duration" value={transitionDuration} onChange={(event) => setTransitionDuration(Number(event.target.value))}>
-          <option value="2000">Slow (2s)</option>
-          <option value="1000">Normal (1s)</option>
-          <option value="500">Fast (0.5s)</option>
-        </select>
-      </div>
+      <p className="grid-hint">Playback advances one frame at a time.</p>
       <div className="form-row">
         <label htmlFor="playback-speed">Playback speed</label>
         <select id="playback-speed" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))}>
@@ -260,8 +190,14 @@ function PlaybackInspector({
           <option value="500">Fast (0.5s)</option>
         </select>
       </div>
-      <button type="button" className="direction-btn" onClick={onTogglePlaying}>
-        {isPlaying ? '⏸️ Pause playback' : '▶️ Play scenario'}
+      <button
+        type="button"
+        className="direction-btn"
+        aria-label={isPlaying ? 'Pause playback' : 'Play scenario'}
+        title={isPlaying ? 'Pause playback' : 'Play scenario'}
+        onClick={onTogglePlaying}
+      >
+        {isPlaying ? <Pause aria-hidden="true" size={16} /> : <Play aria-hidden="true" size={16} />}
       </button>
     </div>
   );
@@ -333,7 +269,7 @@ function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspecto
               rotationDirection: rotationDirection === 'clockwise' ? 'counterclockwise' : 'clockwise',
             })}
           >
-            ↻ Reverse Direction ({rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})
+            <RotateCcw aria-hidden="true" size={16} /> Reverse Direction ({rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})
           </button>
         </div>
       )}
@@ -365,21 +301,32 @@ function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspecto
           </div>
         </>
       )}
-      <button type="button" className="delete-btn" onClick={onDelete}>🗑️ Delete Mark</button>
+      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Mark</button>
     </div>
   );
 }
 
 function ArrowInspector({ arrow, onDelete, updateArrow }: { arrow: TacticalArrow; onDelete: () => void; updateArrow: (id: string, changes: Partial<TacticalArrow>) => void }) {
+  const handleCurvedChange = (curved: boolean) => {
+    updateArrow(arrow.id, {
+      curved,
+      points: curved
+        ? ensureCurvedArrowControlPoint(arrow.points)
+        : arrow.points.length > 2
+          ? [arrow.points[0], arrow.points[arrow.points.length - 1]]
+          : arrow.points,
+    });
+  };
+
   return (
     <div className="editor-form">
       <div className="form-row"><label htmlFor="arrow-name">Name</label><input id="arrow-name" type="text" value={arrow.name} onChange={(event) => updateArrow(arrow.id, { name: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="arrow-color">Color</label><input id="arrow-color" type="color" value={arrow.color} onChange={(event) => updateArrow(arrow.id, { color: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="arrow-width">Line width ({arrow.lineWidth ?? 3}px)</label><input id="arrow-width" type="range" min="1" max="12" value={arrow.lineWidth ?? 3} onChange={(event) => updateArrow(arrow.id, { lineWidth: Number(event.target.value) })} /></div>
       <div className="form-row"><label htmlFor="arrow-style">Line style</label><select id="arrow-style" value={arrow.lineStyle ?? 'solid'} onChange={(event) => updateArrow(arrow.id, { lineStyle: event.target.value as TacticalArrow['lineStyle'] })}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></div>
-      <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={!!arrow.curved} onChange={(event) => updateArrow(arrow.id, { curved: event.target.checked })} /><span>Curved arrow</span></label></div>
+      <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={!!arrow.curved} onChange={(event) => handleCurvedChange(event.target.checked)} /><span>Curved arrow</span></label></div>
       <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={arrow.showArrowhead !== false} onChange={(event) => updateArrow(arrow.id, { showArrowhead: event.target.checked })} /><span>Show arrowhead</span></label></div>
-      <button type="button" className="delete-btn" onClick={onDelete}>🗑️ Delete Arrow</button>
+      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Arrow</button>
     </div>
   );
 }
@@ -391,7 +338,7 @@ function CommentInspector({ comment, onDelete, updateComment }: { comment: Comme
       <div className="form-row"><label htmlFor="comment-text">Text</label><textarea id="comment-text" value={comment.text} rows={4} onChange={(event) => updateComment(comment.id, { text: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="comment-color">Text color</label><input id="comment-color" type="color" value={comment.color} onChange={(event) => updateComment(comment.id, { color: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
-      <button type="button" className="delete-btn" onClick={onDelete}>🗑️ Delete Comment</button>
+      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Comment</button>
     </div>
   );
 }
@@ -402,7 +349,7 @@ function ImageInspector({ image, onDelete, updateImage }: { image: DiagramImage;
       <div className="form-row"><label htmlFor="image-name">Name</label><input id="image-name" type="text" value={image.name} onChange={(event) => updateImage(image.id, { name: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="image-width">Width ({image.width}px)</label><input id="image-width" type="range" min="40" max="800" value={image.width} onChange={(event) => updateImage(image.id, { width: Number(event.target.value) })} /></div>
       <div className="form-row"><label htmlFor="image-rotation">Rotation ({image.rotation ?? 0}°)</label><input id="image-rotation" type="range" min="0" max="359" value={image.rotation ?? 0} onChange={(event) => updateImage(image.id, { rotation: Number(event.target.value) })} /></div>
-      <button type="button" className="delete-btn" onClick={onDelete}>🗑️ Delete Image</button>
+      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Image</button>
     </div>
   );
 }

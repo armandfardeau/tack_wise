@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Copy, Layers, Pause, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2 } from 'lucide-react';
 import type { Frame } from '../types';
 
 interface TimelineProps {
@@ -11,6 +12,7 @@ interface TimelineProps {
   onDuplicateFrame: (frameIndex: number) => void;
   onRenameFrame: (frameIndex: number, name: string) => void;
   onSelectFrame: (index: number) => void;
+  onOpenLayers?: (frameIndex: number) => void;
   onTogglePlaying?: () => void;
   onStepBackward?: () => void;
   onStepForward?: () => void;
@@ -29,6 +31,7 @@ export default function Timeline({
   onDuplicateFrame,
   onRenameFrame,
   onSelectFrame,
+  onOpenLayers,
   onTogglePlaying = () => undefined,
   onStepBackward = () => undefined,
   onStepForward = () => undefined,
@@ -114,12 +117,11 @@ export default function Timeline({
           onClick={onStepBackward}
           disabled={currentFrameIndex <= 0}
         >
-          <span className="timeline-control-icon" aria-hidden="true">⏮️</span>
+          <span className="timeline-control-icon" aria-hidden="true"><SkipBack size={16} /></span>
           <span className="timeline-control-label">Backward</span>
         </button>
         <button type="button" className={`play-pause-btn ${isPlaying ? 'playing' : ''}`} aria-label={isPlaying ? 'Pause' : 'Play'} onClick={onTogglePlaying}>
-          <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? '⏸️' : '▶️'}</span>
-          <span className="timeline-control-label">{isPlaying ? 'Pause' : 'Play'}</span>
+          <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</span>
         </button>
         <button
           type="button"
@@ -129,7 +131,7 @@ export default function Timeline({
           onClick={onStepForward}
           disabled={currentFrameIndex >= frames.length - 1}
         >
-          <span className="timeline-control-icon" aria-hidden="true">⏭️</span>
+          <span className="timeline-control-icon" aria-hidden="true"><SkipForward size={16} /></span>
           <span className="timeline-control-label">Forward</span>
         </button>
         <button
@@ -139,7 +141,7 @@ export default function Timeline({
           title="Replay from start"
           onClick={onReplayFromStart}
         >
-          <span className="timeline-control-icon" aria-hidden="true">↺</span>
+          <span className="timeline-control-icon" aria-hidden="true"><RotateCcw size={16} /></span>
           <span className="timeline-control-label">Replay</span>
         </button>
         <select className="speed-selector" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))} aria-label="Playback speed">
@@ -148,15 +150,15 @@ export default function Timeline({
           <option value="500">Fast (0.5s)</option>
         </select>
         <button type="button" className="timeline-action-btn" aria-label="Add frame" onClick={onAddFrame}>
-          <span className="timeline-control-icon" aria-hidden="true">➕</span>
+          <span className="timeline-control-icon" aria-hidden="true"><Plus size={16} /></span>
           <span className="timeline-control-label">Add Frame</span>
         </button>
         <button type="button" className="timeline-action-btn" aria-label="Duplicate frame" onClick={() => onDuplicateFrame(currentFrameIndex)}>
-          <span className="timeline-control-icon" aria-hidden="true">📋</span>
+          <span className="timeline-control-icon" aria-hidden="true"><Copy size={16} /></span>
           <span className="timeline-control-label">Duplicate</span>
         </button>
         <button type="button" className="timeline-action-btn delete-frame-btn" aria-label="Delete frame" onClick={() => onDeleteFrame(currentFrameIndex)} disabled={frames.length <= 1}>
-          <span className="timeline-control-icon" aria-hidden="true">🗑️</span>
+          <span className="timeline-control-icon" aria-hidden="true"><Trash2 size={16} /></span>
           <span className="timeline-control-label">Delete</span>
         </button>
       </div>}
@@ -167,7 +169,7 @@ export default function Timeline({
 
           if (isEditing) {
             return (
-              <div key={frame.id} className="frame-thumbnail-row">
+              <div key={frame.id} className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}`}>
                 <div className={thumbnailClassName} role="group" aria-label={`Edit frame ${index + 1}`}>
                   <span className="thumbnail-num">{index + 1}</span>
                   <input
@@ -190,8 +192,21 @@ export default function Timeline({
                     onDuplicateFrame(index);
                   }}
                 >
-                  📋
+                  <Copy aria-hidden="true" size={14} />
                 </button>
+                {variant === 'sidebar' && onOpenLayers && (
+                  <button
+                    type="button"
+                    className="frame-layers-btn"
+                    aria-label={`Show layers for frame ${index + 1}`}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onOpenLayers(index);
+                    }}
+                  >
+                    <Layers aria-hidden="true" size={14} />
+                  </button>
+                )}
                 <button
                   type="button"
                   className="frame-delete-btn"
@@ -202,14 +217,14 @@ export default function Timeline({
                   }}
                   disabled={frames.length <= 1}
                 >
-                  🗑️
+                  <Trash2 aria-hidden="true" size={14} />
                 </button>
               </div>
             );
           }
 
           return (
-            <div key={frame.id} className="frame-thumbnail-row">
+            <div key={frame.id} className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}`}>
               <button
                 type="button"
                 className={thumbnailClassName}
@@ -228,6 +243,19 @@ export default function Timeline({
                   {frame.name}
                 </span>
               </button>
+              {variant === 'sidebar' && onOpenLayers && (
+                <button
+                  type="button"
+                  className="frame-layers-btn"
+                  aria-label={`Show layers for frame ${index + 1}`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    onOpenLayers(index);
+                  }}
+                >
+                  <Layers aria-hidden="true" size={14} />
+                </button>
+              )}
               <button
                 type="button"
                 className="frame-duplicate-btn"
@@ -237,7 +265,7 @@ export default function Timeline({
                   onDuplicateFrame(index);
                 }}
               >
-                📋
+                <Copy aria-hidden="true" size={14} />
               </button>
               <button
                 type="button"
@@ -249,7 +277,7 @@ export default function Timeline({
                 }}
                 disabled={frames.length <= 1}
               >
-                🗑️
+                <Trash2 aria-hidden="true" size={14} />
               </button>
             </div>
           );
@@ -257,7 +285,7 @@ export default function Timeline({
       </div>
       {variant === 'sidebar' && (
         <button type="button" className="timeline-action-btn sidebar-add-frame-btn" aria-label="Add frame" onClick={onAddFrame}>
-          <span className="timeline-control-icon" aria-hidden="true">➕</span>
+          <span className="timeline-control-icon" aria-hidden="true"><Plus size={16} /></span>
           <span className="timeline-control-label">Add Frame</span>
         </button>
       )}

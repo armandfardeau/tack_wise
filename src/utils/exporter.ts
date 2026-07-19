@@ -216,8 +216,7 @@ function isFrame(value: unknown): value is Frame {
     (value.arrows === undefined || (Array.isArray(value.arrows) && value.arrows.every(isArrow))) &&
     (value.comments === undefined || (Array.isArray(value.comments) && value.comments.every(isComment))) &&
     (value.images === undefined || (Array.isArray(value.images) && value.images.every(isImage))) &&
-    (value.rules === undefined || (Array.isArray(value.rules) && value.rules.every(isRule))) &&
-    (value.transition === undefined || isRecord(value.transition))
+    (value.rules === undefined || (Array.isArray(value.rules) && value.rules.every(isRule)))
   );
 }
 
@@ -226,7 +225,6 @@ function isScenarioSettings(value: unknown): boolean {
 
   return (
     (value.title === undefined || typeof value.title === 'string') &&
-    (value.animationMode === 'step' || value.animationMode === 'continuous') &&
     (value.displayMode === 'single' || value.displayMode === 'cumulative') &&
     typeof value.presenterMode === 'boolean'
   );

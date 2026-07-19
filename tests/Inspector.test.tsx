@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import Inspector from '../src/components/Inspector';
-import type { Frame, Mark } from '../src/types';
+import type { Boat, Frame, Mark, TacticalArrow } from '../src/types';
 
 const mark: Mark = {
   id: 'mark-1',
@@ -18,6 +18,24 @@ const frame: Frame = {
   windSpeed: 12,
   boats: [],
   marks: [mark],
+};
+
+const boat: Boat = {
+  id: 'boat-1',
+  name: 'Alpha',
+  color: '#38bdf8',
+  x: 200,
+  y: 350,
+  heading: 0,
+  sailAngle: 0,
+};
+
+const curvedArrow: TacticalArrow = {
+  id: 'arrow-1',
+  name: 'Turn',
+  color: '#f97316',
+  points: [{ x: 100, y: 200 }, { x: 180, y: 120 }, { x: 260, y: 200 }],
+  curved: true,
 };
 
 function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark) {
@@ -68,6 +86,40 @@ describe('mark rotation controls', () => {
   });
 });
 
+describe('curved arrow controls', () => {
+  it('removes the curvature point when curvature is turned off', () => {
+    const updateArrow = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={frame}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedArrow={curvedArrow}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedType="arrow"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateArrow={updateArrow}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('checkbox', { name: /curved arrow/i }));
+
+    expect(updateArrow).toHaveBeenCalledWith('arrow-1', {
+      curved: false,
+      points: [{ x: 100, y: 200 }, { x: 260, y: 200 }],
+    });
+  });
+});
+
 describe('wind controls', () => {
   it('edits wind settings from the inspector', () => {
     const updateActiveFrame = jest.fn();
@@ -99,11 +151,43 @@ describe('wind controls', () => {
   });
 });
 
+describe('boat controls', () => {
+  it('allows selecting a heading from -360° to +360°', () => {
+    const updateBoat = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [boat] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={boat}
+        selectedMark={undefined}
+        selectedType="boat"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={updateBoat}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    const heading = screen.getByLabelText(/heading \(0°\)/i);
+    expect(heading).toHaveAttribute('min', '-360');
+    expect(heading).toHaveAttribute('max', '360');
+
+    fireEvent.change(heading, { target: { value: '-180' } });
+
+    expect(updateBoat).toHaveBeenCalledWith('boat-1', { heading: -180 });
+  });
+});
+
 describe('magnetic grid controls', () => {
   it('updates snap and placement-grid settings from the inspector', () => {
     const onSetGridSnapEnabled = jest.fn();
     const onSetShowGrid = jest.fn();
-    const onToggleTheme = jest.fn();
     const updateActiveFrame = jest.fn();
 
     render(
@@ -115,12 +199,10 @@ describe('magnetic grid controls', () => {
         onSetGridSnapEnabled={onSetGridSnapEnabled}
         onSetAutoSailTrim={jest.fn()}
         onSetShowGrid={onSetShowGrid}
-        onToggleTheme={onToggleTheme}
         selectedBoat={undefined}
         selectedMark={undefined}
         selectedType="grid"
         showGrid
-        theme="dark"
         updateActiveFrame={updateActiveFrame}
         updateBoat={jest.fn()}
         updateMark={jest.fn()}
@@ -130,23 +212,20 @@ describe('magnetic grid controls', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[0]);
     fireEvent.click(checkboxes[1]);
-    fireEvent.change(screen.getByLabelText(/direction \(0°\)/i), { target: { value: '90' } });
-
     expect(onSetGridSnapEnabled).toHaveBeenCalledWith(false);
     expect(onSetShowGrid).toHaveBeenCalledWith(false);
-    expect(updateActiveFrame).toHaveBeenCalledWith({ windAngle: 90 });
+    expect(screen.queryByLabelText(/direction \(0°\)/i)).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/velocity \(12 kts\)/i)).not.toBeInTheDocument();
+    expect(updateActiveFrame).not.toHaveBeenCalled();
 
-    fireEvent.click(screen.getByRole('button', { name: /switch to light mode/i }));
-    expect(onToggleTheme).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: /switch to light mode/i })).not.toBeInTheDocument();
   });
 });
 
 describe('playback controls', () => {
   it('updates playback speed and toggles playback from the inspector', () => {
     const onSetPlaySpeed = jest.fn();
-    const onSetAnimationMode = jest.fn();
     const onTogglePlaying = jest.fn();
-    const updateActiveFrame = jest.fn();
 
     render(
       <Inspector
@@ -159,30 +238,24 @@ describe('playback controls', () => {
         onSetAutoSailTrim={jest.fn()}
         onSetShowGrid={jest.fn()}
         onSetPlaySpeed={onSetPlaySpeed}
-        animationMode="step"
-        onSetAnimationMode={onSetAnimationMode}
         onTogglePlaying={onTogglePlaying}
         playSpeed={1000}
         selectedBoat={undefined}
         selectedMark={undefined}
         selectedType="playback"
         showGrid
-        updateActiveFrame={updateActiveFrame}
+        updateActiveFrame={jest.fn()}
         updateBoat={jest.fn()}
         updateMark={jest.fn()}
       />,
     );
 
     fireEvent.change(screen.getByLabelText(/playback speed/i), { target: { value: '500' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: /smooth movement/i }));
-    fireEvent.change(screen.getByLabelText(/transition to next frame/i), { target: { value: '2000' } });
     fireEvent.click(screen.getByRole('button', { name: /play scenario/i }));
 
     expect(onSetPlaySpeed).toHaveBeenCalledWith(500);
-    expect(onSetAnimationMode).toHaveBeenCalledWith('continuous');
-    expect(updateActiveFrame).toHaveBeenCalledWith({
-      transition: { animationMode: 'step', durationMs: 2000 },
-    });
     expect(onTogglePlaying).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('checkbox', { name: /smooth movement/i })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/transition to next frame/i)).not.toBeInTheDocument();
   });
 });

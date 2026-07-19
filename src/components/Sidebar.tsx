@@ -1,42 +1,57 @@
+import { useEffect, useState } from 'react';
+import type { SelectedType } from '../hooks/useScenario';
 import type { Frame } from '../types';
-import ExportActions from './ExportActions';
+import { ChevronLeft, ChevronRight, Film, Layers } from 'lucide-react';
+import LayerList from './LayerList';
 import Timeline from './Timeline';
+
+type SidebarView = 'frames' | 'layers';
 
 interface SidebarProps {
   currentFrameIndex: number;
   frames: Frame[];
-  isExporting: boolean;
   isOpen: boolean;
   onAddFrame: () => void;
   onDeleteFrame: (frameIndex: number) => void;
   onDuplicateFrame: (frameIndex: number) => void;
-  onExport: (type: 'gif' | 'mp4') => void;
-  onExportImage?: (type: 'png' | 'jpeg') => void;
-  onExportJson: () => void;
-  onImportJson: (file: File) => void;
   onRenameFrame: (frameIndex: number, name: string) => void;
   onSelectFrame: (index: number) => void;
   onToggle: () => void;
   onClose: () => void;
+  onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
+  selectedId: string | null;
+  selectedType: SelectedType;
 }
 
 export default function Sidebar({
   currentFrameIndex,
   frames,
-  isExporting,
   isOpen,
   onAddFrame,
   onDeleteFrame,
   onDuplicateFrame,
-  onExport,
-  onExportImage,
-  onExportJson,
-  onImportJson,
   onRenameFrame,
   onSelectFrame,
   onToggle,
   onClose,
+  onSelectObject,
+  selectedId,
+  selectedType,
 }: SidebarProps) {
+  const [view, setView] = useState<SidebarView>('frames');
+  const [layersFrameIndex, setLayersFrameIndex] = useState(currentFrameIndex);
+  const layersFrame = frames[layersFrameIndex] ?? frames[currentFrameIndex] ?? frames[0];
+
+  useEffect(() => {
+    if (!frames[layersFrameIndex]) setLayersFrameIndex(currentFrameIndex);
+  }, [currentFrameIndex, frames, layersFrameIndex]);
+
+  const openLayers = (frameIndex: number) => {
+    onSelectFrame(frameIndex);
+    setLayersFrameIndex(frameIndex);
+    setView('layers');
+  };
+
   return (
     <>
       <button
@@ -47,32 +62,44 @@ export default function Sidebar({
         aria-label={isOpen ? 'Close frames drawer' : 'Open frames drawer'}
         onClick={onToggle}
       >
-        <span aria-hidden="true">{isOpen ? '‹' : '›'}</span>
+        {isOpen ? <ChevronLeft aria-hidden="true" size={16} /> : <ChevronRight aria-hidden="true" size={16} />}
         <span>Frames</span>
       </button>
       <button type="button" className={`sidebar-backdrop${isOpen ? ' is-open' : ''}`} aria-label="Close frames drawer" onClick={onClose} />
       <aside id="controls-sidebar" className={`step-panel${isOpen ? ' is-open' : ''}`}>
-      <ExportActions
-        className="export-actions mobile-export-actions"
-        isExporting={isExporting}
-        onExport={onExport}
-        onExportImage={onExportImage}
-        onExportJson={onExportJson}
-        onImportJson={onImportJson}
-      />
-      <div className="control-section sidebar-frame-section">
-        <h3 className="section-title">🎞️ Frames</h3>
-        <Timeline
-          variant="sidebar"
-          currentFrameIndex={currentFrameIndex}
-          frames={frames}
-          onAddFrame={onAddFrame}
-          onDeleteFrame={onDeleteFrame}
-          onDuplicateFrame={onDuplicateFrame}
-          onRenameFrame={onRenameFrame}
-          onSelectFrame={onSelectFrame}
-        />
-      </div>
+        {view === 'frames' ? (
+          <div className="control-section sidebar-frame-section">
+            <h3 className="section-title"><Film aria-hidden="true" size={16} /> Frames</h3>
+            <Timeline
+              variant="sidebar"
+              currentFrameIndex={currentFrameIndex}
+              frames={frames}
+              onAddFrame={onAddFrame}
+              onDeleteFrame={onDeleteFrame}
+              onDuplicateFrame={onDuplicateFrame}
+              onRenameFrame={onRenameFrame}
+              onSelectFrame={onSelectFrame}
+              onOpenLayers={openLayers}
+            />
+          </div>
+        ) : (
+          <div className="sidebar-layers-section">
+            <button type="button" className="sidebar-back-btn" onClick={() => setView('frames')}>
+              <ChevronLeft aria-hidden="true" size={16} />
+              <span>Back to frames</span>
+            </button>
+            <div className="sidebar-layers-heading">
+              <h3 className="section-title"><Layers aria-hidden="true" size={16} /> Layers</h3>
+              <p className="sidebar-layers-frame-name">{layersFrame?.name}</p>
+            </div>
+            {layersFrame && <LayerList
+              activeFrame={layersFrame}
+              onSelectObject={onSelectObject}
+              selectedId={selectedId}
+              selectedType={selectedType}
+            />}
+          </div>
+        )}
       </aside>
     </>
   );

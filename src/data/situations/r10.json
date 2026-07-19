@@ -1,0 +1,343 @@
+{
+  "title": "R10 — Opposite Tacks",
+  "frames": [
+    {
+      "id": "r10-frame-1",
+      "name": "1. Approaching on opposite tacks",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r10-port",
+          "name": "Port tack",
+          "color": "#38bdf8",
+          "x": 190,
+          "y": 390,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        },
+        {
+          "id": "r10-starboard",
+          "name": "Starboard tack",
+          "color": "#f87171",
+          "x": 410,
+          "y": 390,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r10-port-course",
+          "name": "Port-tack course",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 190, "y": 390 },
+            { "x": 300, "y": 280 }
+          ],
+          "lineStyle": "dashed",
+          "lineWidth": 2
+        },
+        {
+          "id": "r10-starboard-course",
+          "name": "Starboard-tack course",
+          "color": "#f87171",
+          "points": [
+            { "x": 410, "y": 390 },
+            { "x": 300, "y": 280 }
+          ],
+          "lineStyle": "dashed",
+          "lineWidth": 2
+        }
+      ],
+      "comments": [
+        {
+          "id": "r10-note-1",
+          "name": "Rule question",
+          "text": "Who must keep clear?\nIdentify the tack of each boat before deciding.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "When boats are on opposite tacks, a port-tack boat shall keep clear of a starboard-tack boat."
+        }
+      ]
+    },
+    {
+      "id": "r10-frame-2",
+      "name": "2. Crossing the collision line",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r10-port",
+          "name": "Port tack",
+          "color": "#38bdf8",
+          "x": 245,
+          "y": 335,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy"
+        },
+        {
+          "id": "r10-starboard",
+          "name": "Starboard tack",
+          "color": "#f87171",
+          "x": 355,
+          "y": 335,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "dinghy"
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r10-crossing",
+          "name": "Converging courses",
+          "color": "#fb923c",
+          "points": [
+            { "x": 245, "y": 335 },
+            { "x": 300, "y": 280 },
+            { "x": 355, "y": 335 }
+          ],
+          "curved": true,
+          "lineWidth": 3
+        }
+      ],
+      "comments": [
+        {
+          "id": "r10-note-2",
+          "name": "Priority",
+          "text": "Starboard tack has right of way under Rule 10.",
+          "color": "#f87171",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "When boats are on opposite tacks, a port-tack boat shall keep clear of a starboard-tack boat."
+        }
+      ]
+    },
+    {
+      "id": "r10-frame-3",
+      "name": "3. Starboard tack hails",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r10-port",
+          "name": "Port tack",
+          "color": "#38bdf8",
+          "x": 280,
+          "y": 300,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy"
+        },
+        {
+          "id": "r10-starboard",
+          "name": "Starboard tack",
+          "color": "#f87171",
+          "x": 320,
+          "y": 300,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "dinghy"
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r10-hail",
+          "name": "Starboard course",
+          "color": "#f87171",
+          "points": [
+            { "x": 320, "y": 300 },
+            { "x": 380, "y": 240 }
+          ],
+          "lineWidth": 3
+        }
+      ],
+      "comments": [
+        {
+          "id": "r10-note-3",
+          "name": "Hail",
+          "text": "Starboard tack: maintain course and speed.\nA clear hail can prevent confusion.",
+          "color": "#f87171",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "When boats are on opposite tacks, a port-tack boat shall keep clear of a starboard-tack boat."
+        }
+      ]
+    },
+    {
+      "id": "r10-frame-4",
+      "name": "4. Port tack takes avoiding action",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r10-port",
+          "name": "Port tack",
+          "color": "#38bdf8",
+          "x": 235,
+          "y": 275,
+          "heading": 135,
+          "sailAngle": 35,
+          "boatClass": "dinghy"
+        },
+        {
+          "id": "r10-starboard",
+          "name": "Starboard tack",
+          "color": "#f87171",
+          "x": 365,
+          "y": 275,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "dinghy"
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r10-avoid",
+          "name": "Keep clear",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 235, "y": 275 },
+            { "x": 205, "y": 330 },
+            { "x": 190, "y": 390 }
+          ],
+          "curved": true,
+          "lineWidth": 4
+        },
+        {
+          "id": "r10-stand-on",
+          "name": "Stand-on course",
+          "color": "#f87171",
+          "points": [
+            { "x": 365, "y": 275 },
+            { "x": 420, "y": 220 }
+          ],
+          "lineWidth": 3
+        }
+      ],
+      "comments": [
+        {
+          "id": "r10-note-4",
+          "name": "Action",
+          "text": "Port tack keeps clear by changing course early and substantially.",
+          "color": "#38bdf8",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "When boats are on opposite tacks, a port-tack boat shall keep clear of a starboard-tack boat."
+        }
+      ]
+    },
+    {
+      "id": "r10-frame-5",
+      "name": "5. Clear and passing",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r10-port",
+          "name": "Port tack",
+          "color": "#38bdf8",
+          "x": 165,
+          "y": 300,
+          "heading": 135,
+          "sailAngle": 35,
+          "boatClass": "dinghy"
+        },
+        {
+          "id": "r10-starboard",
+          "name": "Starboard tack",
+          "color": "#f87171",
+          "x": 435,
+          "y": 190,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "dinghy"
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r10-port-clear",
+          "name": "Port tack clear",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 165, "y": 300 },
+            { "x": 120, "y": 345 }
+          ],
+          "lineWidth": 3
+        },
+        {
+          "id": "r10-starboard-clear",
+          "name": "Starboard tack continues",
+          "color": "#f87171",
+          "points": [
+            { "x": 435, "y": 190 },
+            { "x": 490, "y": 135 }
+          ],
+          "lineWidth": 3
+        }
+      ],
+      "comments": [
+        {
+          "id": "r10-note-5",
+          "name": "Result",
+          "text": "Both boats are now clear.\nThe port-tack boat has fulfilled its keep-clear obligation.",
+          "color": "#4ade80",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "When boats are on opposite tacks, a port-tack boat shall keep clear of a starboard-tack boat."
+        }
+      ]
+    }
+  ]
+}

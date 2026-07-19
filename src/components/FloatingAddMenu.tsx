@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { ArrowUpRight, DoorOpen, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
 import type { Mark } from '../types';
 
 interface FloatingAddMenuProps {
@@ -50,13 +51,13 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
     <div ref={menuRef} className={`floating-add-menu${isOpen ? ' is-open' : ''}`}>
       {isOpen && (
         <div className="floating-add-actions" aria-label="Add diagram object">
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddBoat)}>⛵ <span>Add boat</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark())}>📍 <span>Add mark</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('obstruction'))}>⚠️ <span>Add obstruction</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('gate'))}>🚪 <span>Add gate</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddArrow)}>↗️ <span>Add arrow</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddComment)}>💬 <span>Add comment</span></button>
-          <button type="button" className="floating-add-action" onClick={() => imageInputRef.current?.click()}>🖼️ <span>Add image</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(onAddBoat)}><Sailboat aria-hidden="true" size={16} /> <span>Add boat</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark())}><MapPin aria-hidden="true" size={16} /> <span>Add mark</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('obstruction'))}><TriangleAlert aria-hidden="true" size={16} /> <span>Add obstruction</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('gate'))}><DoorOpen aria-hidden="true" size={16} /> <span>Add gate</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(onAddArrow)}><ArrowUpRight aria-hidden="true" size={16} /> <span>Add arrow</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(onAddComment)}><MessageCircle aria-hidden="true" size={16} /> <span>Add comment</span></button>
+          <button type="button" className="floating-add-action" onClick={() => imageInputRef.current?.click()}><Image aria-hidden="true" size={16} /> <span>Add image</span></button>
           <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleImageChange} hidden />
         </div>
       )}
@@ -67,7 +68,7 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
       >
-        <span aria-hidden="true">{isOpen ? '×' : '+'}</span>
+        {isOpen ? <X aria-hidden="true" size={22} /> : <Plus aria-hidden="true" size={22} />}
       </button>
     </div>
   );

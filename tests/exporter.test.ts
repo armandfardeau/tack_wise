@@ -130,7 +130,6 @@ describe('scenario JSON export', () => {
       }],
       comments: [{ id: 'comment-1', name: 'Note', text: 'Tack here', color: '#fff', x: 10, y: 20 }],
     }], 0, {
-      animationMode: 'continuous',
       displayMode: 'cumulative',
       presenterMode: true,
     }));

@@ -1,9 +1,12 @@
 import { Group, Rect, Text } from 'react-konva';
-import type { CommentNote as CommentNoteModel } from '../types';
+import { COMMENT_PADDING_X, COMMENT_PADDING_Y } from '../constants';
+import type { CommentNote as CommentNoteModel, Theme } from '../types';
+import { getCommentHeight } from '../utils/simulation';
 
 interface CommentNoteProps {
   comment: CommentNoteModel;
   isSelected: boolean;
+  theme: Theme;
   onMove?: (id: string, position: { x: number; y: number }) => void;
   onOpenControls?: () => void;
   onOpenInspector?: () => void;
@@ -11,9 +14,10 @@ interface CommentNoteProps {
   isShadow?: boolean;
 }
 
-export default function CommentNote({ comment, isSelected, onMove, onOpenControls, onOpenInspector, onSelect, isShadow = false }: CommentNoteProps) {
+export default function CommentNote({ comment, isSelected, theme, onMove, onOpenControls, onOpenInspector, onSelect, isShadow = false }: CommentNoteProps) {
   const width = comment.width ?? 180;
   const fontSize = comment.fontSize ?? 14;
+  const height = getCommentHeight(comment);
 
   return (
     <Group
@@ -37,8 +41,8 @@ export default function CommentNote({ comment, isSelected, onMove, onOpenControl
     >
       <Rect
         width={width}
-        height={Math.max(48, comment.text.split('\n').length * (fontSize + 5) + 18)}
-        fill="#172033"
+        height={height}
+        fill={theme === 'light' ? '#ffffff' : '#172033'}
         stroke={isSelected ? '#22d3ee' : comment.color}
         strokeWidth={isSelected ? 2 : 1}
         cornerRadius={6}
@@ -48,9 +52,9 @@ export default function CommentNote({ comment, isSelected, onMove, onOpenControl
       />
       <Text
         text={comment.text}
-        x={10}
-        y={9}
-        width={width - 20}
+        x={COMMENT_PADDING_X}
+        y={COMMENT_PADDING_Y}
+        width={width - COMMENT_PADDING_X * 2}
         fontSize={fontSize}
         fill={comment.color}
         lineHeight={1.25}

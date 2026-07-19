@@ -5,20 +5,23 @@ interface WindHudProps {
 }
 
 export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps) {
+  const flowAngle = (windAngle + 180) % 360;
+  const displayAngle = flowAngle < 0 ? flowAngle + 360 : flowAngle;
+
   return (
     <button
       type="button"
       className="wind-vane-container"
-      aria-label="Select wind indicator"
-      title="Select wind indicator; use canvas settings for wind options"
+      aria-label="Edit wind direction and velocity"
+      title="Click to edit wind direction and velocity"
       onClick={onSelect}
     >
       <div className="wind-vane-dial">
         <svg
           className="wind-vane-needle"
           viewBox="0 0 100 100"
-          style={{ transform: `rotate(${windAngle}deg)` }}
-          aria-label={`Wind direction ${windAngle} degrees`}
+          style={{ transform: `rotate(${displayAngle}deg)` }}
+          aria-label={`Wind direction ${displayAngle} degrees`}
         >
           <path d="M 50 80 L 50 50" stroke="#94a3b8" strokeWidth="4" />
           <path d="M 42 80 L 50 70 L 58 80 Z" fill="#94a3b8" />

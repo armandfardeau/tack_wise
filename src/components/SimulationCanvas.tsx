@@ -149,7 +149,7 @@ export default function SimulationCanvas({
               <TacticalArrow key={`shadow-${shadowIndex}-${arrow.id}`} arrow={arrow} isSelected={false} isShadow />
             ))}
             {(previousFrame.comments ?? []).map((comment) => (
-              <CommentNote key={`shadow-${shadowIndex}-${comment.id}`} comment={comment} isSelected={false} isShadow />
+              <CommentNote key={`shadow-${shadowIndex}-${comment.id}`} comment={comment} isSelected={false} theme={theme} isShadow />
             ))}
             {(previousFrame.images ?? []).map((image) => (
               <DiagramImage key={`shadow-${shadowIndex}-${image.id}`} image={image} isSelected={false} isShadow />
@@ -225,6 +225,7 @@ export default function SimulationCanvas({
             key={comment.id}
             comment={comment}
             isSelected={selectedId === comment.id}
+            theme={theme}
             onOpenInspector={() => onOpenInspector(comment.id, 'comment')}
             onSelect={(id) => onSelectObject(id, 'comment')}
             onOpenControls={onOpenControls}

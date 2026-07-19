@@ -1,3 +1,5 @@
+import { Redo2, Undo2 } from 'lucide-react';
+
 interface CanvasHistoryControlsProps {
   canRedo: boolean;
   canUndo: boolean;
@@ -25,7 +27,7 @@ export default function CanvasHistoryControls({
         title="Undo (Ctrl/Cmd+Z)"
         aria-label="Undo"
       >
-        ↶
+        <Undo2 aria-hidden="true" size={16} />
       </button>
       <button
         type="button"
@@ -35,7 +37,7 @@ export default function CanvasHistoryControls({
         title="Redo (Ctrl/Cmd+Shift+Z)"
         aria-label="Redo"
       >
-        ↷
+        <Redo2 aria-hidden="true" size={16} />
       </button>
       {hasAutosave && (
         <button

@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
-import type { AnimationMode, DisplayMode, Frame, Theme } from '../types';
+import type { DisplayMode, Frame, Theme } from '../types';
 import type { Boat, CommentNote, DiagramImage, Mark, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import type { SnapTarget } from '../hooks/useGridSnap';
-import type { Position } from '../utils/simulation';
+import { getCommentHeight, type Position } from '../utils/simulation';
 import CanvasZoomControls from './CanvasZoomControls';
 import SimulationCanvas from './SimulationCanvas';
 import WindHud from './WindHud';
@@ -24,6 +24,7 @@ interface CanvasWorkspaceProps {
   constrainPosition: (position: Position) => Position;
   currentFrameIndex: number;
   displayMode: DisplayMode;
+  presenterMode: boolean;
   theme: Theme;
   frames: Frame[];
   canRedo: boolean;
@@ -53,7 +54,6 @@ interface CanvasWorkspaceProps {
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
-  onToggleTheme: () => void;
   onRedo: () => void;
   onRestoreAutosave: () => void;
   onTogglePlaying: () => void;
@@ -62,15 +62,15 @@ interface CanvasWorkspaceProps {
   onReplayFromStart: () => void;
   onUndo: () => void;
   onSetPlaySpeed: (speed: number) => void;
-  animationMode: AnimationMode;
-  onSetAnimationMode: (mode: AnimationMode) => void;
   playSpeed: number;
   onPanCanvasBy: (delta: Position) => void;
   onOpenControls: () => void;
   onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
+  inspectorRequest?: InspectorRequest | null;
   onSnapPreview: (target: SnapTarget | null) => void;
   onZoomIn: () => void;
   onZoomOut: () => void;
+  onAutoZoom: () => void;
   onResetZoom: () => void;
   selectedId: string | null;
   selectedType: SelectedType;
@@ -102,6 +102,12 @@ interface InspectorPlacement {
 
 const INSPECTOR_MARGIN = 12;
 const INSPECTOR_GAP = 24;
+
+export interface InspectorRequest {
+  id: string;
+  type: Exclude<SelectedType, null>;
+  requestId: number;
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), Math.max(min, max));
@@ -253,6 +259,7 @@ export default function CanvasWorkspace({
   constrainPosition,
   currentFrameIndex,
   displayMode,
+  presenterMode,
   theme,
   frames,
   canRedo,
@@ -282,7 +289,6 @@ export default function CanvasWorkspace({
   onSetAutoSailTrim,
   onSetGridSnapEnabled,
   onSetShowGrid,
-  onToggleTheme,
   onRedo,
   onRestoreAutosave,
   onTogglePlaying,
@@ -291,15 +297,15 @@ export default function CanvasWorkspace({
   onReplayFromStart,
   onUndo,
   onSetPlaySpeed,
-  animationMode,
-  onSetAnimationMode,
   playSpeed,
   onPanCanvasBy,
   onOpenControls,
   onSelectObject,
+  inspectorRequest,
   onSnapPreview,
   onZoomIn,
   onZoomOut,
+  onAutoZoom,
   onResetZoom,
   selectedId,
   selectedType,
@@ -323,6 +329,7 @@ export default function CanvasWorkspace({
 }: CanvasWorkspaceProps) {
   const inspectorRef = useRef<HTMLDivElement | null>(null);
   const autoPanKeyRef = useRef<string | null>(null);
+  const handledInspectorRequestRef = useRef<number | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [inspectorPosition, setInspectorPosition] = useState<Position | null>(null);
 
@@ -356,6 +363,13 @@ export default function CanvasWorkspace({
     setIsInspectorOpen(true);
     onSelectObject(id, type);
   };
+
+  useEffect(() => {
+    if (!inspectorRequest || inspectorRequest.requestId === handledInspectorRequestRef.current) return;
+
+    handledInspectorRequestRef.current = inspectorRequest.requestId;
+    handleOpenInspector(inspectorRequest.id, inspectorRequest.type);
+  }, [handleOpenInspector, inspectorRequest]);
 
   const handleAddBoat = () => {
     resetInspectorPlacement();
@@ -397,9 +411,7 @@ export default function CanvasWorkspace({
     }
 
     if (selectedType === 'comment' && selectedComment) {
-      const fontSize = selectedComment.fontSize ?? 14;
-      const height = Math.max(48, selectedComment.text.split('\n').length * (fontSize + 5) + 18);
-      return { left: selectedComment.x, top: selectedComment.y, width: selectedComment.width ?? 180, height };
+      return { left: selectedComment.x, top: selectedComment.y, width: selectedComment.width ?? 180, height: getCommentHeight(selectedComment) };
     }
 
     if (selectedType === 'image' && selectedImage) {
@@ -582,12 +594,8 @@ export default function CanvasWorkspace({
               onSetGridSnapEnabled={onSetGridSnapEnabled}
               onSetAutoSailTrim={onSetAutoSailTrim}
               onSetShowGrid={onSetShowGrid}
-              onToggleTheme={onToggleTheme}
-              theme={theme}
               onTogglePlaying={onTogglePlaying}
               onSetPlaySpeed={onSetPlaySpeed}
-              animationMode={animationMode}
-              onSetAnimationMode={onSetAnimationMode}
               playSpeed={playSpeed}
               selectedBoat={selectedBoat}
               selectedMark={selectedMark}
@@ -613,14 +621,16 @@ export default function CanvasWorkspace({
           onAddComment={handleAddComment}
           onAddImage={handleAddImage}
         />
-        <CanvasHistoryControls
-          canRedo={canRedo}
-          canUndo={canUndo}
-          hasAutosave={hasAutosave}
-          onRedo={onRedo}
-          onRestoreAutosave={onRestoreAutosave}
-          onUndo={onUndo}
-        />
+        {!presenterMode && (
+          <CanvasHistoryControls
+            canRedo={canRedo}
+            canUndo={canUndo}
+            hasAutosave={hasAutosave}
+            onRedo={onRedo}
+            onRestoreAutosave={onRestoreAutosave}
+            onUndo={onUndo}
+          />
+        )}
         <PlaybackButton
           isPlaying={isPlaying}
           currentFrameIndex={currentFrameIndex}
@@ -638,13 +648,14 @@ export default function CanvasWorkspace({
           minZoom={minZoom}
           onZoomIn={onZoomIn}
           onZoomOut={onZoomOut}
+          onAutoZoom={onAutoZoom}
           onReset={onResetZoom}
         />
         <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />
         <WindHud
           windAngle={activeFrame.windAngle}
           windSpeed={activeFrame.windSpeed}
-          onSelect={() => handleSelectObject('wind', 'wind')}
+          onSelect={() => handleOpenInspector('wind', 'wind')}
         />
       </div>
       {children}

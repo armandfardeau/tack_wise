@@ -20,3 +20,5 @@ export const CANVAS_PAN_MARGIN = 2;
 // Use 20px spacing to keep the placement and magnetic grids at 2x density.
 export const GRID_SPACING = 20;
 export const GRID_SNAP_RADIUS = GRID_SPACING * 0.45;
+export const COMMENT_PADDING_X = 14;
+export const COMMENT_PADDING_Y = 12;

@@ -1,3 +1,5 @@
+import { Settings } from 'lucide-react';
+
 interface GridSettingsButtonProps {
   onOpenInspector: () => void;
 }
@@ -11,7 +13,7 @@ export default function GridSettingsButton({ onOpenInspector }: GridSettingsButt
       title="Open canvas settings"
       onClick={onOpenInspector}
     >
-      ⚙️
+      <Settings aria-hidden="true" size={16} />
     </button>
   );
 }

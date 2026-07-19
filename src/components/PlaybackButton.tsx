@@ -1,3 +1,5 @@
+import { Pause, Play, RotateCcw, Settings, SkipBack, SkipForward } from 'lucide-react';
+
 interface PlaybackButtonProps {
   isPlaying: boolean;
   currentFrameIndex?: number;
@@ -29,7 +31,7 @@ export default function PlaybackButton({
         onClick={onStepBackward}
         disabled={currentFrameIndex <= 0}
       >
-        <span aria-hidden="true">⏮️</span>
+        <SkipBack aria-hidden="true" size={16} />
       </button>
       <button
         type="button"
@@ -38,8 +40,7 @@ export default function PlaybackButton({
         title={isPlaying ? 'Pause' : 'Play'}
         onClick={onTogglePlaying}
       >
-        <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? '⏸️' : '▶️'}</span>
-        <span className="timeline-control-label">{isPlaying ? 'Pause' : 'Play'}</span>
+        <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</span>
       </button>
       <button
         type="button"
@@ -49,7 +50,7 @@ export default function PlaybackButton({
         onClick={onStepForward}
         disabled={currentFrameIndex >= frameCount - 1}
       >
-        <span aria-hidden="true">⏭️</span>
+        <SkipForward aria-hidden="true" size={16} />
       </button>
       <button
         type="button"
@@ -58,7 +59,7 @@ export default function PlaybackButton({
         title="Replay from start"
         onClick={onReplayFromStart}
       >
-        <span aria-hidden="true">↺</span>
+        <RotateCcw aria-hidden="true" size={16} />
       </button>
       <button
         type="button"
@@ -67,7 +68,7 @@ export default function PlaybackButton({
         title="Open playback options"
         onClick={onOpenInspector}
       >
-        ⚙️
+        <Settings aria-hidden="true" size={16} />
       </button>
     </div>
   );
