@@ -186,7 +186,7 @@ describe('AppHeader', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: /export gif/i }));
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export video/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export video \(mp4\)/i }));
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /export png/i }));
