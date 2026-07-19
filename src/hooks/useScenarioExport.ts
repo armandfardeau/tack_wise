@@ -1,7 +1,7 @@
 import { useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import type { Frame, ScenarioSettings } from '../types';
+import type { Frame, ScenarioSettings, VideoExportType } from '../types';
 import { dataUrlToBlob, downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
 import { convertWebmToMp4 } from '../utils/mp4';
 
@@ -28,7 +28,7 @@ export function useScenarioExport({
 }: UseScenarioExportProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
-  const [exportType, setExportType] = useState<'gif' | 'mp4' | null>(null);
+  const [exportType, setExportType] = useState<'gif' | VideoExportType | null>(null);
 
   const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
     downloadScenarioJson(exportFrames, exportCurrentFrameIndex, settings);
@@ -43,28 +43,33 @@ export function useScenarioExport({
     downloadBlob(dataUrlToBlob(dataUrl), `tack-wise-diagram-${Date.now()}.${type === 'png' ? 'png' : 'jpg'}`);
   };
 
-  const getRecordingMimeType = () => {
+  const getRecordingMimeType = (type: VideoExportType) => {
     if (typeof MediaRecorder === 'undefined') {
       throw new Error('Video recording is not supported by this browser.');
     }
 
-    const supportedMimeTypes = [
-      'video/mp4;codecs=avc1.42E01E',
-      'video/mp4',
+    const webmMimeTypes = [
       'video/webm;codecs=vp9',
       'video/webm;codecs=vp8',
       'video/webm',
     ];
+    const supportedMimeTypes = type === 'webm'
+      ? webmMimeTypes
+      : [
+        'video/mp4;codecs=avc1.42E01E',
+        'video/mp4',
+        ...webmMimeTypes,
+      ];
     const mimeType = supportedMimeTypes.find((candidate) => MediaRecorder.isTypeSupported(candidate));
 
     if (!mimeType) {
-      throw new Error('This browser cannot record a video that can be exported as MP4.');
+      throw new Error(`This browser cannot record a video that can be exported as ${type.toUpperCase()}.`);
     }
 
     return mimeType;
   };
 
-  const triggerExport = async (type: 'gif' | 'mp4') => {
+  const triggerExport = async (type: 'gif' | VideoExportType) => {
     setIsPlaying(false);
     setIsExporting(true);
     setExportType(type);
@@ -104,7 +109,7 @@ export function useScenarioExport({
           throw new Error('Canvas video capture is not supported by this browser.');
         }
 
-        const mimeType = getRecordingMimeType();
+        const mimeType = getRecordingMimeType(type);
         const stream = canvas.captureStream(20);
         let recordedBlob: Blob;
 
@@ -154,7 +159,10 @@ export function useScenarioExport({
           stream.getTracks().forEach((track) => track.stop());
         }
 
-        if (mimeType.startsWith('video/mp4')) {
+        if (type === 'webm') {
+          setExportProgress(100);
+          downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.webm`);
+        } else if (mimeType.startsWith('video/mp4')) {
           setExportProgress(100);
           downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.mp4`);
         } else {
@@ -169,7 +177,8 @@ export function useScenarioExport({
     } catch (error) {
       console.error('Export error: ', error);
       const message = error instanceof Error ? error.message : 'Please try again.';
-      window.alert(`Could not export ${type === 'gif' ? 'GIF' : 'MP4'}. ${message}`);
+      const exportLabel = type === 'gif' ? 'GIF' : type.toUpperCase();
+      window.alert(`Could not export ${exportLabel}. ${message}`);
     } finally {
       setCurrentFrameIndex(originalFrame);
       setIsExporting(false);
