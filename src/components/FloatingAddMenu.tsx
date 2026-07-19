@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
 import { ArrowUpRight, DoorOpen, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
 import type { Mark } from '../types';
 
@@ -25,6 +25,46 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
 
     document.addEventListener('pointerdown', handlePointerDown, true);
     return () => document.removeEventListener('pointerdown', handlePointerDown, true);
+  }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return undefined;
+
+    const menu = menuRef.current;
+    const canvasWrap = menu?.parentElement;
+    if (!menu || !canvasWrap) return undefined;
+
+    const updatePosition = () => {
+      menu.style.removeProperty('--floating-add-menu-bottom');
+
+      const baseBottom = Number.parseFloat(window.getComputedStyle(menu).bottom);
+      if (!Number.isFinite(baseBottom)) return;
+
+      const menuRect = menu.getBoundingClientRect();
+      const canvasRect = canvasWrap.getBoundingClientRect();
+      const topMargin = 8;
+      const topOverflow = canvasRect.top + topMargin - menuRect.top;
+
+      if (topOverflow > 0) {
+        menu.style.setProperty(
+          '--floating-add-menu-bottom',
+          `${Math.max(0, baseBottom - topOverflow)}px`,
+        );
+      }
+    };
+
+    updatePosition();
+    window.addEventListener('resize', updatePosition);
+
+    const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(updatePosition);
+    resizeObserver?.observe(canvasWrap);
+    resizeObserver?.observe(menu);
+
+    return () => {
+      window.removeEventListener('resize', updatePosition);
+      resizeObserver?.disconnect();
+      menu.style.removeProperty('--floating-add-menu-bottom');
+    };
   }, [isOpen]);
 
   const runAction = (action: () => void) => {
