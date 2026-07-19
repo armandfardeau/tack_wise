@@ -37,7 +37,7 @@ describe('AppHeader', () => {
 
   it('lists and loads situation templates from the File menu', () => {
     const onLoadTemplate = jest.fn();
-    const template = { id: 'tacking-basics', title: 'Tacking Basics', frames: [] };
+    const template = { id: 'tacking-basics', title: 'Getting Started', frames: [] };
 
     render(
       <AppHeader
@@ -52,14 +52,14 @@ describe('AppHeader', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /tacking basics/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /getting started/i }));
 
     expect(onLoadTemplate).toHaveBeenCalledWith(template);
   });
 
   it('filters situation templates from the template search bar', () => {
     const templates = [
-      { id: 'tacking-basics', title: 'Tacking Basics', frames: [] },
+      { id: 'tacking-basics', title: 'Getting Started', frames: [] },
       { id: 'r10', title: 'R10 — Opposite Tacks', frames: [] },
     ];
 
@@ -78,7 +78,7 @@ describe('AppHeader', () => {
     fireEvent.change(screen.getByRole('searchbox', { name: /search templates/i }), { target: { value: 'r10' } });
 
     expect(screen.getByRole('menuitem', { name: /r10 — opposite tacks/i })).toBeInTheDocument();
-    expect(screen.queryByRole('menuitem', { name: /tacking basics/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: /getting started/i })).not.toBeInTheDocument();
   });
 
   it('provides titles for export menu items', () => {

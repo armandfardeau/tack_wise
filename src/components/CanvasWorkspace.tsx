@@ -548,6 +548,8 @@ export default function CanvasWorkspace({
           constrainPosition={constrainPosition}
           currentFrameIndex={currentFrameIndex}
           displayMode={displayMode}
+          presenterMode={presenterMode}
+          isExporting={isExporting}
           theme={theme}
           frames={frames}
           getSnappedPosition={getSnappedPosition}

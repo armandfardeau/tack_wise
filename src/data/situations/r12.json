@@ -1,0 +1,77 @@
+{
+  "title": "R12 — Same Tack, Not Overlapped",
+  "frames": [
+    {
+      "id": "r12-frame-1",
+      "name": "Boat clear astern keeps clear",
+      "windAngle": 0,
+      "windSpeed": 13,
+      "boats": [
+        {
+          "id": "r12-alpha",
+          "name": "Alpha — clear ahead",
+          "color": "#38bdf8",
+          "x": 360,
+          "y": 240,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        },
+        {
+          "id": "r12-bravo",
+          "name": "Bravo — clear astern",
+          "color": "#f87171",
+          "x": 180,
+          "y": 400,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r12-alpha-course",
+          "name": "Boat clear ahead",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 360, "y": 240 },
+            { "x": 470, "y": 130 }
+          ],
+          "lineWidth": 3
+        },
+        {
+          "id": "r12-bravo-course",
+          "name": "Astern boat keeps clear",
+          "color": "#f87171",
+          "points": [
+            { "x": 180, "y": 400 },
+            { "x": 135, "y": 445 }
+          ],
+          "lineWidth": 3
+        }
+      ],
+      "comments": [
+        {
+          "id": "r12-note",
+          "name": "Overlap check",
+          "text": "The boats are on the same tack but not overlapped.\nBravo is clear astern and must keep clear of Alpha.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-12",
+          "label": "RRS 12",
+          "description": "When boats are on the same tack and not overlapped, the boat clear astern keeps clear of the boat clear ahead."
+        }
+      ]
+    }
+  ]
+}

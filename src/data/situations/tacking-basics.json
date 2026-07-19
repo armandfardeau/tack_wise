@@ -1,19 +1,239 @@
 {
-  "title": "Tacking Basics",
+  "title": "Getting Started",
   "frames": [
     {
       "id": "frame-1",
-      "name": "1. Preparation",
-      "windAngle": 0,
-      "windSpeed": 12,
+      "name": "1. Toolbox Tour",
+      "windAngle": 25,
+      "windSpeed": 14,
       "boats": [
-        { "id": "boat-1", "name": "Alpha", "color": "#38bdf8", "x": 200, "y": 350, "heading": 45, "sailAngle": -12 },
-        { "id": "boat-2", "name": "Bravo", "color": "#f87171", "x": 400, "y": 350, "heading": 315, "sailAngle": 12 }
+        {
+          "id": "boat-1",
+          "name": "Alpha — dinghy",
+          "color": "#38bdf8",
+          "x": 150,
+          "y": 345,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "hullScale": 1,
+          "sailPlan": "main",
+          "showHeadingLine": true
+        },
+        {
+          "id": "boat-2",
+          "name": "Bravo — keelboat",
+          "color": "#f87171",
+          "x": 270,
+          "y": 335,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "keelboat",
+          "hullScale": 1.15,
+          "sailPlan": "asymmetric-spinnaker",
+          "spinnakerDeployed": true
+        },
+        {
+          "id": "boat-3",
+          "name": "Cove — optimist",
+          "color": "#a78bfa",
+          "x": 390,
+          "y": 360,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "optimist",
+          "hullScale": 0.8,
+          "sailPlan": "main"
+        },
+        {
+          "id": "boat-4",
+          "name": "Dash — catamaran",
+          "color": "#facc15",
+          "x": 170,
+          "y": 205,
+          "heading": 90,
+          "sailAngle": 35,
+          "boatClass": "tornado",
+          "hullScale": 1.1,
+          "sailPlan": "symmetric-spinnaker",
+          "spinnakerDeployed": true,
+          "showHeadingLine": true
+        },
+        {
+          "id": "boat-5",
+          "name": "Trim — multihull",
+          "color": "#34d399",
+          "x": 315,
+          "y": 180,
+          "heading": 135,
+          "sailAngle": 55,
+          "boatClass": "trimaran",
+          "hullScale": 1.3,
+          "sailPlan": "asymmetric-spinnaker",
+          "spinnakerDeployed": true
+        },
+        {
+          "id": "boat-6",
+          "name": "Coach — custom",
+          "color": "#fb923c",
+          "x": 430,
+          "y": 220,
+          "heading": 225,
+          "sailAngle": -35,
+          "boatClass": "custom",
+          "hullScale": 0.9,
+          "sailPlan": "main"
+        }
       ],
       "marks": [
-        { "id": "mark-1", "name": "Windward Mark", "color": "#ef4444", "x": 300, "y": 120, "shape": "triangle" },
-        { "id": "mark-2", "name": "Committee Boat", "color": "#22c55e", "x": 450, "y": 400, "shape": "square" },
-        { "id": "mark-3", "name": "Pin End", "color": "#eab308", "x": 150, "y": 400, "shape": "circle", "connectedToMarkId": "mark-2" }
+        {
+          "id": "mark-1",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 85,
+          "shape": "triangle",
+          "size": 30,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise",
+          "connectedToMarkId": "mark-2",
+          "connectionLineColor": "#ef4444",
+          "connectionLineStyle": "solid"
+        },
+        {
+          "id": "mark-2",
+          "name": "Committee boat",
+          "color": "#22c55e",
+          "x": 650,
+          "y": 430,
+          "shape": "square",
+          "size": 32
+        },
+        {
+          "id": "mark-3",
+          "name": "Pin end",
+          "color": "#eab308",
+          "x": 75,
+          "y": 430,
+          "shape": "circle",
+          "size": 28,
+          "connectedToMarkId": "mark-5",
+          "connectionLineColor": "#eab308",
+          "connectionLineStyle": "dotted"
+        },
+        {
+          "id": "mark-4",
+          "name": "Obstruction",
+          "color": "#f97316",
+          "x": 470,
+          "y": 245,
+          "shape": "obstruction",
+          "size": 58,
+          "showRotationArrow": true,
+          "rotationDirection": "clockwise",
+          "connectedToMarkId": "mark-2",
+          "connectionLineColor": "#f97316",
+          "connectionLineStyle": "dashed"
+        },
+        {
+          "id": "mark-5",
+          "name": "Starting gate",
+          "color": "#06b6d4",
+          "x": 300,
+          "y": 445,
+          "shape": "gate",
+          "size": 30
+        }
+      ],
+      "arrows": [
+        {
+          "id": "arrow-1",
+          "name": "Curved course",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 85, "y": 330 },
+            { "x": 205, "y": 275 },
+            { "x": 350, "y": 225 }
+          ],
+          "curved": true,
+          "lineStyle": "solid",
+          "lineWidth": 4,
+          "showArrowhead": true
+        },
+        {
+          "id": "arrow-2",
+          "name": "Layline",
+          "color": "#facc15",
+          "points": [
+            { "x": 100, "y": 390 },
+            { "x": 250, "y": 365 },
+            { "x": 435, "y": 405 }
+          ],
+          "curved": false,
+          "lineStyle": "dashed",
+          "lineWidth": 3,
+          "showArrowhead": false
+        },
+        {
+          "id": "arrow-3",
+          "name": "Tactical cue",
+          "color": "#fb923c",
+          "points": [
+            { "x": 395, "y": 260 },
+            { "x": 500, "y": 185 }
+          ],
+          "curved": false,
+          "lineStyle": "dotted",
+          "lineWidth": 2,
+          "showArrowhead": true
+        }
+      ],
+      "comments": [
+        {
+          "id": "comment-1",
+          "name": "Getting started",
+          "text": "Try the toolbox: drag boats and marks, double-click to edit, and use the timeline to animate the situation.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 90,
+          "width": 200,
+          "fontSize": 14
+        },
+        {
+          "id": "comment-2",
+          "name": "Layer legend",
+          "text": "Blue and red paths are tactical arrows. The dashed mark line shows a connection.",
+          "color": "#a5f3fc",
+          "x": 490,
+          "y": 420,
+          "width": 145,
+          "fontSize": 12
+        }
+      ],
+      "images": [
+        {
+          "id": "image-1",
+          "name": "Wind and course reference",
+          "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='110' viewBox='0 0 180 110'%3E%3Crect width='180' height='110' rx='12' fill='%230f3d56'/%3E%3Cpath d='M18 82 C55 60 82 50 150 24' fill='none' stroke='%2338bdf8' stroke-width='4'/%3E%3Cpath d='M150 24 l-14 2 8 10' fill='none' stroke='%2338bdf8' stroke-width='4'/%3E%3Cpath d='M90 80 V28 M90 28 l-7 12 h14 z' fill='%23f87171'/%3E%3Ccircle cx='35' cy='72' r='7' fill='%23facc15'/%3E%3Ccircle cx='150' cy='24' r='7' fill='%2334d399'/%3E%3Ctext x='14' y='102' fill='white' font-family='sans-serif' font-size='11'%3EWindward course sketch%3C/text%3E%3C/svg%3E",
+          "x": 500,
+          "y": 275,
+          "width": 180,
+          "height": 110,
+          "rotation": -3
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "On opposite tacks, a port-tack boat keeps clear of a starboard-tack boat.",
+          "url": "https://www.sailing.org/tools/documents/20252028RRS-%5B27823%5D.pdf"
+        },
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats approach a mark, the outside boat gives the inside boat mark-room."
+        }
       ]
     },
     {

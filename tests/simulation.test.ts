@@ -69,7 +69,7 @@ describe('simulation utilities', () => {
   });
 
   it('includes visual extents when calculating the canvas content bounds', () => {
-    expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 490, maxY: 440 });
+    expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 690, maxY: 705 });
   });
 
 });

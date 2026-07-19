@@ -1,0 +1,79 @@
+{
+  "title": "R13 — While Tacking",
+  "frames": [
+    {
+      "id": "r13-frame-1",
+      "name": "Boat passing head to wind",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r13-alpha",
+          "name": "Alpha — tacking",
+          "color": "#38bdf8",
+          "x": 290,
+          "y": 315,
+          "heading": 5,
+          "sailAngle": 0,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        },
+        {
+          "id": "r13-bravo",
+          "name": "Bravo — close-hauled",
+          "color": "#f87171",
+          "x": 380,
+          "y": 235,
+          "heading": 315,
+          "sailAngle": 12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r13-tack",
+          "name": "Tacking path",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 220, "y": 385 },
+            { "x": 290, "y": 315 },
+            { "x": 360, "y": 245 }
+          ],
+          "curved": true,
+          "lineWidth": 4
+        },
+        {
+          "id": "r13-bravo-course",
+          "name": "Other boat continues",
+          "color": "#f87171",
+          "points": [
+            { "x": 380, "y": 235 },
+            { "x": 455, "y": 160 }
+          ],
+          "lineWidth": 3
+        }
+      ],
+      "comments": [
+        {
+          "id": "r13-note",
+          "name": "Tacking window",
+          "text": "Alpha has passed head to wind but is not yet close-hauled.\nAlpha must keep clear until she reaches a close-hauled course.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-13",
+          "label": "RRS 13",
+          "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
+        }
+      ]
+    }
+  ]
+}

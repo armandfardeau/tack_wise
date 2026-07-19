@@ -1,0 +1,80 @@
+{
+  "title": "R14 — Avoiding Contact",
+  "frames": [
+    {
+      "id": "r14-frame-1",
+      "name": "Avoiding a collision",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r14-alpha",
+          "name": "Alpha — right of way",
+          "color": "#38bdf8",
+          "x": 280,
+          "y": 320,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        },
+        {
+          "id": "r14-bravo",
+          "name": "Bravo — keep clear",
+          "color": "#f87171",
+          "x": 340,
+          "y": 275,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r14-collision-line",
+          "name": "Potential contact",
+          "color": "#ef4444",
+          "points": [
+            { "x": 280, "y": 320 },
+            { "x": 340, "y": 275 }
+          ],
+          "lineStyle": "dashed",
+          "lineWidth": 4
+        },
+        {
+          "id": "r14-avoid",
+          "name": "Avoiding action",
+          "color": "#f87171",
+          "points": [
+            { "x": 340, "y": 275 },
+            { "x": 405, "y": 315 },
+            { "x": 455, "y": 360 }
+          ],
+          "curved": true,
+          "lineWidth": 4
+        }
+      ],
+      "comments": [
+        {
+          "id": "r14-note",
+          "name": "Seamanship",
+          "text": "Even a right-of-way boat avoids contact if reasonably possible.\nThe keep-clear boat must act before the situation becomes unavoidable.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-14",
+          "label": "RRS 14",
+          "description": "If reasonably possible, a boat avoids contact, does not cause contact between boats, and does not cause contact with an object."
+        }
+      ]
+    }
+  ]
+}

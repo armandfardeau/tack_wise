@@ -12,10 +12,11 @@ describe('useScenario', () => {
     });
   });
 
-  it('connects the default committee boat to the pin end', () => {
+  it('keeps the default mark connections across the scenario', () => {
     const { result } = renderHook(() => useScenario());
 
-    expect(result.current.frames.every((frame) => (
+    expect(result.current.frames[0].marks.find((mark) => mark.id === 'mark-3')?.connectedToMarkId).toBe('mark-5');
+    expect(result.current.frames.slice(1).every((frame) => (
       frame.marks.find((mark) => mark.id === 'mark-3')?.connectedToMarkId === 'mark-2'
     ))).toBe(true);
   });
@@ -93,7 +94,7 @@ describe('useScenario', () => {
     });
 
     expect(result.current.frames[1].name).toBe('Mark approach');
-    expect(result.current.frames[0].name).toBe('1. Preparation');
+    expect(result.current.frames[0].name).toBe('1. Toolbox Tour');
 
     act(() => {
       result.current.renameFrame(1, '   ');
@@ -180,9 +181,9 @@ describe('useScenario', () => {
       result.current.addComment();
     });
 
-    expect(result.current.frames[0].marks.some((mark) => mark.shape === 'obstruction')).toBe(false);
-    expect(result.current.frames[0].arrows ?? []).toHaveLength(0);
-    expect(result.current.frames[0].comments ?? []).toHaveLength(0);
+    expect(result.current.frames[0].marks.some((mark) => mark.shape === 'obstruction')).toBe(true);
+    expect(result.current.frames[0].arrows ?? []).toHaveLength(3);
+    expect(result.current.frames[0].comments ?? []).toHaveLength(2);
     expect(result.current.frames.slice(1).every((frame) => frame.marks.some((mark) => mark.shape === 'obstruction'))).toBe(true);
     expect(result.current.frames.slice(1).every((frame) => frame.arrows?.length === 1)).toBe(true);
     const addedArrow = result.current.frames[1].arrows?.[0];
@@ -211,6 +212,6 @@ describe('useScenario', () => {
 
     act(() => result.current.updateBoat('boat-1', { name: 'Changed after save' }));
     act(() => result.current.loadFromLibrary(result.current.libraryItems[0].id));
-    expect(result.current.selectedBoat?.name).toBe('Alpha');
+    expect(result.current.selectedBoat?.name).toBe('Alpha — dinghy');
   });
 });

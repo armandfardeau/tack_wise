@@ -1,0 +1,81 @@
+{
+  "title": "R17 — Same Tack; Proper Course",
+  "frames": [
+    {
+      "id": "r17-frame-1",
+      "name": "Leeward boat sails above proper course",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r17-alpha",
+          "name": "Alpha — leeward overlap",
+          "color": "#38bdf8",
+          "x": 290,
+          "y": 330,
+          "heading": 25,
+          "sailAngle": -5,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        },
+        {
+          "id": "r17-bravo",
+          "name": "Bravo — clear ahead",
+          "color": "#f87171",
+          "x": 335,
+          "y": 270,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r17-approach",
+          "name": "Overlap from astern",
+          "color": "#38bdf8",
+          "points": [
+            { "x": 170, "y": 440 },
+            { "x": 235, "y": 380 },
+            { "x": 290, "y": 330 }
+          ],
+          "curved": true,
+          "lineWidth": 4
+        },
+        {
+          "id": "r17-above-proper",
+          "name": "Above proper course",
+          "color": "#ef4444",
+          "points": [
+            { "x": 290, "y": 330 },
+            { "x": 270, "y": 270 },
+            { "x": 260, "y": 215 }
+          ],
+          "curved": true,
+          "lineWidth": 4
+        }
+      ],
+      "comments": [
+        {
+          "id": "r17-note",
+          "name": "Proper course",
+          "text": "Alpha became overlapped to leeward from clear astern within two hull lengths.\nAlpha may not sail above her proper course while the overlap continues, unless she promptly sails astern.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-17",
+          "label": "RRS 17",
+          "description": "A boat that becomes overlapped to leeward from clear astern within two hull lengths may not sail above her proper course while the overlap continues, unless she promptly sails astern."
+        }
+      ]
+    }
+  ]
+}

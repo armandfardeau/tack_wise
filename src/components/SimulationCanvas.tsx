@@ -23,6 +23,8 @@ interface SimulationCanvasProps {
   constrainPosition: (position: Position) => Position;
   currentFrameIndex: number;
   displayMode: DisplayMode;
+  presenterMode: boolean;
+  isExporting: boolean;
   theme: Theme;
   frames: Frame[];
   gridSnapEnabled: boolean;
@@ -54,6 +56,8 @@ export default function SimulationCanvas({
   constrainPosition,
   currentFrameIndex,
   displayMode,
+  presenterMode,
+  isExporting,
   theme,
   frames,
   gridSnapEnabled,
@@ -142,7 +146,7 @@ export default function SimulationCanvas({
                 <Mark mark={mark} isSelected={false} isShadow />
               </Fragment>
             ))}
-            {previousFrame.boats.map((boat) => (
+            {!presenterMode && !isExporting && previousFrame.boats.map((boat) => (
               <Boat key={`shadow-${shadowIndex}-${boat.id}`} boat={boat} isSelected={false} isShadow />
             ))}
             {(previousFrame.arrows ?? []).map((arrow) => (

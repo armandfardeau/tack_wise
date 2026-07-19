@@ -1,0 +1,80 @@
+{
+  "title": "R11 — Same Tack, Overlapped",
+  "frames": [
+    {
+      "id": "r11-frame-1",
+      "name": "Windward boat keeps clear",
+      "windAngle": 0,
+      "windSpeed": 13,
+      "boats": [
+        {
+          "id": "r11-alpha",
+          "name": "Alpha — leeward",
+          "color": "#38bdf8",
+          "x": 270,
+          "y": 330,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        },
+        {
+          "id": "r11-bravo",
+          "name": "Bravo — windward",
+          "color": "#f87171",
+          "x": 330,
+          "y": 280,
+          "heading": 45,
+          "sailAngle": -12,
+          "boatClass": "dinghy",
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [
+        {
+          "id": "r11-course",
+          "name": "Same-tack courses",
+          "color": "#fb923c",
+          "points": [
+            { "x": 270, "y": 330 },
+            { "x": 390, "y": 210 }
+          ],
+          "lineStyle": "dashed",
+          "lineWidth": 2
+        },
+        {
+          "id": "r11-keep-clear",
+          "name": "Windward keeps clear",
+          "color": "#f87171",
+          "points": [
+            { "x": 330, "y": 280 },
+            { "x": 375, "y": 330 },
+            { "x": 425, "y": 390 }
+          ],
+          "curved": true,
+          "lineWidth": 4
+        }
+      ],
+      "comments": [
+        {
+          "id": "r11-note",
+          "name": "Rule question",
+          "text": "Both boats are on the same tack and overlapped.\nBravo is windward, so Bravo must keep clear of Alpha.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-11",
+          "label": "RRS 11",
+          "description": "When boats are on the same tack and overlapped, the windward boat keeps clear of the leeward boat."
+        }
+      ]
+    }
+  ]
+}
