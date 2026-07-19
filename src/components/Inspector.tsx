@@ -1,4 +1,4 @@
-import type { CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow } from '../types';
+import type { CommentNote, DiagramImage, DisplayMode, Frame, Boat, Mark, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
@@ -6,11 +6,13 @@ import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
 interface InspectorProps {
   activeFrame: Frame;
   autoSailTrim: boolean;
+  displayMode?: DisplayMode;
   gridSnapEnabled: boolean;
   isPlaying?: boolean;
   onDelete: () => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
+  onSetDisplayMode?: (mode: DisplayMode) => void;
   onSetShowGrid: (show: boolean) => void;
   onTogglePlaying?: () => void;
   onSetPlaySpeed?: (speed: number) => void;
@@ -33,11 +35,13 @@ interface InspectorProps {
 export default function Inspector({
   activeFrame,
   autoSailTrim,
+  displayMode = 'single',
   gridSnapEnabled,
   isPlaying = false,
   onDelete,
   onSetGridSnapEnabled,
   onSetAutoSailTrim,
+  onSetDisplayMode = () => undefined,
   onSetShowGrid,
   onTogglePlaying = () => undefined,
   onSetPlaySpeed = () => undefined,
@@ -64,8 +68,10 @@ export default function Inspector({
         <WindInspector activeFrame={activeFrame} updateActiveFrame={updateActiveFrame} />
       ) : selectedType === 'grid' ? (
         <CanvasSettingsInspector
+          displayMode={displayMode}
           gridSnapEnabled={gridSnapEnabled}
           onSetGridSnapEnabled={onSetGridSnapEnabled}
+          onSetDisplayMode={onSetDisplayMode}
           onSetShowGrid={onSetShowGrid}
           showGrid={showGrid}
         />
@@ -145,7 +151,21 @@ function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame;
   );
 }
 
-function CanvasSettingsInspector({ gridSnapEnabled, onSetGridSnapEnabled, onSetShowGrid, showGrid }: { gridSnapEnabled: boolean; onSetGridSnapEnabled: (enabled: boolean) => void; onSetShowGrid: (show: boolean) => void; showGrid: boolean }) {
+function CanvasSettingsInspector({
+  displayMode,
+  gridSnapEnabled,
+  onSetDisplayMode,
+  onSetGridSnapEnabled,
+  onSetShowGrid,
+  showGrid,
+}: {
+  displayMode: DisplayMode;
+  gridSnapEnabled: boolean;
+  onSetDisplayMode: (mode: DisplayMode) => void;
+  onSetGridSnapEnabled: (enabled: boolean) => void;
+  onSetShowGrid: (show: boolean) => void;
+  showGrid: boolean;
+}) {
   return (
     <div className="editor-form">
       <div className="inspector-subsection">
@@ -163,6 +183,34 @@ function CanvasSettingsInspector({ gridSnapEnabled, onSetGridSnapEnabled, onSetS
           </label>
         </div>
         <p className="grid-hint">20px spacing · drag near an intersection</p>
+      </div>
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Ghost Display</h4>
+        <p className="grid-hint">Show earlier frames as translucent ghosts on the canvas.</p>
+        <div className="form-row flex-row">
+          <label className="checkbox-label">
+            <input
+              type="radio"
+              name="ghost-display-mode"
+              value="single"
+              checked={displayMode === 'single'}
+              onChange={() => onSetDisplayMode('single')}
+            />
+            <span>Previous frame only</span>
+          </label>
+        </div>
+        <div className="form-row flex-row">
+          <label className="checkbox-label">
+            <input
+              type="radio"
+              name="ghost-display-mode"
+              value="cumulative"
+              checked={displayMode === 'cumulative'}
+              onChange={() => onSetDisplayMode('cumulative')}
+            />
+            <span>All previous frames</span>
+          </label>
+        </div>
       </div>
     </div>
   );

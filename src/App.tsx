@@ -209,6 +209,7 @@ export default function App() {
           onDeleteSelected={scenario.deleteSelected}
           onClearSelection={scenario.clearSelection}
           onSetAutoSailTrim={scenario.setAutoSailTrim}
+          onSetDisplayMode={(displayMode) => scenario.updateSettings({ displayMode })}
           onSetGridSnapEnabled={setGridSnapEnabled}
           onSetShowGrid={setShowGrid}
           onRedo={scenario.redo}

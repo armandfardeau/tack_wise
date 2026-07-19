@@ -220,6 +220,38 @@ describe('magnetic grid controls', () => {
 
     expect(screen.queryByRole('button', { name: /switch to light mode/i })).not.toBeInTheDocument();
   });
+
+  it('updates ghost display mode from the canvas settings', () => {
+    const onSetDisplayMode = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={frame}
+        autoSailTrim
+        displayMode="single"
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetDisplayMode={onSetDisplayMode}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedType="grid"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('radio', { name: /previous frame only/i })).toBeChecked();
+    expect(screen.getByRole('radio', { name: /all previous frames/i })).not.toBeChecked();
+
+    fireEvent.click(screen.getByRole('radio', { name: /all previous frames/i }));
+
+    expect(onSetDisplayMode).toHaveBeenCalledWith('cumulative');
+  });
 });
 
 describe('playback controls', () => {
