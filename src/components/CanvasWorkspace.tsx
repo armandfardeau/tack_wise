@@ -52,6 +52,7 @@ interface CanvasWorkspaceProps {
   onDeleteSelected: () => void;
   onClearSelection: () => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
+  onSetDisplayMode: (mode: DisplayMode) => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
   onRedo: () => void;
@@ -287,6 +288,7 @@ export default function CanvasWorkspace({
   onDeleteSelected,
   onClearSelection,
   onSetAutoSailTrim,
+  onSetDisplayMode,
   onSetGridSnapEnabled,
   onSetShowGrid,
   onRedo,
@@ -590,11 +592,13 @@ export default function CanvasWorkspace({
             <Inspector
               activeFrame={inspectorFrame}
               autoSailTrim={autoSailTrim}
+              displayMode={displayMode}
               gridSnapEnabled={gridSnapEnabled}
               isPlaying={isPlaying}
               onDelete={onDeleteSelected}
               onSetGridSnapEnabled={onSetGridSnapEnabled}
               onSetAutoSailTrim={onSetAutoSailTrim}
+              onSetDisplayMode={onSetDisplayMode}
               onSetShowGrid={onSetShowGrid}
               onTogglePlaying={onTogglePlaying}
               onSetPlaySpeed={onSetPlaySpeed}
