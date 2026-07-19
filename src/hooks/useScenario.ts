@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { BOAT_COLORS, MARK_COLORS } from '../constants';
-import { cloneFrames } from '../data/initialFrames';
+import { cloneFrames, initialScenarioTitle } from '../data/initialFrames';
 import type {
   Boat,
   CommentNote,
@@ -23,6 +23,7 @@ const AUTOSAVE_KEY = 'tack-wise-autosave';
 const MAX_HISTORY_LENGTH = 50;
 
 export const DEFAULT_SCENARIO_SETTINGS: ScenarioSettings = {
+  title: initialScenarioTitle,
   animationMode: 'step',
   displayMode: 'single',
   presenterMode: false,
