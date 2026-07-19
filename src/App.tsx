@@ -50,6 +50,7 @@ export default function App() {
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const gridSnap = useGridSnap(gridSnapEnabled);
   const { redo, undo } = scenario;
+  const isPresenterMode = scenario.settings.presenterMode;
   const { importScenario } = scenario;
   const loadedShareRef = useRef(false);
   const inspectorRequestIdRef = useRef(0);
@@ -97,6 +98,7 @@ export default function App() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!(event.metaKey || event.ctrlKey)) return;
       if (event.key.toLowerCase() !== 'z') return;
+      if (isPresenterMode) return;
 
       event.preventDefault();
       if (event.shiftKey) redo();
@@ -105,7 +107,7 @@ export default function App() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [redo, undo]);
+  }, [isPresenterMode, redo, undo]);
   const exportState = useScenarioExport({
     currentFrameIndex: scenario.currentFrameIndex,
     frames: scenario.frames,
@@ -147,11 +149,13 @@ export default function App() {
         onExportImage={handleImageExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
         onImportJson={handleImportJson}
+        onNewScenario={scenario.createNewScenario}
         onShareScenario={handleShareScenario}
         onLoadTemplate={(template) => scenario.importScenario(scenarioPayloadFromTemplate(template))}
         templates={situationTemplates}
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
+        readOnly={scenario.settings.presenterMode}
         theme={theme}
       />
 

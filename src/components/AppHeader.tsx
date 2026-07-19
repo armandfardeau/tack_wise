@@ -11,12 +11,14 @@ interface AppHeaderProps {
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
+  onNewScenario?: () => void;
   onShareScenario?: () => void;
   onToggleTheme?: () => void;
   onTogglePresenter?: () => void;
   onLoadTemplate?: (template: SituationTemplate) => void;
   templates?: SituationTemplate[];
   theme?: Theme;
+  readOnly?: boolean;
 }
 
 export default function AppHeader({
@@ -26,12 +28,14 @@ export default function AppHeader({
   onExportImage,
   onExportJson,
   onImportJson,
+  onNewScenario,
   onShareScenario,
   onToggleTheme,
   onTogglePresenter,
   onLoadTemplate,
   templates,
   theme = 'dark',
+  readOnly = false,
 }: AppHeaderProps) {
   return (
     <header className="app-header">
@@ -49,7 +53,9 @@ export default function AppHeader({
           onExportImage={onExportImage}
           onExportJson={onExportJson}
           onImportJson={onImportJson}
+          onNewScenario={onNewScenario}
           onLoadTemplate={onLoadTemplate}
+          readOnly={readOnly}
           templates={templates}
         />
         <ViewActions

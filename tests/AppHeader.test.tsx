@@ -24,6 +24,17 @@ describe('AppHeader', () => {
     expect(onExportJson).toHaveBeenCalledTimes(1);
   });
 
+  it('starts a new blank diagram from the File menu', () => {
+    const onNewScenario = jest.fn();
+
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} onNewScenario={onNewScenario} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /new diagram/i }));
+
+    expect(onNewScenario).toHaveBeenCalledTimes(1);
+  });
+
   it('keeps Import JSON direct and groups export under the File menu', () => {
     render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
 
@@ -198,5 +209,14 @@ describe('AppHeader', () => {
     expect(onExport).toHaveBeenNthCalledWith(2, 'mp4');
     expect(onExportImage).toHaveBeenNthCalledWith(1, 'png');
     expect(onExportImage).toHaveBeenNthCalledWith(2, 'jpeg');
+  });
+
+  it('hides content-changing file actions in read-only mode', () => {
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} onNewScenario={jest.fn()} readOnly />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+
+    expect(screen.queryByRole('menuitem', { name: /new diagram/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: /import json/i })).not.toBeInTheDocument();
   });
 });

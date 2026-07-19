@@ -8,10 +8,11 @@ interface DiagramImageProps {
   onMove?: (id: string, position: { x: number; y: number }) => void;
   onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
-export default function DiagramImage({ image, isSelected, onMove, onOpenInspector, onSelect, isShadow = false }: DiagramImageProps) {
+export default function DiagramImage({ image, isSelected, onMove, onOpenInspector, onSelect, readOnly = false, isShadow = false }: DiagramImageProps) {
   const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function DiagramImage({ image, isSelected, onMove, onOpenInspecto
       opacity={isShadow ? 0.22 : 1}
       stroke={isSelected ? '#22d3ee' : undefined}
       strokeWidth={isSelected ? 3 : 0}
-      draggable={!isShadow}
+      draggable={!isShadow && !readOnly}
       listening={!isShadow}
       onClick={() => {
         onSelect?.(image.id);

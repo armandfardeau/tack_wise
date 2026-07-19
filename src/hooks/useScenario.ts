@@ -31,6 +31,8 @@ export const DEFAULT_SCENARIO_SETTINGS: ScenarioSettings = {
   showFrameNumber: true,
 };
 
+const BLANK_SCENARIO_TITLE = 'Untitled situation';
+
 interface HistoryState {
   past: Frame[][];
   future: Frame[][];
@@ -344,6 +346,26 @@ export function useScenario() {
     setSelectedType(firstBoat ? 'boat' : firstMark ? 'mark' : firstArrow ? 'arrow' : firstComment ? 'comment' : null);
   };
 
+  const createNewScenario = () => {
+    setIsPlaying(false);
+    setFrames([{
+      id: `frame-${Date.now()}`,
+      name: 'Frame 1',
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [],
+      marks: [],
+    }]);
+    setCurrentFrameIndex(0);
+    setSettings({
+      ...DEFAULT_SCENARIO_SETTINGS,
+      title: BLANK_SCENARIO_TITLE,
+    });
+    setHistory({ past: [], future: [] });
+    setSelectedId(null);
+    setSelectedType(null);
+  };
+
   const restoreAutosave = () => {
     try {
       const raw = window.localStorage.getItem(AUTOSAVE_KEY);
@@ -593,5 +615,6 @@ export function useScenario() {
     updateSettings,
     canRedo: history.future.length > 0,
     canUndo: history.past.length > 0,
+    createNewScenario,
   };
 }

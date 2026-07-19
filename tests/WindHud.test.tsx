@@ -30,4 +30,14 @@ describe('WindHud', () => {
 
     expect(screen.getByLabelText('Wind direction 340 degrees')).toBeInTheDocument();
   });
+
+  it('renders as non-interactive content in read-only mode', () => {
+    const onSelect = jest.fn();
+
+    render(<WindHud windAngle={45} windSpeed={12} onSelect={onSelect} readOnly />);
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
+    expect(screen.getByLabelText(/wind direction and velocity/i).tagName).toBe('DIV');
+    expect(onSelect).not.toHaveBeenCalled();
+  });
 });

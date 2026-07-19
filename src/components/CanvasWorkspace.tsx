@@ -514,7 +514,7 @@ export default function CanvasWorkspace({
         ? { left: inspectorPlacement.left, top: inspectorPlacement.top }
       : undefined;
 
-  const shouldShowInspector = isInspectorOpen && (selectedType === 'wind' || selectedType === 'grid' || selectedType === 'playback' || Boolean(selectedPosition));
+  const shouldShowInspector = !presenterMode && isInspectorOpen && (selectedType === 'wind' || selectedType === 'grid' || selectedType === 'playback' || Boolean(selectedPosition));
 
   const inspectorPlacementKey = `${selectedId ?? ''}:${selectedType ?? ''}:${selectedPosition?.x ?? ''}:${selectedPosition?.y ?? ''}`;
   const inspectorStyleLeft = inspectorStyle?.left;
@@ -563,6 +563,7 @@ export default function CanvasWorkspace({
           constrainPosition={constrainPosition}
           currentFrameIndex={currentFrameIndex}
           displayMode={displayMode}
+          readOnly={presenterMode}
           presenterMode={presenterMode}
           isExporting={isExporting}
           theme={theme}
@@ -645,13 +646,15 @@ export default function CanvasWorkspace({
             </div>
           </Rnd>
         )}
-        <FloatingAddMenu
-          onAddBoat={handleAddBoat}
-          onAddMark={handleAddMark}
-          onAddArrow={handleAddArrow}
-          onAddComment={handleAddComment}
-          onAddImage={handleAddImage}
-        />
+        {!presenterMode && (
+          <FloatingAddMenu
+            onAddBoat={handleAddBoat}
+            onAddMark={handleAddMark}
+            onAddArrow={handleAddArrow}
+            onAddComment={handleAddComment}
+            onAddImage={handleAddImage}
+          />
+        )}
         {!presenterMode && (
           <CanvasHistoryControls
             canRedo={canRedo}
@@ -682,10 +685,11 @@ export default function CanvasWorkspace({
           onAutoZoom={onAutoZoom}
           onReset={onResetZoom}
         />
-        <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />
+        {!presenterMode && <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />}
         <WindHud
           windAngle={activeFrame.windAngle}
           windSpeed={activeFrame.windSpeed}
+          readOnly={presenterMode}
           onSelect={() => handleOpenInspector('wind', 'wind')}
         />
       </div>

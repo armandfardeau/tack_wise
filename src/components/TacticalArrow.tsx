@@ -8,12 +8,13 @@ interface TacticalArrowProps {
   onMove?: (id: string, points: TacticalArrowModel['points']) => void;
   onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
 const ARROW_HIT_STROKE_WIDTH = 24;
 
-export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspector, onSelect, isShadow = false }: TacticalArrowProps) {
+export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspector, onSelect, readOnly = false, isShadow = false }: TacticalArrowProps) {
   const isCurved = arrow.curved === true;
   const pathPoints = isCurved ? ensureCurvedArrowControlPoint(arrow.points) : arrow.points;
   const points = pathPoints.flatMap((point) => [point.x, point.y]);
@@ -32,7 +33,7 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspect
         pointerWidth={arrow.showArrowhead === false ? 0 : 10}
         tension={isCurved ? 0.45 : 0}
         opacity={isShadow ? 0.22 : 0.9}
-        draggable={!isShadow}
+        draggable={!isShadow && !readOnly}
         listening={!isShadow}
         onClick={() => {
           onSelect?.(arrow.id);
@@ -50,7 +51,7 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspect
           onMove?.(arrow.id, pathPoints.map((point) => ({ x: point.x + dx, y: point.y + dy })));
         }}
       />
-      {isSelected && isCurved && !isShadow && pathPoints.slice(1, -1).map((point, pointIndex) => {
+      {isSelected && isCurved && !readOnly && !isShadow && pathPoints.slice(1, -1).map((point, pointIndex) => {
         const pathPointIndex = pointIndex + 1;
 
         return (

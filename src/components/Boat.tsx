@@ -12,10 +12,11 @@ interface BoatProps {
   onDragMove?: (boatId: string, pos: { x: number; y: number }) => void;
   /** Optional function that snaps a raw {x,y} to a constrained position */
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false }: BoatProps) {
   const boatScale = 0.5;
 
   // Mast is located slightly forward of the center of the boat
@@ -88,7 +89,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       rotation={boat.heading}
       scaleX={boatScale}
       scaleY={boatScale}
-      draggable
+      draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
         onSelect?.(boat.id);

@@ -1,21 +1,16 @@
 interface WindHudProps {
   windAngle: number;
   windSpeed: number;
-  onSelect: () => void;
+  onSelect?: () => void;
+  readOnly?: boolean;
 }
 
-export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps) {
+export default function WindHud({ windAngle, windSpeed, onSelect, readOnly = false }: WindHudProps) {
   const flowAngle = (windAngle + 180) % 360;
   const displayAngle = flowAngle < 0 ? flowAngle + 360 : flowAngle;
 
-  return (
-    <button
-      type="button"
-      className="wind-vane-container"
-      aria-label="Edit wind direction and velocity"
-      title="Click to edit wind direction and velocity"
-      onClick={onSelect}
-    >
+  const content = (
+    <>
       <div className="wind-vane-dial">
         <svg
           className="wind-vane-needle"
@@ -36,8 +31,24 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
       </div>
       <div className="wind-vane-info">
         <span className="wind-vane-speed">{windSpeed} KTS</span>
-        <span className="wind-vane-angle">{windAngle}°</span>
+        <span className="wind-vane-angle">{displayAngle}°</span>
       </div>
+    </>
+  );
+
+  if (readOnly) {
+    return <div className="wind-vane-container" aria-label="Wind direction and velocity">{content}</div>;
+  }
+
+  return (
+    <button
+      type="button"
+      className="wind-vane-container"
+      aria-label="Edit wind direction and velocity"
+      title="Click to edit wind direction and velocity"
+      onClick={onSelect}
+    >
+      {content}
     </button>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FileVideoCamera, FolderOpen, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
+import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FilePlus, FileVideoCamera, FolderOpen, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
 import type { SituationTemplate } from '../data/situationTemplates';
 import type { VideoExportType } from '../types';
 
@@ -10,11 +10,13 @@ interface ExportActionsProps {
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
+  onNewScenario?: () => void;
   onLoadTemplate?: (template: SituationTemplate) => void;
+  readOnly?: boolean;
   templates?: SituationTemplate[];
 }
 
-export default function ExportActions({ className = 'export-actions', isExporting, onExport, onExportImage, onExportJson, onImportJson, onLoadTemplate, templates = [] }: ExportActionsProps) {
+export default function ExportActions({ className = 'export-actions', isExporting, onExport, onExportImage, onExportJson, onImportJson, onNewScenario, onLoadTemplate, readOnly = false, templates = [] }: ExportActionsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
@@ -101,7 +103,14 @@ export default function ExportActions({ className = 'export-actions', isExportin
           <span className="file-menu-chevron" aria-hidden="true"><ChevronDown size={14} /></span>
         </button>
         {isFileMenuOpen && <div className="file-dropdown-menu" role="menu" aria-label="File options">
-          {templates.length > 0 && <div className="file-submenu">
+          {!readOnly && <button type="button" className="action-btn file-menu-item new-btn" role="menuitem" title="New diagram" onClick={() => {
+            onNewScenario?.();
+            closeFileMenu();
+          }}>
+            <span className="action-icon" aria-hidden="true"><FilePlus size={16} /></span>
+            <span className="action-label">New diagram</span>
+          </button>}
+          {!readOnly && templates.length > 0 && <div className="file-submenu">
             <button
               type="button"
               className="action-btn file-submenu-trigger"
@@ -148,10 +157,10 @@ export default function ExportActions({ className = 'export-actions', isExportin
               {filteredTemplates.length === 0 && <div className="template-search-empty" role="status">No templates found</div>}
             </div>}
           </div>}
-          <button type="button" className="action-btn file-menu-item import-btn" role="menuitem" title="Import JSON" onClick={handleImportClick}>
-            <span className="action-icon" aria-hidden="true"><FolderOpen size={16} /></span>
-            <span className="action-label">Import JSON</span>
-          </button>
+          {!readOnly && <button type="button" className="action-btn file-menu-item import-btn" role="menuitem" title="Import JSON" onClick={handleImportClick}>
+              <span className="action-icon" aria-hidden="true"><FolderOpen size={16} /></span>
+              <span className="action-label">Import JSON</span>
+            </button>}
           <div className="file-submenu">
             <button
               type="button"

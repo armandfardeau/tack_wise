@@ -9,10 +9,11 @@ interface MarkProps {
   onSelect?: (markId: string) => void;
   /** Optional function that snaps a raw {x,y} to a constrained position */
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, isShadow = false }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false }: MarkProps) {
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
     const strokeColor = isShadow ? '#94a3b8' : isSelected ? '#ffffff' : '#1e293b';
@@ -114,7 +115,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
     <Group
       x={mark.x}
       y={mark.y}
-      draggable
+      draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
         onSelect?.(mark.id);

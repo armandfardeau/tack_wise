@@ -19,6 +19,35 @@ describe('useScenario', () => {
     });
   });
 
+  it('creates a blank JSON-backed scenario', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.createNewScenario();
+    });
+
+    expect(result.current.frames).toHaveLength(1);
+    expect(result.current.activeFrame).toEqual({
+      id: expect.stringMatching(/^frame-/),
+      name: 'Frame 1',
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [],
+      marks: [],
+    });
+    expect(result.current.settings).toEqual({
+      title: 'Untitled situation',
+      displayMode: 'single',
+      presenterMode: false,
+      showFrameNumber: true,
+      showFrameTitle: true,
+    });
+    expect(result.current.selectedId).toBeNull();
+    expect(result.current.selectedType).toBeNull();
+    expect(result.current.canUndo).toBe(false);
+    expect(result.current.canRedo).toBe(false);
+  });
+
   it('keeps the default mark connections across the scenario', () => {
     const { result } = renderHook(() => useScenario());
 
