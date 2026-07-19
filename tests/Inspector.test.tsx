@@ -144,7 +144,9 @@ describe('magnetic grid controls', () => {
 describe('playback controls', () => {
   it('updates playback speed and toggles playback from the inspector', () => {
     const onSetPlaySpeed = jest.fn();
+    const onSetAnimationMode = jest.fn();
     const onTogglePlaying = jest.fn();
+    const updateActiveFrame = jest.fn();
 
     render(
       <Inspector
@@ -157,22 +159,30 @@ describe('playback controls', () => {
         onSetAutoSailTrim={jest.fn()}
         onSetShowGrid={jest.fn()}
         onSetPlaySpeed={onSetPlaySpeed}
+        animationMode="step"
+        onSetAnimationMode={onSetAnimationMode}
         onTogglePlaying={onTogglePlaying}
         playSpeed={1000}
         selectedBoat={undefined}
         selectedMark={undefined}
         selectedType="playback"
         showGrid
-        updateActiveFrame={jest.fn()}
+        updateActiveFrame={updateActiveFrame}
         updateBoat={jest.fn()}
         updateMark={jest.fn()}
       />,
     );
 
     fireEvent.change(screen.getByLabelText(/playback speed/i), { target: { value: '500' } });
+    fireEvent.click(screen.getByRole('checkbox', { name: /smooth movement/i }));
+    fireEvent.change(screen.getByLabelText(/transition to next frame/i), { target: { value: '2000' } });
     fireEvent.click(screen.getByRole('button', { name: /play scenario/i }));
 
     expect(onSetPlaySpeed).toHaveBeenCalledWith(500);
+    expect(onSetAnimationMode).toHaveBeenCalledWith('continuous');
+    expect(updateActiveFrame).toHaveBeenCalledWith({
+      transition: { animationMode: 'step', durationMs: 2000 },
+    });
     expect(onTogglePlaying).toHaveBeenCalledTimes(1);
   });
 });

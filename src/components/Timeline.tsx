@@ -12,6 +12,9 @@ interface TimelineProps {
   onRenameFrame: (frameIndex: number, name: string) => void;
   onSelectFrame: (index: number) => void;
   onTogglePlaying?: () => void;
+  onStepBackward?: () => void;
+  onStepForward?: () => void;
+  onReplayFromStart?: () => void;
   playSpeed?: number;
   onSetPlaySpeed?: (speed: number) => void;
 }
@@ -27,6 +30,9 @@ export default function Timeline({
   onRenameFrame,
   onSelectFrame,
   onTogglePlaying = () => undefined,
+  onStepBackward = () => undefined,
+  onStepForward = () => undefined,
+  onReplayFromStart = () => undefined,
   playSpeed = 1000,
   onSetPlaySpeed = () => undefined,
 }: TimelineProps) {
@@ -100,9 +106,41 @@ export default function Timeline({
   return (
     <footer className={`timeline-bar${variant === 'sidebar' ? ' sidebar-timeline' : ''}`}>
       {variant !== 'sidebar' && <div className="playback-controls">
+        <button
+          type="button"
+          className="timeline-action-btn playback-step-btn"
+          aria-label="Step backward"
+          title="Step backward"
+          onClick={onStepBackward}
+          disabled={currentFrameIndex <= 0}
+        >
+          <span className="timeline-control-icon" aria-hidden="true">⏮️</span>
+          <span className="timeline-control-label">Backward</span>
+        </button>
         <button type="button" className={`play-pause-btn ${isPlaying ? 'playing' : ''}`} aria-label={isPlaying ? 'Pause' : 'Play'} onClick={onTogglePlaying}>
           <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? '⏸️' : '▶️'}</span>
           <span className="timeline-control-label">{isPlaying ? 'Pause' : 'Play'}</span>
+        </button>
+        <button
+          type="button"
+          className="timeline-action-btn playback-step-btn"
+          aria-label="Step forward"
+          title="Step forward"
+          onClick={onStepForward}
+          disabled={currentFrameIndex >= frames.length - 1}
+        >
+          <span className="timeline-control-icon" aria-hidden="true">⏭️</span>
+          <span className="timeline-control-label">Forward</span>
+        </button>
+        <button
+          type="button"
+          className="timeline-action-btn playback-replay-btn"
+          aria-label="Replay from start"
+          title="Replay from start"
+          onClick={onReplayFromStart}
+        >
+          <span className="timeline-control-icon" aria-hidden="true">↺</span>
+          <span className="timeline-control-label">Replay</span>
         </button>
         <select className="speed-selector" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))} aria-label="Playback speed">
           <option value="2000">Slow (2s)</option>

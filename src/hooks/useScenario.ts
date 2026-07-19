@@ -24,7 +24,7 @@ const MAX_HISTORY_LENGTH = 50;
 
 export const DEFAULT_SCENARIO_SETTINGS: ScenarioSettings = {
   title: initialScenarioTitle,
-  animationMode: 'step',
+  animationMode: 'continuous',
   displayMode: 'single',
   presenterMode: false,
 };
@@ -61,6 +61,7 @@ export function useScenario() {
   const skipInitialAutosaveRef = useRef(true);
 
   const activeFrame = frames[currentFrameIndex] ?? frames[0];
+  const transitionDuration = Math.max(activeFrame.transition?.durationMs ?? playSpeed, 50);
   const selectedBoat = activeFrame.boats.find((boat) => boat.id === selectedId);
   const selectedMark = activeFrame.marks.find((mark) => mark.id === selectedId);
   const selectedArrow = activeFrame.arrows?.find((arrow) => arrow.id === selectedId);
@@ -76,7 +77,7 @@ export function useScenario() {
     if (settings.animationMode === 'continuous') {
       const interval = window.setInterval(() => {
         setFrameProgress((progress) => {
-          const nextProgress = progress + 50 / Math.max(playSpeed, 50);
+          const nextProgress = progress + 50 / transitionDuration;
           if (nextProgress < 1) return nextProgress;
 
           setCurrentFrameIndex((index) => (index >= frames.length - 1 ? 0 : index + 1));
@@ -92,7 +93,7 @@ export function useScenario() {
     }, playSpeed);
 
     return () => window.clearInterval(interval);
-  }, [frames.length, isPlaying, playSpeed, settings.animationMode]);
+  }, [currentFrameIndex, frames.length, isPlaying, playSpeed, settings.animationMode, transitionDuration]);
 
   useEffect(() => {
     if (!autoSailTrim) return;
@@ -142,6 +143,21 @@ export function useScenario() {
     setIsPlaying(false);
     setFrameProgress(0);
     setCurrentFrameIndex(index);
+  };
+
+  const stepFrame = (direction: 1 | -1) => {
+    setIsPlaying(false);
+    setFrameProgress(0);
+    setCurrentFrameIndex((index) => Math.min(Math.max(index + direction, 0), frames.length - 1));
+  };
+
+  const stepBackward = () => stepFrame(-1);
+  const stepForward = () => stepFrame(1);
+
+  const replayFromStart = () => {
+    setFrameProgress(0);
+    setCurrentFrameIndex(0);
+    setIsPlaying(true);
   };
 
   const selectObject = (id: string, type: Exclude<SelectedType, null>) => {
@@ -490,6 +506,23 @@ export function useScenario() {
     setSettings((previousSettings) => ({ ...previousSettings, ...changes }));
   };
 
+  const setAnimationMode = (animationMode: ScenarioSettings['animationMode']) => {
+    setFrameProgress(0);
+    setSettings((previousSettings) => ({ ...previousSettings, animationMode }));
+    commitFrames((previousFrames) => previousFrames.map((frame, index) => {
+      if (index >= previousFrames.length - 1) return frame;
+
+      return {
+        ...frame,
+        transition: {
+          ...frame.transition,
+          animationMode,
+          durationMs: frame.transition?.durationMs ?? playSpeed,
+        },
+      };
+    }));
+  };
+
   const addRuleToActiveFrame = (rule: RuleReference) => {
     commitFrames((previousFrames) => previousFrames.map((frame, index) => index === currentFrameIndex ? { ...frame, rules: [...(frame.rules ?? []), rule] } : frame));
   };
@@ -531,6 +564,7 @@ export function useScenario() {
     redo,
     renameFrame,
     restoreAutosave,
+    replayFromStart,
     selectFrame,
     selectObject,
     selectedArrow,
@@ -544,6 +578,9 @@ export function useScenario() {
     setCurrentFrameIndex,
     setIsPlaying,
     setPlaySpeed,
+    setAnimationMode,
+    stepBackward,
+    stepForward,
     settings,
     undo,
     updateActiveFrame,

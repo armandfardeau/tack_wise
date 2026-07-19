@@ -54,7 +54,6 @@ function interpolateBoat(start: Boat, end: Boat | undefined, progress: number): 
     x: interpolateNumber(start.x, end.x, progress),
     y: interpolateNumber(start.y, end.y, progress),
     heading: interpolateAngle(start.heading, end.heading, progress),
-    sailAngle: interpolateNumber(start.sailAngle, end.sailAngle, progress),
   };
 }
 

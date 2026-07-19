@@ -5,6 +5,7 @@ import type { Frame } from '../src/types';
 const frames: Frame[] = [
   { id: 'frame-1', name: '1. Preparation', windAngle: 0, windSpeed: 12, boats: [], marks: [] },
   { id: 'frame-2', name: '2. Upwind Tack', windAngle: 0, windSpeed: 12, boats: [], marks: [] },
+  { id: 'frame-3', name: '3. Finish', windAngle: 0, windSpeed: 12, boats: [], marks: [] },
 ];
 
 describe('Timeline', () => {
@@ -14,11 +15,14 @@ describe('Timeline', () => {
     const onDuplicateFrame = jest.fn();
     const onSelectFrame = jest.fn();
     const onTogglePlaying = jest.fn();
+    const onStepBackward = jest.fn();
+    const onStepForward = jest.fn();
+    const onReplayFromStart = jest.fn();
     const onSetPlaySpeed = jest.fn();
 
     render(
       <Timeline
-        currentFrameIndex={0}
+        currentFrameIndex={1}
         frames={frames}
         isPlaying={false}
         onAddFrame={onAddFrame}
@@ -27,12 +31,18 @@ describe('Timeline', () => {
         onRenameFrame={jest.fn()}
         onSelectFrame={onSelectFrame}
         onTogglePlaying={onTogglePlaying}
+        onStepBackward={onStepBackward}
+        onStepForward={onStepForward}
+        onReplayFromStart={onReplayFromStart}
         playSpeed={1000}
         onSetPlaySpeed={onSetPlaySpeed}
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /play/i }));
+    fireEvent.click(screen.getByRole('button', { name: /^Play$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /step backward/i }));
+    fireEvent.click(screen.getByRole('button', { name: /step forward/i }));
+    fireEvent.click(screen.getByRole('button', { name: /replay from start/i }));
     fireEvent.click(screen.getByRole('button', { name: /add frame/i }));
     fireEvent.click(screen.getByRole('button', { name: /^Duplicate frame$/ }));
     fireEvent.click(screen.getByRole('button', { name: /^Delete frame$/ }));
@@ -40,6 +50,9 @@ describe('Timeline', () => {
     fireEvent.change(screen.getByRole('combobox', { name: /playback speed/i }), { target: { value: '500' } });
 
     expect(onTogglePlaying).toHaveBeenCalledTimes(1);
+    expect(onStepBackward).toHaveBeenCalledTimes(1);
+    expect(onStepForward).toHaveBeenCalledTimes(1);
+    expect(onReplayFromStart).toHaveBeenCalledTimes(1);
     expect(onAddFrame).toHaveBeenCalledTimes(1);
     expect(onDuplicateFrame).toHaveBeenCalledTimes(1);
     expect(onDeleteFrame).toHaveBeenCalledTimes(1);

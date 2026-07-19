@@ -7,6 +7,7 @@ import {
   getCanvasContentBounds,
   getGridSnap,
   getSnappedPosition,
+  interpolateFrame,
   isWithinGridSnapRadius,
   worldToCanvasPosition,
 } from '../src/utils/simulation';
@@ -70,5 +71,25 @@ describe('simulation utilities', () => {
 
   it('includes visual extents when calculating the canvas content bounds', () => {
     expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 490, maxY: 440 });
+  });
+
+  it('interpolates boat movement without interpolating sail movement', () => {
+    const startFrame = {
+      ...initialFrames[0],
+      boats: [{ ...initialFrames[0].boats[0], x: 100, y: 200, heading: 0, sailAngle: -30 }],
+    };
+    const endFrame = {
+      ...initialFrames[1],
+      boats: [{ ...initialFrames[1].boats[0], x: 300, y: 400, heading: 90, sailAngle: 45 }],
+    };
+
+    const frame = interpolateFrame(startFrame, endFrame, 0.5);
+
+    expect(frame.boats[0]).toMatchObject({
+      x: 200,
+      y: 300,
+      heading: 45,
+      sailAngle: -30,
+    });
   });
 });

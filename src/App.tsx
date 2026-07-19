@@ -195,7 +195,12 @@ export default function App() {
           onRedo={scenario.redo}
           onRestoreAutosave={() => scenario.restoreAutosave()}
           onTogglePlaying={() => scenario.setIsPlaying((isPlaying) => !isPlaying)}
+          onStepBackward={scenario.stepBackward}
+          onStepForward={scenario.stepForward}
+          onReplayFromStart={scenario.replayFromStart}
           onSetPlaySpeed={scenario.setPlaySpeed}
+          animationMode={scenario.settings.animationMode}
+          onSetAnimationMode={scenario.setAnimationMode}
           playSpeed={scenario.playSpeed}
           onUndo={scenario.undo}
           onPanCanvasBy={viewport.panCanvasBy}

@@ -2,6 +2,12 @@ import { act, renderHook } from '@testing-library/react';
 import { useScenario } from '../src/hooks/useScenario';
 
 describe('useScenario', () => {
+  it('uses smooth movement by default', () => {
+    const { result } = renderHook(() => useScenario());
+
+    expect(result.current.settings.animationMode).toBe('continuous');
+  });
+
   it('connects the default committee boat to the pin end', () => {
     const { result } = renderHook(() => useScenario());
 
@@ -90,6 +96,66 @@ describe('useScenario', () => {
     });
 
     expect(result.current.frames[1].name).toBe('Mark approach');
+  });
+
+  it('steps through frames and replays from the beginning', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.selectFrame(2);
+      result.current.stepBackward();
+    });
+    expect(result.current.currentFrameIndex).toBe(1);
+    expect(result.current.isPlaying).toBe(false);
+
+    act(() => result.current.stepForward());
+    expect(result.current.currentFrameIndex).toBe(2);
+
+    act(() => result.current.replayFromStart());
+    expect(result.current.currentFrameIndex).toBe(0);
+    expect(result.current.isPlaying).toBe(true);
+
+    act(() => result.current.stepBackward());
+    expect(result.current.currentFrameIndex).toBe(0);
+    expect(result.current.isPlaying).toBe(false);
+
+    act(() => {
+      result.current.selectFrame(result.current.frames.length - 1);
+      result.current.stepForward();
+    });
+    expect(result.current.currentFrameIndex).toBe(result.current.frames.length - 1);
+  });
+
+  it('creates frame-to-frame transitions when smooth movement is enabled', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => result.current.setAnimationMode('continuous'));
+
+    expect(result.current.settings.animationMode).toBe('continuous');
+    expect(result.current.frames.slice(0, -1).every((frame) => (
+      frame.transition?.animationMode === 'continuous' && frame.transition.durationMs === 1000
+    ))).toBe(true);
+    expect(result.current.frames.at(-1)?.transition).toBeUndefined();
+  });
+
+  it('interpolates movement during a smooth transition while snapping sail trim', () => {
+    jest.useFakeTimers();
+
+    try {
+      const { result } = renderHook(() => useScenario());
+
+      act(() => {
+        result.current.setAnimationMode('continuous');
+        result.current.setIsPlaying(true);
+      });
+      act(() => jest.advanceTimersByTime(500));
+
+      expect(result.current.frameProgress).toBeCloseTo(0.5);
+      expect(result.current.displayFrame.boats[0].x).toBe(230);
+      expect(result.current.displayFrame.boats[0].sailAngle).toBe(result.current.frames[0].boats[0].sailAngle);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('supports undo and redo for scenario edits', () => {

@@ -1,4 +1,4 @@
-import type { CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow, Theme } from '../types';
+import type { AnimationMode, CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow, Theme } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 
 interface InspectorProps {
@@ -14,6 +14,8 @@ interface InspectorProps {
   theme?: Theme;
   onTogglePlaying?: () => void;
   onSetPlaySpeed?: (speed: number) => void;
+  animationMode?: AnimationMode;
+  onSetAnimationMode?: (mode: AnimationMode) => void;
   playSpeed?: number;
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
@@ -43,6 +45,8 @@ export default function Inspector({
   theme = 'dark',
   onTogglePlaying = () => undefined,
   onSetPlaySpeed = () => undefined,
+  animationMode = 'step',
+  onSetAnimationMode = () => undefined,
   playSpeed = 1000,
   selectedBoat,
   selectedMark,
@@ -77,10 +81,14 @@ export default function Inspector({
         />
       ) : selectedType === 'playback' ? (
         <PlaybackInspector
+          activeFrame={activeFrame}
           isPlaying={isPlaying}
           onSetPlaySpeed={onSetPlaySpeed}
+          animationMode={animationMode}
+          onSetAnimationMode={onSetAnimationMode}
           onTogglePlaying={onTogglePlaying}
           playSpeed={playSpeed}
+          updateActiveFrame={updateActiveFrame}
         />
       ) : selectedType === 'boat' && selectedBoat ? (
         <div className="editor-form">
@@ -191,9 +199,59 @@ function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEn
   );
 }
 
-function PlaybackInspector({ isPlaying, onSetPlaySpeed, onTogglePlaying, playSpeed }: { isPlaying: boolean; onSetPlaySpeed: (speed: number) => void; onTogglePlaying: () => void; playSpeed: number }) {
+function PlaybackInspector({
+  activeFrame,
+  animationMode,
+  isPlaying,
+  onSetAnimationMode,
+  onSetPlaySpeed,
+  onTogglePlaying,
+  playSpeed,
+  updateActiveFrame,
+}: {
+  activeFrame: Frame;
+  animationMode: AnimationMode;
+  isPlaying: boolean;
+  onSetAnimationMode: (mode: AnimationMode) => void;
+  onSetPlaySpeed: (speed: number) => void;
+  onTogglePlaying: () => void;
+  playSpeed: number;
+  updateActiveFrame: (changes: Partial<Frame>) => void;
+}) {
+  const transitionDuration = activeFrame.transition?.durationMs ?? playSpeed;
+
+  const setTransitionDuration = (durationMs: number) => {
+    updateActiveFrame({
+      transition: {
+        ...activeFrame.transition,
+        animationMode,
+        durationMs,
+      },
+    });
+  };
+
   return (
     <div className="editor-form">
+      <div className="form-row flex-row">
+        <label className="checkbox-label">
+          <input
+            type="checkbox"
+            aria-label="Smooth movement"
+            checked={animationMode === 'continuous'}
+            onChange={(event) => onSetAnimationMode(event.target.checked ? 'continuous' : 'step')}
+          />
+          <span>Smooth movement</span>
+        </label>
+      </div>
+      <p className="grid-hint">Boats and marks transition between frames; sail trim changes at the frame boundary.</p>
+      <div className="form-row">
+        <label htmlFor="frame-transition-duration">Transition to next frame</label>
+        <select id="frame-transition-duration" value={transitionDuration} onChange={(event) => setTransitionDuration(Number(event.target.value))}>
+          <option value="2000">Slow (2s)</option>
+          <option value="1000">Normal (1s)</option>
+          <option value="500">Fast (0.5s)</option>
+        </select>
+      </div>
       <div className="form-row">
         <label htmlFor="playback-speed">Playback speed</label>
         <select id="playback-speed" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))}>

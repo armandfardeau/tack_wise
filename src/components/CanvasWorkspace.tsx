@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
-import type { DisplayMode, Frame, Theme } from '../types';
+import type { AnimationMode, DisplayMode, Frame, Theme } from '../types';
 import type { Boat, CommentNote, DiagramImage, Mark, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import type { SnapTarget } from '../hooks/useGridSnap';
@@ -57,8 +57,13 @@ interface CanvasWorkspaceProps {
   onRedo: () => void;
   onRestoreAutosave: () => void;
   onTogglePlaying: () => void;
+  onStepBackward: () => void;
+  onStepForward: () => void;
+  onReplayFromStart: () => void;
   onUndo: () => void;
   onSetPlaySpeed: (speed: number) => void;
+  animationMode: AnimationMode;
+  onSetAnimationMode: (mode: AnimationMode) => void;
   playSpeed: number;
   onPanCanvasBy: (delta: Position) => void;
   onOpenControls: () => void;
@@ -281,8 +286,13 @@ export default function CanvasWorkspace({
   onRedo,
   onRestoreAutosave,
   onTogglePlaying,
+  onStepBackward,
+  onStepForward,
+  onReplayFromStart,
   onUndo,
   onSetPlaySpeed,
+  animationMode,
+  onSetAnimationMode,
   playSpeed,
   onPanCanvasBy,
   onOpenControls,
@@ -576,6 +586,8 @@ export default function CanvasWorkspace({
               theme={theme}
               onTogglePlaying={onTogglePlaying}
               onSetPlaySpeed={onSetPlaySpeed}
+              animationMode={animationMode}
+              onSetAnimationMode={onSetAnimationMode}
               playSpeed={playSpeed}
               selectedBoat={selectedBoat}
               selectedMark={selectedMark}
@@ -611,7 +623,12 @@ export default function CanvasWorkspace({
         />
         <PlaybackButton
           isPlaying={isPlaying}
+          currentFrameIndex={currentFrameIndex}
+          frameCount={frames.length}
           onTogglePlaying={onTogglePlaying}
+          onStepBackward={onStepBackward}
+          onStepForward={onStepForward}
+          onReplayFromStart={onReplayFromStart}
           onOpenInspector={() => handleOpenInspector('playback', 'playback')}
         />
         <CanvasZoomControls
