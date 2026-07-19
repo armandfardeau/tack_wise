@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
 import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FileVideoCamera, FolderOpen, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
 import type { SituationTemplate } from '../data/situationTemplates';
+import type { VideoExportType } from '../types';
 
 interface ExportActionsProps {
   className?: string;
   isExporting: boolean;
-  onExport: (type: 'gif' | 'mp4') => void;
+  onExport: (type: 'gif' | VideoExportType) => void;
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
@@ -172,6 +173,10 @@ export default function ExportActions({ className = 'export-actions', isExportin
               <button type="button" className="action-btn file-menu-item gif-btn" role="menuitem" title="Export GIF" onClick={() => closeAfterExport(() => onExport('gif'))}>
                 <span className="action-icon" aria-hidden="true"><Download size={16} /></span>
                 <span className="action-label">Export GIF</span>
+              </button>
+              <button type="button" className="action-btn file-menu-item webm-btn" role="menuitem" title="Export Video (WEBM)" onClick={() => closeAfterExport(() => onExport('webm'))}>
+                <span className="action-icon" aria-hidden="true"><FileVideoCamera size={16} /></span>
+                <span className="action-label">Export Video (WEBM)</span>
               </button>
               <button type="button" className="action-btn file-menu-item mp4-btn" role="menuitem" title="Export Video (MP4)" onClick={() => closeAfterExport(() => onExport('mp4'))}>
                 <span className="action-icon" aria-hidden="true"><FileVideoCamera size={16} /></span>

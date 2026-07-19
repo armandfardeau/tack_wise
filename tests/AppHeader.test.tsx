@@ -89,7 +89,25 @@ describe('AppHeader', () => {
 
     expect(screen.getByRole('menuitem', { name: /export json/i })).toHaveAttribute('title', 'Export JSON');
     expect(screen.getByRole('menuitem', { name: /export gif/i })).toHaveAttribute('title', 'Export GIF');
+    expect(screen.getByRole('menuitem', { name: /export video \(webm\)/i })).toHaveAttribute('title', 'Export Video (WEBM)');
     expect(screen.getByRole('menuitem', { name: /export video \(mp4\)/i })).toHaveAttribute('title', 'Export Video (MP4)');
+  });
+
+  it('delegates WEBM and MP4 video exports separately', () => {
+    const onExport = jest.fn();
+
+    render(<AppHeader isExporting={false} onExport={onExport} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export video \(webm\)/i }));
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export video \(mp4\)/i }));
+
+    expect(onExport).toHaveBeenNthCalledWith(1, 'webm');
+    expect(onExport).toHaveBeenNthCalledWith(2, 'mp4');
   });
 
   it('disables JSON export while another export is running', () => {

@@ -2,12 +2,12 @@ import ExportActions from './ExportActions';
 import ViewActions from './ViewActions';
 import type { SituationTemplate } from '../data/situationTemplates';
 import { Copy, Sailboat } from 'lucide-react';
-import type { Theme } from '../types';
+import type { Theme, VideoExportType } from '../types';
 
 interface AppHeaderProps {
   isExporting: boolean;
   presenterMode?: boolean;
-  onExport: (type: 'gif' | 'mp4') => void;
+  onExport: (type: 'gif' | VideoExportType) => void;
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
