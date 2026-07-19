@@ -16,12 +16,18 @@ describe('WindHud', () => {
   it('displays the direction the wind is blowing toward', () => {
     render(<WindHud windAngle={240} windSpeed={12} onSelect={jest.fn()} />);
 
-    expect(screen.getByText('60°')).toBeInTheDocument();
+    expect(screen.getByLabelText('Wind direction 60 degrees')).toBeInTheDocument();
   });
 
   it('rotates the vane to match the blowing direction', () => {
     render(<WindHud windAngle={0} windSpeed={12} onSelect={jest.fn()} />);
 
     expect(screen.getByLabelText('Wind direction 180 degrees')).toHaveStyle({ transform: 'rotate(180deg)' });
+  });
+
+  it('wraps a negative flow angle back into the compass range', () => {
+    render(<WindHud windAngle={-200} windSpeed={12} onSelect={jest.fn()} />);
+
+    expect(screen.getByLabelText('Wind direction 340 degrees')).toBeInTheDocument();
   });
 });

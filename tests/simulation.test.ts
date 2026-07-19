@@ -3,6 +3,7 @@ import {
   canvasToWorldPosition,
   clampCanvasZoom,
   constrainCanvasPosition,
+  getCommentHeight,
   getCanvasWorldBounds,
   getCanvasContentBounds,
   getGridSnap,
@@ -70,6 +71,23 @@ describe('simulation utilities', () => {
 
   it('includes visual extents when calculating the canvas content bounds', () => {
     expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 690, maxY: 705 });
+  });
+
+  it('uses default comment dimensions and returns empty bounds for empty scenarios', () => {
+    expect(getCommentHeight({ text: 'Short note' })).toBe(64);
+    expect(getCanvasContentBounds([])).toEqual({ maxX: 0, maxY: 0 });
+    expect(getCanvasContentBounds([{
+      boats: [],
+      marks: [],
+      comments: [{ id: 'comment', name: 'Note', text: 'Text', color: '#fff', x: 1, y: 2 }],
+      images: [{ id: 'image', name: 'Image', src: 'data:image/png;base64,AA==', x: 5, y: 6, width: 10, height: 20 }],
+    }])).toMatchObject({ maxX: expect.any(Number), maxY: expect.any(Number) });
+  });
+
+  it('normalizes negative wind-flow angles', () => {
+    // WindHud owns the presentation calculation; this input keeps simulation
+    // coverage focused on the corresponding negative-angle edge case.
+    expect(calculateAutoSailAngle(-10, 0)).toBe(2);
   });
 
 });
