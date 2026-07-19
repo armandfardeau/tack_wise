@@ -121,7 +121,7 @@ export default function SimulationCanvas({
           height={worldSize.height}
           fill={isLightTheme ? '#f8fafc' : '#0f172a'}
         />
-        {showGrid && (
+        {showGrid && !isExporting && (
           <PlacementGrid
             origin={{ x: worldBounds.left, y: worldBounds.top }}
             size={worldSize}
