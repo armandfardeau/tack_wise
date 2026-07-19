@@ -11,7 +11,7 @@ Tack Wise is a browser-based Tactical Sailing Situations (TSS) authoring and pre
 - Timeline editing with add, duplicate, rename, delete, playback, and speed control.
 - Canvas pan, zoom, placement grid, magnetic snapping, presenter mode, and print output.
 - Undo/redo, autosave recovery, local scenario library, JSON import/export, and portable share links.
-- PNG/JPG diagram export, animated GIF export, and MP4 video export.
+- PNG/JPG diagram export, animated GIF export, and WEBM or MP4 video export.
 
 ## Development
 

@@ -2,6 +2,8 @@ export type DisplayMode = 'single' | 'cumulative';
 
 export type Theme = 'light' | 'dark';
 
+export type VideoExportType = 'webm' | 'mp4';
+
 export interface Boat {
   id: string;
   name: string;
