@@ -39,6 +39,7 @@ export function useScenarioExport({
     if (!stage) return;
 
     const mimeType = type === 'png' ? 'image/png' : 'image/jpeg';
+    stage.draw();
     const dataUrl = stage.toDataURL({ pixelRatio: 1.5, mimeType });
     downloadBlob(dataUrlToBlob(dataUrl), `tack-wise-diagram-${Date.now()}.${type === 'png' ? 'png' : 'jpg'}`);
   };

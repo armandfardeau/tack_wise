@@ -554,7 +554,7 @@ export default function CanvasWorkspace({
           frames={frames}
           getSnappedPosition={getSnappedPosition}
           gridSnapEnabled={gridSnapEnabled}
-          showGrid={showGrid && !isExporting}
+          showGrid={showGrid}
           onCanvasDragEnd={handleCanvasDragEnd}
           onCanvasWheel={handleCanvasWheel}
           onMoveBoat={onMoveBoat}
