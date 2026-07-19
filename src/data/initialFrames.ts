@@ -13,7 +13,7 @@ export const initialFrames: Frame[] = [
     marks: [
       { id: 'mark-1', name: 'Windward Mark', color: '#ef4444', x: 300, y: 120, shape: 'triangle' },
       { id: 'mark-2', name: 'Pin End', color: '#22c55e', x: 450, y: 400, shape: 'circle' },
-      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square' },
+      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square', connectedToMarkId: 'mark-2' },
     ],
   },
   {
@@ -28,7 +28,7 @@ export const initialFrames: Frame[] = [
     marks: [
       { id: 'mark-1', name: 'Windward Mark', color: '#ef4444', x: 300, y: 120, shape: 'triangle' },
       { id: 'mark-2', name: 'Pin End', color: '#22c55e', x: 450, y: 400, shape: 'circle' },
-      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square' },
+      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square', connectedToMarkId: 'mark-2' },
     ],
   },
   {
@@ -43,7 +43,7 @@ export const initialFrames: Frame[] = [
     marks: [
       { id: 'mark-1', name: 'Windward Mark', color: '#ef4444', x: 300, y: 120, shape: 'triangle' },
       { id: 'mark-2', name: 'Pin End', color: '#22c55e', x: 450, y: 400, shape: 'circle' },
-      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square' },
+      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square', connectedToMarkId: 'mark-2' },
     ],
   },
   {
@@ -58,7 +58,7 @@ export const initialFrames: Frame[] = [
     marks: [
       { id: 'mark-1', name: 'Windward Mark', color: '#ef4444', x: 300, y: 120, shape: 'triangle' },
       { id: 'mark-2', name: 'Pin End', color: '#22c55e', x: 450, y: 400, shape: 'circle' },
-      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square' },
+      { id: 'mark-3', name: 'Committee Boat', color: '#eab308', x: 150, y: 400, shape: 'square', connectedToMarkId: 'mark-2' },
     ],
   },
 ];

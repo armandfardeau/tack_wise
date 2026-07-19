@@ -16,6 +16,8 @@ interface BoatProps {
 }
 
 export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
+  const boatScale = (boat.hullScale ?? 1) * 0.5;
+
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
   const mastY = -12;
@@ -38,8 +40,8 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         x={boat.x}
         y={boat.y}
         rotation={boat.heading}
-        scaleX={boat.hullScale ?? 1}
-        scaleY={boat.hullScale ?? 1}
+        scaleX={boatScale}
+        scaleY={boatScale}
         draggable={false}
         opacity={0.22}
         listening={false}
@@ -84,8 +86,8 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       x={boat.x}
       y={boat.y}
       rotation={boat.heading}
-      scaleX={boat.hullScale ?? 1}
-      scaleY={boat.hullScale ?? 1}
+      scaleX={boatScale}
+      scaleY={boatScale}
       draggable
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {

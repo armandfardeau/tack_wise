@@ -24,6 +24,20 @@ export interface CanvasWorldBounds {
   bottom: number;
 }
 
+export function canvasToWorldPosition(position: Position, canvasPosition: Position, canvasZoom: number): Position {
+  return {
+    x: (position.x - canvasPosition.x) / canvasZoom,
+    y: (position.y - canvasPosition.y) / canvasZoom,
+  };
+}
+
+export function worldToCanvasPosition(position: Position, canvasPosition: Position, canvasZoom: number): Position {
+  return {
+    x: canvasPosition.x + position.x * canvasZoom,
+    y: canvasPosition.y + position.y * canvasZoom,
+  };
+}
+
 function interpolateNumber(start: number, end: number, progress: number) {
   return start + (end - start) * progress;
 }

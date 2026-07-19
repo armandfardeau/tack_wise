@@ -244,6 +244,12 @@ export function useScenario() {
   const moveComment = (commentId: string, position: Position) => updateComment(commentId, position);
   const moveImage = (imageId: string, position: Position) => updateImage(imageId, position);
 
+  const updateCurrentAndFutureFrames = (updater: (frame: Frame) => Frame) => {
+    commitFrames((previousFrames) => previousFrames.map((frame, index) => (
+      index >= currentFrameIndex ? updater(frame) : frame
+    )));
+  };
+
   const addFrame = () => {
     setIsPlaying(false);
     const newFrame: Frame = {
@@ -370,15 +376,13 @@ export function useScenario() {
       sailPlan: 'main',
     };
 
-    commitFrames((previousFrames) =>
-      previousFrames.map((frame) => ({
-        ...frame,
-        boats: [
-          ...frame.boats,
-          { ...newBoat, sailAngle: calculateAutoSailAngle(newBoat.heading, frame.windAngle) },
-        ],
-      })),
-    );
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      boats: [
+        ...frame.boats,
+        { ...newBoat, sailAngle: calculateAutoSailAngle(newBoat.heading, frame.windAngle) },
+      ],
+    }));
     selectObject(newBoat.id, 'boat');
   };
 
@@ -395,9 +399,10 @@ export function useScenario() {
       rotationDirection: 'counterclockwise',
     };
 
-    commitFrames((previousFrames) =>
-      previousFrames.map((frame) => ({ ...frame, marks: [...frame.marks, { ...newMark }] })),
-    );
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      marks: [...frame.marks, { ...newMark }],
+    }));
     selectObject(newMark.id, 'mark');
   };
 
@@ -412,7 +417,13 @@ export function useScenario() {
       lineWidth: 3,
       showArrowhead: true,
     };
-    commitFrames((previousFrames) => previousFrames.map((frame) => ({ ...frame, arrows: [...(frame.arrows ?? []), { ...arrow, points: arrow.points.map((point) => ({ ...point })) }] })));
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      arrows: [
+        ...(frame.arrows ?? []),
+        { ...arrow, points: arrow.points.map((point) => ({ ...point })) },
+      ],
+    }));
     selectObject(arrow.id, 'arrow');
   };
 
@@ -427,7 +438,10 @@ export function useScenario() {
       width: 180,
       fontSize: 14,
     };
-    commitFrames((previousFrames) => previousFrames.map((frame) => ({ ...frame, comments: [...(frame.comments ?? []), { ...comment }] })));
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      comments: [...(frame.comments ?? []), { ...comment }],
+    }));
     selectObject(comment.id, 'comment');
   };
 
@@ -442,7 +456,10 @@ export function useScenario() {
       height: 120,
       rotation: 0,
     };
-    commitFrames((previousFrames) => previousFrames.map((frame) => ({ ...frame, images: [...(frame.images ?? []), { ...image }] })));
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      images: [...(frame.images ?? []), { ...image }],
+    }));
     selectObject(image.id, 'image');
   };
 

@@ -17,5 +17,6 @@ export const MOBILE_INITIAL_CANVAS_ZOOM = 0.7;
 // Keep a generous world around the visible viewport so the canvas can be panned
 // in every direction even when it is at its default 100% zoom.
 export const CANVAS_PAN_MARGIN = 2;
-export const GRID_SPACING = 40;
+// Use 20px spacing to keep the placement and magnetic grids at 2x density.
+export const GRID_SPACING = 20;
 export const GRID_SNAP_RADIUS = GRID_SPACING * 0.45;

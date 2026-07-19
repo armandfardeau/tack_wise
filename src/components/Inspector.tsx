@@ -1,4 +1,4 @@
-import type { CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow } from '../types';
+import type { CommentNote, DiagramImage, Frame, Boat, Mark, TacticalArrow, Theme } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 
 interface InspectorProps {
@@ -10,6 +10,8 @@ interface InspectorProps {
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
+  onToggleTheme?: () => void;
+  theme?: Theme;
   onTogglePlaying?: () => void;
   onSetPlaySpeed?: (speed: number) => void;
   playSpeed?: number;
@@ -37,6 +39,8 @@ export default function Inspector({
   onSetGridSnapEnabled,
   onSetAutoSailTrim,
   onSetShowGrid,
+  onToggleTheme = () => undefined,
+  theme = 'dark',
   onTogglePlaying = () => undefined,
   onSetPlaySpeed = () => undefined,
   playSpeed = 1000,
@@ -66,6 +70,8 @@ export default function Inspector({
           gridSnapEnabled={gridSnapEnabled}
           onSetGridSnapEnabled={onSetGridSnapEnabled}
           onSetShowGrid={onSetShowGrid}
+          onToggleTheme={onToggleTheme}
+          theme={theme}
           updateActiveFrame={updateActiveFrame}
           showGrid={showGrid}
         />
@@ -145,7 +151,7 @@ function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame;
   );
 }
 
-function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEnabled, onSetShowGrid, showGrid, updateActiveFrame }: { activeFrame: Frame; gridSnapEnabled: boolean; onSetGridSnapEnabled: (enabled: boolean) => void; onSetShowGrid: (show: boolean) => void; showGrid: boolean; updateActiveFrame: (changes: Partial<Frame>) => void }) {
+function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEnabled, onSetShowGrid, onToggleTheme, showGrid, theme, updateActiveFrame }: { activeFrame: Frame; gridSnapEnabled: boolean; onSetGridSnapEnabled: (enabled: boolean) => void; onSetShowGrid: (show: boolean) => void; onToggleTheme: () => void; showGrid: boolean; theme: Theme; updateActiveFrame: (changes: Partial<Frame>) => void }) {
   return (
     <div className="editor-form">
       <div className="inspector-subsection">
@@ -167,7 +173,19 @@ function CanvasSettingsInspector({ activeFrame, gridSnapEnabled, onSetGridSnapEn
             <span>Show placement grid</span>
           </label>
         </div>
-        <p className="grid-hint">40px spacing · drag near an intersection</p>
+        <p className="grid-hint">20px spacing · drag near an intersection</p>
+      </div>
+
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Appearance</h4>
+        <button
+          type="button"
+          className="direction-btn"
+          onClick={onToggleTheme}
+          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+        >
+          {theme === 'dark' ? '☀️ Switch to light mode' : '🌙 Switch to dark mode'}
+        </button>
       </div>
     </div>
   );

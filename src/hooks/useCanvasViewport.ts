@@ -102,6 +102,20 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     setCanvasPosition({ x: 0, y: 0 });
   };
 
+  const panCanvasBy = (delta: Position) => {
+    setCanvasPosition((position) =>
+      constrainCanvasPosition(
+        {
+          x: position.x + delta.x,
+          y: position.y + delta.y,
+        },
+        canvasZoom,
+        stageSize,
+        getCanvasWorldBounds(stageSize),
+      ),
+    );
+  };
+
   const handleCanvasWheel = (event: { evt: { preventDefault: () => void; deltaY: number } }) => {
     event.evt.preventDefault();
     const pointer = stageRef.current?.getPointerPosition();
@@ -127,6 +141,7 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     handleCanvasWheel,
     maxZoom: MAX_CANVAS_ZOOM,
     minZoom: MIN_CANVAS_ZOOM,
+    panCanvasBy,
     resetCanvasZoom,
     stageRef,
     stageSize,

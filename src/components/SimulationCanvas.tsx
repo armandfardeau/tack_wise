@@ -14,7 +14,7 @@ import SnapIndicator from './SnapIndicator';
 import TacticalArrow from './TacticalArrow';
 import WindIndicator from './WindIndicator';
 import type { SnapTarget } from '../hooks/useGridSnap';
-import { getCanvasWorldBounds, type Position } from '../utils/simulation';
+import { canvasToWorldPosition, getCanvasWorldBounds, worldToCanvasPosition, type Position } from '../utils/simulation';
 
 interface SimulationCanvasProps {
   activeFrame: Frame;
@@ -88,6 +88,12 @@ export default function SimulationCanvas({
     height: worldBounds.bottom - worldBounds.top,
   };
   const isLightTheme = theme === 'light';
+
+  const getSnappedAbsolutePosition = (objectId: string, absolutePosition: Position) => {
+    const worldPosition = canvasToWorldPosition(absolutePosition, canvasPosition, canvasZoom);
+    const snappedWorldPosition = getSnappedPosition(objectId, worldPosition);
+    return worldToCanvasPosition(snappedWorldPosition, canvasPosition, canvasZoom);
+  };
 
   return (
     <Stage
@@ -166,7 +172,7 @@ export default function SimulationCanvas({
                 mark={mark}
                 isSelected={selectedId === mark.id}
                 onOpenInspector={() => onOpenInspector(mark.id, 'mark')}
-              snapFn={(position) => getSnappedPosition(mark.id, position)}
+                snapFn={(position) => getSnappedAbsolutePosition(mark.id, position)}
               onSelect={(id) => {
                 onSelectObject(id, 'mark');
                 onSnapPreview(null);
@@ -187,7 +193,7 @@ export default function SimulationCanvas({
             onOpenInspector={() => onOpenInspector(boat.id, 'boat')}
             snapFn={
               gridSnapEnabled
-                ? (position) => getSnappedPosition(boat.id, position)
+                ? (position) => getSnappedAbsolutePosition(boat.id, position)
                 : undefined
             }
             onSelect={(id) => {

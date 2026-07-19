@@ -5,7 +5,7 @@ describe('AppHeader', () => {
   it('delegates JSON export to the provided handler', () => {
     const onExportJson = jest.fn();
 
-    render(<AppHeader isExporting={false} isSidebarOpen={false} onExport={jest.fn()} onExportJson={onExportJson} onImportJson={jest.fn()} onToggleSidebar={jest.fn()} />);
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={onExportJson} onImportJson={jest.fn()} />);
 
     fireEvent.click(screen.getByRole('button', { name: /export options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /export json/i }));
@@ -14,7 +14,7 @@ describe('AppHeader', () => {
   });
 
   it('disables JSON export while another export is running', () => {
-    render(<AppHeader isExporting isSidebarOpen={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} onToggleSidebar={jest.fn()} />);
+    render(<AppHeader isExporting onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
 
     expect(screen.getByRole('button', { name: /export options/i })).toBeDisabled();
   });
@@ -23,7 +23,7 @@ describe('AppHeader', () => {
     const onImportJson = jest.fn();
     const file = new File(['{}'], 'scenario.json', { type: 'application/json' });
 
-    render(<AppHeader isExporting={false} isSidebarOpen={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={onImportJson} onToggleSidebar={jest.fn()} />);
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={onImportJson} />);
 
     fireEvent.change(screen.getByLabelText(/import scenario json file/i), {
       target: { files: [file] },
@@ -32,36 +32,25 @@ describe('AppHeader', () => {
     expect(onImportJson).toHaveBeenCalledWith(file);
   });
 
-  it('toggles the controls menu from the burger button', () => {
-    const onToggleSidebar = jest.fn();
+  it('does not render a burger menu trigger', () => {
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
 
-    render(<AppHeader isExporting={false} isSidebarOpen={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} onToggleSidebar={onToggleSidebar} />);
-
-    const menuButton = screen.getByRole('button', { name: /open controls menu/i });
-    expect(menuButton).toHaveAttribute('aria-expanded', 'false');
-
-    fireEvent.click(menuButton);
-
-    expect(onToggleSidebar).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: /open controls menu/i })).not.toBeInTheDocument();
   });
 
-  it('delegates the theme toggle to the provided handler', () => {
+  it('does not render a theme toggle in the header', () => {
     const onToggleTheme = jest.fn();
 
     render(
       <AppHeader
         isExporting={false}
-        isSidebarOpen={false}
         onExport={jest.fn()}
         onExportJson={jest.fn()}
         onImportJson={jest.fn()}
-        onToggleSidebar={jest.fn()}
-        onToggleTheme={onToggleTheme}
       />,
     );
 
-    fireEvent.click(screen.getByRole('button', { name: /switch to light mode/i }));
-
-    expect(onToggleTheme).toHaveBeenCalledTimes(1);
+    expect(screen.queryByRole('button', { name: /switch to light mode/i })).not.toBeInTheDocument();
+    expect(onToggleTheme).not.toHaveBeenCalled();
   });
 });

@@ -103,6 +103,7 @@ describe('magnetic grid controls', () => {
   it('updates snap and placement-grid settings from the inspector', () => {
     const onSetGridSnapEnabled = jest.fn();
     const onSetShowGrid = jest.fn();
+    const onToggleTheme = jest.fn();
     const updateActiveFrame = jest.fn();
 
     render(
@@ -114,10 +115,12 @@ describe('magnetic grid controls', () => {
         onSetGridSnapEnabled={onSetGridSnapEnabled}
         onSetAutoSailTrim={jest.fn()}
         onSetShowGrid={onSetShowGrid}
+        onToggleTheme={onToggleTheme}
         selectedBoat={undefined}
         selectedMark={undefined}
         selectedType="grid"
         showGrid
+        theme="dark"
         updateActiveFrame={updateActiveFrame}
         updateBoat={jest.fn()}
         updateMark={jest.fn()}
@@ -132,6 +135,9 @@ describe('magnetic grid controls', () => {
     expect(onSetGridSnapEnabled).toHaveBeenCalledWith(false);
     expect(onSetShowGrid).toHaveBeenCalledWith(false);
     expect(updateActiveFrame).toHaveBeenCalledWith({ windAngle: 90 });
+
+    fireEvent.click(screen.getByRole('button', { name: /switch to light mode/i }));
+    expect(onToggleTheme).toHaveBeenCalledTimes(1);
   });
 });
 

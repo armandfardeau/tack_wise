@@ -1,46 +1,25 @@
 import ExportActions from './ExportActions';
-import type { Theme } from '../types';
 
 interface AppHeaderProps {
-  canRedo?: boolean;
-  canUndo?: boolean;
-  hasAutosave?: boolean;
   isExporting: boolean;
-  isSidebarOpen: boolean;
-  theme?: Theme;
   presenterMode?: boolean;
-  onRedo?: () => void;
   onExport: (type: 'gif' | 'mp4') => void;
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
   onImportJson: (file: File) => void;
-  onRestoreAutosave?: () => void;
   onShareScenario?: () => void;
-  onToggleSidebar: () => void;
   onTogglePresenter?: () => void;
-  onToggleTheme?: () => void;
-  onUndo?: () => void;
 }
 
 export default function AppHeader({
-  canRedo = false,
-  canUndo = false,
-  hasAutosave = false,
   isExporting,
-  isSidebarOpen,
-  theme = 'dark',
   presenterMode = false,
-  onRedo,
   onExport,
   onExportImage,
   onExportJson,
   onImportJson,
-  onRestoreAutosave,
   onShareScenario,
-  onToggleSidebar,
   onTogglePresenter,
-  onToggleTheme,
-  onUndo,
 }: AppHeaderProps) {
   return (
     <header className="app-header">
@@ -49,16 +28,6 @@ export default function AppHeader({
           <span className="eyebrow">Tactical Sailing Simulator</span>
           <h1>Tack Wise ⛵</h1>
         </div>
-        <button
-          type="button"
-          className="menu-toggle"
-          aria-controls="controls-sidebar"
-          aria-expanded={isSidebarOpen}
-          aria-label={isSidebarOpen ? 'Close controls menu' : 'Open controls menu'}
-          onClick={onToggleSidebar}
-        >
-          <span aria-hidden="true">☰</span>
-        </button>
       </div>
       <ExportActions
         isExporting={isExporting}
@@ -68,20 +37,8 @@ export default function AppHeader({
         onImportJson={onImportJson}
       />
       <div className="header-tools" aria-label="Scenario tools">
-        <button type="button" className="header-tool-btn" onClick={() => onUndo?.()} disabled={!canUndo} title="Undo (Ctrl/Cmd+Z)" aria-label="Undo">↶</button>
-        <button type="button" className="header-tool-btn" onClick={() => onRedo?.()} disabled={!canRedo} title="Redo (Ctrl/Cmd+Shift+Z)" aria-label="Redo">↷</button>
-        {hasAutosave && <button type="button" className="header-tool-btn recovery-btn" onClick={() => onRestoreAutosave?.()}>Restore autosave</button>}
         <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}>Copy share link</button>
         <button type="button" className="header-tool-btn" onClick={() => onTogglePresenter?.()}>{presenterMode ? 'Exit presenter' : 'Presenter mode'}</button>
-        <button
-          type="button"
-          className="header-tool-btn theme-toggle-btn"
-          onClick={() => onToggleTheme?.()}
-          aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-          title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-        >
-          {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
-        </button>
       </div>
     </header>
   );

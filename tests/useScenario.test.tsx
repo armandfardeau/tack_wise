@@ -2,6 +2,14 @@ import { act, renderHook } from '@testing-library/react';
 import { useScenario } from '../src/hooks/useScenario';
 
 describe('useScenario', () => {
+  it('connects the default committee boat to the pin end', () => {
+    const { result } = renderHook(() => useScenario());
+
+    expect(result.current.frames.every((frame) => (
+      frame.marks.find((mark) => mark.id === 'mark-3')?.connectedToMarkId === 'mark-2'
+    ))).toBe(true);
+  });
+
   it('updates the selected boat and keeps auto trim in sync with its heading', () => {
     const { result } = renderHook(() => useScenario());
 
@@ -14,15 +22,20 @@ describe('useScenario', () => {
     expect(result.current.frames).toHaveLength(4);
   });
 
-  it('adds and removes scenario objects across every frame', () => {
+  it('adds and removes scenario objects from the active frame onward', () => {
     const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.selectFrame(1);
+    });
     act(() => {
       result.current.addBoat();
     });
 
     const addedBoatId = result.current.selectedId ?? '';
     expect(addedBoatId).toMatch(/^boat-/);
-    expect(result.current.frames.every((frame) => frame.boats.some((boat) => boat.id === addedBoatId))).toBe(true);
+    expect(result.current.frames[0].boats.some((boat) => boat.id === addedBoatId)).toBe(false);
+    expect(result.current.frames.slice(1).every((frame) => frame.boats.some((boat) => boat.id === addedBoatId))).toBe(true);
 
     act(() => {
       result.current.deleteSelected();
@@ -97,18 +110,24 @@ describe('useScenario', () => {
     expect(result.current.selectedBoat?.name).toBe('Updated Boat');
   });
 
-  it('adds richer diagram objects across every frame', () => {
+  it('adds richer diagram objects from the active frame onward', () => {
     const { result } = renderHook(() => useScenario());
 
+    act(() => {
+      result.current.selectFrame(1);
+    });
     act(() => {
       result.current.addMark('obstruction');
       result.current.addArrow();
       result.current.addComment();
     });
 
-    expect(result.current.frames.every((frame) => frame.marks.some((mark) => mark.shape === 'obstruction'))).toBe(true);
-    expect(result.current.frames.every((frame) => frame.arrows?.length === 1)).toBe(true);
-    expect(result.current.frames.every((frame) => frame.comments?.length === 1)).toBe(true);
+    expect(result.current.frames[0].marks.some((mark) => mark.shape === 'obstruction')).toBe(false);
+    expect(result.current.frames[0].arrows ?? []).toHaveLength(0);
+    expect(result.current.frames[0].comments ?? []).toHaveLength(0);
+    expect(result.current.frames.slice(1).every((frame) => frame.marks.some((mark) => mark.shape === 'obstruction'))).toBe(true);
+    expect(result.current.frames.slice(1).every((frame) => frame.arrows?.length === 1)).toBe(true);
+    expect(result.current.frames.slice(1).every((frame) => frame.comments?.length === 1)).toBe(true);
   });
 
   it('updates presentation settings and restores a saved library scenario', () => {

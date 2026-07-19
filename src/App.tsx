@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import './App.css';
 import AppHeader from './components/AppHeader';
 import CanvasWorkspace from './components/CanvasWorkspace';
@@ -35,6 +36,7 @@ export default function App() {
   const [showGrid, setShowGrid] = useState(true);
   const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isImageExporting, setIsImageExporting] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const gridSnap = useGridSnap(gridSnapEnabled);
   const { redo, undo } = scenario;
@@ -98,6 +100,17 @@ export default function App() {
     stageSize: viewport.stageSize,
   });
 
+  const isCanvasExporting = exportState.isExporting || isImageExporting;
+
+  const handleImageExport = (type: 'png' | 'jpeg') => {
+    flushSync(() => setIsImageExporting(true));
+    try {
+      exportState.triggerImageExport(type);
+    } finally {
+      setIsImageExporting(false);
+    }
+  };
+
   const handleImportJson = async (file: File) => {
     try {
       const payload = parseScenarioFromJson(await file.text());
@@ -111,40 +124,31 @@ export default function App() {
   return (
     <main className={`app-shell ${theme}-theme${scenario.settings.presenterMode ? ' presenter-mode' : ''}`}>
       <AppHeader
-        canRedo={scenario.canRedo}
-        canUndo={scenario.canUndo}
-        hasAutosave={scenario.hasAutosave}
-        isExporting={exportState.isExporting}
-        isSidebarOpen={isSidebarOpen}
-        theme={theme}
+        isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
-        onRedo={scenario.redo}
         onExport={exportState.triggerExport}
-        onExportImage={exportState.triggerImageExport}
+        onExportImage={handleImageExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
         onImportJson={handleImportJson}
-        onRestoreAutosave={() => scenario.restoreAutosave()}
         onShareScenario={handleShareScenario}
-        onToggleSidebar={() => setIsSidebarOpen((isOpen) => !isOpen)}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
-        onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
-        onUndo={scenario.undo}
       />
 
       <section className="workspace">
         {!scenario.settings.presenterMode && <Sidebar
           currentFrameIndex={scenario.currentFrameIndex}
           frames={scenario.frames}
-          isExporting={exportState.isExporting}
+          isExporting={isCanvasExporting}
           onAddFrame={scenario.addFrame}
           onDeleteFrame={scenario.deleteFrame}
           onDuplicateFrame={scenario.duplicateFrame}
           onExport={exportState.triggerExport}
-          onExportImage={exportState.triggerImageExport}
+          onExportImage={handleImageExport}
           onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
           onImportJson={handleImportJson}
           onRenameFrame={scenario.renameFrame}
           onSelectFrame={scenario.selectFrame}
+          onToggle={() => setIsSidebarOpen((isOpen) => !isOpen)}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
         />}
@@ -160,9 +164,13 @@ export default function App() {
           displayMode={scenario.settings.displayMode}
           theme={theme}
           frames={scenario.frames}
+          canRedo={scenario.canRedo}
+          canUndo={scenario.canUndo}
+          hasAutosave={scenario.hasAutosave}
           getSnappedPosition={gridSnap.getSnappedPosition}
           gridSnapEnabled={gridSnapEnabled}
           isPlaying={scenario.isPlaying}
+          isExporting={isCanvasExporting}
           handleCanvasDragEnd={viewport.handleCanvasDragEnd}
           handleCanvasWheel={viewport.handleCanvasWheel}
           maxZoom={viewport.maxZoom}
@@ -183,9 +191,14 @@ export default function App() {
           onSetAutoSailTrim={scenario.setAutoSailTrim}
           onSetGridSnapEnabled={setGridSnapEnabled}
           onSetShowGrid={setShowGrid}
+          onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
+          onRedo={scenario.redo}
+          onRestoreAutosave={() => scenario.restoreAutosave()}
           onTogglePlaying={() => scenario.setIsPlaying((isPlaying) => !isPlaying)}
           onSetPlaySpeed={scenario.setPlaySpeed}
           playSpeed={scenario.playSpeed}
+          onUndo={scenario.undo}
+          onPanCanvasBy={viewport.panCanvasBy}
           onOpenControls={() => setIsSidebarOpen(true)}
           onSelectObject={scenario.selectObject}
           onSnapPreview={gridSnap.setSnapPreview}

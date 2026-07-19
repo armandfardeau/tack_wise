@@ -1,5 +1,6 @@
 import {
   calculateAutoSailAngle,
+  canvasToWorldPosition,
   clampCanvasZoom,
   constrainCanvasPosition,
   getCanvasWorldBounds,
@@ -7,11 +8,16 @@ import {
   getGridSnap,
   getSnappedPosition,
   isWithinGridSnapRadius,
+  worldToCanvasPosition,
 } from '../src/utils/simulation';
-import { MOBILE_INITIAL_CANVAS_ZOOM } from '../src/constants';
+import { GRID_SPACING, MOBILE_INITIAL_CANVAS_ZOOM } from '../src/constants';
 import { initialFrames } from '../src/data/initialFrames';
 
 describe('simulation utilities', () => {
+  it('uses the denser 20px magnetic grid spacing', () => {
+    expect(GRID_SPACING).toBe(20);
+  });
+
   it('calculates an auto-trimmed sail angle from heading and wind', () => {
     expect(calculateAutoSailAngle(45, 0)).toBe(-12);
     expect(calculateAutoSailAngle(315, 0)).toBe(12);
@@ -24,6 +30,18 @@ describe('simulation utilities', () => {
     expect(getSnappedPosition({ x: 38, y: 82 })).toEqual({ x: 40, y: 80 });
     expect(isWithinGridSnapRadius({ x: 27, y: 27 })).toBe(false);
     expect(getSnappedPosition({ x: 27, y: 27 })).toEqual({ x: 27, y: 27 });
+  });
+
+  it('converts snap positions through the current canvas pan and zoom', () => {
+    const canvasPosition = { x: 120, y: -40 };
+    const canvasZoom = 2;
+    const absolutePosition = { x: 200, y: 120 };
+    const worldPosition = canvasToWorldPosition(absolutePosition, canvasPosition, canvasZoom);
+    const snappedWorldPosition = getSnappedPosition(worldPosition);
+
+    expect(worldPosition).toEqual({ x: 40, y: 80 });
+    expect(snappedWorldPosition).toEqual({ x: 40, y: 80 });
+    expect(worldToCanvasPosition(snappedWorldPosition, canvasPosition, canvasZoom)).toEqual(absolutePosition);
   });
 
   it('clamps zoom and keeps the canvas inside its stage bounds', () => {

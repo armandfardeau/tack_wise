@@ -16,9 +16,9 @@ export default function WindIndicator({ windAngle, windSpeed, stageSize, origin 
   // The flow/arrow direction is opposite (windAngle + 180).
   const flowAngle = (windAngle + 180) % 360;
 
-  // Let's draw 6 parallel wind lines across the screen.
+  // Draw a denser field of parallel wind lines across the screen.
   // We can place them at different vertical offsets in a group, then rotate the group.
-  const linesCount = 5;
+  const linesCount = 64;
   const spacing = height / (linesCount + 1);
 
   return (
@@ -28,7 +28,7 @@ export default function WindIndicator({ windAngle, windSpeed, stageSize, origin 
         {Array.from({ length: linesCount }).map((_, i) => {
           const yOffset = -height / 2 + spacing * (i + 1);
           // Scale arrow length and width with windSpeed
-          const opacity = Math.min(0.04 + (windSpeed / 30) * 0.08, 0.15);
+          const opacity = Math.min(0.16 + (windSpeed / 30) * 0.16, 0.32);
           const strokeWidth = Math.max(1, (windSpeed / 10) * 1.5);
           
           return (
