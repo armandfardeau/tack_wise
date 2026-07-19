@@ -181,6 +181,8 @@ export default function App() {
           constrainPosition={viewport.constrainPosition}
           currentFrameIndex={scenario.currentFrameIndex}
           displayMode={scenario.settings.displayMode}
+          showFrameTitle={scenario.settings.showFrameTitle ?? true}
+          showFrameNumber={scenario.settings.showFrameNumber ?? true}
           presenterMode={scenario.settings.presenterMode}
           theme={theme}
           frames={scenario.frames}
@@ -210,6 +212,8 @@ export default function App() {
           onClearSelection={scenario.clearSelection}
           onSetAutoSailTrim={scenario.setAutoSailTrim}
           onSetDisplayMode={(displayMode) => scenario.updateSettings({ displayMode })}
+          onSetShowFrameTitle={(showFrameTitle) => scenario.updateSettings({ showFrameTitle })}
+          onSetShowFrameNumber={(showFrameNumber) => scenario.updateSettings({ showFrameNumber })}
           onSetGridSnapEnabled={setGridSnapEnabled}
           onSetShowGrid={setShowGrid}
           onRedo={scenario.redo}

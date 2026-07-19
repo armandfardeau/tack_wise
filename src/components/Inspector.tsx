@@ -13,6 +13,8 @@ interface InspectorProps {
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetDisplayMode?: (mode: DisplayMode) => void;
+  onSetShowFrameTitle?: (show: boolean) => void;
+  onSetShowFrameNumber?: (show: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
   onTogglePlaying?: () => void;
   onSetPlaySpeed?: (speed: number) => void;
@@ -24,6 +26,8 @@ interface InspectorProps {
   selectedImage?: DiagramImage;
   selectedType: SelectedType;
   showGrid: boolean;
+  showFrameTitle?: boolean;
+  showFrameNumber?: boolean;
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
   updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
@@ -42,6 +46,8 @@ export default function Inspector({
   onSetGridSnapEnabled,
   onSetAutoSailTrim,
   onSetDisplayMode = () => undefined,
+  onSetShowFrameTitle = () => undefined,
+  onSetShowFrameNumber = () => undefined,
   onSetShowGrid,
   onTogglePlaying = () => undefined,
   onSetPlaySpeed = () => undefined,
@@ -53,6 +59,8 @@ export default function Inspector({
   selectedImage,
   selectedType,
   showGrid,
+  showFrameTitle = true,
+  showFrameNumber = true,
   updateBoat,
   updateActiveFrame,
   updateMark,
@@ -72,7 +80,11 @@ export default function Inspector({
           gridSnapEnabled={gridSnapEnabled}
           onSetGridSnapEnabled={onSetGridSnapEnabled}
           onSetDisplayMode={onSetDisplayMode}
+          onSetShowFrameTitle={onSetShowFrameTitle}
+          onSetShowFrameNumber={onSetShowFrameNumber}
           onSetShowGrid={onSetShowGrid}
+          showFrameTitle={showFrameTitle}
+          showFrameNumber={showFrameNumber}
           showGrid={showGrid}
         />
       ) : selectedType === 'playback' ? (
@@ -155,15 +167,23 @@ function CanvasSettingsInspector({
   displayMode,
   gridSnapEnabled,
   onSetDisplayMode,
+  onSetShowFrameTitle,
+  onSetShowFrameNumber,
   onSetGridSnapEnabled,
   onSetShowGrid,
+  showFrameTitle,
+  showFrameNumber,
   showGrid,
 }: {
   displayMode: DisplayMode;
   gridSnapEnabled: boolean;
   onSetDisplayMode: (mode: DisplayMode) => void;
+  onSetShowFrameTitle: (show: boolean) => void;
+  onSetShowFrameNumber: (show: boolean) => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
+  showFrameTitle: boolean;
+  showFrameNumber: boolean;
   showGrid: boolean;
 }) {
   return (
@@ -183,6 +203,21 @@ function CanvasSettingsInspector({
           </label>
         </div>
         <p className="grid-hint">20px spacing · drag near an intersection</p>
+      </div>
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Frame Header</h4>
+        <div className="form-row flex-row">
+          <label className="checkbox-label">
+            <input type="checkbox" checked={showFrameTitle} onChange={(event) => onSetShowFrameTitle(event.target.checked)} />
+            <span>Show frame title</span>
+          </label>
+        </div>
+        <div className="form-row flex-row">
+          <label className="checkbox-label">
+            <input type="checkbox" checked={showFrameNumber} onChange={(event) => onSetShowFrameNumber(event.target.checked)} />
+            <span>Show frame number</span>
+          </label>
+        </div>
       </div>
       <div className="inspector-subsection">
         <h4 className="inspector-subsection-title">Ghost Display</h4>

@@ -27,6 +27,8 @@ export const DEFAULT_SCENARIO_SETTINGS: ScenarioSettings = {
   title: initialScenarioTitle,
   displayMode: 'single',
   presenterMode: false,
+  showFrameTitle: true,
+  showFrameNumber: true,
 };
 
 interface HistoryState {
@@ -295,6 +297,8 @@ export function useScenario() {
       title: payload.settings.title,
       displayMode: payload.settings.displayMode,
       presenterMode: payload.settings.presenterMode,
+      showFrameTitle: payload.settings.showFrameTitle ?? true,
+      showFrameNumber: payload.settings.showFrameNumber ?? true,
     } : DEFAULT_SCENARIO_SETTINGS);
     setHistory({ past: [], future: [] });
     setSelectedId(firstBoat?.id ?? firstMark?.id ?? firstArrow?.id ?? firstComment?.id ?? null);

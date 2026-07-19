@@ -402,6 +402,45 @@ describe('magnetic grid controls', () => {
 
     expect(onSetDisplayMode).toHaveBeenCalledWith('cumulative');
   });
+
+  it('toggles frame title and number visibility from the canvas settings', () => {
+    const onSetShowFrameTitle = jest.fn();
+    const onSetShowFrameNumber = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={frame}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowFrameTitle={onSetShowFrameTitle}
+        onSetShowFrameNumber={onSetShowFrameNumber}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedType="grid"
+        showFrameTitle
+        showFrameNumber
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    const titleToggle = screen.getByRole('checkbox', { name: /show frame title/i });
+    const numberToggle = screen.getByRole('checkbox', { name: /show frame number/i });
+    expect(titleToggle).toBeChecked();
+    expect(numberToggle).toBeChecked();
+
+    fireEvent.click(titleToggle);
+    fireEvent.click(numberToggle);
+
+    expect(onSetShowFrameTitle).toHaveBeenCalledWith(false);
+    expect(onSetShowFrameNumber).toHaveBeenCalledWith(false);
+  });
 });
 
 describe('playback controls', () => {

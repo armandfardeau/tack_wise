@@ -87,6 +87,8 @@ export interface ScenarioSettings {
   title?: string;
   displayMode: DisplayMode;
   presenterMode: boolean;
+  showFrameTitle?: boolean;
+  showFrameNumber?: boolean;
 }
 
 export interface ScenarioExportPayload {

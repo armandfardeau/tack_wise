@@ -222,7 +222,9 @@ function isScenarioSettings(value: unknown): boolean {
   return (
     (value.title === undefined || typeof value.title === 'string') &&
     (value.displayMode === 'single' || value.displayMode === 'cumulative') &&
-    typeof value.presenterMode === 'boolean'
+    typeof value.presenterMode === 'boolean' &&
+    (value.showFrameTitle === undefined || typeof value.showFrameTitle === 'boolean') &&
+    (value.showFrameNumber === undefined || typeof value.showFrameNumber === 'boolean')
   );
 }
 

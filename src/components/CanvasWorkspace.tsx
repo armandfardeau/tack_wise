@@ -14,6 +14,7 @@ import GridSettingsButton from './GridSettingsButton';
 import FloatingAddMenu from './FloatingAddMenu';
 import PlaybackButton from './PlaybackButton';
 import CanvasHistoryControls from './CanvasHistoryControls';
+import FrameHeader from './FrameHeader';
 
 interface CanvasWorkspaceProps {
   activeFrame: Frame;
@@ -24,6 +25,8 @@ interface CanvasWorkspaceProps {
   constrainPosition: (position: Position) => Position;
   currentFrameIndex: number;
   displayMode: DisplayMode;
+  showFrameTitle: boolean;
+  showFrameNumber: boolean;
   presenterMode: boolean;
   theme: Theme;
   frames: Frame[];
@@ -53,6 +56,8 @@ interface CanvasWorkspaceProps {
   onClearSelection: () => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetDisplayMode: (mode: DisplayMode) => void;
+  onSetShowFrameTitle: (show: boolean) => void;
+  onSetShowFrameNumber: (show: boolean) => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetShowGrid: (show: boolean) => void;
   onRedo: () => void;
@@ -260,6 +265,8 @@ export default function CanvasWorkspace({
   constrainPosition,
   currentFrameIndex,
   displayMode,
+  showFrameTitle,
+  showFrameNumber,
   presenterMode,
   theme,
   frames,
@@ -289,6 +296,8 @@ export default function CanvasWorkspace({
   onClearSelection,
   onSetAutoSailTrim,
   onSetDisplayMode,
+  onSetShowFrameTitle,
+  onSetShowFrameNumber,
   onSetGridSnapEnabled,
   onSetShowGrid,
   onRedo,
@@ -443,13 +452,17 @@ export default function CanvasWorkspace({
       }
     : null;
 
-  const inspectorHeightEstimate = selectedType === 'wind' || selectedType === 'grid' || selectedType === 'playback'
+  const inspectorHeightEstimate = selectedType === 'wind'
     ? 220
-    : selectedType === 'boat'
-      ? 560
-      : selectedType === 'mark'
-        ? 520
-        : 360;
+    : selectedType === 'grid'
+      ? 330
+      : selectedType === 'playback'
+        ? 220
+        : selectedType === 'boat'
+          ? 560
+          : selectedType === 'mark'
+            ? 520
+            : 360;
   const isCompactLayout = typeof window !== 'undefined' && window.innerWidth <= 768;
   const inspectorLayoutHeight = isCompactLayout
     ? Math.min(inspectorHeightEstimate, window.innerHeight * 0.45)
@@ -575,6 +588,13 @@ export default function CanvasWorkspace({
           stageRef={stageRef}
           stageSize={stageSize}
         />
+        <FrameHeader
+          frameName={activeFrame.name}
+          frameIndex={currentFrameIndex}
+          frameCount={frames.length}
+          showTitle={showFrameTitle}
+          showNumber={showFrameNumber}
+        />
         {shouldShowInspector && inspectorStyle && (
           <Rnd
             bounds="parent"
@@ -599,7 +619,11 @@ export default function CanvasWorkspace({
               onSetGridSnapEnabled={onSetGridSnapEnabled}
               onSetAutoSailTrim={onSetAutoSailTrim}
               onSetDisplayMode={onSetDisplayMode}
+              onSetShowFrameTitle={onSetShowFrameTitle}
+              onSetShowFrameNumber={onSetShowFrameNumber}
               onSetShowGrid={onSetShowGrid}
+              showFrameTitle={showFrameTitle}
+              showFrameNumber={showFrameNumber}
               onTogglePlaying={onTogglePlaying}
               onSetPlaySpeed={onSetPlaySpeed}
               playSpeed={playSpeed}
