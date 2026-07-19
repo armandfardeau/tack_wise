@@ -146,4 +146,39 @@ describe('AppHeader', () => {
 
     expect(onTogglePresenter).toHaveBeenCalledTimes(1);
   });
+
+  it('copies a share link through the optional handler', () => {
+    const onShareScenario = jest.fn();
+
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} onShareScenario={onShareScenario} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /copy share link/i }));
+
+    expect(onShareScenario).toHaveBeenCalledTimes(1);
+  });
+
+  it('exposes image export actions and delegates their selected formats', () => {
+    const onExport = jest.fn();
+    const onExportImage = jest.fn();
+
+    render(<AppHeader isExporting={false} onExport={onExport} onExportImage={onExportImage} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export gif/i }));
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export video/i }));
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export png/i }));
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /export jpg/i }));
+
+    expect(onExport).toHaveBeenNthCalledWith(1, 'gif');
+    expect(onExport).toHaveBeenNthCalledWith(2, 'mp4');
+    expect(onExportImage).toHaveBeenNthCalledWith(1, 'png');
+    expect(onExportImage).toHaveBeenNthCalledWith(2, 'jpeg');
+  });
 });

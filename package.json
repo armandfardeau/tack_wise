@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "test": "jest --runInBand",
+    "test:coverage": "jest --runInBand --coverage",
     "preview": "vite preview"
   },
   "dependencies": {

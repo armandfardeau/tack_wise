@@ -1,5 +1,20 @@
-import { createScenarioShareUrl, downloadScenarioJson, parseScenarioFromJson, parseScenarioShareUrl, serializeScenarioToJson } from '../src/utils/exporter';
-import type { Frame } from '../src/types';
+jest.mock('gifshot', () => ({
+  __esModule: true,
+  default: { createGIF: jest.fn() },
+}));
+
+import gifshot from 'gifshot';
+import {
+  createScenarioShareUrl,
+  dataUrlToBlob,
+  downloadBlob,
+  downloadScenarioJson,
+  exportToGif,
+  parseScenarioFromJson,
+  parseScenarioShareUrl,
+  serializeScenarioToJson,
+} from '../src/utils/exporter';
+import type { Frame, ScenarioExportPayload } from '../src/types';
 
 const frames: Frame[] = [
   {
@@ -144,5 +159,105 @@ describe('scenario JSON export', () => {
     const payload = { version: 2 as const, frames, currentFrameIndex: 1 };
     const url = createScenarioShareUrl(payload, 'https://example.test/tack-wise');
     expect(parseScenarioShareUrl(url)).toEqual(payload);
+
+    const defaultUrl = createScenarioShareUrl(payload);
+    window.history.replaceState({}, '', defaultUrl);
+    expect(parseScenarioShareUrl()).toEqual(payload);
+  });
+
+  it('reports malformed JSON and malformed share links without throwing to callers', () => {
+    expect(() => parseScenarioFromJson('{not json')).toThrow(/not valid JSON/i);
+    expect(parseScenarioShareUrl('https://example.test/tack-wise')).toBeNull();
+    expect(parseScenarioShareUrl('not a URL')).toBeNull();
+  });
+
+  it.each([
+    { frames: [null], label: 'frame' },
+    { frames: [{ ...frames[0], boats: [null] }], label: 'boats' },
+    { frames: [{ ...frames[0], marks: [null] }], label: 'marks' },
+    { frames: [{ ...frames[0], arrows: [null] }], label: 'arrows' },
+    { frames: [{ ...frames[0], comments: [null] }], label: 'comments' },
+    { frames: [{ ...frames[0], images: [null] }], label: 'images' },
+    { frames: [{ ...frames[0], rules: [null] }], label: 'rules' },
+  ])('rejects a scenario with an invalid $label entry', ({ frames: invalidFrames }) => {
+    expect(() => parseScenarioFromJson(JSON.stringify({ version: 1, frames: invalidFrames, currentFrameIndex: 0 }))).toThrow(/valid Tack Wise scenario export/i);
+  });
+
+  it('validates all optional diagram fields and settings', () => {
+    const payload: ScenarioExportPayload = {
+      version: 2 as const,
+      currentFrameIndex: 0,
+      settings: { title: 'Lesson', displayMode: 'single' as const, presenterMode: false },
+      frames: [{
+        ...frames[0],
+        boats: [],
+        marks: [{
+          id: 'mark-1', name: 'Mark', color: '#fff', x: 1, y: 2, shape: 'circle' as const,
+          size: 20, showRotationArrow: true, rotationDirection: 'clockwise' as const,
+          connectedToMarkId: null, connectionLineColor: '#000', connectionLineStyle: 'solid' as const,
+        }],
+        arrows: [{
+          id: 'arrow-1', name: 'Arrow', color: '#fff', points: [{ x: 1, y: 2 }, { x: 3, y: 4 }],
+          curved: false, lineStyle: 'dashed' as const, lineWidth: 4, showArrowhead: false,
+        }],
+        comments: [{ id: 'comment-1', name: 'Comment', text: 'Text', color: '#fff', x: 1, y: 2, width: 100, fontSize: 16 }],
+        images: [{ id: 'image-1', name: 'Image', src: 'data:image/png;base64,AA==', x: 1, y: 2, width: 100, height: 80, rotation: 20 }],
+        rules: [{ id: 'rrs-10', label: 'RRS 10', description: 'On opposite tacks', url: 'https://rules.example.test/10' }],
+      }],
+    };
+
+    // The boat validator needs a real boat; keeping the fixture local makes the
+    // optional-field coverage above independent from the application defaults.
+    payload.frames[0].boats = [{ id: 'boat-1', name: 'Boat', color: '#fff', x: 1, y: 2, heading: 3, sailAngle: 4, showHeadingLine: true }];
+
+    expect(parseScenarioFromJson(JSON.stringify(payload))).toEqual(payload);
+  });
+
+  it('rejects invalid settings and frame indexes', () => {
+    const valid = { version: 2, frames, currentFrameIndex: 0, settings: { displayMode: 'single', presenterMode: false } };
+
+    expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, currentFrameIndex: 2 }))).toThrow(/valid Tack Wise scenario export/i);
+    expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, displayMode: 'continuous' } }))).toThrow(/valid Tack Wise scenario export/i);
+    expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, presenterMode: 'yes' } }))).toThrow(/valid Tack Wise scenario export/i);
+    expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: null }))).toThrow(/valid Tack Wise scenario export/i);
+  });
+});
+
+describe('binary exports', () => {
+  it('converts data URLs and uses a fallback MIME type when metadata is absent', () => {
+    expect(dataUrlToBlob('data:text/plain;base64,SGk=')).toEqual(expect.objectContaining({ type: 'text/plain', size: 2 }));
+    expect(dataUrlToBlob('data:text/plain,QQ==')).toEqual(expect.objectContaining({ type: 'application/octet-stream', size: 1 }));
+  });
+
+  it('creates a GIF blob from gifshot output', async () => {
+    const createGIF = gifshot.createGIF as jest.Mock;
+    createGIF.mockImplementationOnce((_options, callback) => callback({ image: 'data:image/gif;base64,AAE=' }));
+
+    await expect(exportToGif(['frame-1'], 0.5, 320, 180)).resolves.toEqual(expect.objectContaining({ type: 'image/gif', size: 2 }));
+    expect(createGIF).toHaveBeenCalledWith(expect.objectContaining({ images: ['frame-1'], interval: 0.5, gifWidth: 320, gifHeight: 180 }), expect.any(Function));
+  });
+
+  it('rejects GIF errors with a useful fallback message', async () => {
+    const createGIF = gifshot.createGIF as jest.Mock;
+    createGIF.mockImplementationOnce((_options, callback) => callback({ error: true }));
+    await expect(exportToGif([], 1, 10, 10)).rejects.toThrow('Failed to create GIF');
+
+    createGIF.mockImplementationOnce((_options, callback) => callback({ error: true, errorMsg: 'Canvas failed' }));
+    await expect(exportToGif([], 1, 10, 10)).rejects.toThrow('Canvas failed');
+  });
+
+  it('downloads and revokes a blob URL', () => {
+    const createObjectURL = jest.fn(() => 'blob:test');
+    const revokeObjectURL = jest.fn();
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
+    const click = jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined);
+
+    downloadBlob(new Blob(['content']), 'scenario.json');
+
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect(click).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:test');
+    click.mockRestore();
   });
 });

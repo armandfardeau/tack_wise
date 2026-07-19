@@ -232,6 +232,7 @@ describe('Timeline', () => {
       />,
     );
 
+    fireEvent.click(screen.getByText('1. Preparation'));
     fireEvent.doubleClick(screen.getByText('1. Preparation'));
     const firstTitleInput = screen.getByRole('textbox', { name: 'Frame 1 title' });
     fireEvent.change(firstTitleInput, { target: { value: 'Start line' } });
@@ -264,5 +265,114 @@ describe('Timeline', () => {
     );
 
     expect(screen.getByText('1. Preparation')).toBeInTheDocument();
+  });
+
+  it('supports inline duplicate, delete, and layer actions while editing', () => {
+    const onDeleteFrame = jest.fn();
+    const onDuplicateFrame = jest.fn();
+    const onOpenLayers = jest.fn();
+
+    render(
+      <Timeline
+        variant="sidebar"
+        currentFrameIndex={0}
+        frames={frames}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={onDeleteFrame}
+        onDuplicateFrame={onDuplicateFrame}
+        onOpenLayers={onOpenLayers}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    fireEvent.doubleClick(screen.getByText('2. Upwind Tack'));
+    fireEvent.click(screen.getByRole('button', { name: /duplicate frame 2/i }));
+    fireEvent.click(screen.getByRole('button', { name: /show layers for frame 2/i }));
+    fireEvent.click(screen.getByRole('button', { name: /delete frame 2/i }));
+
+    expect(onDuplicateFrame).toHaveBeenCalledWith(1);
+    expect(onOpenLayers).toHaveBeenCalledWith(1);
+    expect(onDeleteFrame).toHaveBeenCalledWith(1);
+  });
+
+  it('does not rename a frame to a blank title and exits editing on frame removal', () => {
+    const onRenameFrame = jest.fn();
+    const { rerender } = render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={frames}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={onRenameFrame}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    fireEvent.doubleClick(screen.getByText('1. Preparation'));
+    const titleInput = screen.getByRole('textbox', { name: 'Frame 1 title' });
+    fireEvent.change(titleInput, { target: { value: '   ' } });
+    fireEvent.keyDown(titleInput, { key: 'Tab' });
+    fireEvent.blur(titleInput);
+    expect(onRenameFrame).not.toHaveBeenCalled();
+
+    fireEvent.doubleClick(screen.getByText('2. Upwind Tack'));
+    rerender(
+      <Timeline
+        currentFrameIndex={0}
+        frames={[frames[0]]}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={onRenameFrame}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole('textbox', { name: 'Frame 2 title' })).not.toBeInTheDocument();
+  });
+
+  it('keeps the optional playback callbacks safe when the bottom controls omit handlers', () => {
+    render(
+      <Timeline
+        currentFrameIndex={1}
+        frames={frames}
+        isPlaying
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /pause/i }));
+    fireEvent.click(screen.getByRole('button', { name: /step backward/i }));
+    fireEvent.click(screen.getByRole('button', { name: /step forward/i }));
+    fireEvent.click(screen.getByRole('button', { name: /replay from start/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /playback speed/i }), { target: { value: '500' } });
+    expect(screen.getByRole('button', { name: /pause/i })).toBeInTheDocument();
+  });
+
+  it('opens layers from a normal sidebar frame row', () => {
+    const onOpenLayers = jest.fn();
+    render(
+      <Timeline
+        variant="sidebar"
+        currentFrameIndex={0}
+        frames={frames}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onOpenLayers={onOpenLayers}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /show layers for frame 2/i }));
+
+    expect(onOpenLayers).toHaveBeenCalledWith(1);
   });
 });

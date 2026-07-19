@@ -2,6 +2,11 @@ import { act, renderHook } from '@testing-library/react';
 import { useScenario } from '../src/hooks/useScenario';
 
 describe('useScenario', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    jest.restoreAllMocks();
+  });
+
   it('uses discrete playback by default', () => {
     const { result } = renderHook(() => useScenario());
 
@@ -146,6 +151,13 @@ describe('useScenario', () => {
       act(() => jest.advanceTimersByTime(1));
       expect(result.current.currentFrameIndex).toBe(1);
       expect(result.current.displayFrame).toBe(result.current.frames[1]);
+
+      act(() => {
+        result.current.setCurrentFrameIndex(result.current.frames.length - 1);
+        result.current.setIsPlaying(true);
+      });
+      act(() => jest.advanceTimersByTime(1000));
+      expect(result.current.currentFrameIndex).toBe(0);
     } finally {
       jest.useRealTimers();
     }
@@ -213,5 +225,241 @@ describe('useScenario', () => {
     act(() => result.current.updateBoat('boat-1', { name: 'Changed after save' }));
     act(() => result.current.loadFromLibrary(result.current.libraryItems[0].id));
     expect(result.current.selectedBoat?.name).toBe('Alpha — dinghy');
+  });
+
+  it('updates every diagram object and exposes movement helpers', () => {
+    const { result } = renderHook(() => useScenario());
+    const importedFrame = {
+      id: 'objects-frame',
+      name: 'Objects',
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [{ id: 'boat-a', name: 'Boat', color: '#fff', x: 10, y: 20, heading: 0, sailAngle: 0 }],
+      marks: [
+        { id: 'mark-a', name: 'A', color: '#fff', x: 30, y: 40, shape: 'circle' as const },
+        { id: 'mark-b', name: 'B', color: '#000', x: 50, y: 60, shape: 'gate' as const },
+      ],
+      arrows: [{ id: 'arrow-a', name: 'Arrow', color: '#f00', points: [{ x: 0, y: 0 }, { x: 10, y: 10 }] }],
+      comments: [{ id: 'comment-a', name: 'Comment', text: 'Text', color: '#fff', x: 1, y: 2 }],
+      images: [{ id: 'image-a', name: 'Image', src: 'data:image/png;base64,AA==', x: 1, y: 2, width: 30, height: 40 }],
+    };
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 1, frames: [importedFrame, { ...importedFrame, id: 'objects-frame-2' }] }));
+    act(() => result.current.selectFrame(1));
+    act(() => {
+      result.current.updateActiveFrame({ windSpeed: 20 });
+      result.current.moveBoat('boat-a', { x: 100, y: 110 });
+      result.current.moveMark('mark-a', { x: 120, y: 130 });
+      result.current.moveArrow('arrow-a', [{ x: 2, y: 3 }, { x: 12, y: 13 }]);
+      result.current.moveComment('comment-a', { x: 140, y: 150 });
+      result.current.moveImage('image-a', { x: 160, y: 170 });
+      result.current.updateMark('mark-a', { connectedToMarkId: 'mark-b' });
+      result.current.updateArrow('arrow-a', { curved: true });
+      result.current.updateComment('comment-a', { text: 'Updated' });
+      result.current.updateImage('image-a', { rotation: 45 });
+    });
+
+    expect(result.current.activeFrame.windSpeed).toBe(20);
+    expect(result.current.activeFrame.boats[0]).toMatchObject({ x: 100, y: 110 });
+    expect(result.current.activeFrame.marks[0]).toMatchObject({ x: 120, y: 130, connectedToMarkId: 'mark-b' });
+    expect(result.current.activeFrame.arrows?.[0]).toMatchObject({ points: [{ x: 2, y: 3 }, { x: 12, y: 13 }], curved: true });
+    expect(result.current.activeFrame.comments?.[0]).toMatchObject({ x: 140, y: 150, text: 'Updated' });
+    expect(result.current.activeFrame.images?.[0]).toMatchObject({ x: 160, y: 170, rotation: 45 });
+  });
+
+  it('adds, duplicates, deletes, and selects frames', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(987);
+    const { result } = renderHook(() => useScenario());
+    const originalLength = result.current.frames.length;
+
+    act(() => result.current.addFrame());
+    expect(result.current.frames).toHaveLength(originalLength + 1);
+    expect(result.current.currentFrameIndex).toBe(originalLength);
+    expect(result.current.isPlaying).toBe(false);
+
+    act(() => result.current.duplicateFrame());
+    expect(result.current.frames[originalLength + 1].name).toMatch(/\(Copy\)$/);
+    expect(result.current.currentFrameIndex).toBe(originalLength + 1);
+
+    act(() => result.current.deleteFrame(1));
+    expect(result.current.currentFrameIndex).toBe(0);
+    expect(result.current.frames).toHaveLength(originalLength + 1);
+
+    act(() => result.current.duplicateFrame(999));
+    expect(result.current.currentFrameIndex).toBe(1000);
+
+    act(() => result.current.setCurrentFrameIndex(2));
+    expect(result.current.currentFrameIndex).toBe(2);
+  });
+
+  it('adds images, rules, and all supported mark shapes from the active frame onward', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(456);
+    const { result } = renderHook(() => useScenario());
+
+    act(() => result.current.selectFrame(1));
+    act(() => {
+      result.current.addBoat();
+      result.current.addMark('gate');
+      result.current.addMark();
+      result.current.addImage('data:image/png;base64,AA==', 'Background');
+      result.current.addImage('data:image/png;base64,AA==');
+      result.current.addRuleToActiveFrame({ id: 'rrs-10', label: 'RRS 10' });
+      result.current.updateSettings({ presenterMode: true, title: 'Lesson' });
+      result.current.setAutoSailTrim(false);
+      result.current.setPlaySpeed(500);
+    });
+
+    expect(result.current.frames[0].images?.some((image) => image.name === 'Background')).toBe(false);
+    expect(result.current.frames.slice(1).every((frame) => frame.images?.some((image) => image.name === 'Background'))).toBe(true);
+    expect(result.current.frames[1].rules?.some((rule) => rule.id === 'rrs-10')).toBe(true);
+    expect(result.current.frames.slice(1).every((frame) => frame.boats.length > 1)).toBe(true);
+    expect(result.current.frames.slice(1).some((frame) => frame.marks.some((mark) => mark.shape === 'gate'))).toBe(true);
+    expect(result.current.settings).toMatchObject({ presenterMode: true, title: 'Lesson' });
+    expect(result.current.playSpeed).toBe(500);
+
+    act(() => result.current.clearSelection());
+    expect(result.current.selectedId).toBeNull();
+    expect(result.current.selectedType).toBeNull();
+  });
+
+  it('restores and clears a valid autosave, while rejecting missing or invalid data', () => {
+    localStorage.setItem('tack-wise-autosave', JSON.stringify({
+      version: 2,
+      currentFrameIndex: 0,
+      settings: { title: 'Recovered', displayMode: 'cumulative', presenterMode: true },
+      frames: [{ id: 'recovered', name: 'Recovered', windAngle: 45, windSpeed: 15, boats: [], marks: [] }],
+    }));
+
+    const { result } = renderHook(() => useScenario());
+    expect(result.current.hasAutosave).toBe(true);
+
+    // The initial autosave effect intentionally runs once after mount; restore
+    // from a fresh copy so this test exercises the recovery path itself.
+    localStorage.setItem('tack-wise-autosave', JSON.stringify({
+      version: 2,
+      currentFrameIndex: 0,
+      settings: { title: 'Recovered', displayMode: 'cumulative', presenterMode: true },
+      frames: [{ id: 'recovered', name: 'Recovered', windAngle: 45, windSpeed: 15, boats: [], marks: [] }],
+    }));
+
+    let restored = false;
+    act(() => { restored = result.current.restoreAutosave(); });
+    expect(restored).toBe(true);
+    expect(result.current.activeFrame.name).toBe('Recovered');
+    expect(result.current.settings.displayMode).toBe('cumulative');
+
+    act(() => result.current.clearAutosave());
+    expect(result.current.hasAutosave).toBe(false);
+    expect(localStorage.getItem('tack-wise-autosave')).toBeNull();
+
+    let missing = true;
+    act(() => { missing = result.current.restoreAutosave(); });
+    expect(missing).toBe(false);
+
+    localStorage.setItem('tack-wise-autosave', '{bad json');
+    let invalid = true;
+    act(() => { invalid = result.current.restoreAutosave(); });
+    expect(invalid).toBe(false);
+  });
+
+  it('selects the first available imported object and falls back to no selection', () => {
+    const { result } = renderHook(() => useScenario());
+    const base = { id: 'frame', name: 'Frame', windAngle: 0, windSpeed: 12, boats: [], marks: [] };
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [{ ...base, marks: [{ id: 'mark', name: 'Mark', color: '#fff', x: 1, y: 1, shape: 'circle' }] }] }));
+    expect(result.current.selectedType).toBe('mark');
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [{ ...base, arrows: [{ id: 'arrow', name: 'Arrow', color: '#fff', points: [{ x: 1, y: 1 }, { x: 2, y: 2 }] }] }] }));
+    expect(result.current.selectedType).toBe('arrow');
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [{ ...base, comments: [{ id: 'comment', name: 'Comment', text: 'Text', color: '#fff', x: 1, y: 1 }] }] }));
+    expect(result.current.selectedType).toBe('comment');
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [base] }));
+    expect(result.current.selectedId).toBeNull();
+    expect(result.current.selectedType).toBeNull();
+  });
+
+  it('deletes selected objects and clears mark connections to the deleted mark', () => {
+    const { result } = renderHook(() => useScenario());
+    const frame = {
+      id: 'objects', name: 'Objects', windAngle: 0, windSpeed: 12,
+      boats: [{ id: 'boat', name: 'Boat', color: '#fff', x: 1, y: 1, heading: 0, sailAngle: 0 }],
+      marks: [
+        { id: 'mark-a', name: 'A', color: '#fff', x: 1, y: 1, shape: 'circle' as const, connectedToMarkId: 'mark-b' },
+        { id: 'mark-b', name: 'B', color: '#000', x: 2, y: 2, shape: 'circle' as const },
+      ],
+      arrows: [{ id: 'arrow', name: 'Arrow', color: '#f00', points: [{ x: 0, y: 0 }, { x: 1, y: 1 }] }],
+      comments: [{ id: 'comment', name: 'Comment', text: 'Text', color: '#fff', x: 1, y: 1 }],
+      images: [{ id: 'image', name: 'Image', src: 'data:image/png;base64,AA==', x: 1, y: 1, width: 20, height: 20 }],
+    };
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [frame] }));
+    act(() => result.current.selectObject('mark-b', 'mark'));
+    act(() => result.current.deleteSelected());
+    expect(result.current.activeFrame.marks).toEqual([
+      expect.objectContaining({ id: 'mark-a', connectedToMarkId: null }),
+    ]);
+
+    for (const [id, type] of [['boat', 'boat'], ['arrow', 'arrow'], ['comment', 'comment'], ['image', 'image']] as const) {
+      act(() => result.current.selectObject(id, type));
+      act(() => result.current.deleteSelected());
+    }
+
+    expect(result.current.activeFrame.boats).toEqual([]);
+    expect(result.current.activeFrame.arrows).toEqual([]);
+    expect(result.current.activeFrame.comments).toEqual([]);
+    expect(result.current.activeFrame.images).toEqual([]);
+    expect(result.current.selectedId).toBeNull();
+  });
+
+  it('returns false for missing library entries and removes saved entries', () => {
+    const { result } = renderHook(() => useScenario());
+
+    expect(result.current.loadFromLibrary('missing')).toBe(false);
+    act(() => result.current.saveToLibrary('Temporary'));
+    const id = result.current.libraryItems[0].id;
+    act(() => result.current.deleteFromLibrary(id));
+
+    expect(result.current.libraryItems.some((item) => item.id === id)).toBe(false);
+    expect(result.current.loadFromLibrary(id)).toBe(false);
+  });
+
+  it('clears special and empty selections without changing frames', () => {
+    const { result } = renderHook(() => useScenario());
+    const frameCount = result.current.frames.length;
+
+    act(() => result.current.clearSelection());
+    act(() => result.current.deleteSelected());
+    expect(result.current.frames).toHaveLength(frameCount);
+
+    act(() => result.current.selectObject('wind', 'wind'));
+    act(() => result.current.deleteSelected());
+    expect(result.current.selectedId).toBeNull();
+    expect(result.current.selectedType).toBeNull();
+
+    act(() => result.current.setAutoSailTrim(false));
+    act(() => result.current.selectObject('boat-1', 'boat'));
+    act(() => result.current.updateBoat('boat-1', { name: 'Manual trim' }));
+    expect(result.current.selectedBoat?.name).toBe('Manual trim');
+  });
+
+  it('ignores undo, redo, and deleting the only remaining frame without history', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => result.current.importScenario({
+      version: 1,
+      currentFrameIndex: 0,
+      frames: [{ id: 'only-frame', name: 'Only frame', windAngle: 0, windSpeed: 12, boats: [], marks: [] }],
+    }));
+    const originalName = result.current.frames[0].name;
+
+    act(() => {
+      result.current.undo();
+      result.current.redo();
+      result.current.deleteFrame(0);
+    });
+
+    expect(result.current.frames[0].name).toBe(originalName);
+    expect(result.current.frames).toHaveLength(1);
+    expect(result.current.canUndo).toBe(false);
+    expect(result.current.canRedo).toBe(false);
   });
 });
