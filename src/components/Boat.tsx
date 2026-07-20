@@ -127,16 +127,30 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         <Circle
           x={0}
           y={-88}
-          radius={7}
+          radius={8}
           fill="#22d3ee"
           stroke="#082f49"
           strokeWidth={2}
+          hitStrokeWidth={24}
           draggable
           onMouseDown={(event) => { event.cancelBubble = true; }}
           onTouchStart={(event) => { event.cancelBubble = true; }}
+          onDragStart={(event) => { event.cancelBubble = true; }}
+          onDragMove={(event) => { event.cancelBubble = true; }}
           onDragEnd={(event) => {
-            const angle = (Math.atan2(event.target.x(), -event.target.y()) * 180) / Math.PI;
-            onRotate?.(boat.id, (angle + 360) % 360);
+            event.cancelBubble = true;
+
+            const pointerPosition = event.target.getStage()?.getPointerPosition();
+            const boatPosition = event.target.getParent()?.getAbsolutePosition();
+
+            if (pointerPosition && boatPosition) {
+              const angle = (Math.atan2(
+                pointerPosition.x - boatPosition.x,
+                -(pointerPosition.y - boatPosition.y),
+              ) * 180) / Math.PI;
+              onRotate?.(boat.id, (angle + 360) % 360);
+            }
+
             event.target.position({ x: 0, y: -88 });
           }}
         />
