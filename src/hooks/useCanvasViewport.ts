@@ -19,6 +19,11 @@ const CANVAS_FIT_PADDING = 32;
 const CANVAS_FIT_TOP_CONTROL_OFFSET = 48;
 const CANVAS_FIT_BOTTOM_CONTROL_OFFSET = 48;
 
+interface PinchGesture {
+  center: Position;
+  distance: number;
+}
+
 const isMobileViewport = () =>
   typeof window !== 'undefined' &&
   typeof window.matchMedia === 'function' &&
@@ -46,6 +51,14 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
   const [stageSize, setStageSize] = useState({ width: 720, height: 500 });
   const [canvasZoom, setCanvasZoom] = useState(() => getInitialCanvasZoom({ width: 720, height: 500 }, contentBounds));
   const [canvasPosition, setCanvasPosition] = useState<Position>({ x: 0, y: 0 });
+  const stageSizeRef = useRef(stageSize);
+  const canvasZoomRef = useRef(canvasZoom);
+  const canvasPositionRef = useRef(canvasPosition);
+  const pinchGestureRef = useRef<PinchGesture | null>(null);
+
+  stageSizeRef.current = stageSize;
+  canvasZoomRef.current = canvasZoom;
+  canvasPositionRef.current = canvasPosition;
 
   useEffect(() => {
     const canvasWrap = canvasWrapRef.current;
@@ -74,37 +87,47 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     return () => observer.disconnect();
   }, [contentBounds]);
 
+  const setCanvasViewport = (position: Position, zoom: number) => {
+    canvasPositionRef.current = position;
+    canvasZoomRef.current = zoom;
+    setCanvasPosition(position);
+    setCanvasZoom(zoom);
+  };
+
   const zoomCanvasAtPoint = (requestedZoom: number, point: Position) => {
     const nextZoom = clampCanvasZoom(requestedZoom);
+    const currentZoom = canvasZoomRef.current;
+    const currentPosition = canvasPositionRef.current;
+    const currentStageSize = stageSizeRef.current;
     const worldPoint = {
-      x: (point.x - canvasPosition.x) / canvasZoom,
-      y: (point.y - canvasPosition.y) / canvasZoom,
+      x: (point.x - currentPosition.x) / currentZoom,
+      y: (point.y - currentPosition.y) / currentZoom,
     };
 
-    setCanvasPosition(
+    setCanvasViewport(
       constrainCanvasPosition(
         {
           x: point.x - worldPoint.x * nextZoom,
           y: point.y - worldPoint.y * nextZoom,
         },
         nextZoom,
-        stageSize,
-        getCanvasWorldBounds(stageSize),
+        currentStageSize,
+        getCanvasWorldBounds(currentStageSize),
       ),
+      nextZoom,
     );
-    setCanvasZoom(nextZoom);
   };
 
   const zoomCanvasFromCenter = (factor: number) => {
-    zoomCanvasAtPoint(canvasZoom * factor, {
-      x: stageSize.width / 2,
-      y: stageSize.height / 2,
+    const currentStageSize = stageSizeRef.current;
+    zoomCanvasAtPoint(canvasZoomRef.current * factor, {
+      x: currentStageSize.width / 2,
+      y: currentStageSize.height / 2,
     });
   };
 
   const resetCanvasZoom = () => {
-    setCanvasZoom(1);
-    setCanvasPosition({ x: 0, y: 0 });
+    setCanvasViewport({ x: 0, y: 0 }, 1);
   };
 
   const fitCanvasToContent = (contentRect: CanvasContentRect) => {
@@ -132,28 +155,33 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
       y: topFitInset + availableHeight / 2 - contentCenter.y * nextZoom,
     };
 
-    setCanvasZoom(nextZoom);
-    setCanvasPosition(
+    const currentStageSize = stageSizeRef.current;
+    setCanvasViewport(
       constrainCanvasPosition(
         nextPosition,
         nextZoom,
-        stageSize,
-        getCanvasWorldBounds(stageSize),
+        currentStageSize,
+        getCanvasWorldBounds(currentStageSize),
       ),
+      nextZoom,
     );
   };
 
   const panCanvasBy = (delta: Position) => {
-    setCanvasPosition((position) =>
+    const currentPosition = canvasPositionRef.current;
+    const currentZoom = canvasZoomRef.current;
+    const currentStageSize = stageSizeRef.current;
+    setCanvasViewport(
       constrainCanvasPosition(
         {
-          x: position.x + delta.x,
-          y: position.y + delta.y,
+          x: currentPosition.x + delta.x,
+          y: currentPosition.y + delta.y,
         },
-        canvasZoom,
-        stageSize,
-        getCanvasWorldBounds(stageSize),
+        currentZoom,
+        currentStageSize,
+        getCanvasWorldBounds(currentStageSize),
       ),
+      currentZoom,
     );
   };
 
@@ -163,13 +191,95 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     if (!pointer) return;
 
     const factor = event.evt.deltaY > 0 ? 1 / CANVAS_ZOOM_STEP : CANVAS_ZOOM_STEP;
-    zoomCanvasAtPoint(canvasZoom * factor, pointer);
+    zoomCanvasAtPoint(canvasZoomRef.current * factor, pointer);
   };
 
   const handleCanvasDragEnd = () => {
     const stage = stageRef.current;
     if (!stage) return;
-    setCanvasPosition({ x: stage.x(), y: stage.y() });
+    const position = { x: stage.x(), y: stage.y() };
+    canvasPositionRef.current = position;
+    setCanvasPosition(position);
+  };
+
+  const getTouchPoint = (touch: Touch): Position => {
+    const canvasWrap = canvasWrapRef.current;
+    if (!canvasWrap) return { x: touch.clientX, y: touch.clientY };
+    const bounds = canvasWrap.getBoundingClientRect();
+    return {
+      x: touch.clientX - bounds.left,
+      y: touch.clientY - bounds.top,
+    };
+  };
+
+  const getPinchGesture = (touches: TouchList): PinchGesture | null => {
+    if (touches.length < 2) return null;
+    const first = getTouchPoint(touches[0]);
+    const second = getTouchPoint(touches[1]);
+    return {
+      center: {
+        x: (first.x + second.x) / 2,
+        y: (first.y + second.y) / 2,
+      },
+      distance: Math.max(Math.hypot(second.x - first.x, second.y - first.y), 1),
+    };
+  };
+
+  const stopCanvasDrag = () => {
+    const stage = stageRef.current;
+    if (!stage?.isDragging()) return;
+    stage.stopDrag();
+    const position = { x: stage.x(), y: stage.y() };
+    canvasPositionRef.current = position;
+    setCanvasPosition(position);
+  };
+
+  const handleCanvasTouchStart = (event: { evt: TouchEvent }) => {
+    const gesture = getPinchGesture(event.evt.touches);
+    if (!gesture) return;
+    event.evt.preventDefault();
+    stopCanvasDrag();
+    pinchGestureRef.current = gesture;
+  };
+
+  const handleCanvasTouchMove = (event: { evt: TouchEvent }) => {
+    const gesture = getPinchGesture(event.evt.touches);
+    if (!gesture) return;
+    event.evt.preventDefault();
+    stopCanvasDrag();
+
+    const previousGesture = pinchGestureRef.current;
+    if (!previousGesture) {
+      pinchGestureRef.current = gesture;
+      return;
+    }
+
+    const currentZoom = canvasZoomRef.current;
+    const currentPosition = canvasPositionRef.current;
+    const currentStageSize = stageSizeRef.current;
+    const worldPoint = {
+      x: (previousGesture.center.x - currentPosition.x) / currentZoom,
+      y: (previousGesture.center.y - currentPosition.y) / currentZoom,
+    };
+    const nextZoom = clampCanvasZoom(currentZoom * (gesture.distance / previousGesture.distance));
+    const nextPosition = constrainCanvasPosition(
+      {
+        x: gesture.center.x - worldPoint.x * nextZoom,
+        y: gesture.center.y - worldPoint.y * nextZoom,
+      },
+      nextZoom,
+      currentStageSize,
+      getCanvasWorldBounds(currentStageSize),
+    );
+
+    setCanvasViewport(nextPosition, nextZoom);
+    pinchGestureRef.current = gesture;
+  };
+
+  const handleCanvasTouchEnd = (event: { evt: TouchEvent }) => {
+    if (event.evt.touches.length < 2) {
+      pinchGestureRef.current = null;
+    }
   };
 
   return {
@@ -180,6 +290,9 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
       constrainCanvasPosition(position, canvasZoom, stageSize, getCanvasWorldBounds(stageSize)),
     fitCanvasToContent,
     handleCanvasDragEnd,
+    handleCanvasTouchEnd,
+    handleCanvasTouchMove,
+    handleCanvasTouchStart,
     handleCanvasWheel,
     maxZoom: MAX_CANVAS_ZOOM,
     minZoom: MIN_CANVAS_ZOOM,

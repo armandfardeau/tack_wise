@@ -48,6 +48,9 @@ interface SimulationCanvasProps {
   stageRef: RefObject<KonvaStage | null>;
   stageSize: { width: number; height: number };
   getSnappedPosition: (objectId: string, position: Position) => Position;
+  onCanvasTouchEnd: (event: { evt: TouchEvent }) => void;
+  onCanvasTouchMove: (event: { evt: TouchEvent }) => void;
+  onCanvasTouchStart: (event: { evt: TouchEvent }) => void;
 }
 
 export default function SimulationCanvas({
@@ -82,6 +85,9 @@ export default function SimulationCanvas({
   stageRef,
   stageSize,
   getSnappedPosition,
+  onCanvasTouchEnd,
+  onCanvasTouchMove,
+  onCanvasTouchStart,
 }: SimulationCanvasProps) {
   const previousFrames = displayMode === 'cumulative'
     ? frames.slice(0, currentFrameIndex)
@@ -113,6 +119,10 @@ export default function SimulationCanvas({
       draggable
       dragBoundFunc={constrainPosition}
       onDragEnd={onCanvasDragEnd}
+      onTouchCancel={onCanvasTouchEnd}
+      onTouchEnd={onCanvasTouchEnd}
+      onTouchMove={onCanvasTouchMove}
+      onTouchStart={onCanvasTouchStart}
       onWheel={onCanvasWheel}
     >
       <Layer>

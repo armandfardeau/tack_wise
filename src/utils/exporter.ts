@@ -1,4 +1,5 @@
 import gifshot from 'gifshot';
+import { cloneFrames } from '../data/initialFrames';
 import type {
   Boat,
   CommentNote,
@@ -77,7 +78,7 @@ export function serializeScenarioToJson(
 ): string {
   const payload: ScenarioExportPayload = {
     version: settings ? 2 : 1,
-    frames,
+    frames: cloneFrames(frames),
     currentFrameIndex,
     ...(settings ? { settings } : {}),
   };
@@ -112,7 +113,6 @@ function isBoat(value: unknown): value is Boat {
     isFiniteNumber(value.y) &&
     isFiniteNumber(value.heading) &&
     isFiniteNumber(value.sailAngle) &&
-    (value.aspectRatio === undefined || isFiniteNumber(value.aspectRatio)) &&
     (value.showHeadingLine === undefined || typeof value.showHeadingLine === 'boolean')
   );
 }
@@ -260,7 +260,10 @@ export function parseScenarioFromJson(json: string): ScenarioExportPayload {
     throw new Error('The selected file is not a valid Tack Wise scenario export.');
   }
 
-  return parsed;
+  return {
+    ...parsed,
+    frames: cloneFrames(parsed.frames),
+  };
 }
 
 function encodeBase64Url(value: string) {
@@ -277,7 +280,7 @@ function decodeBase64Url(value: string) {
 
 export function createScenarioShareUrl(payload: ScenarioExportPayload, baseUrl = window.location.href) {
   const url = new URL(baseUrl);
-  url.hash = `scenario=${encodeBase64Url(JSON.stringify(payload))}`;
+  url.hash = `scenario=${encodeBase64Url(JSON.stringify({ ...payload, frames: cloneFrames(payload.frames) }))}`;
   return url.toString();
 }
 

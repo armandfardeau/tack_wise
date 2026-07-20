@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BOAT_COLORS, DEFAULT_BOAT_ASPECT_RATIO, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MARK_COLORS } from '../constants';
+import { BOAT_COLORS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MARK_COLORS } from '../constants';
 import { cloneFrames, initialScenarioTitle } from '../data/initialFrames';
 import type {
   Boat,
@@ -432,7 +432,6 @@ export function useScenario() {
       y: 200 + Math.random() * 200,
       heading: 0,
       sailAngle: 0,
-      aspectRatio: DEFAULT_BOAT_ASPECT_RATIO,
     };
 
     updateCurrentAndFutureFrames((frame) => ({

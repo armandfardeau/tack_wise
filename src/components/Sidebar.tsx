@@ -18,7 +18,7 @@ interface SidebarProps {
   onSelectFrame: (index: number) => void;
   onToggle: () => void;
   onClose: () => void;
-  onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
+  onOpenInspector: (id: string, type: Exclude<SelectedType, null>) => void;
   selectedId: string | null;
   selectedType: SelectedType;
 }
@@ -34,7 +34,7 @@ export default function Sidebar({
   onSelectFrame,
   onToggle,
   onClose,
-  onSelectObject,
+  onOpenInspector,
   selectedId,
   selectedType,
 }: SidebarProps) {
@@ -94,7 +94,7 @@ export default function Sidebar({
             </div>
             {layersFrame && <LayerList
               activeFrame={layersFrame}
-              onSelectObject={onSelectObject}
+              onOpenInspector={onOpenInspector}
               selectedId={selectedId}
               selectedType={selectedType}
             />}

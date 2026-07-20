@@ -8,7 +8,7 @@ type LayerIcon = ComponentType<{ 'aria-hidden'?: boolean; size?: number; strokeW
 
 interface LayerListProps {
   activeFrame: Frame;
-  onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
+  onOpenInspector: (id: string, type: Exclude<SelectedType, null>) => void;
   selectedId: string | null;
   selectedType: SelectedType;
 }
@@ -80,7 +80,7 @@ function getEntries(frame: Frame, type: LayerObjectType): LayerEntry[] {
 
 export default function LayerList({
   activeFrame,
-  onSelectObject,
+  onOpenInspector,
   selectedId,
   selectedType,
 }: LayerListProps) {
@@ -94,7 +94,7 @@ export default function LayerList({
         type="button"
         className={`layer-row${selectedId === 'wind' && selectedType === 'wind' ? ' is-selected' : ''}`}
         aria-pressed={selectedId === 'wind' && selectedType === 'wind'}
-        onClick={() => onSelectObject('wind', 'wind')}
+        onClick={() => onOpenInspector('wind', 'wind')}
       >
         <span className="layer-row-icon is-wind"><Wind aria-hidden="true" size={15} /></span>
         <span className="layer-row-copy">
@@ -126,7 +126,7 @@ export default function LayerList({
                     type="button"
                     className={`layer-row${isSelected ? ' is-selected' : ''}`}
                     aria-pressed={isSelected}
-                    onClick={() => onSelectObject(entry.id, entry.type)}
+                    onClick={() => onOpenInspector(entry.id, entry.type)}
                   >
                     <span className="layer-row-icon" style={entry.color ? { color: entry.color } : undefined}>
                       <EntryIcon aria-hidden={true} size={15} />

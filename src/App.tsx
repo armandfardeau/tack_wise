@@ -54,7 +54,8 @@ export default function App() {
   const loadedShareRef = useRef(false);
   const inspectorRequestIdRef = useRef(0);
 
-  const handleLayerSelect = (id: string, type: Exclude<SelectedType, null>) => {
+  const handleLayerOpenInspector = (id: string, type: Exclude<SelectedType, null>) => {
+    setIsSidebarOpen(false);
     scenario.selectObject(id, type);
     inspectorRequestIdRef.current += 1;
     setInspectorRequest({ id, type, requestId: inspectorRequestIdRef.current });
@@ -168,7 +169,7 @@ export default function App() {
           onToggle={() => setIsSidebarOpen((isOpen) => !isOpen)}
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
-          onSelectObject={handleLayerSelect}
+          onOpenInspector={handleLayerOpenInspector}
           selectedId={scenario.selectedId}
           selectedType={scenario.selectedType}
         />}
@@ -228,6 +229,7 @@ export default function App() {
           onUndo={scenario.undo}
           onPanCanvasBy={viewport.panCanvasBy}
           onOpenControls={() => setIsSidebarOpen(true)}
+          onCloseControls={() => setIsSidebarOpen(false)}
           onSelectObject={scenario.selectObject}
           inspectorRequest={inspectorRequest}
           onSnapPreview={gridSnap.setSnapPreview}
@@ -249,6 +251,9 @@ export default function App() {
           updateComment={scenario.updateComment}
           updateImage={scenario.updateImage}
           canvasWrapRef={viewport.canvasWrapRef}
+          handleCanvasTouchEnd={viewport.handleCanvasTouchEnd}
+          handleCanvasTouchMove={viewport.handleCanvasTouchMove}
+          handleCanvasTouchStart={viewport.handleCanvasTouchStart}
           showGrid={showGrid}
           snapTarget={gridSnap.snapTarget}
           stageRef={viewport.stageRef}

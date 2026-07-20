@@ -1,8 +1,9 @@
 import type { CommentNote, DiagramImage, DisplayMode, Frame, Boat, Mark, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
-import { DEFAULT_BOAT_ASPECT_RATIO, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MAX_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO } from '../constants';
+import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { useId, useRef, useState, type ReactNode } from 'react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
 
@@ -123,69 +124,12 @@ export default function Inspector({
           playSpeed={playSpeed}
         />
       ) : selectedType === 'boat' && selectedBoat ? (
-        <div className="editor-form">
-          <div className="form-row">
-            <label htmlFor="boat-name">Name</label>
-            <input id="boat-name" type="text" value={selectedBoat.name} onChange={(event) => updateBoat(selectedBoat.id, { name: event.target.value })} />
-          </div>
-          <div className="form-row">
-            <label htmlFor="boat-color">Color</label>
-            <input id="boat-color" type="color" value={selectedBoat.color} onChange={(event) => updateBoat(selectedBoat.id, { color: event.target.value })} />
-          </div>
-          <div className="form-row">
-            <label htmlFor="boat-aspect-ratio">Boat aspect ratio ({(selectedBoat.aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO).toFixed(2)})</label>
-            <input
-              id="boat-aspect-ratio"
-              type="range"
-              min={MIN_BOAT_ASPECT_RATIO}
-              max={MAX_BOAT_ASPECT_RATIO}
-              step="0.01"
-              value={selectedBoat.aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO}
-              onChange={(event) => updateBoat(selectedBoat.id, { aspectRatio: Number(event.target.value) })}
-            />
-            <p className="grid-hint">Beam relative to hull length.</p>
-          </div>
-          <div className="form-row">
-            <label htmlFor="boat-heading">Heading ({selectedBoat.heading}°)</label>
-            <input id="boat-heading" type="range" min="-360" max="360" value={selectedBoat.heading} onChange={(event) => updateBoat(selectedBoat.id, { heading: Number(event.target.value) })} />
-            <div className="quick-angle-dial" aria-label="Quick heading angles">
-              {QUICK_HEADING_ANGLES.map((angle) => (
-                <button
-                  key={angle}
-                  type="button"
-                  className={`quick-angle-button quick-angle-button-${angle < 0 ? `negative-${Math.abs(angle)}` : angle}`}
-                  aria-pressed={selectedBoat.heading === angle}
-                  title={`Set heading to ${formatAngle(angle)}`}
-                  style={{
-                    left: `${50 + Math.sin((angle * Math.PI) / 180) * 35}%`,
-                    top: `${50 - Math.cos((angle * Math.PI) / 180) * 35}%`,
-                  }}
-                  onClick={() => updateBoat(selectedBoat.id, { heading: angle })}
-                >
-                  {formatAngle(angle)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="form-row flex-row">
-            <label className="checkbox-label">
-              <input type="checkbox" checked={autoSailTrim} onChange={(event) => onSetAutoSailTrim(event.target.checked)} />
-              <span>Auto Sail Trim</span>
-            </label>
-          </div>
-          {!autoSailTrim && (
-            <div className="form-row">
-              <label htmlFor="boat-sail-angle">Sail Angle ({selectedBoat.sailAngle}°)</label>
-              <input id="boat-sail-angle" type="range" min="-90" max="90" value={selectedBoat.sailAngle} onChange={(event) => updateBoat(selectedBoat.id, { sailAngle: Number(event.target.value) })} />
-            </div>
-          )}
-          <div className="form-row flex-row">
-            <label className="checkbox-label">
-              <input type="checkbox" checked={!!selectedBoat.showHeadingLine} onChange={(event) => updateBoat(selectedBoat.id, { showHeadingLine: event.target.checked })} />
-              <span>Show Dotted Path Line</span>
-            </label>
-          </div>
-        </div>
+        <BoatInspector
+          autoSailTrim={autoSailTrim}
+          boat={selectedBoat}
+          onSetAutoSailTrim={onSetAutoSailTrim}
+          updateBoat={updateBoat}
+        />
       ) : selectedType === 'mark' && selectedMark ? (
         <MarkInspector
           activeFrame={activeFrame}
@@ -202,6 +146,170 @@ export default function Inspector({
         <p className="no-selection">Click an object or the wind indicator on the canvas to inspect and edit its properties.</p>
       )}
     </div>
+  );
+}
+
+interface InspectorTabDefinition {
+  id: string;
+  label: string;
+  content: ReactNode;
+}
+
+function InspectorTabs({ label, tabs }: { label: string; tabs: readonly InspectorTabDefinition[] }) {
+  const tabId = useId();
+  const tabButtonRefs = useRef<Partial<Record<string, HTMLButtonElement>>>({});
+  const [activeTab, setActiveTab] = useState(tabs[0]?.id ?? '');
+  const activeTabDefinition = tabs.find((tab) => tab.id === activeTab) ?? tabs[0];
+
+  if (!activeTabDefinition) return null;
+
+  return (
+    <div className="inspector-tabbed-section">
+      <div className="inspector-tabs" role="tablist" aria-label={`${label} sections`}>
+        {tabs.map((tab, index) => {
+          const tabPanelId = `${tabId}-${tab.id}-panel`;
+          const buttonId = `${tabId}-${tab.id}-tab`;
+
+          return (
+            <button
+              key={tab.id}
+              ref={(button) => {
+                if (button) tabButtonRefs.current[tab.id] = button;
+              }}
+              type="button"
+              id={buttonId}
+              className="inspector-tab"
+              role="tab"
+              aria-selected={activeTab === tab.id}
+              aria-controls={tabPanelId}
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              onClick={() => setActiveTab(tab.id)}
+              onKeyDown={(event) => {
+                const nextIndex = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+                  ? (index + 1) % tabs.length
+                  : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+                    ? (index - 1 + tabs.length) % tabs.length
+                    : event.key === 'Home'
+                      ? 0
+                      : event.key === 'End'
+                        ? tabs.length - 1
+                        : -1;
+
+                if (nextIndex < 0) return;
+
+                event.preventDefault();
+                const nextTab = tabs[nextIndex];
+                setActiveTab(nextTab.id);
+                tabButtonRefs.current[nextTab.id]?.focus();
+              }}
+            >
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
+      <div
+        id={`${tabId}-${activeTabDefinition.id}-panel`}
+        className="inspector-tab-panel"
+        role="tabpanel"
+        aria-labelledby={`${tabId}-${activeTabDefinition.id}-tab`}
+        tabIndex={0}
+      >
+        {activeTabDefinition.content}
+      </div>
+    </div>
+  );
+}
+
+function BoatInspector({
+  autoSailTrim,
+  boat,
+  onSetAutoSailTrim,
+  updateBoat,
+}: {
+  autoSailTrim: boolean;
+  boat: Boat;
+  onSetAutoSailTrim: (enabled: boolean) => void;
+  updateBoat: (boatId: string, changes: Partial<Boat>) => void;
+}) {
+  return (
+    <InspectorTabs
+      label="Boat"
+      tabs={[
+        {
+          id: 'heading',
+          label: 'Heading',
+          content: (
+            <div className="editor-form">
+              <div className="form-row">
+                <label htmlFor="boat-heading">Heading ({boat.heading}°)</label>
+                <input id="boat-heading" type="range" min="-360" max="360" value={boat.heading} onChange={(event) => updateBoat(boat.id, { heading: Number(event.target.value) })} />
+                <div className="quick-angle-dial" aria-label="Quick heading angles">
+                  {QUICK_HEADING_ANGLES.map((angle) => (
+                    <button
+                      key={angle}
+                      type="button"
+                      className={`quick-angle-button quick-angle-button-${angle < 0 ? `negative-${Math.abs(angle)}` : angle}`}
+                      aria-pressed={boat.heading === angle}
+                      title={`Set heading to ${formatAngle(angle)}`}
+                      style={{
+                        left: `${50 + Math.sin((angle * Math.PI) / 180) * 35}%`,
+                        top: `${50 - Math.cos((angle * Math.PI) / 180) * 35}%`,
+                      }}
+                      onClick={() => updateBoat(boat.id, { heading: angle })}
+                    >
+                      {formatAngle(angle)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: 'settings',
+          label: 'Settings',
+          content: (
+            <div className="editor-form">
+              <div className="form-row">
+                <label htmlFor="boat-name">Name</label>
+                <input id="boat-name" type="text" value={boat.name} onChange={(event) => updateBoat(boat.id, { name: event.target.value })} />
+              </div>
+              <div className="form-row">
+                <label htmlFor="boat-color">Color</label>
+                <input id="boat-color" type="color" value={boat.color} onChange={(event) => updateBoat(boat.id, { color: event.target.value })} />
+              </div>
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={autoSailTrim} onChange={(event) => onSetAutoSailTrim(event.target.checked)} />
+                  <span>Auto Sail Trim</span>
+                </label>
+              </div>
+              {!autoSailTrim && (
+                <div className="form-row">
+                  <label htmlFor="boat-sail-angle">Sail Angle ({boat.sailAngle}°)</label>
+                  <input id="boat-sail-angle" type="range" min="-90" max="90" value={boat.sailAngle} onChange={(event) => updateBoat(boat.id, { sailAngle: Number(event.target.value) })} />
+                </div>
+              )}
+            </div>
+          ),
+        },
+        {
+          id: 'display',
+          label: 'Display',
+          content: (
+            <div className="editor-form">
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={!!boat.showHeadingLine} onChange={(event) => updateBoat(boat.id, { showHeadingLine: event.target.checked })} />
+                  <span>Show Dotted Path Line</span>
+                </label>
+              </div>
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }
 
@@ -244,67 +352,85 @@ function CanvasSettingsInspector({
   showGrid: boolean;
 }) {
   return (
-    <div className="editor-form">
-      <div className="inspector-subsection">
-        <h4 className="inspector-subsection-title">Magnetic Grid</h4>
-        <div className="form-row flex-row">
-          <label className="checkbox-label">
-            <input type="checkbox" checked={gridSnapEnabled} onChange={(event) => onSetGridSnapEnabled(event.target.checked)} />
-            <span>Snap boats &amp; marks</span>
-          </label>
-        </div>
-        <div className="form-row flex-row">
-          <label className="checkbox-label">
-            <input type="checkbox" checked={showGrid} onChange={(event) => onSetShowGrid(event.target.checked)} />
-            <span>Show placement grid</span>
-          </label>
-        </div>
-        <p className="grid-hint">20px spacing · drag near an intersection</p>
-      </div>
-      <div className="inspector-subsection">
-        <h4 className="inspector-subsection-title">Frame Header</h4>
-        <div className="form-row flex-row">
-          <label className="checkbox-label">
-            <input type="checkbox" checked={showFrameTitle} onChange={(event) => onSetShowFrameTitle(event.target.checked)} />
-            <span>Show frame title</span>
-          </label>
-        </div>
-        <div className="form-row flex-row">
-          <label className="checkbox-label">
-            <input type="checkbox" checked={showFrameNumber} onChange={(event) => onSetShowFrameNumber(event.target.checked)} />
-            <span>Show frame number</span>
-          </label>
-        </div>
-      </div>
-      <div className="inspector-subsection">
-        <h4 className="inspector-subsection-title">Ghost Display</h4>
-        <p className="grid-hint">Show earlier frames as translucent ghosts on the canvas.</p>
-        <div className="form-row flex-row">
-          <label className="checkbox-label">
-            <input
-              type="radio"
-              name="ghost-display-mode"
-              value="single"
-              checked={displayMode === 'single'}
-              onChange={() => onSetDisplayMode('single')}
-            />
-            <span>Previous frame only</span>
-          </label>
-        </div>
-        <div className="form-row flex-row">
-          <label className="checkbox-label">
-            <input
-              type="radio"
-              name="ghost-display-mode"
-              value="cumulative"
-              checked={displayMode === 'cumulative'}
-              onChange={() => onSetDisplayMode('cumulative')}
-            />
-            <span>All previous frames</span>
-          </label>
-        </div>
-      </div>
-    </div>
+    <InspectorTabs
+      label="Canvas settings"
+      tabs={[
+        {
+          id: 'grid',
+          label: 'Magnetic Grid',
+          content: (
+            <div className="editor-form">
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={gridSnapEnabled} onChange={(event) => onSetGridSnapEnabled(event.target.checked)} />
+                  <span>Snap boats &amp; marks</span>
+                </label>
+              </div>
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={showGrid} onChange={(event) => onSetShowGrid(event.target.checked)} />
+                  <span>Show placement grid</span>
+                </label>
+              </div>
+              <p className="grid-hint">20px spacing · drag near an intersection</p>
+            </div>
+          ),
+        },
+        {
+          id: 'header',
+          label: 'Frame Header',
+          content: (
+            <div className="editor-form">
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={showFrameTitle} onChange={(event) => onSetShowFrameTitle(event.target.checked)} />
+                  <span>Show frame title</span>
+                </label>
+              </div>
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={showFrameNumber} onChange={(event) => onSetShowFrameNumber(event.target.checked)} />
+                  <span>Show frame number</span>
+                </label>
+              </div>
+            </div>
+          ),
+        },
+        {
+          id: 'ghosts',
+          label: 'Ghost Display',
+          content: (
+            <div className="editor-form">
+              <p className="grid-hint">Show earlier frames as translucent ghosts on the canvas.</p>
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input
+                    type="radio"
+                    name="ghost-display-mode"
+                    value="single"
+                    checked={displayMode === 'single'}
+                    onChange={() => onSetDisplayMode('single')}
+                  />
+                  <span>Previous frame only</span>
+                </label>
+              </div>
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input
+                    type="radio"
+                    name="ghost-display-mode"
+                    value="cumulative"
+                    checked={displayMode === 'cumulative'}
+                    onChange={() => onSetDisplayMode('cumulative')}
+                  />
+                  <span>All previous frames</span>
+                </label>
+              </div>
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }
 
@@ -368,119 +494,146 @@ function MarkInspector({ activeFrame, mark, updateMark }: MarkInspectorProps) {
   };
 
   return (
-    <div className="editor-form">
-      <div className="form-row">
-        <label htmlFor="mark-name">Name</label>
-        <input id="mark-name" type="text" value={mark.name} onChange={(event) => updateMark(mark.id, { name: event.target.value })} />
-      </div>
-      <div className="form-row">
-        <label htmlFor="mark-color">Color</label>
-        <input id="mark-color" type="color" value={mark.color} onChange={(event) => updateMark(mark.id, { color: event.target.value })} />
-      </div>
-      <div className="form-row">
-        <label htmlFor="mark-shape">Shape</label>
-        <select id="mark-shape" value={mark.shape} onChange={(event) => updateMark(mark.id, { shape: event.target.value as Mark['shape'] })}>
-          <option value="circle">Conical (Circle)</option>
-          <option value="triangle">Triangle (Conical/Buoy)</option>
-          <option value="square">Spar (Square)</option>
-          <option value="obstruction">Obstruction</option>
-          <option value="gate">Gate</option>
-          <option value="committeeBoat">Committee boat</option>
-        </select>
-      </div>
-      <div className="form-row">
-        <label htmlFor="mark-size">Mark size ({mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}px)</label>
-        <input
-          id="mark-size"
-          type="range"
-          min="12"
-          max="160"
-          step="1"
-          value={mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}
-          onChange={(event) => updateMark(mark.id, { size: Number(event.target.value) })}
-        />
-      </div>
-      <div className="form-row">
-        <label htmlFor="mark-rotation">Mark rotation ({Math.round(mark.rotation ?? 0)}°)</label>
-        <input
-          id="mark-rotation"
-          type="range"
-          min="-180"
-          max="180"
-          value={mark.rotation ?? 0}
-          onChange={(event) => updateMark(mark.id, { rotation: Number(event.target.value) })}
-        />
-      </div>
-      {mark.shape === 'obstruction' && (
-        <div className="form-row">
-          <label htmlFor="mark-proximity-radius">Proximity radius ({mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS} boat lengths)</label>
-          <input
-            id="mark-proximity-radius"
-            type="range"
-            min="1"
-            max="8"
-            step="0.5"
-            value={mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS}
-            onChange={(event) => updateMark(mark.id, { proximityRadius: Number(event.target.value) })}
-          />
-          <p className="grid-hint">Default: three boat lengths.</p>
-        </div>
-      )}
-      <div className="form-row flex-row">
-        <label className="checkbox-label">
-          <input
-            type="checkbox"
-            checked={!!mark.showRotationArrow}
-            onChange={(event) => updateMark(mark.id, { showRotationArrow: event.target.checked })}
-          />
-          <span>Show Rotation Arrow</span>
-        </label>
-      </div>
-      {!!mark.showRotationArrow && (
-        <div className="form-row">
-          <label>Rounding Direction</label>
-          <button
-            id="mark-rotation-direction"
-            type="button"
-            className="direction-btn"
-            aria-label={`Reverse direction (${rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})`}
-            onClick={() => updateMark(mark.id, {
-              rotationDirection: rotationDirection === 'clockwise' ? 'counterclockwise' : 'clockwise',
-            })}
-          >
-            <RotateCcw aria-hidden="true" size={16} /> Reverse Direction ({rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})
-          </button>
-        </div>
-      )}
-      <div className="form-row flex-row">
-        <label className="checkbox-label">
-          <input type="checkbox" checked={!!mark.connectedToMarkId} disabled={activeFrame.marks.length <= 1} onChange={(event) => toggleConnection(event.target.checked)} />
-          <span>Show Dotted Line to Mark</span>
-        </label>
-      </div>
-      {!!mark.connectedToMarkId && (
-        <>
-          <div className="form-row">
-            <label htmlFor="mark-connection-target">Connect to</label>
-            <select id="mark-connection-target" value={mark.connectedToMarkId} onChange={(event) => updateMark(mark.id, { connectedToMarkId: event.target.value })}>
-              {otherMarks.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
-            </select>
-          </div>
-          <div className="form-row">
-            <label htmlFor="mark-line-color">Line Color</label>
-            <input id="mark-line-color" type="color" value={mark.connectionLineColor ?? mark.color} onChange={(event) => updateMark(mark.id, { connectionLineColor: event.target.value })} />
-          </div>
-          <div className="form-row">
-            <label htmlFor="mark-line-style">Line Style</label>
-            <select id="mark-line-style" value={mark.connectionLineStyle ?? 'dotted'} onChange={(event) => updateMark(mark.id, { connectionLineStyle: event.target.value as Mark['connectionLineStyle'] })}>
-              <option value="dotted">Dotted</option>
-              <option value="dashed">Dashed</option>
-              <option value="solid">Solid</option>
-            </select>
-          </div>
-        </>
-      )}
-    </div>
+    <InspectorTabs
+      label="Mark"
+      tabs={[
+        {
+          id: 'settings',
+          label: 'Settings',
+          content: (
+            <div className="editor-form">
+              <div className="form-row">
+                <label htmlFor="mark-name">Name</label>
+                <input id="mark-name" type="text" value={mark.name} onChange={(event) => updateMark(mark.id, { name: event.target.value })} />
+              </div>
+              <div className="form-row">
+                <label htmlFor="mark-color">Color</label>
+                <input id="mark-color" type="color" value={mark.color} onChange={(event) => updateMark(mark.id, { color: event.target.value })} />
+              </div>
+              <div className="form-row">
+                <label htmlFor="mark-shape">Shape</label>
+                <select id="mark-shape" value={mark.shape} onChange={(event) => updateMark(mark.id, { shape: event.target.value as Mark['shape'] })}>
+                  <option value="circle">Conical (Circle)</option>
+                  <option value="triangle">Triangle (Conical/Buoy)</option>
+                  <option value="square">Spar (Square)</option>
+                  <option value="obstruction">Obstruction</option>
+                  <option value="gate">Gate</option>
+                  <option value="committeeBoat">Committee boat</option>
+                </select>
+              </div>
+              <div className="form-row">
+                <label htmlFor="mark-size">Mark size ({mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}px)</label>
+                <input
+                  id="mark-size"
+                  type="range"
+                  min="12"
+                  max="160"
+                  step="1"
+                  value={mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}
+                  onChange={(event) => updateMark(mark.id, { size: Number(event.target.value) })}
+                />
+              </div>
+              {mark.shape === 'obstruction' && (
+                <div className="form-row">
+                  <label htmlFor="mark-proximity-radius">Proximity radius ({mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS} boat lengths)</label>
+                  <input
+                    id="mark-proximity-radius"
+                    type="range"
+                    min="1"
+                    max="8"
+                    step="0.5"
+                    value={mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS}
+                    onChange={(event) => updateMark(mark.id, { proximityRadius: Number(event.target.value) })}
+                  />
+                  <p className="grid-hint">Default: three boat lengths.</p>
+                </div>
+              )}
+            </div>
+          ),
+        },
+        {
+          id: 'rotation',
+          label: 'Rotation',
+          content: (
+            <div className="editor-form">
+              <div className="form-row">
+                <label htmlFor="mark-rotation">Mark rotation ({Math.round(mark.rotation ?? 0)}°)</label>
+                <input
+                  id="mark-rotation"
+                  type="range"
+                  min="-180"
+                  max="180"
+                  value={mark.rotation ?? 0}
+                  onChange={(event) => updateMark(mark.id, { rotation: Number(event.target.value) })}
+                />
+              </div>
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={!!mark.showRotationArrow}
+                    onChange={(event) => updateMark(mark.id, { showRotationArrow: event.target.checked })}
+                  />
+                  <span>Show Rotation Arrow</span>
+                </label>
+              </div>
+              {!!mark.showRotationArrow && (
+                <div className="form-row">
+                  <label>Rounding Direction</label>
+                  <button
+                    id="mark-rotation-direction"
+                    type="button"
+                    className="direction-btn"
+                    aria-label={`Reverse direction (${rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})`}
+                    onClick={() => updateMark(mark.id, {
+                      rotationDirection: rotationDirection === 'clockwise' ? 'counterclockwise' : 'clockwise',
+                    })}
+                  >
+                    <RotateCcw aria-hidden="true" size={16} /> Reverse Direction ({rotationDirection === 'clockwise' ? 'Clockwise' : 'Counterclockwise'})
+                  </button>
+                </div>
+              )}
+            </div>
+          ),
+        },
+        {
+          id: 'connection',
+          label: 'Connection',
+          content: (
+            <div className="editor-form">
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input type="checkbox" checked={!!mark.connectedToMarkId} disabled={activeFrame.marks.length <= 1} onChange={(event) => toggleConnection(event.target.checked)} />
+                  <span>Show Dotted Line to Mark</span>
+                </label>
+              </div>
+              {!!mark.connectedToMarkId && (
+                <>
+                  <div className="form-row">
+                    <label htmlFor="mark-connection-target">Connect to</label>
+                    <select id="mark-connection-target" value={mark.connectedToMarkId} onChange={(event) => updateMark(mark.id, { connectedToMarkId: event.target.value })}>
+                      {otherMarks.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
+                    </select>
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="mark-line-color">Line Color</label>
+                    <input id="mark-line-color" type="color" value={mark.connectionLineColor ?? mark.color} onChange={(event) => updateMark(mark.id, { connectionLineColor: event.target.value })} />
+                  </div>
+                  <div className="form-row">
+                    <label htmlFor="mark-line-style">Line Style</label>
+                    <select id="mark-line-style" value={mark.connectionLineStyle ?? 'dotted'} onChange={(event) => updateMark(mark.id, { connectionLineStyle: event.target.value as Mark['connectionLineStyle'] })}>
+                      <option value="dotted">Dotted</option>
+                      <option value="dashed">Dashed</option>
+                      <option value="solid">Solid</option>
+                    </select>
+                  </div>
+                </>
+              )}
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }
 
@@ -497,34 +650,91 @@ function ArrowInspector({ arrow, updateArrow }: { arrow: TacticalArrow; updateAr
   };
 
   return (
-    <div className="editor-form">
-      <div className="form-row"><label htmlFor="arrow-name">Name</label><input id="arrow-name" type="text" value={arrow.name} onChange={(event) => updateArrow(arrow.id, { name: event.target.value })} /></div>
-      <div className="form-row"><label htmlFor="arrow-color">Color</label><input id="arrow-color" type="color" value={arrow.color} onChange={(event) => updateArrow(arrow.id, { color: event.target.value })} /></div>
-      <div className="form-row"><label htmlFor="arrow-width">Line width ({arrow.lineWidth ?? 3}px)</label><input id="arrow-width" type="range" min="1" max="12" value={arrow.lineWidth ?? 3} onChange={(event) => updateArrow(arrow.id, { lineWidth: Number(event.target.value) })} /></div>
-      <div className="form-row"><label htmlFor="arrow-style">Line style</label><select id="arrow-style" value={arrow.lineStyle ?? 'solid'} onChange={(event) => updateArrow(arrow.id, { lineStyle: event.target.value as TacticalArrow['lineStyle'] })}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></div>
-      <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={!!arrow.curved} onChange={(event) => handleCurvedChange(event.target.checked)} /><span>Curved arrow</span></label></div>
-      <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={arrow.showArrowhead !== false} onChange={(event) => updateArrow(arrow.id, { showArrowhead: event.target.checked })} /><span>Show arrowhead</span></label></div>
-    </div>
+    <InspectorTabs
+      label="Arrow"
+      tabs={[
+        {
+          id: 'settings',
+          label: 'Settings',
+          content: (
+            <div className="editor-form">
+              <div className="form-row"><label htmlFor="arrow-name">Name</label><input id="arrow-name" type="text" value={arrow.name} onChange={(event) => updateArrow(arrow.id, { name: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="arrow-color">Color</label><input id="arrow-color" type="color" value={arrow.color} onChange={(event) => updateArrow(arrow.id, { color: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="arrow-width">Line width ({arrow.lineWidth ?? 3}px)</label><input id="arrow-width" type="range" min="1" max="12" value={arrow.lineWidth ?? 3} onChange={(event) => updateArrow(arrow.id, { lineWidth: Number(event.target.value) })} /></div>
+              <div className="form-row"><label htmlFor="arrow-style">Line style</label><select id="arrow-style" value={arrow.lineStyle ?? 'solid'} onChange={(event) => updateArrow(arrow.id, { lineStyle: event.target.value as TacticalArrow['lineStyle'] })}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></div>
+            </div>
+          ),
+        },
+        {
+          id: 'display',
+          label: 'Display',
+          content: (
+            <div className="editor-form">
+              <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={!!arrow.curved} onChange={(event) => handleCurvedChange(event.target.checked)} /><span>Curved arrow</span></label></div>
+              <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={arrow.showArrowhead !== false} onChange={(event) => updateArrow(arrow.id, { showArrowhead: event.target.checked })} /><span>Show arrowhead</span></label></div>
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }
 
 function CommentInspector({ comment, updateComment }: { comment: CommentNote; updateComment: (id: string, changes: Partial<CommentNote>) => void }) {
   return (
-    <div className="editor-form">
-      <div className="form-row"><label htmlFor="comment-name">Name</label><input id="comment-name" type="text" value={comment.name} onChange={(event) => updateComment(comment.id, { name: event.target.value })} /></div>
-      <div className="form-row"><label htmlFor="comment-text">Text</label><textarea id="comment-text" value={comment.text} rows={4} onChange={(event) => updateComment(comment.id, { text: event.target.value })} /></div>
-      <div className="form-row"><label htmlFor="comment-color">Text color</label><input id="comment-color" type="color" value={comment.color} onChange={(event) => updateComment(comment.id, { color: event.target.value })} /></div>
-      <div className="form-row"><label htmlFor="comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
-    </div>
+    <InspectorTabs
+      label="Comment"
+      tabs={[
+        {
+          id: 'content',
+          label: 'Content',
+          content: (
+            <div className="editor-form">
+              <div className="form-row"><label htmlFor="comment-name">Name</label><input id="comment-name" type="text" value={comment.name} onChange={(event) => updateComment(comment.id, { name: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="comment-text">Text</label><textarea id="comment-text" value={comment.text} rows={4} onChange={(event) => updateComment(comment.id, { text: event.target.value })} /></div>
+            </div>
+          ),
+        },
+        {
+          id: 'display',
+          label: 'Display',
+          content: (
+            <div className="editor-form">
+              <div className="form-row"><label htmlFor="comment-color">Text color</label><input id="comment-color" type="color" value={comment.color} onChange={(event) => updateComment(comment.id, { color: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }
 
 function ImageInspector({ image, updateImage }: { image: DiagramImage; updateImage: (id: string, changes: Partial<DiagramImage>) => void }) {
   return (
-    <div className="editor-form">
-      <div className="form-row"><label htmlFor="image-name">Name</label><input id="image-name" type="text" value={image.name} onChange={(event) => updateImage(image.id, { name: event.target.value })} /></div>
-      <div className="form-row"><label htmlFor="image-width">Width ({image.width}px)</label><input id="image-width" type="range" min="40" max="800" value={image.width} onChange={(event) => updateImage(image.id, { width: Number(event.target.value) })} /></div>
-      <div className="form-row"><label htmlFor="image-rotation">Rotation ({image.rotation ?? 0}°)</label><input id="image-rotation" type="range" min="0" max="359" value={image.rotation ?? 0} onChange={(event) => updateImage(image.id, { rotation: Number(event.target.value) })} /></div>
-    </div>
+    <InspectorTabs
+      label="Image"
+      tabs={[
+        {
+          id: 'settings',
+          label: 'Settings',
+          content: (
+            <div className="editor-form">
+              <div className="form-row"><label htmlFor="image-name">Name</label><input id="image-name" type="text" value={image.name} onChange={(event) => updateImage(image.id, { name: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="image-width">Width ({image.width}px)</label><input id="image-width" type="range" min="40" max="800" value={image.width} onChange={(event) => updateImage(image.id, { width: Number(event.target.value) })} /></div>
+            </div>
+          ),
+        },
+        {
+          id: 'display',
+          label: 'Display',
+          content: (
+            <div className="editor-form">
+              <div className="form-row"><label htmlFor="image-rotation">Rotation ({image.rotation ?? 0}°)</label><input id="image-rotation" type="range" min="0" max="359" value={image.rotation ?? 0} onChange={(event) => updateImage(image.id, { rotation: Number(event.target.value) })} /></div>
+            </div>
+          ),
+        },
+      ]}
+    />
   );
 }

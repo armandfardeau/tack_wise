@@ -94,9 +94,44 @@ describe('inspector deletion control', () => {
   });
 });
 
+describe('inspector tabs', () => {
+  it('groups boat controls into heading, settings, and display tabs', () => {
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [boat] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={boat}
+        selectedMark={undefined}
+        selectedType="boat"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('tab', { name: 'Heading' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByLabelText(/heading \(0°\)/i)).toBeInTheDocument();
+    expect(screen.queryByLabelText('Name')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
+    expect(screen.getByLabelText('Name')).toHaveValue('Alpha');
+    expect(screen.queryByLabelText(/heading \(0°\)/i)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
+    expect(screen.getByRole('checkbox', { name: /show dotted path line/i })).toBeInTheDocument();
+  });
+});
+
 describe('mark rotation controls', () => {
   it('keeps rotation arrows hidden by default and allows showing them', () => {
     const updateMark = renderMarkInspector();
+    fireEvent.click(screen.getByRole('tab', { name: 'Rotation' }));
     const checkbox = screen.getByRole('checkbox', { name: /show rotation arrow/i });
 
     expect(checkbox).not.toBeChecked();
@@ -109,6 +144,7 @@ describe('mark rotation controls', () => {
 
   it('reverses and displays the current rounding direction', () => {
     const updateMark = renderMarkInspector(jest.fn(), { ...mark, showRotationArrow: true });
+    fireEvent.click(screen.getByRole('tab', { name: 'Rotation' }));
     const reverseButton = screen.getByRole('button', { name: /reverse direction \(counterclockwise\)/i });
 
     fireEvent.click(reverseButton);
@@ -141,6 +177,7 @@ describe('mark rotation controls', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Rotation' }));
     fireEvent.click(screen.getByRole('button', { name: /reverse direction \(clockwise\)/i }));
     expect(updateMark).toHaveBeenCalledWith('mark-1', { rotationDirection: 'counterclockwise' });
 
@@ -165,6 +202,7 @@ describe('mark rotation controls', () => {
       />,
     );
 
+    fireEvent.click(screen.getAllByRole('tab', { name: 'Connection' }).at(-1)!);
     expect(screen.getByLabelText('Line Color')).toHaveValue('#ef4444');
     expect(screen.getByLabelText('Line Style')).toHaveValue('dotted');
   });
@@ -195,6 +233,7 @@ describe('curved arrow controls', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /curved arrow/i }));
 
     expect(updateArrow).toHaveBeenCalledWith('arrow-1', {
@@ -239,6 +278,7 @@ describe('curved arrow controls', () => {
     fireEvent.change(screen.getByLabelText('Color'), { target: { value: '#00ff00' } });
     fireEvent.change(screen.getByLabelText(/line width \(3px\)/i), { target: { value: '6' } });
     fireEvent.change(screen.getByLabelText('Line style'), { target: { value: 'dotted' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /curved arrow/i }));
     fireEvent.click(screen.getByRole('checkbox', { name: /show arrowhead/i }));
     fireEvent.click(screen.getByRole('button', { name: /delete arrow/i }));
@@ -277,6 +317,7 @@ describe('curved arrow controls', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /curved arrow/i }));
     expect(updateArrow).toHaveBeenCalledWith('arrow-legacy', { curved: false, points: arrow.points });
   });
@@ -440,6 +481,7 @@ describe('magnetic grid controls', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Ghost Display' }));
     expect(screen.getByRole('radio', { name: /previous frame only/i })).toBeChecked();
     expect(screen.getByRole('radio', { name: /all previous frames/i })).not.toBeChecked();
 
@@ -475,6 +517,7 @@ describe('magnetic grid controls', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Frame Header' }));
     const titleToggle = screen.getByRole('checkbox', { name: /show frame title/i });
     const numberToggle = screen.getByRole('checkbox', { name: /show frame number/i });
     expect(titleToggle).toBeChecked();
@@ -576,10 +619,12 @@ describe('boat editor', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Bravo' } });
     fireEvent.change(screen.getByLabelText('Color'), { target: { value: '#ffffff' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /auto sail trim/i }));
     fireEvent.change(screen.getByLabelText(/sail angle \(0°\)/i), { target: { value: '30' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /show dotted path line/i }));
     fireEvent.click(screen.getByRole('button', { name: /delete boat/i }));
 
@@ -621,6 +666,7 @@ describe('mark editor', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Windward' } });
     fireEvent.change(screen.getByLabelText('Color'), { target: { value: '#00ff00' } });
     fireEvent.change(screen.getByLabelText('Shape'), { target: { value: 'gate' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Connection' }));
     fireEvent.change(screen.getByLabelText('Connect to'), { target: { value: 'mark-2' } });
     fireEvent.change(screen.getByLabelText('Line Color'), { target: { value: '#222222' } });
     fireEvent.change(screen.getByLabelText('Line Style'), { target: { value: 'solid' } });
@@ -660,6 +706,7 @@ describe('mark editor', () => {
       />,
     );
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Connection' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /show dotted line/i }));
 
     expect(updateMark).toHaveBeenCalledWith('mark-1', {
@@ -698,6 +745,7 @@ describe('comment and image editors', () => {
 
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Tack note' } });
     fireEvent.change(screen.getByLabelText('Text'), { target: { value: 'New explanation' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.change(screen.getByLabelText('Text color'), { target: { value: '#ff0000' } });
     fireEvent.change(screen.getByLabelText(/font size \(14px\)/i), { target: { value: '20' } });
     fireEvent.click(screen.getByRole('button', { name: /delete comment/i }));
@@ -736,6 +784,7 @@ describe('comment and image editors', () => {
 
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Background' } });
     fireEvent.change(screen.getByLabelText(/width \(180px\)/i), { target: { value: '240' } });
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.change(screen.getByLabelText(/rotation \(0°\)/i), { target: { value: '45' } });
     fireEvent.click(screen.getByRole('button', { name: /delete image/i }));
 

@@ -22,7 +22,7 @@ Build the foundational 2D authoring model for sailing situations.
   boat movements.
 - Place, move, rotate, select, and edit boats and marks.
 - Represent wind direction and boat headings.
-- Support adjustable boat aspect ratios and mark sizes.
+- Support adjustable mark sizes.
 - Provide gate areas, committee boats, and other mark arrangements.
 - Represent obstructions with a configurable proximity circle; the default
   radius is three boat lengths.

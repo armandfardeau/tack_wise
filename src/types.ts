@@ -12,8 +12,6 @@ export interface Boat {
   y: number;
   heading: number; // heading in degrees (0 = North, clockwise)
   sailAngle: number; // sail angle relative to centerline (-90 to +90 degrees)
-  /** Beam-to-length ratio used to render different boat proportions. */
-  aspectRatio?: number;
   showHeadingLine?: boolean;
 }
 

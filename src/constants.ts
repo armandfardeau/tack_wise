@@ -14,9 +14,6 @@ export const MARK_COLORS = ['#ef4444', '#22c55e', '#f97316', '#eab308'] as const
 // Keeping the effective length in one place lets obstruction proximity circles
 // use a meaningful sailing-specific unit without coupling them to Konva paths.
 export const BOAT_LENGTH = 55;
-export const DEFAULT_BOAT_ASPECT_RATIO = 0.42;
-export const MIN_BOAT_ASPECT_RATIO = 0.25;
-export const MAX_BOAT_ASPECT_RATIO = 0.8;
 export const DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS = 3;
 
 export const MIN_CANVAS_ZOOM = 0.5;

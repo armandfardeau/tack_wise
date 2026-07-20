@@ -38,6 +38,9 @@ interface CanvasWorkspaceProps {
   isPlaying: boolean;
   isExporting: boolean;
   handleCanvasDragEnd: () => void;
+  handleCanvasTouchEnd: (event: { evt: TouchEvent }) => void;
+  handleCanvasTouchMove: (event: { evt: TouchEvent }) => void;
+  handleCanvasTouchStart: (event: { evt: TouchEvent }) => void;
   handleCanvasWheel: (event: { evt: { preventDefault: () => void; deltaY: number } }) => void;
   maxZoom: number;
   minZoom: number;
@@ -71,6 +74,7 @@ interface CanvasWorkspaceProps {
   playSpeed: number;
   onPanCanvasBy: (delta: Position) => void;
   onOpenControls: () => void;
+  onCloseControls: () => void;
   onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
   inspectorRequest?: InspectorRequest | null;
   onSnapPreview: (target: SnapTarget | null) => void;
@@ -278,6 +282,9 @@ export default function CanvasWorkspace({
   isPlaying,
   isExporting,
   handleCanvasDragEnd,
+  handleCanvasTouchEnd,
+  handleCanvasTouchMove,
+  handleCanvasTouchStart,
   handleCanvasWheel,
   maxZoom,
   minZoom,
@@ -311,6 +318,7 @@ export default function CanvasWorkspace({
   playSpeed,
   onPanCanvasBy,
   onOpenControls,
+  onCloseControls,
   onSelectObject,
   inspectorRequest,
   onSnapPreview,
@@ -371,10 +379,11 @@ export default function CanvasWorkspace({
 
   const handleOpenInspector = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     if (presenterMode) return;
+    onCloseControls();
     resetInspectorPlacement();
     setIsInspectorOpen(true);
     onSelectObject(id, type);
-  }, [onSelectObject, presenterMode, resetInspectorPlacement]);
+  }, [onCloseControls, onSelectObject, presenterMode, resetInspectorPlacement]);
 
   useEffect(() => {
     if (!inspectorRequest || inspectorRequest.requestId === handledInspectorRequestRef.current) return;
@@ -573,6 +582,9 @@ export default function CanvasWorkspace({
           gridSnapEnabled={gridSnapEnabled}
           showGrid={showGrid}
           onCanvasDragEnd={handleCanvasDragEnd}
+          onCanvasTouchEnd={handleCanvasTouchEnd}
+          onCanvasTouchMove={handleCanvasTouchMove}
+          onCanvasTouchStart={handleCanvasTouchStart}
           onCanvasWheel={handleCanvasWheel}
           onMoveBoat={onMoveBoat}
           onRotateBoat={onRotateBoat}
