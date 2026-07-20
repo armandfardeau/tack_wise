@@ -17,7 +17,7 @@ import { scenarioPayloadFromTemplate, situationTemplates } from './data/situatio
 import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
 import { getCanvasContentBounds, getCanvasContentRect } from './utils/simulation';
 import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
-import type { ExportQuality, Theme } from './types';
+import type { ExportQuality, Theme, VideoExportType } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
@@ -39,6 +39,7 @@ function getInitialTheme(): Theme {
 export default function App() {
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
+  const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
   const visibleCanvasContentRect = useMemo(() => {
     const visibleFrames = scenario.settings.displayMode === 'cumulative'
       ? scenario.frames.slice(0, scenario.currentFrameIndex + 1)
@@ -87,6 +88,16 @@ export default function App() {
   }, [importScenario]);
 
   const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
+
+  const saveViewportAndFitCanvas = () => {
+    const previousViewport = {
+      position: { ...viewport.canvasPosition },
+      zoom: viewport.canvasZoom,
+    };
+
+    flushSync(() => viewport.fitCanvasToContent(exportContentRect));
+    return previousViewport;
+  };
 
   const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
     scenario.importScenario(scenarioPayloadFromTemplate(template));
@@ -149,6 +160,15 @@ export default function App() {
 
   const isCanvasExporting = exportState.isExporting || isImageExporting;
 
+  const handleCanvasExport = async (type: 'gif' | VideoExportType) => {
+    const previousViewport = saveViewportAndFitCanvas();
+    try {
+      await exportState.triggerExport(type);
+    } finally {
+      viewport.setCanvasViewport(previousViewport.position, previousViewport.zoom);
+    }
+  };
+
   const resetToNewScenario = () => {
     scenario.createNewScenario();
     setLoadedTemplateId(null);
@@ -170,10 +190,12 @@ export default function App() {
   };
 
   const handleImageExport = (type: 'png' | 'jpeg') => {
+    const previousViewport = saveViewportAndFitCanvas();
     flushSync(() => setIsImageExporting(true));
     try {
       exportState.triggerImageExport(type);
     } finally {
+      viewport.setCanvasViewport(previousViewport.position, previousViewport.zoom);
       setIsImageExporting(false);
     }
   };
@@ -195,7 +217,7 @@ export default function App() {
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
         onNewScenario={handleNewScenario}
-        onExport={exportState.triggerExport}
+        onExport={handleCanvasExport}
         onExportImage={handleImageExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
         onImportJson={handleImportJson}

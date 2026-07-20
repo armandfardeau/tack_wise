@@ -298,6 +298,7 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     minZoom: MIN_CANVAS_ZOOM,
     panCanvasBy,
     resetCanvasZoom,
+    setCanvasViewport,
     stageRef,
     stageSize,
     zoomCanvasFromCenter,
