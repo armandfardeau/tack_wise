@@ -3,7 +3,7 @@
   "frames": [
     {
       "id": "r18-frame-1",
-      "name": "Inside boat receives mark-room",
+      "name": "Approach to the mark",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -67,7 +67,7 @@
     },
     {
       "id": "frame-1784554638053",
-      "name": "Inside boat receives mark-room (Copy)",
+      "name": "Entering the mark-room zone",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -131,7 +131,7 @@
     },
     {
       "id": "frame-1784554670637",
-      "name": "Inside boat receives mark-room (Copy) (Copy)",
+      "name": "Inside boat reaches the mark",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -195,7 +195,7 @@
     },
     {
       "id": "frame-1784554683223",
-      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy)",
+      "name": "Inside boat begins rounding",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -259,7 +259,7 @@
     },
     {
       "id": "frame-1784554704215",
-      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy)",
+      "name": "Inside boat rounds the mark",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -323,7 +323,7 @@
     },
     {
       "id": "frame-1784554714161",
-      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "name": "Inside boat clears the mark",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -387,7 +387,7 @@
     },
     {
       "id": "frame-1784554774057",
-      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "name": "Sailing away from the mark",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
@@ -451,7 +451,7 @@
     },
     {
       "id": "frame-1784554787787",
-      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "name": "Clear of the mark",
       "windAngle": 0,
       "windSpeed": 12,
       "boats": [
