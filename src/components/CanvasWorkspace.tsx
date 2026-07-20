@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObjec
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
 import type { DisplayMode, Frame, Theme } from '../types';
-import type { Boat, CommentNote, DiagramImage, Mark, TacticalArrow } from '../types';
+import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, RuleComment, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import type { SnapTarget } from '../hooks/useGridSnap';
 import { getCommentHeight, type Position } from '../utils/simulation';
@@ -48,6 +48,7 @@ interface CanvasWorkspaceProps {
   onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: () => void;
   onAddComment: () => void;
+  onAddRuleComment: () => void;
   onAddImage: (src: string, name?: string) => void;
   onMoveBoat: (boatId: string, position: Position) => void;
   onRotateBoat: (boatId: string, heading: number) => void;
@@ -88,13 +89,14 @@ interface CanvasWorkspaceProps {
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
   selectedArrow?: TacticalArrow;
-  selectedComment?: CommentNote;
+  selectedComment?: FrameComment;
   selectedImage?: DiagramImage;
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
   updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
+  updateRuleComment?: (commentId: string, changes: Partial<RuleComment>) => void;
   updateImage?: (imageId: string, changes: Partial<DiagramImage>) => void;
   canvasWrapRef: RefObject<HTMLDivElement | null>;
   showGrid: boolean;
@@ -293,6 +295,7 @@ export default function CanvasWorkspace({
   onAddMark,
   onAddArrow,
   onAddComment,
+  onAddRuleComment,
   onAddImage,
   onMoveBoat,
   onRotateBoat,
@@ -340,6 +343,7 @@ export default function CanvasWorkspace({
   updateMark,
   updateArrow,
   updateComment,
+  updateRuleComment,
   updateImage,
   canvasWrapRef,
   showGrid,
@@ -418,6 +422,12 @@ export default function CanvasWorkspace({
     setIsInspectorOpen(true);
   };
 
+  const handleAddRuleComment = () => {
+    resetInspectorPlacement();
+    onAddRuleComment();
+    setIsInspectorOpen(true);
+  };
+
   const handleAddImage = (src: string, name?: string) => {
     resetInspectorPlacement();
     onAddImage(src, name);
@@ -434,7 +444,15 @@ export default function CanvasWorkspace({
     }
 
     if (selectedType === 'comment' && selectedComment) {
-      return { left: selectedComment.x, top: selectedComment.y, width: selectedComment.width ?? 180, height: getCommentHeight(selectedComment) };
+      const text = selectedComment.type === 'rule'
+        ? [selectedComment.rule.label, selectedComment.rule.description].filter(Boolean).join('\n')
+        : selectedComment.text;
+      return {
+        left: selectedComment.x,
+        top: selectedComment.y,
+        width: selectedComment.width ?? 180,
+        height: getCommentHeight({ ...selectedComment, text }),
+      };
     }
 
     if (selectedType === 'image' && selectedImage) {
@@ -657,6 +675,7 @@ export default function CanvasWorkspace({
               updateMark={updateMark}
               updateArrow={updateArrow}
               updateComment={updateComment}
+              updateRuleComment={updateRuleComment}
               updateImage={updateImage}
             />
             </div>
@@ -667,6 +686,7 @@ export default function CanvasWorkspace({
             onAddMark={handleAddMark}
             onAddArrow={handleAddArrow}
             onAddComment={handleAddComment}
+            onAddRuleComment={handleAddRuleComment}
             onAddImage={handleAddImage}
           />}
         {!presenterMode && (

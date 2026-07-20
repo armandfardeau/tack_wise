@@ -143,7 +143,19 @@ describe('scenario JSON export', () => {
         points: [{ x: 10, y: 20 }, { x: 30, y: 40 }],
         curved: true,
       }],
-      comments: [{ id: 'comment-1', name: 'Note', text: 'Tack here', color: '#fff', x: 10, y: 20 }],
+      comments: [
+        { id: 'comment-1', name: 'Note', text: 'Tack here', color: '#fff', x: 10, y: 20 },
+        {
+          id: 'rule-comment-1',
+          name: 'RRS 10 breach',
+          type: 'rule' as const,
+          rule: { id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' },
+          offenseTargets: [{ id: 'boat-1', type: 'boat' as const }],
+          color: '#facc15',
+          x: 40,
+          y: 50,
+        },
+      ],
     }], 0, {
       displayMode: 'cumulative',
       presenterMode: true,
@@ -153,6 +165,11 @@ describe('scenario JSON export', () => {
     expect(result.settings?.presenterMode).toBe(true);
     expect(result.frames[0].arrows?.[0].curved).toBe(true);
     expect(result.frames[0].comments?.[0].text).toBe('Tack here');
+    expect(result.frames[0].comments?.[1]).toMatchObject({
+      type: 'rule',
+      rule: { id: 'rrs-10', label: 'RRS 10' },
+      offenseTargets: [{ id: 'boat-1', type: 'boat' }],
+    });
   });
 
   it('round-trips a scenario through a portable share URL', () => {

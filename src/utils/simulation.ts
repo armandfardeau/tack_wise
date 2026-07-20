@@ -7,7 +7,7 @@ import {
   MAX_CANVAS_ZOOM,
   MIN_CANVAS_ZOOM,
 } from '../constants';
-import type { CommentNote, Frame } from '../types';
+import type { Frame, FrameComment } from '../types';
 import { COMMENT_PADDING_Y } from '../constants';
 
 export interface Position {
@@ -32,7 +32,15 @@ export interface CanvasWorldBounds {
   bottom: number;
 }
 
-export function getCommentHeight(comment: Pick<CommentNote, 'text' | 'fontSize' | 'width'>): number {
+export function getCommentText(comment: FrameComment): string {
+  if (comment.type === 'rule') {
+    return [comment.rule.label, comment.rule.description].filter(Boolean).join('\n');
+  }
+
+  return comment.text;
+}
+
+export function getCommentHeight(comment: Pick<FrameComment, 'fontSize' | 'width'> & { text: string }): number {
   const fontSize = comment.fontSize ?? 14;
   const width = comment.width ?? 180;
   const availableTextWidth = Math.max(1, width - COMMENT_PADDING_X * 2);
@@ -105,7 +113,12 @@ export function getCanvasContentRect(frames: Array<Pick<Frame, 'boats' | 'marks'
     });
 
     frame.comments?.forEach((comment) => {
-      includeRect(comment.x, comment.y, comment.x + (comment.width ?? 180), comment.y + getCommentHeight(comment));
+      includeRect(
+        comment.x,
+        comment.y,
+        comment.x + (comment.width ?? 180),
+        comment.y + getCommentHeight({ ...comment, text: getCommentText(comment) }),
+      );
     });
 
     frame.images?.forEach((image) => {

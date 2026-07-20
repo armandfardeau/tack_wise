@@ -1,4 +1,5 @@
 import { Group, Line, Path, Circle, Text } from 'react-konva';
+import { DEFAULT_BOAT_ASPECT_RATIO, MAX_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO } from '../constants';
 import type { Boat as BoatModel } from '../types';
 
 interface BoatProps {
@@ -14,10 +15,17 @@ interface BoatProps {
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
   readOnly?: boolean;
   isShadow?: boolean;
+  isOffense?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false }: BoatProps) {
+function clampAspectRatio(aspectRatio: number | undefined) {
+  return Math.min(Math.max(aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO), MAX_BOAT_ASPECT_RATIO);
+}
+
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false }: BoatProps) {
   const boatScale = 0.5;
+  const boatAspectRatio = clampAspectRatio(boat.aspectRatio);
+  const boatWidthScale = boatScale * (boatAspectRatio / DEFAULT_BOAT_ASPECT_RATIO);
 
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
@@ -41,7 +49,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         x={boat.x}
         y={boat.y}
         rotation={boat.heading}
-        scaleX={boatScale}
+        scaleX={boatWidthScale}
         scaleY={boatScale}
         draggable={false}
         opacity={0.22}
@@ -87,7 +95,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       x={boat.x}
       y={boat.y}
       rotation={boat.heading}
-      scaleX={boatScale}
+      scaleX={boatWidthScale}
       scaleY={boatScale}
       draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
@@ -114,6 +122,17 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       }}
     >
       {/* Selection Glow / Shadow Ring */}
+      {isOffense && (
+        <Path
+          data="M 0 -66 C 32 -43 36 24 18 60 L -18 60 C -36 24 -32 -43 0 -66 Z"
+          fill="transparent"
+          stroke="#ef4444"
+          strokeWidth={5}
+          dash={[10, 6]}
+          opacity={0.95}
+        />
+      )}
+
       {isSelected && (
         <Path
           data="M 0 -62 C 30 -40 34 23 16 56 L -16 56 C -34 23 -30 -40 0 -62 Z"

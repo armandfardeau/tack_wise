@@ -42,7 +42,13 @@ export function cloneFrames(frames: Frame[] = initialFrames): Frame[] {
         ...arrow,
         points: arrow.points.map((point) => ({ ...point })),
       })),
-      comments: frame.comments?.map((comment) => ({ ...comment })),
+      comments: frame.comments?.map((comment) => comment.type === 'rule'
+        ? {
+            ...comment,
+            rule: { ...comment.rule },
+            offenseTargets: comment.offenseTargets.map((target) => ({ ...target })),
+          }
+        : { ...comment }),
       images: frame.images?.map((image) => ({ ...image })),
       rules: frame.rules?.map((rule) => ({ ...rule })),
     };

@@ -2,9 +2,9 @@ import gifshot from 'gifshot';
 import { cloneFrames } from '../data/initialFrames';
 import type {
   Boat,
-  CommentNote,
   DiagramImage,
   Frame,
+  FrameComment,
   Mark,
   RuleReference,
   ScenarioExportPayload,
@@ -159,19 +159,33 @@ function isArrow(value: unknown): value is TacticalArrow {
   );
 }
 
-function isComment(value: unknown): value is CommentNote {
+function isOffenseTarget(value: unknown): boolean {
+  return isRecord(value)
+    && typeof value.id === 'string'
+    && (value.type === 'boat' || value.type === 'mark');
+}
+
+function isComment(value: unknown): value is FrameComment {
   if (!isRecord(value)) return false;
 
-  return (
+  const commonFields = (
     typeof value.id === 'string' &&
     typeof value.name === 'string' &&
-    typeof value.text === 'string' &&
     typeof value.color === 'string' &&
     isFiniteNumber(value.x) &&
     isFiniteNumber(value.y) &&
     (value.width === undefined || isFiniteNumber(value.width)) &&
     (value.fontSize === undefined || isFiniteNumber(value.fontSize))
   );
+
+  if (!commonFields) return false;
+  if (value.type === 'rule') {
+    return isRule(value.rule)
+      && Array.isArray(value.offenseTargets)
+      && value.offenseTargets.every(isOffenseTarget);
+  }
+
+  return (value.type === undefined || value.type === 'comment') && typeof value.text === 'string';
 }
 
 function isImage(value: unknown): value is DiagramImage {

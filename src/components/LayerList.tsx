@@ -66,6 +66,7 @@ function getEntries(frame: Frame, type: LayerObjectType): LayerEntry[] {
         type,
         icon: MessageSquare,
         color: comment.color,
+        detail: comment.type === 'rule' ? comment.rule.label : undefined,
       }));
     case 'image':
       return (frame.images ?? []).map((image) => ({

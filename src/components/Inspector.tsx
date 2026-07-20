@@ -1,4 +1,4 @@
-import type { CommentNote, DiagramImage, DisplayMode, Frame, Boat, Mark, TacticalArrow } from '../types';
+import type { CommentNote, DiagramImage, DisplayMode, Frame, FrameComment, Boat, Mark, RuleComment, RuleOffenseTarget, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
@@ -31,7 +31,7 @@ interface InspectorProps {
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
   selectedArrow?: TacticalArrow;
-  selectedComment?: CommentNote;
+  selectedComment?: FrameComment;
   selectedImage?: DiagramImage;
   selectedType: SelectedType;
   showGrid: boolean;
@@ -42,6 +42,7 @@ interface InspectorProps {
   updateMark: (markId: string, changes: Partial<Mark>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
+  updateRuleComment?: (commentId: string, changes: Partial<RuleComment>) => void;
   updateImage?: (imageId: string, changes: Partial<DiagramImage>) => void;
 }
 
@@ -76,6 +77,7 @@ export default function Inspector({
   updateMark,
   updateArrow,
   updateComment,
+  updateRuleComment,
   updateImage,
 }: InspectorProps) {
   const deletableObject =
@@ -151,7 +153,13 @@ export default function Inspector({
         />
       ) : selectedType === 'arrow' && selectedArrow && updateArrow ? (
         <ArrowInspector arrow={selectedArrow} updateArrow={updateArrow} />
-      ) : selectedType === 'comment' && selectedComment && updateComment ? (
+      ) : selectedType === 'comment' && selectedComment?.type === 'rule' && updateRuleComment ? (
+        <RuleCommentInspector
+          activeFrame={activeFrame}
+          comment={selectedComment}
+          updateRuleComment={updateRuleComment}
+        />
+      ) : selectedType === 'comment' && selectedComment && selectedComment.type !== 'rule' && updateComment ? (
         <CommentInspector comment={selectedComment} updateComment={updateComment} />
       ) : selectedType === 'image' && selectedImage && updateImage ? (
         <ImageInspector image={selectedImage} updateImage={updateImage} />
@@ -690,6 +698,57 @@ function ArrowInspector({ arrow, updateArrow }: { arrow: TacticalArrow; updateAr
         },
       ]}
     />
+  );
+}
+
+function RuleCommentInspector({
+  activeFrame,
+  comment,
+  updateRuleComment,
+}: {
+  activeFrame: Frame;
+  comment: RuleComment;
+  updateRuleComment: (id: string, changes: Partial<RuleComment>) => void;
+}) {
+  const updateRule = (changes: Partial<RuleComment['rule']>) => {
+    updateRuleComment(comment.id, { rule: { ...comment.rule, ...changes } });
+  };
+
+  const toggleOffense = (target: RuleOffenseTarget, checked: boolean) => {
+    const currentTargets = comment.offenseTargets;
+    const alreadySelected = currentTargets.some((candidate) => candidate.id === target.id && candidate.type === target.type);
+    const offenseTargets = checked
+      ? alreadySelected ? currentTargets : [...currentTargets, target]
+      : currentTargets.filter((candidate) => candidate.id !== target.id || candidate.type !== target.type);
+
+    updateRuleComment(comment.id, { offenseTargets });
+  };
+
+  const isTargeted = (target: RuleOffenseTarget) => comment.offenseTargets.some(
+    (candidate) => candidate.id === target.id && candidate.type === target.type,
+  );
+
+  return (
+    <div className="editor-form">
+      <div className="form-row"><label htmlFor="rule-comment-name">Name</label><input id="rule-comment-name" type="text" value={comment.name} onChange={(event) => updateRuleComment(comment.id, { name: event.target.value })} /></div>
+      <div className="form-row"><label htmlFor="rule-reference">Rule reference</label><input id="rule-reference" type="text" value={comment.rule.label} onChange={(event) => updateRule({ label: event.target.value })} /></div>
+      <div className="form-row"><label htmlFor="rule-description">Rule description</label><textarea id="rule-description" value={comment.rule.description ?? ''} rows={4} onChange={(event) => updateRule({ description: event.target.value })} /></div>
+      <div className="form-row"><label htmlFor="rule-comment-color">Highlight color</label><input id="rule-comment-color" type="color" value={comment.color} onChange={(event) => updateRuleComment(comment.id, { color: event.target.value })} /></div>
+      <div className="form-row"><label htmlFor="rule-comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="rule-comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateRuleComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Highlight offenses</h4>
+        <p className="grid-hint">Select the boats or marks that breach this rule.</p>
+        {activeFrame.boats.map((boat) => {
+          const target: RuleOffenseTarget = { id: boat.id, type: 'boat' };
+          return <label className="checkbox-label" key={boat.id}><input type="checkbox" checked={isTargeted(target)} onChange={(event) => toggleOffense(target, event.target.checked)} /><span>{boat.name}</span></label>;
+        })}
+        {activeFrame.marks.map((mark) => {
+          const target: RuleOffenseTarget = { id: mark.id, type: 'mark' };
+          return <label className="checkbox-label" key={mark.id}><input type="checkbox" checked={isTargeted(target)} onChange={(event) => toggleOffense(target, event.target.checked)} /><span>{mark.name}</span></label>;
+        })}
+        {activeFrame.boats.length === 0 && activeFrame.marks.length === 0 && <p className="grid-hint">Add a boat or mark to make it an offense target.</p>}
+      </div>
+    </div>
   );
 }
 

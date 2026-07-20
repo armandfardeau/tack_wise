@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import Inspector from '../src/components/Inspector';
-import type { Boat, CommentNote, DiagramImage, Frame, Mark, TacticalArrow } from '../src/types';
+import type { Boat, CommentNote, DiagramImage, Frame, Mark, RuleComment, TacticalArrow } from '../src/types';
 
 const mark: Mark = {
   id: 'mark-1',
@@ -43,6 +43,17 @@ const comment: CommentNote = {
   name: 'Tack here',
   text: 'Explain the overlap',
   color: '#f8fafc',
+  x: 180,
+  y: 100,
+};
+
+const ruleComment: RuleComment = {
+  id: 'rule-comment-1',
+  name: 'RRS 10 breach',
+  type: 'rule',
+  rule: { id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' },
+  offenseTargets: [],
+  color: '#facc15',
   x: 180,
   y: 100,
 };
@@ -155,6 +166,39 @@ describe('inspector tabs', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     expect(screen.getByRole('checkbox', { name: /show dotted path line/i })).toBeInTheDocument();
+  });
+});
+
+describe('rule comment controls', () => {
+  it('edits the rule reference and associates offense targets', () => {
+    const updateRuleComment = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [boat] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedComment={ruleComment}
+        selectedType="comment"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+        updateRuleComment={updateRuleComment}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Rule reference'), { target: { value: 'RRS 18' } });
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Alpha' }));
+
+    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', { rule: { ...ruleComment.rule, label: 'RRS 18' } });
+    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', { offenseTargets: [{ id: 'boat-1', type: 'boat' }] });
   });
 });
 

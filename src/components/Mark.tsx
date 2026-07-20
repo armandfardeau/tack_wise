@@ -12,9 +12,12 @@ interface MarkProps {
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
   readOnly?: boolean;
   isShadow?: boolean;
+  isOffense?: boolean;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false, isOffense = false }: MarkProps) {
+  const markSize = mark.size ?? 28;
+
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
     const strokeColor = isShadow ? '#94a3b8' : isSelected ? '#ffffff' : '#1e293b';
@@ -24,8 +27,6 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
     const shadowBlur = isShadow ? 0 : 4;
     const shadowOpacity = isShadow ? 0 : 0.3;
     const shadowOffset = isShadow ? { x: 0, y: 0 } : { x: 1, y: 2 };
-    const markSize = mark.size ?? 28;
-
     switch (mark.shape) {
       case 'triangle':
         return (
@@ -168,6 +169,16 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       }}
     >
       {/* Visual representation of the buoy */}
+      {isOffense && (
+        <Circle
+          radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
+          fill="transparent"
+          stroke="#ef4444"
+          strokeWidth={4}
+          dash={[8, 5]}
+          opacity={0.95}
+        />
+      )}
       {renderShape()}
 
       {/* A tiny flag stick & flag on top of the mark to make it look premium */}

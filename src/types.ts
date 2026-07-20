@@ -44,16 +44,35 @@ export interface TacticalArrow {
   showArrowhead?: boolean;
 }
 
-export interface CommentNote {
+interface CommentVisualProperties {
   id: string;
   name: string;
-  text: string;
   color: string;
   x: number;
   y: number;
   width?: number;
   fontSize?: number;
 }
+
+export interface CommentNote extends CommentVisualProperties {
+  type?: 'comment';
+  text: string;
+}
+
+export interface RuleOffenseTarget {
+  id: string;
+  type: 'boat' | 'mark';
+}
+
+export interface RuleComment extends CommentVisualProperties {
+  type: 'rule';
+  /** Kept optional for compatibility with code that treats all comments as text notes. */
+  text?: string;
+  rule: RuleReference;
+  offenseTargets: RuleOffenseTarget[];
+}
+
+export type FrameComment = CommentNote | RuleComment;
 
 export interface DiagramImage {
   id: string;
@@ -81,7 +100,7 @@ export interface Frame {
   boats: Boat[];
   marks: Mark[];
   arrows?: TacticalArrow[];
-  comments?: CommentNote[];
+  comments?: FrameComment[];
   images?: DiagramImage[];
   rules?: RuleReference[];
 }

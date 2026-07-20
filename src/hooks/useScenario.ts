@@ -7,6 +7,7 @@ import type {
   DiagramImage,
   Frame,
   Mark,
+  RuleComment,
   RuleReference,
   ScenarioExportPayload,
   ScenarioRepositoryItem,
@@ -301,9 +302,39 @@ export function useScenario() {
     commitFrames((previousFrames) =>
       previousFrames.map((frame, index) =>
         index === currentFrameIndex
-          ? { ...frame, comments: (frame.comments ?? []).map((comment) => comment.id === commentId ? { ...comment, ...changes } : comment) }
+          ? {
+              ...frame,
+              comments: (frame.comments ?? []).map((comment) => (
+                comment.id === commentId && comment.type !== 'rule'
+                  ? { ...comment, ...changes }
+                  : comment
+              )),
+            }
           : frame,
       ),
+    );
+  };
+
+  const updateRuleComment = (commentId: string, changes: Partial<RuleComment>) => {
+    commitFrames((previousFrames) =>
+      previousFrames.map((frame, index) => {
+        if (index !== currentFrameIndex) return frame;
+
+        const currentComment = frame.comments?.find((comment) => comment.id === commentId);
+        if (!currentComment || currentComment.type !== 'rule') return frame;
+
+        const updatedComment: RuleComment = { ...currentComment, ...changes };
+        const rules = [...(frame.rules ?? [])];
+        const ruleIndex = rules.findIndex((rule) => rule.id === currentComment.rule.id);
+        if (ruleIndex >= 0) rules[ruleIndex] = { ...updatedComment.rule };
+        else rules.push({ ...updatedComment.rule });
+
+        return {
+          ...frame,
+          comments: (frame.comments ?? []).map((comment) => comment.id === commentId ? updatedComment : comment),
+          rules,
+        };
+      }),
     );
   };
 
@@ -535,6 +566,33 @@ export function useScenario() {
     selectObject(comment.id, 'comment');
   };
 
+  const addRuleComment = () => {
+    const ruleId = `rule-${Date.now()}`;
+    const ruleComment: RuleComment = {
+      id: `rule-comment-${Date.now()}`,
+      name: `Rule ${(activeFrame.comments?.filter((comment) => comment.type === 'rule').length ?? 0) + 1}`,
+      type: 'rule',
+      rule: {
+        id: ruleId,
+        label: 'RRS rule',
+        description: 'Describe the rule and why the highlighted objects are in breach.',
+      },
+      offenseTargets: [],
+      color: '#facc15',
+      x: 180,
+      y: 100,
+      width: 230,
+      fontSize: 14,
+    };
+
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      comments: [...(frame.comments ?? []), { ...ruleComment, rule: { ...ruleComment.rule }, offenseTargets: [] }],
+      rules: [...(frame.rules ?? []), { ...ruleComment.rule }],
+    }));
+    selectObject(ruleComment.id, 'comment');
+  };
+
   const addImage = (src: string, name = 'Diagram image') => {
     const image: DiagramImage = {
       id: `image-${Date.now()}`,
@@ -559,6 +617,11 @@ export function useScenario() {
       return;
     }
 
+    const selectedRuleComment = selectedType === 'comment'
+      ? activeFrame.comments?.find((comment) => comment.id === selectedId)
+      : undefined;
+    const selectedRuleId = selectedRuleComment?.type === 'rule' ? selectedRuleComment.rule.id : undefined;
+
     commitFrames((previousFrames) =>
       previousFrames.map((frame) => ({
         ...frame,
@@ -569,6 +632,7 @@ export function useScenario() {
         arrows: frame.arrows?.filter((arrow) => arrow.id !== selectedId),
         comments: frame.comments?.filter((comment) => comment.id !== selectedId),
         images: frame.images?.filter((image) => image.id !== selectedId),
+        rules: selectedRuleId ? frame.rules?.filter((rule) => rule.id !== selectedRuleId) : frame.rules,
       })),
     );
     setSelectedId(null);
@@ -667,6 +731,7 @@ export function useScenario() {
     addArrow,
     addBoat,
     addComment,
+    addRuleComment,
     addFrame,
     addImage,
     addMark,
@@ -700,6 +765,7 @@ export function useScenario() {
     updateArrow,
     updateBoat,
     updateComment,
+    updateRuleComment,
     updateImage,
     updateMark,
     updateSettings,
