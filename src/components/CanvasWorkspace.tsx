@@ -49,7 +49,7 @@ interface CanvasWorkspaceProps {
   minZoom: number;
   onAddBoat: () => void;
   onAddMark: (shape?: Mark['shape']) => void;
-  onAddArrow: () => void;
+  onAddArrow: (start?: Position, end?: Position) => void;
   onAddComment: () => void;
   onAddRuleComment?: () => void;
   onAddImage: (src: string, name?: string) => void;
@@ -372,6 +372,8 @@ export default function CanvasWorkspace({
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [inspectorPosition, setInspectorPosition] = useState<Position | null>(null);
   const [playbackToast, setPlaybackToast] = useState<string | null>(null);
+  const [isAddingArrow, setIsAddingArrow] = useState(false);
+  const [arrowDrawingStart, setArrowDrawingStart] = useState<Position | null>(null);
 
   useEffect(() => {
     if (!playbackWarning) return undefined;
@@ -413,12 +415,17 @@ export default function CanvasWorkspace({
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
       event.preventDefault();
+      if (isAddingArrow) {
+        setIsAddingArrow(false);
+        setArrowDrawingStart(null);
+        return;
+      }
       handleCloseInspector();
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [handleCloseInspector, isInspectorOpen]);
+  }, [handleCloseInspector, isAddingArrow, isInspectorOpen]);
 
   const handleSelectObject = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     resetInspectorPlacement();
@@ -455,7 +462,22 @@ export default function CanvasWorkspace({
 
   const handleAddArrow = () => {
     resetInspectorPlacement();
-    onAddArrow();
+    setIsInspectorOpen(false);
+    setArrowDrawingStart(null);
+    setIsAddingArrow(true);
+  };
+
+  const handleArrowPoint = (point: Position) => {
+    if (!isAddingArrow) return;
+
+    if (!arrowDrawingStart) {
+      setArrowDrawingStart(point);
+      return;
+    }
+
+    onAddArrow(arrowDrawingStart, point);
+    setArrowDrawingStart(null);
+    setIsAddingArrow(false);
     setIsInspectorOpen(true);
   };
 
@@ -647,7 +669,7 @@ export default function CanvasWorkspace({
 
   return (
     <section className="canvas-container">
-      <div ref={canvasWrapRef} className="canvas-wrap">
+      <div ref={canvasWrapRef} className={`canvas-wrap${isAddingArrow ? ' is-arrow-drawing' : ''}`}>
         <SimulationCanvas
           activeFrame={activeFrame}
           canvasPosition={canvasPosition}
@@ -673,6 +695,9 @@ export default function CanvasWorkspace({
           onMoveMark={onMoveMark}
           onConnectMarks={onConnectMarks}
           onMoveArrow={onMoveArrow}
+          onArrowPoint={handleArrowPoint}
+          isAddingArrow={isAddingArrow}
+          arrowDrawingStart={arrowDrawingStart}
           onMoveComment={onMoveComment}
           onMoveImage={onMoveImage}
           onOpenControls={onOpenControls}
@@ -685,6 +710,21 @@ export default function CanvasWorkspace({
           stageRef={stageRef}
           stageSize={stageSize}
         />
+        {isAddingArrow && (
+          <div className="arrow-drawing-hint" role="status" aria-live="polite">
+            <span>{arrowDrawingStart ? 'Click the end point for the arrow.' : 'Click the start point for the arrow.'}</span>
+            <button
+              type="button"
+              className="arrow-drawing-cancel"
+              onClick={() => {
+                setIsAddingArrow(false);
+                setArrowDrawingStart(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        )}
         <div className="canvas-top-controls">
           {!presenterMode && <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />}
           {!presenterMode && (

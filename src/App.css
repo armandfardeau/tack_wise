@@ -1217,6 +1217,57 @@ body {
   touch-action: none;
 }
 
+.canvas-wrap.is-arrow-drawing {
+  cursor: crosshair;
+}
+
+.arrow-drawing-hint {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(78%, 520px);
+  padding: 9px 12px;
+  border: 1px solid rgba(34, 211, 238, 0.65);
+  border-radius: 9px;
+  background: rgba(8, 47, 73, 0.94);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+  color: #ecfeff;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.arrow-drawing-cancel {
+  padding: 3px 7px;
+  border: 1px solid rgba(236, 254, 255, 0.55);
+  border-radius: 5px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.7rem;
+}
+
+.arrow-drawing-cancel:hover,
+.arrow-drawing-cancel:focus-visible {
+  background: rgba(236, 254, 255, 0.14);
+}
+
+.light-theme .arrow-drawing-hint {
+  background: rgba(236, 254, 255, 0.96);
+  color: #164e63;
+}
+
+.light-theme .arrow-drawing-cancel {
+  border-color: rgba(22, 78, 99, 0.45);
+}
+
 .canvas-wrap:active {
   cursor: grabbing;
 }

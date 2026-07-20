@@ -57,11 +57,23 @@ export interface MarkConnection {
   arrowhead?: boolean;
 }
 
+export interface ArrowPoint {
+  x: number;
+  y: number;
+}
+
+/**
+ * An arrow path always contains its start and end points. Additional points
+ * are used as control points for curved arrows.
+ */
+export type TacticalArrowPoints = [ArrowPoint, ArrowPoint, ...ArrowPoint[]];
+
 export interface TacticalArrow {
   id: string;
   name: string;
   color: string;
-  points: Array<{ x: number; y: number }>;
+  /** First and last points are required; intermediate points are curve controls. */
+  points: ArrowPoint[];
   curved?: boolean;
   lineStyle?: 'dotted' | 'dashed' | 'solid';
   lineWidth?: number;

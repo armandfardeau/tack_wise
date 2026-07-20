@@ -1,7 +1,7 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
 import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type MarkConnection, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
-import { ensureCurvedArrowControlPoint } from '../utils/arrows';
+import { ensureCurvedArrowControlPoint, toTacticalArrowPoints } from '../utils/arrows';
 import { DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { Copy, Pencil, Pause, Play, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
@@ -924,7 +924,7 @@ function ArrowInspector({ arrow, updateArrow }: { arrow: TacticalArrow; updateAr
       points: curved
         ? ensureCurvedArrowControlPoint(arrow.points)
         : arrow.points.length > 2
-          ? [arrow.points[0], arrow.points[arrow.points.length - 1]]
+          ? toTacticalArrowPoints([arrow.points[0], arrow.points[arrow.points.length - 1]]) ?? arrow.points
           : arrow.points,
     });
   };
