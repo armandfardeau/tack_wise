@@ -1,5 +1,5 @@
 import { getRuleReferences, type Frame } from '../types';
-import situationData from './situations/tacking-basics.json';
+import situationData from './situations/getting-started.json';
 import { cloneTacticalArrowPoints } from '../utils/arrows';
 import { normalizeFrameConnections } from '../utils/markConnections';
 
