@@ -1,6 +1,7 @@
 import { Group, Rect, Text } from 'react-konva';
 import { COMMENT_PADDING_X, COMMENT_PADDING_Y } from '../constants';
 import type { FrameComment, Theme } from '../types';
+import { getReadableCommentTextColor } from '../utils/colors';
 import { getCommentHeight, getCommentText, RULE_COMMENT_HEADER_HEIGHT } from '../utils/simulation';
 
 interface CommentNoteProps {
@@ -25,7 +26,7 @@ export default function CommentNote({ comment, isSelected, theme, onMove, onOpen
     : theme === 'light' ? '#ffffff' : '#172033';
   const bodyTextColor = isRule
     ? theme === 'light' ? '#92400e' : '#fde68a'
-    : comment.color;
+    : getReadableCommentTextColor(comment.color, theme, cardFill);
 
   return (
     <Group
