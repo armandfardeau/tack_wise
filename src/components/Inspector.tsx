@@ -3,6 +3,12 @@ import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
 
+const QUICK_HEADING_ANGLES = [-180, -90, -45, 0, 45, 90, 180] as const;
+
+function formatAngle(angle: number) {
+  return `${angle > 0 ? '+' : ''}${angle}°`;
+}
+
 interface InspectorProps {
   activeFrame: Frame;
   autoSailTrim: boolean;
@@ -128,6 +134,20 @@ export default function Inspector({
           <div className="form-row">
             <label htmlFor="boat-heading">Heading ({selectedBoat.heading}°)</label>
             <input id="boat-heading" type="range" min="-360" max="360" value={selectedBoat.heading} onChange={(event) => updateBoat(selectedBoat.id, { heading: Number(event.target.value) })} />
+            <div className="quick-angle-options" aria-label="Quick heading angles">
+              {QUICK_HEADING_ANGLES.map((angle) => (
+                <button
+                  key={angle}
+                  type="button"
+                  className="quick-angle-button"
+                  aria-pressed={selectedBoat.heading === angle}
+                  title={`Set heading to ${formatAngle(angle)}`}
+                  onClick={() => updateBoat(selectedBoat.id, { heading: angle })}
+                >
+                  {formatAngle(angle)}
+                </button>
+              ))}
+            </div>
           </div>
           <div className="form-row flex-row">
             <label className="checkbox-label">

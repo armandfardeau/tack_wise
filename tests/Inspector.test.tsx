@@ -344,6 +344,39 @@ describe('boat controls', () => {
 
     expect(updateBoat).toHaveBeenCalledWith('boat-1', { heading: -180 });
   });
+
+  it('offers quick heading angle selections', () => {
+    const updateBoat = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [boat] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={boat}
+        selectedMark={undefined}
+        selectedType="boat"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={updateBoat}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    const quickAngles = ['-180°', '-90°', '-45°', '0°', '+45°', '+90°', '+180°'];
+
+    quickAngles.forEach((angle) => {
+      expect(screen.getByRole('button', { name: angle })).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: '+45°' }));
+
+    expect(updateBoat).toHaveBeenCalledWith('boat-1', { heading: 45 });
+  });
 });
 
 describe('magnetic grid controls', () => {
