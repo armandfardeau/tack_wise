@@ -682,13 +682,31 @@ export default function CanvasWorkspace({
           stageRef={stageRef}
           stageSize={stageSize}
         />
-        <FrameHeader
-          frameName={activeFrame.name}
-          frameIndex={currentFrameIndex}
-          frameCount={frames.length}
-          showTitle={showFrameTitle}
-          showNumber={showFrameNumber}
-        />
+        <div className="canvas-top-controls">
+          {!presenterMode && <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />}
+          {!presenterMode && (
+            <CanvasHistoryControls
+              canRedo={canRedo}
+              canUndo={canUndo}
+              hasAutosave={hasAutosave}
+              onRedo={onRedo}
+              onRestoreAutosave={onRestoreAutosave}
+              onUndo={onUndo}
+            />
+          )}
+          <WindHud
+            windAngle={activeFrame.windAngle}
+            windSpeed={activeFrame.windSpeed}
+            onSelect={() => handleOpenInspector('wind', 'wind')}
+          />
+          <FrameHeader
+            frameName={activeFrame.name}
+            frameIndex={currentFrameIndex}
+            frameCount={frames.length}
+            showTitle={showFrameTitle}
+            showNumber={showFrameNumber}
+          />
+        </div>
         {playbackToast && (
           <div className="playback-toast" role="status" aria-live="polite" aria-atomic="true">
             <TriangleAlert aria-hidden="true" size={17} />
@@ -769,16 +787,6 @@ export default function CanvasWorkspace({
             onAddRuleComment={handleAddRuleComment}
             onAddImage={handleAddImage}
           />}
-        {!presenterMode && (
-          <CanvasHistoryControls
-            canRedo={canRedo}
-            canUndo={canUndo}
-            hasAutosave={hasAutosave}
-            onRedo={onRedo}
-            onRestoreAutosave={onRestoreAutosave}
-            onUndo={onUndo}
-          />
-        )}
         <PlaybackButton
           isPlaying={isPlaying}
           currentFrameIndex={currentFrameIndex}
@@ -798,12 +806,6 @@ export default function CanvasWorkspace({
           onZoomOut={onZoomOut}
           onAutoZoom={onAutoZoom}
           onReset={onResetZoom}
-        />
-        {!presenterMode && <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />}
-        <WindHud
-          windAngle={activeFrame.windAngle}
-          windSpeed={activeFrame.windSpeed}
-          onSelect={() => handleOpenInspector('wind', 'wind')}
         />
       </div>
       {children}

@@ -1181,12 +1181,37 @@ body {
   cursor: grabbing;
 }
 
-.canvas-frame-header {
+.canvas-top-controls {
   position: absolute;
   top: 16px;
-  left: 50%;
-  z-index: 4;
-  max-width: min(52%, 560px);
+  right: 16px;
+  left: 16px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  grid-template-areas:
+    "settings . history"
+    "wind title .";
+  gap: 12px 16px;
+  pointer-events: none;
+}
+
+.canvas-top-controls > .canvas-settings-btn,
+.canvas-top-controls > .canvas-history-controls,
+.canvas-top-controls > .wind-vane-container {
+  pointer-events: auto;
+}
+
+.presenter-mode .canvas-top-controls {
+  grid-template-rows: auto;
+  grid-template-areas: "wind title .";
+}
+
+.canvas-frame-header {
+  grid-area: title;
+  justify-self: center;
+  max-width: min(100%, 560px);
   padding: 8px 18px 9px;
   border: 1px solid var(--border-color);
   border-radius: 10px;
@@ -1195,7 +1220,6 @@ body {
   color: var(--text-main);
   pointer-events: none;
   text-align: center;
-  transform: translateX(-50%);
 }
 
 .canvas-frame-header h2 {
@@ -1302,10 +1326,8 @@ body {
 }
 
 .canvas-history-controls {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 5;
+  grid-area: history;
+  justify-self: end;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1599,12 +1621,10 @@ body {
   text-align: center;
 }
 
-/* Windvane Overlay at Top Center */
+/* Windvane overlay in the second row of the canvas controls */
 .wind-vane-container {
-  position: absolute;
-  top: 80px;
-  left: 50%;
-  transform: translateX(-50%);
+  grid-area: wind;
+  justify-self: start;
   background-color: rgba(15, 23, 42, 0.85);
   backdrop-filter: blur(8px);
   border: 1px solid var(--border-color);
@@ -1675,10 +1695,8 @@ body {
 }
 
 .canvas-settings-btn {
-  position: absolute;
-  top: 16px;
-  left: 16px;
-  z-index: 5;
+  grid-area: settings;
+  justify-self: start;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2766,9 +2784,28 @@ body {
     border-radius: 10px;
   }
 
-  .canvas-history-controls {
+  .canvas-top-controls {
     top: calc(8px + env(safe-area-inset-top, 0px));
     right: 8px;
+    left: 8px;
+    grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+    grid-template-areas:
+      "settings history"
+      "wind title";
+    gap: 8px;
+  }
+
+  .canvas-top-controls .canvas-frame-header {
+    justify-self: end;
+    max-width: 100%;
+    padding: 6px 10px 7px;
+  }
+
+  .presenter-mode .canvas-top-controls {
+    grid-template-areas: "wind title";
+  }
+
+  .canvas-top-controls .canvas-history-controls {
     gap: 4px;
     padding: 4px;
     border-radius: 10px;
@@ -2788,9 +2825,6 @@ body {
   }
 
   .wind-vane-container {
-    top: calc(64px + env(safe-area-inset-top, 32px));
-    left: 12px;
-    transform: none;
     gap: 8px;
     padding: 6px 10px;
   }
