@@ -99,7 +99,8 @@
           "x": 245,
           "y": 335,
           "heading": 45,
-          "sailAngle": -12
+          "sailAngle": -12,
+          "speechBubble": ""
         },
         {
           "id": "r10-starboard",
@@ -108,7 +109,8 @@
           "x": 355,
           "y": 335,
           "heading": 315,
-          "sailAngle": 12
+          "sailAngle": 12,
+          "speechBubble": "Starboard!"
         }
       ],
       "marks": [],
@@ -135,7 +137,7 @@
       "connections": []
     },
     {
-      "id": "r10-frame-3",
+      "id": "frame-1784560869026",
       "name": "3. Starboard tack hails",
       "windAngle": 0,
       "windSpeed": 14,
@@ -144,31 +146,33 @@
           "id": "r10-port",
           "name": "Port tack",
           "color": "#38bdf8",
-          "x": 280,
-          "y": 300,
-          "heading": -45,
-          "sailAngle": 12
+          "x": 245,
+          "y": 335,
+          "heading": 112,
+          "sailAngle": -55,
+          "speechBubble": "😡"
         },
         {
           "id": "r10-starboard",
           "name": "Starboard tack",
           "color": "#f87171",
-          "x": 320,
-          "y": 300,
+          "x": 355,
+          "y": 335,
           "heading": 315,
-          "sailAngle": 12
+          "sailAngle": 12,
+          "speechBubble": ""
         }
       ],
       "marks": [],
       "arrows": [],
       "comments": [
         {
-          "id": "r10-note-3",
-          "name": "Hail",
-          "text": "Starboard tack: maintain course and speed.\nA clear hail can prevent confusion.",
+          "id": "r10-note-2",
+          "name": "Priority",
+          "text": "Starboard tack has right of way under Rule 10.",
           "color": "#f87171",
-          "x": 349.2178770949721,
-          "y": 188.21229050279328,
+          "x": 452.79329608938565,
+          "y": 190.22346368715088,
           "width": 230,
           "fontSize": 14
         }
@@ -183,8 +187,8 @@
       "connections": []
     },
     {
-      "id": "frame-1784554441751",
-      "name": "5. Clear and passing",
+      "id": "frame-1784560926798",
+      "name": "4. Clear and passing",
       "windAngle": 0,
       "windSpeed": 14,
       "boats": [
@@ -192,31 +196,83 @@
           "id": "r10-port",
           "name": "Port tack",
           "color": "#38bdf8",
-          "x": 220,
-          "y": 240,
-          "heading": -45,
-          "sailAngle": 12
+          "x": 320,
+          "y": 340,
+          "heading": 90,
+          "sailAngle": -55,
+          "speechBubble": ""
         },
         {
           "id": "r10-starboard",
           "name": "Starboard tack",
           "color": "#f87171",
-          "x": 260,
-          "y": 239.99999999999994,
+          "x": 300,
+          "y": 280,
           "heading": 315,
-          "sailAngle": 12
+          "sailAngle": 12,
+          "speechBubble": "😎"
         }
       ],
       "marks": [],
       "arrows": [],
       "comments": [
         {
-          "id": "r10-note-3",
-          "name": "Hail",
-          "text": "Both boats are now clear.\nThe port-tack boat has fulfilled its keep-clear obligation.",
-          "color": "#30ab65",
-          "x": 349.2178770949721,
-          "y": 188.21229050279328,
+          "id": "r10-note-2",
+          "name": "Priority",
+          "text": "Starboard tack has right of way under Rule 10.",
+          "color": "#f87171",
+          "x": 452.79329608938565,
+          "y": 190.22346368715088,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-10",
+          "label": "RRS 10",
+          "description": "When boats are on opposite tacks, a port-tack boat shall keep clear of a starboard-tack boat."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784560973019",
+      "name": "5. End of contact",
+      "windAngle": 0,
+      "windSpeed": 14,
+      "boats": [
+        {
+          "id": "r10-port",
+          "name": "Port tack",
+          "color": "#38bdf8",
+          "x": 380,
+          "y": 280,
+          "heading": 45,
+          "sailAngle": -12,
+          "speechBubble": ""
+        },
+        {
+          "id": "r10-starboard",
+          "name": "Starboard tack",
+          "color": "#f87171",
+          "x": 240,
+          "y": 220,
+          "heading": 315,
+          "sailAngle": 12,
+          "speechBubble": ""
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r10-note-2",
+          "name": "Priority",
+          "text": "Starboard tack has right of way under Rule 10.",
+          "color": "#f87171",
+          "x": 452.79329608938565,
+          "y": 190.22346368715088,
           "width": 230,
           "fontSize": 14
         }
