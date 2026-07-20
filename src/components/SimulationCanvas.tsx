@@ -1,9 +1,9 @@
 import { Fragment, useCallback, useEffect, useRef, useState, type RefObject } from 'react';
-import { Circle, Layer, Line, Rect, Stage } from 'react-konva';
+import { Circle, Group, Layer, Line, Rect, Stage } from 'react-konva';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import type { DisplayMode, Frame, Theme } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
-import Boat from './Boat';
+import Boat, { SpeechBubble } from './Boat';
 import CommentNote from './CommentNote';
 import DiagramImage from './DiagramImage';
 import Mark from './Mark';
@@ -16,6 +16,7 @@ import WindIndicator from './WindIndicator';
 import type { SnapTarget } from '../hooks/useGridSnap';
 import { canvasToWorldPosition, getCanvasWorldBounds, worldToCanvasPosition, type Position } from '../utils/simulation';
 import { getMarkConnectionAnchor, getMarkConnectionPoint, getMarkConnectionRadius } from '../utils/markConnections';
+import { getSpeechBubblePositions, type SpeechBubblePosition } from '../utils/speechBubble';
 
 interface SimulationCanvasProps {
   activeFrame: Frame;
@@ -66,6 +67,41 @@ interface ConnectionDrag {
   endAnchor: Position | null;
 }
 
+function PositionedSpeechBubble({
+  boat,
+  position,
+  isSelected,
+  isShadow = false,
+}: {
+  boat: Frame['boats'][number];
+  position: SpeechBubblePosition;
+  isSelected: boolean;
+  isShadow?: boolean;
+}) {
+  const text = boat.speechBubble?.trim();
+  if (!text) return null;
+
+  return (
+    <Group
+      x={boat.x}
+      y={boat.y}
+      scaleX={0.5}
+      scaleY={0.5}
+      opacity={isShadow ? 0.22 : 1}
+      listening={false}
+      zIndex={100}
+    >
+      <SpeechBubble
+        text={text}
+        heading={0}
+        isSelected={isSelected}
+        isShadow={isShadow}
+        position={position}
+      />
+    </Group>
+  );
+}
+
 export default function SimulationCanvas({
   activeFrame,
   canvasPosition,
@@ -114,6 +150,11 @@ export default function SimulationCanvas({
     : frames[currentFrameIndex - 1]
       ? [frames[currentFrameIndex - 1]]
       : [];
+  const speechBubblePositions = getSpeechBubblePositions(activeFrame.boats);
+  const previousSpeechBubblePositions = previousFrames.map((frame) => ({
+    frame,
+    positions: getSpeechBubblePositions(frame.boats),
+  }));
   const worldBounds = getCanvasWorldBounds(stageSize);
   const worldSize = {
     width: worldBounds.right - worldBounds.left,
@@ -313,7 +354,7 @@ export default function SimulationCanvas({
               </Fragment>
             ))}
             {!presenterMode && !isExporting && previousFrame.boats.map((boat) => (
-              <Boat key={`shadow-${shadowIndex}-${boat.id}`} boat={boat} isSelected={false} isShadow />
+              <Boat key={`shadow-${shadowIndex}-${boat.id}`} boat={boat} isSelected={false} isShadow showSpeechBubble={false} />
             ))}
             {(previousFrame.arrows ?? []).map((arrow) => (
               <TacticalArrow key={`shadow-${shadowIndex}-${arrow.id}`} arrow={arrow} isSelected={false} isShadow />
@@ -418,6 +459,7 @@ export default function SimulationCanvas({
             key={boat.id}
             boat={boat}
             isSelected={selectedId === boat.id}
+            showSpeechBubble={false}
             offenseColor={offenseTargetColors.get(`boat:${boat.id}`)}
             readOnly={readOnly}
             onOpenInspector={readOnly ? undefined : () => onOpenInspector(boat.id, 'boat')}
@@ -474,6 +516,34 @@ export default function SimulationCanvas({
             onMove={onMoveImage}
           />
         ))}
+      </Layer>
+
+      <Layer zIndex={100} listening={false}>
+        {!presenterMode && !isExporting && previousSpeechBubblePositions.flatMap(({ frame, positions }) => (
+          frame.boats.map((boat) => {
+            const position = positions.get(boat.id);
+            return position ? (
+              <PositionedSpeechBubble
+                key={`shadow-bubble-${frame.id}-${boat.id}`}
+                boat={boat}
+                position={position}
+                isSelected={false}
+                isShadow
+              />
+            ) : null;
+          })
+        ))}
+        {activeFrame.boats.map((boat) => {
+          const position = speechBubblePositions.get(boat.id);
+          return position ? (
+            <PositionedSpeechBubble
+              key={`bubble-${boat.id}`}
+              boat={boat}
+              position={position}
+              isSelected={selectedId === boat.id}
+            />
+          ) : null;
+        })}
       </Layer>
 
       <Layer listening={false}>

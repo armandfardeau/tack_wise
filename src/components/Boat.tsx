@@ -1,5 +1,12 @@
 import { Group, Line, Path, Circle, Rect, Text } from 'react-konva';
 import type { Boat as BoatModel } from '../types';
+import {
+  getSpeechBubbleHeight,
+  SPEECH_BUBBLE_BOTTOM_Y,
+  SPEECH_BUBBLE_WIDTH,
+  SPEECH_BUBBLE_TOP_Y,
+  type SpeechBubblePosition,
+} from '../utils/speechBubble';
 
 interface BoatProps {
   boat: BoatModel;
@@ -16,29 +23,44 @@ interface BoatProps {
   isShadow?: boolean;
   isOffense?: boolean;
   offenseColor?: string;
+  showSpeechBubble?: boolean;
+  speechBubblePosition?: SpeechBubblePosition;
 }
 
-const SPEECH_BUBBLE_WIDTH = 190;
 const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
-const SPEECH_BUBBLE_Y = -112;
+const SPEECH_BUBBLE_TAIL_LENGTH = 20;
 
-function SpeechBubble({ text, heading, isSelected, isShadow }: { text: string; heading: number; isSelected: boolean; isShadow: boolean }) {
-  const lineCount = text.split('\n').reduce((count, line) => count + Math.max(1, Math.ceil(line.length / 26)), 0);
-  const height = Math.min(100, Math.max(54, 24 + lineCount * 18));
-  const tailY = SPEECH_BUBBLE_Y + height;
+export function SpeechBubble({
+  text,
+  heading,
+  isSelected,
+  isShadow,
+  position = 'top',
+}: {
+  text: string;
+  heading: number;
+  isSelected: boolean;
+  isShadow: boolean;
+  position?: SpeechBubblePosition;
+}) {
+  const height = getSpeechBubbleHeight(text);
+  const bubbleY = position === 'top' ? SPEECH_BUBBLE_TOP_Y : SPEECH_BUBBLE_BOTTOM_Y;
+  const tailY = position === 'top' ? bubbleY + height : bubbleY;
+  const tailTipY = position === 'top' ? tailY + SPEECH_BUBBLE_TAIL_LENGTH : tailY - SPEECH_BUBBLE_TAIL_LENGTH;
 
   return (
     <Group
       rotation={-heading}
       scaleX={2}
       scaleY={2}
+      zIndex={100}
       listening={!isShadow}
     >
       <Line
         points={[
-          -12, tailY - 2,
-          0, tailY + 20,
-          12, tailY - 2,
+          -12, tailY + (position === 'top' ? -2 : 2),
+          0, tailTipY,
+          12, tailY + (position === 'top' ? -2 : 2),
         ]}
         closed
         fill={isShadow ? '#cbd5e1' : '#ffffff'}
@@ -48,7 +70,7 @@ function SpeechBubble({ text, heading, isSelected, isShadow }: { text: string; h
       />
       <Rect
         x={SPEECH_BUBBLE_X}
-        y={SPEECH_BUBBLE_Y}
+        y={bubbleY}
         width={SPEECH_BUBBLE_WIDTH}
         height={height}
         fill={isShadow ? '#e2e8f0' : '#ffffff'}
@@ -62,7 +84,7 @@ function SpeechBubble({ text, heading, isSelected, isShadow }: { text: string; h
       <Text
         text={text}
         x={SPEECH_BUBBLE_X + 12}
-        y={SPEECH_BUBBLE_Y + 8}
+        y={bubbleY + 8}
         width={SPEECH_BUBBLE_WIDTH - 24}
         height={height - 16}
         align="center"
@@ -76,7 +98,7 @@ function SpeechBubble({ text, heading, isSelected, isShadow }: { text: string; h
   );
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top' }: BoatProps) {
   const boatScale = 0.5;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
   const speechBubble = boat.speechBubble?.trim();
@@ -109,7 +131,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         opacity={0.22}
         listening={false}
       >
-        {speechBubble && <SpeechBubble text={speechBubble} heading={boat.heading} isSelected={false} isShadow />}
+        {showSpeechBubble && speechBubble && <SpeechBubble text={speechBubble} heading={boat.heading} isSelected={false} isShadow position={speechBubblePosition} />}
         {/* Simplified Ghost Heading Line */}
         {boat.showHeadingLine && (
           <Line
@@ -176,7 +198,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         });
       }}
     >
-      {speechBubble && <SpeechBubble text={speechBubble} heading={boat.heading} isSelected={isSelected} isShadow={false} />}
+      {showSpeechBubble && speechBubble && <SpeechBubble text={speechBubble} heading={boat.heading} isSelected={isSelected} isShadow={false} position={speechBubblePosition} />}
 
       {/* Selection Glow / Shadow Ring */}
       {offenseStroke && (
