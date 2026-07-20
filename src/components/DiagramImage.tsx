@@ -6,13 +6,12 @@ interface DiagramImageProps {
   image: DiagramImageModel;
   isSelected: boolean;
   onMove?: (id: string, position: { x: number; y: number }) => void;
-  onOpenControls?: () => void;
   onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
   isShadow?: boolean;
 }
 
-export default function DiagramImage({ image, isSelected, onMove, onOpenControls, onOpenInspector, onSelect, isShadow = false }: DiagramImageProps) {
+export default function DiagramImage({ image, isSelected, onMove, onOpenInspector, onSelect, isShadow = false }: DiagramImageProps) {
   const [loadedImage, setLoadedImage] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
@@ -41,11 +40,9 @@ export default function DiagramImage({ image, isSelected, onMove, onOpenControls
       listening={!isShadow}
       onClick={() => {
         onSelect?.(image.id);
-        onOpenControls?.();
       }}
       onTap={() => {
         onSelect?.(image.id);
-        onOpenControls?.();
       }}
       onDblClick={() => onOpenInspector?.()}
       onDblTap={() => onOpenInspector?.()}

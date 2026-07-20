@@ -219,7 +219,6 @@ export default function SimulationCanvas({
             isSelected={selectedId === arrow.id}
             onOpenInspector={() => onOpenInspector(arrow.id, 'arrow')}
             onSelect={(id) => onSelectObject(id, 'arrow')}
-            onOpenControls={onOpenControls}
             onMove={onMoveArrow}
           />
         ))}
@@ -232,7 +231,6 @@ export default function SimulationCanvas({
             theme={theme}
             onOpenInspector={() => onOpenInspector(comment.id, 'comment')}
             onSelect={(id) => onSelectObject(id, 'comment')}
-            onOpenControls={onOpenControls}
             onMove={onMoveComment}
           />
         ))}
@@ -244,7 +242,6 @@ export default function SimulationCanvas({
             isSelected={selectedId === image.id}
             onOpenInspector={() => onOpenInspector(image.id, 'image')}
             onSelect={(id) => onSelectObject(id, 'image')}
-            onOpenControls={onOpenControls}
             onMove={onMoveImage}
           />
         ))}

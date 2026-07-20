@@ -60,9 +60,30 @@ export default function Inspector({
   updateComment,
   updateImage,
 }: InspectorProps) {
+  const deletableObject =
+    selectedType === 'boat' && selectedBoat ? 'Boat' :
+      selectedType === 'mark' && selectedMark ? 'Mark' :
+        selectedType === 'arrow' && selectedArrow ? 'Arrow' :
+          selectedType === 'comment' && selectedComment ? 'Comment' :
+            selectedType === 'image' && selectedImage ? 'Image' :
+              null;
+
   return (
     <div className="control-section inspector">
-      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector"><Search aria-hidden="true" size={16} /> Inspector</h3>
+      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector">
+        <span className="inspector-title-content"><Search aria-hidden="true" size={16} /> Inspector</span>
+        {deletableObject && (
+          <button
+            type="button"
+            className="inspector-delete-btn"
+            aria-label={`Delete ${deletableObject}`}
+            title={`Delete ${deletableObject}`}
+            onClick={onDelete}
+          >
+            <Trash2 aria-hidden="true" size={16} />
+          </button>
+        )}
+      </h3>
 
       {selectedType === 'wind' ? (
         <WindInspector activeFrame={activeFrame} updateActiveFrame={updateActiveFrame} />
@@ -114,21 +135,19 @@ export default function Inspector({
               <span>Show Dotted Path Line</span>
             </label>
           </div>
-          <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Boat</button>
         </div>
       ) : selectedType === 'mark' && selectedMark ? (
         <MarkInspector
           activeFrame={activeFrame}
           mark={selectedMark}
-          onDelete={onDelete}
           updateMark={updateMark}
         />
       ) : selectedType === 'arrow' && selectedArrow && updateArrow ? (
-        <ArrowInspector arrow={selectedArrow} onDelete={onDelete} updateArrow={updateArrow} />
+        <ArrowInspector arrow={selectedArrow} updateArrow={updateArrow} />
       ) : selectedType === 'comment' && selectedComment && updateComment ? (
-        <CommentInspector comment={selectedComment} onDelete={onDelete} updateComment={updateComment} />
+        <CommentInspector comment={selectedComment} updateComment={updateComment} />
       ) : selectedType === 'image' && selectedImage && updateImage ? (
-        <ImageInspector image={selectedImage} onDelete={onDelete} updateImage={updateImage} />
+        <ImageInspector image={selectedImage} updateImage={updateImage} />
       ) : (
         <p className="no-selection">Click an object or the wind indicator on the canvas to inspect and edit its properties.</p>
       )}
@@ -254,11 +273,10 @@ function PlaybackInspector({
 interface MarkInspectorProps {
   activeFrame: Frame;
   mark: Mark;
-  onDelete: () => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
 }
 
-function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspectorProps) {
+function MarkInspector({ activeFrame, mark, updateMark }: MarkInspectorProps) {
   const otherMarks = activeFrame.marks.filter((candidate) => candidate.id !== mark.id);
   const rotationDirection = mark.rotationDirection ?? 'counterclockwise';
 
@@ -349,12 +367,11 @@ function MarkInspector({ activeFrame, mark, onDelete, updateMark }: MarkInspecto
           </div>
         </>
       )}
-      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Mark</button>
     </div>
   );
 }
 
-function ArrowInspector({ arrow, onDelete, updateArrow }: { arrow: TacticalArrow; onDelete: () => void; updateArrow: (id: string, changes: Partial<TacticalArrow>) => void }) {
+function ArrowInspector({ arrow, updateArrow }: { arrow: TacticalArrow; updateArrow: (id: string, changes: Partial<TacticalArrow>) => void }) {
   const handleCurvedChange = (curved: boolean) => {
     updateArrow(arrow.id, {
       curved,
@@ -374,30 +391,27 @@ function ArrowInspector({ arrow, onDelete, updateArrow }: { arrow: TacticalArrow
       <div className="form-row"><label htmlFor="arrow-style">Line style</label><select id="arrow-style" value={arrow.lineStyle ?? 'solid'} onChange={(event) => updateArrow(arrow.id, { lineStyle: event.target.value as TacticalArrow['lineStyle'] })}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></div>
       <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={!!arrow.curved} onChange={(event) => handleCurvedChange(event.target.checked)} /><span>Curved arrow</span></label></div>
       <div className="form-row flex-row"><label className="checkbox-label"><input type="checkbox" checked={arrow.showArrowhead !== false} onChange={(event) => updateArrow(arrow.id, { showArrowhead: event.target.checked })} /><span>Show arrowhead</span></label></div>
-      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Arrow</button>
     </div>
   );
 }
 
-function CommentInspector({ comment, onDelete, updateComment }: { comment: CommentNote; onDelete: () => void; updateComment: (id: string, changes: Partial<CommentNote>) => void }) {
+function CommentInspector({ comment, updateComment }: { comment: CommentNote; updateComment: (id: string, changes: Partial<CommentNote>) => void }) {
   return (
     <div className="editor-form">
       <div className="form-row"><label htmlFor="comment-name">Name</label><input id="comment-name" type="text" value={comment.name} onChange={(event) => updateComment(comment.id, { name: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="comment-text">Text</label><textarea id="comment-text" value={comment.text} rows={4} onChange={(event) => updateComment(comment.id, { text: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="comment-color">Text color</label><input id="comment-color" type="color" value={comment.color} onChange={(event) => updateComment(comment.id, { color: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
-      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Comment</button>
     </div>
   );
 }
 
-function ImageInspector({ image, onDelete, updateImage }: { image: DiagramImage; onDelete: () => void; updateImage: (id: string, changes: Partial<DiagramImage>) => void }) {
+function ImageInspector({ image, updateImage }: { image: DiagramImage; updateImage: (id: string, changes: Partial<DiagramImage>) => void }) {
   return (
     <div className="editor-form">
       <div className="form-row"><label htmlFor="image-name">Name</label><input id="image-name" type="text" value={image.name} onChange={(event) => updateImage(image.id, { name: event.target.value })} /></div>
       <div className="form-row"><label htmlFor="image-width">Width ({image.width}px)</label><input id="image-width" type="range" min="40" max="800" value={image.width} onChange={(event) => updateImage(image.id, { width: Number(event.target.value) })} /></div>
       <div className="form-row"><label htmlFor="image-rotation">Rotation ({image.rotation ?? 0}°)</label><input id="image-rotation" type="range" min="0" max="359" value={image.rotation ?? 0} onChange={(event) => updateImage(image.id, { rotation: Number(event.target.value) })} /></div>
-      <button type="button" className="delete-btn" onClick={onDelete}><Trash2 aria-hidden="true" size={16} /> Delete Image</button>
     </div>
   );
 }

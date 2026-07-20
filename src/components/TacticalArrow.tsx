@@ -6,13 +6,12 @@ interface TacticalArrowProps {
   arrow: TacticalArrowModel;
   isSelected: boolean;
   onMove?: (id: string, points: TacticalArrowModel['points']) => void;
-  onOpenControls?: () => void;
   onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
   isShadow?: boolean;
 }
 
-export default function TacticalArrow({ arrow, isSelected, onMove, onOpenControls, onOpenInspector, onSelect, isShadow = false }: TacticalArrowProps) {
+export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspector, onSelect, isShadow = false }: TacticalArrowProps) {
   const isCurved = arrow.curved === true;
   const pathPoints = isCurved ? ensureCurvedArrowControlPoint(arrow.points) : arrow.points;
   const points = pathPoints.flatMap((point) => [point.x, point.y]);
@@ -34,11 +33,9 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenControl
         listening={!isShadow}
         onClick={() => {
           onSelect?.(arrow.id);
-          onOpenControls?.();
         }}
         onTap={() => {
           onSelect?.(arrow.id);
-          onOpenControls?.();
         }}
         onDblClick={() => onOpenInspector?.()}
         onDblTap={() => onOpenInspector?.()}
@@ -65,11 +62,9 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenControl
             draggable
             onClick={() => {
               onSelect?.(arrow.id);
-              onOpenControls?.();
             }}
             onTap={() => {
               onSelect?.(arrow.id);
-              onOpenControls?.();
             }}
             onDragStart={(event) => {
               event.cancelBubble = true;

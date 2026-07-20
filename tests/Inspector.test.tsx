@@ -82,6 +82,18 @@ function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark) {
   return updateMark;
 }
 
+describe('inspector deletion control', () => {
+  it('places object deletion in the inspector header as an icon button', () => {
+    renderMarkInspector();
+
+    const deleteButton = screen.getByRole('button', { name: /delete mark/i });
+
+    expect(deleteButton).toHaveClass('inspector-delete-btn');
+    expect(deleteButton.closest('h3')).toHaveClass('section-title');
+    expect(screen.queryByText('Delete Mark')).not.toBeInTheDocument();
+  });
+});
+
 describe('mark rotation controls', () => {
   it('keeps rotation arrows hidden by default and allows showing them', () => {
     const updateMark = renderMarkInspector();
