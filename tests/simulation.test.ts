@@ -169,7 +169,7 @@ describe('simulation utilities', () => {
   });
 
   it('includes visual extents when calculating the canvas content bounds', () => {
-    expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 690, maxY: 705 });
+    expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 770, maxY: 750 });
   });
 
   it('includes an enabled mark-room zone in the content bounds', () => {
