@@ -45,6 +45,26 @@ describe('useScenario', () => {
     expect(result.current.frames).toHaveLength(4);
   });
 
+  it('tracks unsaved changes and resets the state after replacing the scenario', () => {
+    const { result } = renderHook(() => useScenario());
+
+    expect(result.current.hasUnsavedChanges).toBe(false);
+
+    act(() => {
+      result.current.updateBoat('boat-1', { heading: 90 });
+    });
+
+    expect(result.current.hasUnsavedChanges).toBe(true);
+
+    act(() => {
+      result.current.createNewScenario();
+    });
+
+    expect(result.current.hasUnsavedChanges).toBe(false);
+    expect(result.current.frames).toHaveLength(1);
+    expect(result.current.activeFrame.boats).toEqual([]);
+  });
+
   it('adds and removes scenario objects from the active frame onward', () => {
     const { result } = renderHook(() => useScenario());
 

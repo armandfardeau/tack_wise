@@ -2111,6 +2111,130 @@ body {
   background: rgba(238, 244, 243, 0.78);
 }
 
+.new-scenario-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(9, 13, 22, 0.78);
+  backdrop-filter: blur(8px);
+}
+
+.light-theme .new-scenario-backdrop {
+  background: rgba(238, 244, 243, 0.78);
+}
+
+.new-scenario-dialog {
+  width: min(480px, 100%);
+  padding: 24px;
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  background: var(--bg-sidebar);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.new-scenario-header,
+.new-scenario-heading,
+.new-scenario-actions {
+  display: flex;
+  align-items: center;
+}
+
+.new-scenario-header {
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.new-scenario-heading {
+  gap: 9px;
+  color: var(--accent-red-hover);
+}
+
+.new-scenario-heading h2 {
+  margin: 0;
+  color: var(--text-main);
+  font-size: 1.2rem;
+}
+
+.new-scenario-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 auto;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.new-scenario-close:hover,
+.new-scenario-close:focus-visible {
+  border-color: var(--accent-cyan);
+  color: var(--text-main);
+}
+
+.new-scenario-dialog > p {
+  margin: 18px 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.new-scenario-actions {
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 24px;
+  flex-wrap: wrap;
+}
+
+.new-scenario-secondary,
+.new-scenario-export,
+.new-scenario-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 8px 11px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.new-scenario-secondary {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.new-scenario-export {
+  border-color: var(--accent-cyan);
+  background: var(--accent-cyan);
+  color: #00141a;
+}
+
+.new-scenario-danger {
+  border-color: rgba(244, 63, 94, 0.55);
+  background: rgba(244, 63, 94, 0.12);
+  color: var(--accent-red-hover);
+}
+
+.new-scenario-secondary:hover,
+.new-scenario-secondary:focus-visible,
+.new-scenario-export:hover,
+.new-scenario-export:focus-visible,
+.new-scenario-danger:hover,
+.new-scenario-danger:focus-visible {
+  transform: translateY(-1px);
+}
+
 .template-contribution-dialog {
   width: min(720px, 100%);
   max-height: calc(100vh - 48px);

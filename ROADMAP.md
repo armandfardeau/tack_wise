@@ -44,6 +44,29 @@ Expand the visual vocabulary and sailing-specific behavior of diagram objects.
 
 Historical TSS references: 2.5C, 2.5F, 2.6F, 2.6G, 2.6H.
 
+### v1.1 UX and Authoring Hardening
+
+Polish the authoring workflow so coaches, sailors, umpires, and protest
+committees can work confidently across desktop and mobile devices.
+
+- Protect active work with dirty-state detection and confirmation before
+  starting a new diagram or replacing the current scenario.
+- Add an editable scenario title and make the title visible in the editing
+  and sharing workflow.
+- Add an explicit inspector close action, Escape-to-close behavior, focus
+  management, and a visible edit affordance for selected objects.
+- Improve discoverability of direct-manipulation gestures such as
+  double-click-to-edit, rotation handles, mark connections, and canvas pan.
+- Meet mobile touch-target guidance and consolidate dense playback, zoom, and
+  history controls into a touch-friendly toolbar.
+- Separate everyday file, template, sharing, and export actions from
+  contributor or developer workflows.
+- Improve light-theme annotation contrast and replace blocking alerts for
+  share/export feedback with inline status messages.
+- Add clearer autosave state, recovery context, and first-use guidance.
+- Monitor initial-load performance and split heavy export dependencies where
+  appropriate.
+
 ## v1.2 — Timeline and Animation
 
 Make a situation explainable as a sequence of tactical events.
