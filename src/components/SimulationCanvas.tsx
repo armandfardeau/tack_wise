@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useRef, useState, type RefObject } from 'react';
-import { Layer, Line, Rect, Stage } from 'react-konva';
+import { Circle, Layer, Line, Rect, Stage } from 'react-konva';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import type { DisplayMode, Frame, Theme } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
@@ -37,6 +37,9 @@ interface SimulationCanvasProps {
   onMoveMark: (markId: string, position: Position) => void;
   onConnectMarks: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: Position; end?: Position }) => void;
   onMoveArrow: (arrowId: string, points: NonNullable<Frame['arrows']>[number]['points']) => void;
+  onArrowPoint: (position: Position) => void;
+  isAddingArrow: boolean;
+  arrowDrawingStart: Position | null;
   onMoveComment: (commentId: string, position: Position) => void;
   onMoveImage: (imageId: string, position: Position) => void;
   onOpenControls: () => void;
@@ -83,6 +86,9 @@ export default function SimulationCanvas({
   onMoveMark,
   onConnectMarks,
   onMoveArrow,
+  onArrowPoint,
+  isAddingArrow,
+  arrowDrawingStart,
   onMoveComment,
   onMoveImage,
   onOpenControls: _onOpenControls,
@@ -102,6 +108,7 @@ export default function SimulationCanvas({
 }: SimulationCanvasProps) {
   const [connectionDrag, setConnectionDrag] = useState<ConnectionDrag | null>(null);
   const connectionDragRef = useRef<ConnectionDrag | null>(null);
+  const [arrowDrawingPointer, setArrowDrawingPointer] = useState<Position | null>(null);
   const previousFrames = displayMode === 'cumulative'
     ? frames.slice(0, currentFrameIndex)
     : frames[currentFrameIndex - 1]
@@ -138,6 +145,22 @@ export default function SimulationCanvas({
     if (!pointerPosition) return null;
     return canvasToWorldPosition(pointerPosition, canvasPosition, canvasZoom);
   }, [canvasPosition, canvasZoom, stageRef]);
+
+  const updateArrowDrawingPreview = useCallback(() => {
+    if (!isAddingArrow) return;
+    setArrowDrawingPointer(getPointerWorldPosition());
+  }, [getPointerWorldPosition, isAddingArrow]);
+
+  const handleArrowPoint = useCallback(() => {
+    if (!isAddingArrow) return;
+
+    const pointer = getPointerWorldPosition();
+    if (pointer) onArrowPoint(pointer);
+  }, [getPointerWorldPosition, isAddingArrow, onArrowPoint]);
+
+  useEffect(() => {
+    if (!isAddingArrow) setArrowDrawingPointer(null);
+  }, [isAddingArrow]);
 
   const findConnectionTarget = useCallback((sourceMarkId: string, pointer: Position): string | null => {
     const candidates = activeFrame.marks
@@ -214,11 +237,18 @@ export default function SimulationCanvas({
   }, [connectionDrag, finishConnectionDrag]);
 
   const handleStageTouchMove = (event: { evt: TouchEvent }) => {
+    if (isAddingArrow) {
+      updateArrowDrawingPreview();
+      return;
+    }
+
     onCanvasTouchMove(event);
     if (connectionDrag) updateConnectionDrag();
   };
 
   const handleStageTouchEnd = (event: { evt: TouchEvent }) => {
+    if (isAddingArrow) return;
+
     onCanvasTouchEnd(event);
     if (connectionDrag) finishConnectionDrag();
   };
@@ -232,17 +262,19 @@ export default function SimulationCanvas({
       y={canvasPosition.y}
       scaleX={canvasZoom}
       scaleY={canvasZoom}
-      draggable
+      draggable={!isAddingArrow}
       dragBoundFunc={constrainPosition}
-      onDragEnd={onCanvasDragEnd}
-      onTouchCancel={onCanvasTouchEnd}
-      onTouchEnd={handleStageTouchEnd}
+      onDragEnd={isAddingArrow ? undefined : onCanvasDragEnd}
+      onTouchCancel={isAddingArrow ? undefined : onCanvasTouchEnd}
+      onTouchEnd={isAddingArrow ? undefined : handleStageTouchEnd}
       onTouchMove={handleStageTouchMove}
-      onTouchStart={onCanvasTouchStart}
+      onTouchStart={isAddingArrow ? undefined : onCanvasTouchStart}
       onWheel={onCanvasWheel}
-      onMouseMove={connectionDrag ? updateConnectionDrag : undefined}
-      onMouseUp={connectionDrag ? finishConnectionDrag : undefined}
-      onMouseLeave={connectionDrag ? () => {
+      onClick={isAddingArrow ? handleArrowPoint : undefined}
+      onTap={isAddingArrow ? handleArrowPoint : undefined}
+      onMouseMove={isAddingArrow ? updateArrowDrawingPreview : connectionDrag ? updateConnectionDrag : undefined}
+      onMouseUp={!isAddingArrow && connectionDrag ? finishConnectionDrag : undefined}
+      onMouseLeave={isAddingArrow ? () => setArrowDrawingPointer(null) : connectionDrag ? () => {
         const activeDrag = connectionDragRef.current;
         if (activeDrag) setActiveConnectionDrag({ ...activeDrag, targetMarkId: null, endAnchor: null });
       } : undefined}
@@ -325,6 +357,33 @@ export default function SimulationCanvas({
             opacity={0.9}
             listening={false}
           />
+        )}
+
+        {isAddingArrow && arrowDrawingStart && (
+          <>
+            <Line
+              points={[
+                arrowDrawingStart.x,
+                arrowDrawingStart.y,
+                arrowDrawingPointer?.x ?? arrowDrawingStart.x,
+                arrowDrawingPointer?.y ?? arrowDrawingStart.y,
+              ]}
+              stroke="#22d3ee"
+              strokeWidth={3}
+              dash={[10, 8]}
+              opacity={0.9}
+              listening={false}
+            />
+            <Circle
+              x={arrowDrawingStart.x}
+              y={arrowDrawingStart.y}
+              radius={8}
+              fill="#22d3ee"
+              stroke="#ecfeff"
+              strokeWidth={2}
+              listening={false}
+            />
+          </>
         )}
 
         {activeFrame.marks.map((mark) => (

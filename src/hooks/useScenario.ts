@@ -743,12 +743,12 @@ export function useScenario() {
     selectObject(newMark.id, 'mark');
   };
 
-  const addArrow = () => {
+  const addArrow = (start: Position = { x: 180, y: 240 }, end: Position = { x: 320, y: 180 }) => {
     const arrow: TacticalArrow = {
       id: `arrow-${Date.now()}`,
       name: `Arrow ${(activeFrame.arrows?.length ?? 0) + 1}`,
       color: '#f97316',
-      points: getCurvedArrowPoints({ x: 180, y: 240 }, { x: 320, y: 180 }),
+      points: getCurvedArrowPoints(start, end),
       curved: true,
       lineStyle: 'solid',
       lineWidth: 3,
