@@ -43,33 +43,7 @@
           "rotationDirection": "counterclockwise"
         }
       ],
-      "arrows": [
-        {
-          "id": "r18-approach",
-          "name": "Approach to mark",
-          "color": "#fb923c",
-          "points": [
-            { "x": 265, "y": 240 },
-            { "x": 300, "y": 170 },
-            { "x": 360, "y": 275 }
-          ],
-          "curved": true,
-          "lineWidth": 3
-        },
-        {
-          "id": "r18-mark-room",
-          "name": "Inside boat mark-room",
-          "color": "#38bdf8",
-          "points": [
-            { "x": 265, "y": 240 },
-            { "x": 270, "y": 165 },
-            { "x": 350, "y": 120 },
-            { "x": 390, "y": 175 }
-          ],
-          "curved": true,
-          "lineWidth": 4
-        }
-      ],
+      "arrows": [],
       "comments": [
         {
           "id": "r18-note",
@@ -88,7 +62,456 @@
           "label": "RRS 18",
           "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
         }
-      ]
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554638053",
+      "name": "Inside boat receives mark-room (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 320,
+          "y": 180,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 440,
+          "y": 200,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554670637",
+      "name": "Inside boat receives mark-room (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 380,
+          "y": 120,
+          "heading": -45,
+          "sailAngle": 12,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 500,
+          "y": 140,
+          "heading": -45,
+          "sailAngle": 12,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554683223",
+      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 320,
+          "y": 80,
+          "heading": -90,
+          "sailAngle": 55,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 400,
+          "y": 40.00000000000003,
+          "heading": -45,
+          "sailAngle": 12,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554704215",
+      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 260,
+          "y": 80,
+          "heading": -135,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 400,
+          "y": 40.00000000000003,
+          "heading": -90,
+          "sailAngle": 55,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554714161",
+      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 220.00000000000003,
+          "y": 120.00000000000003,
+          "heading": 180,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 300,
+          "y": 40.00000000000006,
+          "heading": -135,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554774057",
+      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 220.00000000000003,
+          "y": 220.0000000000001,
+          "heading": 180,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 260,
+          "y": 80.00000000000001,
+          "heading": 180,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784554787787",
+      "name": "Inside boat receives mark-room (Copy) (Copy) (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r18-alpha",
+          "name": "Alpha — inside",
+          "color": "#38bdf8",
+          "x": 220,
+          "y": 340.00000000000006,
+          "heading": 180,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r18-bravo",
+          "name": "Bravo — outside",
+          "color": "#f87171",
+          "x": 260.00000000000006,
+          "y": 220.00000000000009,
+          "heading": 180,
+          "sailAngle": 75,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [
+        {
+          "id": "r18-windward-mark",
+          "name": "Windward mark",
+          "color": "#ef4444",
+          "x": 300,
+          "y": 125,
+          "shape": "triangle",
+          "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
+          "showRotationArrow": true,
+          "rotationDirection": "counterclockwise"
+        }
+      ],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r18-note",
+          "name": "Zone and room",
+          "text": "The boats are overlapped and must leave the mark on the same side.\nThe outside boat gives the inside boat room to sail to and round the mark.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-18",
+          "label": "RRS 18",
+          "description": "When boats must leave a mark on the same side and at least one is in the zone, the outside boat gives the inside boat mark-room."
+        }
+      ],
+      "connections": []
     }
   ]
 }
