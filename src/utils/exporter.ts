@@ -321,18 +321,79 @@ function decodeBase64Url(value: string) {
   return decodeURIComponent(encoded);
 }
 
+function encodeBinaryBase64Url(value: Uint8Array) {
+  let binary = '';
+  for (const byte of value) binary += String.fromCharCode(byte);
+
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+function decodeBinaryBase64Url(value: string) {
+  const padded = value.replace(/-/g, '+').replace(/_/g, '/') + '='.repeat((4 - (value.length % 4)) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+  return bytes;
+}
+
+function serializeSharePayload(payload: ScenarioExportPayload) {
+  return JSON.stringify({ ...payload, frames: cloneFrames(payload.frames) });
+}
+
+function getScenarioShareValue(urlValue: string) {
+  const url = new URL(urlValue);
+  return new URLSearchParams(url.hash.replace(/^#/, '')).get('scenario');
+}
+
 export function createScenarioShareUrl(payload: ScenarioExportPayload, baseUrl = window.location.href) {
   const url = new URL(baseUrl);
-  url.hash = `scenario=${encodeBase64Url(JSON.stringify({ ...payload, frames: cloneFrames(payload.frames) }))}`;
+  url.hash = `scenario=${encodeBase64Url(serializeSharePayload(payload))}`;
   return url.toString();
+}
+
+/**
+ * Creates a smaller share URL for modern browsers. The synchronous creator above
+ * remains available for compatibility with callers and older browsers.
+ */
+export async function createScenarioShareUrlAsync(payload: ScenarioExportPayload, baseUrl = window.location.href) {
+  if (typeof CompressionStream === 'undefined') return createScenarioShareUrl(payload, baseUrl);
+
+  try {
+    const compressedStream = new Blob([serializeSharePayload(payload)])
+      .stream()
+      .pipeThrough(new CompressionStream('gzip'));
+    const compressed = new Uint8Array(await new Response(compressedStream).arrayBuffer());
+    const url = new URL(baseUrl);
+    url.hash = `scenario=gzip.${encodeBinaryBase64Url(compressed)}`;
+    return url.toString();
+  } catch {
+    return createScenarioShareUrl(payload, baseUrl);
+  }
 }
 
 export function parseScenarioShareUrl(urlValue = window.location.href): ScenarioExportPayload | null {
   try {
-    const url = new URL(urlValue);
-    const encoded = new URLSearchParams(url.hash.replace(/^#/, '')).get('scenario');
-    if (!encoded) return null;
+    const encoded = getScenarioShareValue(urlValue);
+    if (!encoded || encoded.startsWith('gzip.')) return null;
     return parseScenarioFromJson(decodeBase64Url(encoded));
+  } catch {
+    return null;
+  }
+}
+
+export async function parseScenarioShareUrlAsync(urlValue = window.location.href): Promise<ScenarioExportPayload | null> {
+  try {
+    const encoded = getScenarioShareValue(urlValue);
+    if (!encoded) return null;
+    if (!encoded.startsWith('gzip.')) return parseScenarioShareUrl(urlValue);
+    if (typeof DecompressionStream === 'undefined') return null;
+
+    const compressed = decodeBinaryBase64Url(encoded.slice('gzip.'.length));
+    const decompressedStream = new Blob([compressed])
+      .stream()
+      .pipeThrough(new DecompressionStream('gzip'));
+    const json = await new Response(decompressedStream).text();
+    return parseScenarioFromJson(json);
   } catch {
     return null;
   }

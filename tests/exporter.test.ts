@@ -6,12 +6,14 @@ jest.mock('gifshot', () => ({
 import gifshot from 'gifshot';
 import {
   createScenarioShareUrl,
+  createScenarioShareUrlAsync,
   dataUrlToBlob,
   downloadBlob,
   downloadScenarioJson,
   exportToGif,
   parseScenarioFromJson,
   parseScenarioShareUrl,
+  parseScenarioShareUrlAsync,
   serializeScenarioToJson,
 } from '../src/utils/exporter';
 import type { Frame, MarkConnection, ScenarioExportPayload } from '../src/types';
@@ -216,6 +218,13 @@ describe('scenario JSON export', () => {
     const defaultUrl = createScenarioShareUrl(payload);
     window.history.replaceState({}, '', defaultUrl);
     expect(parseScenarioShareUrl()).toEqual(payload);
+  });
+
+  it('round-trips a scenario through the async compressed share URL path', async () => {
+    const payload = { version: 2 as const, frames, currentFrameIndex: 1 };
+    const url = await createScenarioShareUrlAsync(payload, 'https://example.test/tack-wise');
+
+    await expect(parseScenarioShareUrlAsync(url)).resolves.toEqual(payload);
   });
 
   it('reports malformed JSON and malformed share links without throwing to callers', () => {
