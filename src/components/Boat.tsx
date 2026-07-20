@@ -1,4 +1,4 @@
-import { Group, Line, Path, Circle, Text } from 'react-konva';
+import { Group, Line, Path, Circle, Rect, Text } from 'react-konva';
 import type { Boat as BoatModel } from '../types';
 
 interface BoatProps {
@@ -18,9 +18,68 @@ interface BoatProps {
   offenseColor?: string;
 }
 
+const SPEECH_BUBBLE_WIDTH = 190;
+const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
+const SPEECH_BUBBLE_Y = -112;
+
+function SpeechBubble({ text, heading, isSelected, isShadow }: { text: string; heading: number; isSelected: boolean; isShadow: boolean }) {
+  const lineCount = text.split('\n').reduce((count, line) => count + Math.max(1, Math.ceil(line.length / 26)), 0);
+  const height = Math.min(100, Math.max(54, 24 + lineCount * 18));
+  const tailY = SPEECH_BUBBLE_Y + height;
+
+  return (
+    <Group
+      rotation={-heading}
+      scaleX={2}
+      scaleY={2}
+      listening={!isShadow}
+    >
+      <Line
+        points={[
+          -12, tailY - 2,
+          0, tailY + 20,
+          12, tailY - 2,
+        ]}
+        closed
+        fill={isShadow ? '#cbd5e1' : '#ffffff'}
+        stroke={isShadow ? '#94a3b8' : '#334155'}
+        strokeWidth={2}
+        lineJoin="round"
+      />
+      <Rect
+        x={SPEECH_BUBBLE_X}
+        y={SPEECH_BUBBLE_Y}
+        width={SPEECH_BUBBLE_WIDTH}
+        height={height}
+        fill={isShadow ? '#e2e8f0' : '#ffffff'}
+        stroke={isShadow ? '#94a3b8' : isSelected ? '#06b6d4' : '#334155'}
+        strokeWidth={isSelected ? 2.5 : 2}
+        cornerRadius={16}
+        shadowColor="#000"
+        shadowBlur={isShadow ? 0 : 6}
+        shadowOpacity={0.22}
+      />
+      <Text
+        text={text}
+        x={SPEECH_BUBBLE_X + 12}
+        y={SPEECH_BUBBLE_Y + 8}
+        width={SPEECH_BUBBLE_WIDTH - 24}
+        height={height - 16}
+        align="center"
+        verticalAlign="middle"
+        fontSize={14}
+        fill="#0f172a"
+        lineHeight={1.2}
+        wrap="word"
+      />
+    </Group>
+  );
+}
+
 export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor }: BoatProps) {
   const boatScale = 0.5;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
+  const speechBubble = boat.speechBubble?.trim();
 
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
@@ -40,7 +99,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
 
   if (isShadow) {
     return (
-    <Group
+      <Group
         x={boat.x}
         y={boat.y}
         rotation={boat.heading}
@@ -50,6 +109,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         opacity={0.22}
         listening={false}
       >
+        {speechBubble && <SpeechBubble text={speechBubble} heading={boat.heading} isSelected={false} isShadow />}
         {/* Simplified Ghost Heading Line */}
         {boat.showHeadingLine && (
           <Line
@@ -116,6 +176,8 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         });
       }}
     >
+      {speechBubble && <SpeechBubble text={speechBubble} heading={boat.heading} isSelected={isSelected} isShadow={false} />}
+
       {/* Selection Glow / Shadow Ring */}
       {offenseStroke && (
         <Path

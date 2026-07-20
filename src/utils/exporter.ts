@@ -114,7 +114,8 @@ function isBoat(value: unknown): value is Boat {
     isFiniteNumber(value.y) &&
     isFiniteNumber(value.heading) &&
     isFiniteNumber(value.sailAngle) &&
-    (value.showHeadingLine === undefined || typeof value.showHeadingLine === 'boolean')
+    (value.showHeadingLine === undefined || typeof value.showHeadingLine === 'boolean') &&
+    (value.speechBubble === undefined || typeof value.speechBubble === 'string')
   );
 }
 

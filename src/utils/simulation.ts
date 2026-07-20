@@ -313,8 +313,9 @@ export function getCanvasContentRect(frames: Array<Pick<Frame, 'boats' | 'marks'
     };
 
     frame.boats.forEach((boat) => {
-      const horizontalExtent = boat.showHeadingLine ? 360 : 50;
-      const verticalExtent = boat.showHeadingLine ? 360 : 70;
+      const hasSpeechBubble = Boolean(boat.speechBubble?.trim());
+      const horizontalExtent = boat.showHeadingLine ? 360 : hasSpeechBubble ? 110 : 50;
+      const verticalExtent = boat.showHeadingLine ? 360 : hasSpeechBubble ? 140 : 70;
       includeRect(boat.x - horizontalExtent, boat.y - verticalExtent, boat.x + horizontalExtent, boat.y + verticalExtent);
     });
 

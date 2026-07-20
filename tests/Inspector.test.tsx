@@ -741,6 +741,36 @@ describe('playback controls', () => {
 });
 
 describe('boat editor', () => {
+  it('adds boat info or a preset feeling to the comic bubble', () => {
+    const updateBoat = jest.fn();
+
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [boat] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={boat}
+        selectedMark={undefined}
+        selectedType="boat"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={updateBoat}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
+    fireEvent.change(screen.getByLabelText('Comic bubble'), { target: { value: 'Hold your course!' } });
+    fireEvent.click(screen.getByRole('button', { name: /use happy feeling/i }));
+
+    expect(updateBoat).toHaveBeenNthCalledWith(1, 'boat-1', { speechBubble: 'Hold your course!' });
+    expect(updateBoat).toHaveBeenNthCalledWith(2, 'boat-1', { speechBubble: '😀' });
+  });
+
   it('edits boat identity, color, manual sail trim, heading line, and deletion', () => {
     const updateBoat = jest.fn();
     const onSetAutoSailTrim = jest.fn();
