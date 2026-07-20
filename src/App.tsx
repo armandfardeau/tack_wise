@@ -234,6 +234,9 @@ export default function App() {
           onMoveBoat={scenario.moveBoat}
           onRotateBoat={(boatId, heading) => scenario.updateBoat(boatId, { heading })}
           onMoveMark={scenario.moveMark}
+          onConnectMarks={scenario.connectMarks}
+          onRemoveMarkConnection={scenario.removeMarkConnection}
+          onReplaceMarkConnection={scenario.replaceMarkConnection}
           onMoveArrow={scenario.moveArrow}
           onMoveComment={scenario.moveComment}
           onMoveImage={scenario.moveImage}
@@ -269,12 +272,14 @@ export default function App() {
           selectedType={scenario.selectedType}
           selectedBoat={scenario.selectedBoat}
           selectedMark={scenario.selectedMark}
+          selectedConnection={scenario.selectedConnection}
           selectedArrow={scenario.selectedArrow}
           selectedComment={scenario.selectedComment}
           selectedImage={scenario.selectedImage}
           updateBoat={scenario.updateBoat}
           updateActiveFrame={scenario.updateActiveFrame}
           updateMark={scenario.updateMark}
+          updateConnection={scenario.updateConnection}
           updateArrow={scenario.updateArrow}
           updateComment={scenario.updateComment}
           updateRuleComment={scenario.updateRuleComment}

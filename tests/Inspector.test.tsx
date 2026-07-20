@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react';
 import Inspector from '../src/components/Inspector';
-import type { Boat, CommentNote, DiagramImage, Frame, Mark, RuleComment, TacticalArrow } from '../src/types';
+import type { Boat, CommentNote, DiagramImage, Frame, Mark, MarkConnection, RuleComment, TacticalArrow } from '../src/types';
 
 const mark: Mark = {
   id: 'mark-1',
@@ -277,11 +277,17 @@ describe('mark rotation controls', () => {
     expect(updateMark).toHaveBeenCalledWith('mark-1', { rotationDirection: 'clockwise' });
   });
 
-  it('reverses a clockwise arrow and falls back for optional connection styles', () => {
+  it('reverses a clockwise arrow and exposes connection style defaults', () => {
     const updateMark = jest.fn();
+    const updateConnection = jest.fn();
     const clockwiseMark = { ...mark, showRotationArrow: true, rotationDirection: 'clockwise' as const };
-    const connectedMark = { ...mark, connectedToMarkId: 'mark-2' };
+    const connectedMark = { ...mark };
     const otherMark = { ...mark, id: 'mark-2', name: 'Other mark' };
+    const connection: MarkConnection = {
+      id: 'connection-1',
+      start: { markId: 'mark-1', anchor: { x: 0, y: 0 } },
+      end: { markId: 'mark-2', anchor: { x: 0, y: 0 } },
+    };
 
     render(
       <Inspector
@@ -306,11 +312,11 @@ describe('mark rotation controls', () => {
     fireEvent.click(screen.getByRole('button', { name: /reverse direction \(clockwise\)/i }));
     expect(updateMark).toHaveBeenCalledWith('mark-1', { rotationDirection: 'counterclockwise' });
 
-    // Render the connected mark without saved style fields to exercise the
-    // color and dotted-line defaults in the editor.
+    // Connection styling belongs to the selected connection, so it can be
+    // edited independently from the source mark.
     render(
       <Inspector
-        activeFrame={{ ...frame, marks: [connectedMark, otherMark] }}
+        activeFrame={{ ...frame, marks: [connectedMark, otherMark], connections: [connection] }}
         autoSailTrim
         gridSnapEnabled
         onDelete={jest.fn()}
@@ -318,18 +324,20 @@ describe('mark rotation controls', () => {
         onSetAutoSailTrim={jest.fn()}
         onSetShowGrid={jest.fn()}
         selectedBoat={undefined}
-        selectedMark={connectedMark}
-        selectedType="mark"
+        selectedMark={undefined}
+        selectedConnection={connection}
+        selectedType="connection"
         showGrid
         updateActiveFrame={jest.fn()}
         updateBoat={jest.fn()}
         updateMark={jest.fn()}
+        updateConnection={updateConnection}
       />,
     );
 
-    fireEvent.click(screen.getAllByRole('tab', { name: 'Connection' }).at(-1)!);
     expect(screen.getByLabelText('Line Color')).toHaveValue('#ef4444');
     expect(screen.getByLabelText('Line Style')).toHaveValue('dotted');
+    expect(screen.getByRole('checkbox', { name: /show arrowhead/i })).not.toBeChecked();
   });
 });
 
@@ -767,11 +775,23 @@ describe('mark editor', () => {
     const updateMark = jest.fn();
     const onDelete = jest.fn();
     const secondMark: Mark = { ...mark, id: 'mark-2', name: 'Leeward Mark', x: 500, y: 400 };
-    const connectedMark = { ...mark, connectedToMarkId: 'mark-2', connectionLineColor: '#111111', connectionLineStyle: 'dashed' as const };
+    const thirdMark: Mark = { ...mark, id: 'mark-3', name: 'Finish Mark', x: 600, y: 450 };
+    const connectedMark = { ...mark };
+    const connection: MarkConnection = {
+      id: 'connection-1',
+      start: { markId: 'mark-1', anchor: { x: 0, y: 0 } },
+      end: { markId: 'mark-2', anchor: { x: 0, y: 0 } },
+      color: '#111111',
+      style: 'dashed',
+      arrowhead: true,
+    };
+    const onConnectMarks = jest.fn();
+    const onRemoveMarkConnection = jest.fn();
+    const onReplaceMarkConnection = jest.fn();
 
-    render(
+    const renderedMarkInspector = render(
       <Inspector
-        activeFrame={{ ...frame, marks: [connectedMark, secondMark] }}
+        activeFrame={{ ...frame, marks: [connectedMark, secondMark, thirdMark], connections: [connection] }}
         autoSailTrim
         gridSnapEnabled
         onDelete={onDelete}
@@ -785,6 +805,9 @@ describe('mark editor', () => {
         updateActiveFrame={jest.fn()}
         updateBoat={jest.fn()}
         updateMark={updateMark}
+        onConnectMarks={onConnectMarks}
+        onRemoveMarkConnection={onRemoveMarkConnection}
+        onReplaceMarkConnection={onReplaceMarkConnection}
       />,
     );
 
@@ -792,24 +815,52 @@ describe('mark editor', () => {
     fireEvent.change(screen.getByLabelText('Color'), { target: { value: '#00ff00' } });
     fireEvent.change(screen.getByLabelText('Shape'), { target: { value: 'gate' } });
     fireEvent.click(screen.getByRole('tab', { name: 'Connection' }));
-    fireEvent.change(screen.getByLabelText('Connect to'), { target: { value: 'mark-2' } });
-    fireEvent.change(screen.getByLabelText('Line Color'), { target: { value: '#222222' } });
-    fireEvent.change(screen.getByLabelText('Line Style'), { target: { value: 'solid' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: /show dotted line/i }));
+    fireEvent.click(screen.getByRole('button', { name: /edit connection to leeward mark/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /edit connection to leeward mark/i }), { target: { value: 'mark-3' } });
+    fireEvent.click(screen.getByRole('button', { name: /add connection/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /new connection target/i }), { target: { value: 'mark-3' } });
+    fireEvent.click(screen.getByRole('button', { name: /delete connection to leeward mark/i }));
     fireEvent.click(screen.getByRole('button', { name: /delete mark/i }));
 
     expect(updateMark).toHaveBeenCalledWith('mark-1', { name: 'Windward' });
     expect(updateMark).toHaveBeenCalledWith('mark-1', { color: '#00ff00' });
     expect(updateMark).toHaveBeenCalledWith('mark-1', { shape: 'gate' });
-    expect(updateMark).toHaveBeenCalledWith('mark-1', { connectedToMarkId: 'mark-2' });
-    expect(updateMark).toHaveBeenCalledWith('mark-1', { connectionLineColor: '#222222' });
-    expect(updateMark).toHaveBeenCalledWith('mark-1', { connectionLineStyle: 'solid' });
-    expect(updateMark).toHaveBeenCalledWith('mark-1', { connectedToMarkId: null });
+    expect(onReplaceMarkConnection).toHaveBeenCalledWith('connection-1', 'mark-3');
+    expect(onConnectMarks).toHaveBeenCalledWith('mark-1', 'mark-3');
+    expect(onRemoveMarkConnection).toHaveBeenCalledWith('connection-1');
     expect(onDelete).toHaveBeenCalledTimes(1);
+
+    renderedMarkInspector.unmount();
+    const updateConnection = jest.fn();
+    render(
+      <Inspector
+        activeFrame={{ ...frame, marks: [connectedMark, secondMark, thirdMark], connections: [connection] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedConnection={connection}
+        selectedMark={undefined}
+        selectedType="connection"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+        updateConnection={updateConnection}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Line Color'), { target: { value: '#222222' } });
+    fireEvent.change(screen.getByLabelText('Line Style'), { target: { value: 'solid' } });
+    expect(updateConnection).toHaveBeenCalledWith('connection-1', { color: '#222222' });
+    expect(updateConnection).toHaveBeenCalledWith('connection-1', { style: 'solid' });
   });
 
-  it('connects an unconnected mark to the first other mark using fallback styles', () => {
-    const updateMark = jest.fn();
+  it('connects an unconnected mark to the first other mark', () => {
+    const onConnectMarks = jest.fn();
     const secondMark: Mark = { ...mark, id: 'mark-2', name: 'Leeward Mark' };
 
     render(
@@ -827,18 +878,16 @@ describe('mark editor', () => {
         showGrid
         updateActiveFrame={jest.fn()}
         updateBoat={jest.fn()}
-        updateMark={updateMark}
+        updateMark={jest.fn()}
+        onConnectMarks={onConnectMarks}
       />,
     );
 
     fireEvent.click(screen.getByRole('tab', { name: 'Connection' }));
-    fireEvent.click(screen.getByRole('checkbox', { name: /show dotted line/i }));
+    fireEvent.click(screen.getByRole('button', { name: /add connection/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /new connection target/i }), { target: { value: 'mark-2' } });
 
-    expect(updateMark).toHaveBeenCalledWith('mark-1', {
-      connectedToMarkId: 'mark-2',
-      connectionLineColor: '#ef4444',
-      connectionLineStyle: 'dotted',
-    });
+    expect(onConnectMarks).toHaveBeenCalledWith('mark-1', 'mark-2');
   });
 });
 

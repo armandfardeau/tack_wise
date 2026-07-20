@@ -6,6 +6,7 @@ import type {
   Frame,
   FrameComment,
   Mark,
+  MarkConnection,
   RuleReference,
   ScenarioExportPayload,
   ScenarioSettings,
@@ -132,9 +133,31 @@ function isMark(value: unknown): value is Mark {
     (value.proximityRadius === undefined || isFiniteNumber(value.proximityRadius)) &&
     (value.showRotationArrow === undefined || typeof value.showRotationArrow === 'boolean') &&
     (value.rotationDirection === undefined || value.rotationDirection === 'clockwise' || value.rotationDirection === 'counterclockwise') &&
+    (value.connectedToMarkIds === undefined || (Array.isArray(value.connectedToMarkIds) && value.connectedToMarkIds.every((id) => typeof id === 'string'))) &&
     (value.connectedToMarkId === undefined || value.connectedToMarkId === null || typeof value.connectedToMarkId === 'string') &&
     (value.connectionLineColor === undefined || typeof value.connectionLineColor === 'string') &&
     (value.connectionLineStyle === undefined || value.connectionLineStyle === 'dotted' || value.connectionLineStyle === 'dashed' || value.connectionLineStyle === 'solid')
+  );
+}
+
+function isConnectionEndpoint(value: unknown): value is MarkConnection['start'] {
+  return isRecord(value)
+    && typeof value.markId === 'string'
+    && isRecord(value.anchor)
+    && isFiniteNumber(value.anchor.x)
+    && isFiniteNumber(value.anchor.y);
+}
+
+function isMarkConnection(value: unknown): value is MarkConnection {
+  if (!isRecord(value)) return false;
+
+  return (
+    typeof value.id === 'string' &&
+    isConnectionEndpoint(value.start) &&
+    isConnectionEndpoint(value.end) &&
+    (value.color === undefined || typeof value.color === 'string') &&
+    (value.style === undefined || value.style === 'dotted' || value.style === 'dashed' || value.style === 'solid') &&
+    (value.arrowhead === undefined || typeof value.arrowhead === 'boolean')
   );
 }
 
@@ -231,6 +254,7 @@ function isFrame(value: unknown): value is Frame {
     value.boats.every(isBoat) &&
     Array.isArray(value.marks) &&
     value.marks.every(isMark) &&
+    (value.connections === undefined || (Array.isArray(value.connections) && value.connections.every(isMarkConnection))) &&
     (value.arrows === undefined || (Array.isArray(value.arrows) && value.arrows.every(isArrow))) &&
     (value.comments === undefined || (Array.isArray(value.comments) && value.comments.every(isComment))) &&
     (value.images === undefined || (Array.isArray(value.images) && value.images.every(isImage))) &&

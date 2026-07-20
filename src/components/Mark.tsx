@@ -1,6 +1,7 @@
 import { Circle, Group, Line, Rect, RegularPolygon, Text } from 'react-konva';
 import { BOAT_LENGTH, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import type { Mark as MarkModel } from '../types';
+import { getMarkConnectionHandleOffset } from '../utils/markConnections';
 
 interface MarkProps {
   mark: MarkModel;
@@ -8,22 +9,23 @@ interface MarkProps {
   onMove?: (markId: string, pos: { x: number; y: number }) => void;
   onOpenInspector?: () => void;
   onSelect?: (markId: string) => void;
+  onStartConnection?: (markId: string) => void;
   /** Optional function that snaps a raw {x,y} to a constrained position */
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
   readOnly?: boolean;
   isShadow?: boolean;
   isOffense?: boolean;
   offenseColor?: string;
+  isConnectionTarget?: boolean;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, onStartConnection, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, isConnectionTarget = false }: MarkProps) {
   const markSize = mark.size ?? 28;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
-
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
-    const strokeColor = isShadow ? '#94a3b8' : isSelected ? '#ffffff' : '#1e293b';
-    const strokeWidth = isShadow ? 1.5 : isSelected ? 3 : 1.5;
+    const strokeColor = isShadow ? '#94a3b8' : isConnectionTarget ? '#22d3ee' : isSelected ? '#ffffff' : '#1e293b';
+    const strokeWidth = isShadow ? 1.5 : isConnectionTarget || isSelected ? 3 : 1.5;
     const fillColor = isShadow ? '#475569' : mark.color;
     const shadowColor = 'black';
     const shadowBlur = isShadow ? 0 : 4;
@@ -209,6 +211,29 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
           ellipsis={true}
         />
       </Group>
+
+      {!readOnly && (
+        <Circle
+          x={getMarkConnectionHandleOffset(mark)}
+          y={0}
+          radius={7}
+          fill={isConnectionTarget ? '#22d3ee' : '#0e7490'}
+          stroke="#ecfeff"
+          strokeWidth={2}
+          shadowColor="#0e7490"
+          shadowBlur={4}
+          shadowOpacity={0.55}
+          onMouseDown={(event) => {
+            event.cancelBubble = true;
+            event.evt.preventDefault();
+            onStartConnection?.(mark.id);
+          }}
+          onTouchStart={(event) => {
+            event.cancelBubble = true;
+            onStartConnection?.(mark.id);
+          }}
+        />
+      )}
     </Group>
   );
 }

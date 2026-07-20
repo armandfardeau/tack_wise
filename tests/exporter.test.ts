@@ -14,7 +14,7 @@ import {
   parseScenarioShareUrl,
   serializeScenarioToJson,
 } from '../src/utils/exporter';
-import type { Frame, ScenarioExportPayload } from '../src/types';
+import type { Frame, MarkConnection, ScenarioExportPayload } from '../src/types';
 
 const frames: Frame[] = [
   {
@@ -24,6 +24,7 @@ const frames: Frame[] = [
     windSpeed: 12,
     boats: [],
     marks: [],
+    connections: [],
   },
   {
     id: 'frame-2',
@@ -32,6 +33,7 @@ const frames: Frame[] = [
     windSpeed: 14,
     boats: [],
     marks: [],
+    connections: [],
   },
 ];
 
@@ -172,6 +174,40 @@ describe('scenario JSON export', () => {
     });
   });
 
+  it('round-trips multiple canonical mark connections', () => {
+    const connections: MarkConnection[] = [
+      {
+        id: 'connection-a-b',
+        start: { markId: 'mark-a', anchor: { x: 0.75, y: -0.25 } },
+        end: { markId: 'mark-b', anchor: { x: -0.5, y: 0.5 } },
+        color: '#38bdf8',
+        style: 'dashed',
+        arrowhead: true,
+      },
+      {
+        id: 'connection-a-c',
+        start: { markId: 'mark-a', anchor: { x: 0, y: 0 } },
+        end: { markId: 'mark-c', anchor: { x: 0.5, y: 0 } },
+        color: '#f97316',
+        style: 'solid',
+        arrowhead: false,
+      },
+    ];
+    const markFrame: Frame = {
+      ...frames[0],
+      marks: [
+        { id: 'mark-a', name: 'A', color: '#fff', x: 10, y: 20, shape: 'circle' },
+        { id: 'mark-b', name: 'B', color: '#000', x: 30, y: 40, shape: 'circle' },
+        { id: 'mark-c', name: 'C', color: '#f00', x: 50, y: 60, shape: 'circle' },
+      ],
+      connections,
+    };
+
+    const result = parseScenarioFromJson(serializeScenarioToJson([markFrame], 0));
+
+    expect(result.frames[0].connections).toEqual(connections);
+  });
+
   it('round-trips a scenario through a portable share URL', () => {
     const payload = { version: 2 as const, frames, currentFrameIndex: 1 };
     const url = createScenarioShareUrl(payload, 'https://example.test/tack-wise');
@@ -227,7 +263,14 @@ describe('scenario JSON export', () => {
     // optional-field coverage above independent from the application defaults.
     payload.frames[0].boats = [{ id: 'boat-1', name: 'Boat', color: '#fff', x: 1, y: 2, heading: 3, sailAngle: 4, showHeadingLine: true }];
 
-    expect(parseScenarioFromJson(JSON.stringify(payload))).toEqual(payload);
+    const result = parseScenarioFromJson(JSON.stringify(payload));
+    const { connectedToMarkId: _legacyConnectedToMarkId, ...canonicalMark } = payload.frames[0].marks[0];
+    expect(result).toMatchObject({
+      ...payload,
+      frames: [{ ...payload.frames[0], marks: [canonicalMark] }],
+    });
+    expect(result.frames[0].connections).toEqual([]);
+    expect(result.frames[0].marks[0].connectedToMarkId).toBeUndefined();
   });
 
   it('rejects invalid settings and frame indexes', () => {

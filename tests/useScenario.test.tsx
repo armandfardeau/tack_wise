@@ -22,9 +22,14 @@ describe('useScenario', () => {
   it('keeps the default mark connections across the scenario', () => {
     const { result } = renderHook(() => useScenario());
 
-    expect(result.current.frames[0].marks.find((mark) => mark.id === 'mark-3')?.connectedToMarkId).toBe('mark-5');
+    expect(result.current.frames[0].connections).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        start: expect.objectContaining({ markId: 'mark-3' }),
+        end: expect.objectContaining({ markId: 'mark-5' }),
+      }),
+    ]));
     expect(result.current.frames.slice(1).every((frame) => (
-      frame.marks.find((mark) => mark.id === 'mark-3')?.connectedToMarkId === 'mark-2'
+      frame.connections?.some((connection) => connection.start.markId === 'mark-3' && connection.end.markId === 'mark-2')
     ))).toBe(true);
   });
 
@@ -272,7 +277,6 @@ describe('useScenario', () => {
       result.current.moveArrow('arrow-a', [{ x: 2, y: 3 }, { x: 12, y: 13 }]);
       result.current.moveComment('comment-a', { x: 140, y: 150 });
       result.current.moveImage('image-a', { x: 160, y: 170 });
-      result.current.updateMark('mark-a', { connectedToMarkId: 'mark-b' });
       result.current.updateArrow('arrow-a', { curved: true });
       result.current.updateComment('comment-a', { text: 'Updated' });
       result.current.updateImage('image-a', { rotation: 45 });
@@ -280,10 +284,66 @@ describe('useScenario', () => {
 
     expect(result.current.activeFrame.windSpeed).toBe(20);
     expect(result.current.activeFrame.boats[0]).toMatchObject({ x: 100, y: 110 });
-    expect(result.current.activeFrame.marks[0]).toMatchObject({ x: 120, y: 130, connectedToMarkId: 'mark-b' });
+    expect(result.current.activeFrame.marks[0]).toMatchObject({ x: 120, y: 130 });
     expect(result.current.activeFrame.arrows?.[0]).toMatchObject({ points: [{ x: 2, y: 3 }, { x: 12, y: 13 }], curved: true });
     expect(result.current.activeFrame.comments?.[0]).toMatchObject({ x: 140, y: 150, text: 'Updated' });
     expect(result.current.activeFrame.images?.[0]).toMatchObject({ x: 160, y: 170, rotation: 45 });
+  });
+
+  it('adds, replaces, removes, and undoes multiple mark connections', () => {
+    const { result } = renderHook(() => useScenario());
+    const baseFrame = {
+      id: 'connections-frame',
+      name: 'Connections',
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [],
+      marks: [
+        { id: 'mark-a', name: 'A', color: '#fff', x: 10, y: 10, shape: 'circle' as const },
+        { id: 'mark-b', name: 'B', color: '#000', x: 30, y: 30, shape: 'circle' as const },
+        { id: 'mark-c', name: 'C', color: '#f00', x: 50, y: 50, shape: 'circle' as const },
+      ],
+    };
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [baseFrame] }));
+    act(() => result.current.connectMarks('mark-a', 'mark-b', { start: { x: 0.5, y: 0 }, end: { x: -0.5, y: 0.25 } }));
+    const firstConnectionId = 'mark-connection-mark-a-mark-b';
+    act(() => result.current.replaceMarkConnection(firstConnectionId, 'mark-c'));
+    act(() => result.current.connectMarks('mark-a', 'mark-b'));
+    act(() => result.current.connectMarks('mark-a', 'mark-c'));
+    act(() => result.current.connectMarks('mark-a', 'mark-a'));
+
+    expect(result.current.activeFrame.connections).toEqual([
+      expect.objectContaining({
+        id: firstConnectionId,
+        start: { markId: 'mark-a', anchor: { x: 0.5, y: 0 } },
+        end: { markId: 'mark-c', anchor: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }) },
+        arrowhead: false,
+      }),
+      expect.objectContaining({
+        start: { markId: 'mark-a', anchor: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }) },
+        end: { markId: 'mark-b', anchor: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }) },
+        arrowhead: false,
+      }),
+    ]);
+
+    act(() => result.current.removeMarkConnection(firstConnectionId));
+    expect(result.current.activeFrame.connections).toHaveLength(1);
+    expect(result.current.activeFrame.connections?.[0].end.markId).toBe('mark-b');
+
+    act(() => result.current.undo());
+    expect(result.current.activeFrame.connections).toHaveLength(2);
+    act(() => result.current.redo());
+    expect(result.current.activeFrame.connections).toHaveLength(1);
+
+    const remainingConnectionId = result.current.activeFrame.connections?.[0].id;
+    expect(remainingConnectionId).toBeDefined();
+    if (remainingConnectionId) {
+      act(() => result.current.selectObject(remainingConnectionId, 'connection'));
+      act(() => result.current.deleteSelected());
+    }
+    expect(result.current.activeFrame.connections).toEqual([]);
+    expect(result.current.selectedType).toBeNull();
   });
 
   it('adds, duplicates, deletes, and selects frames', () => {
@@ -454,8 +514,9 @@ describe('useScenario', () => {
     act(() => result.current.selectObject('mark-b', 'mark'));
     act(() => result.current.deleteSelected());
     expect(result.current.activeFrame.marks).toEqual([
-      expect.objectContaining({ id: 'mark-a', connectedToMarkId: null }),
+      expect.objectContaining({ id: 'mark-a' }),
     ]);
+    expect(result.current.activeFrame.connections).toEqual([]);
 
     for (const [id, type] of [['boat', 'boat'], ['arrow', 'arrow'], ['comment', 'comment'], ['image', 'image']] as const) {
       act(() => result.current.selectObject(id, type));

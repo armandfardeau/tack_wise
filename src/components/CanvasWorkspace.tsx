@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
+import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, MarkConnection, RuleComment, TacticalArrow } from '../types';
 import type { DisplayMode, Frame, Theme } from '../types';
-import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, RuleComment, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import type { SnapTarget } from '../hooks/useGridSnap';
 import { getCommentHeight, getCommentText, type Position } from '../utils/simulation';
@@ -15,6 +15,7 @@ import FloatingAddMenu from './FloatingAddMenu';
 import PlaybackButton from './PlaybackButton';
 import CanvasHistoryControls from './CanvasHistoryControls';
 import FrameHeader from './FrameHeader';
+import { getConnectionPoints } from '../utils/markConnections';
 
 interface CanvasWorkspaceProps {
   activeFrame: Frame;
@@ -53,6 +54,9 @@ interface CanvasWorkspaceProps {
   onMoveBoat: (boatId: string, position: Position) => void;
   onRotateBoat: (boatId: string, heading: number) => void;
   onMoveMark: (markId: string, position: Position) => void;
+  onConnectMarks?: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: Position; end?: Position }) => void;
+  onRemoveMarkConnection?: (connectionId: string) => void;
+  onReplaceMarkConnection?: (connectionId: string, nextTargetMarkId: string) => void;
   onMoveArrow: (arrowId: string, points: NonNullable<Frame['arrows']>[number]['points']) => void;
   onMoveComment: (commentId: string, position: Position) => void;
   onMoveImage: (imageId: string, position: Position) => void;
@@ -88,12 +92,14 @@ interface CanvasWorkspaceProps {
   selectedType: SelectedType;
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
+  selectedConnection?: MarkConnection;
   selectedArrow?: TacticalArrow;
   selectedComment?: FrameComment;
   selectedImage?: DiagramImage;
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
   updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
+  updateConnection?: (connectionId: string, changes: Partial<MarkConnection>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
   updateRuleComment?: (commentId: string, changes: Partial<RuleComment>) => void;
@@ -300,6 +306,9 @@ export default function CanvasWorkspace({
   onMoveBoat,
   onRotateBoat,
   onMoveMark,
+  onConnectMarks = () => undefined,
+  onRemoveMarkConnection = () => undefined,
+  onReplaceMarkConnection = () => undefined,
   onMoveArrow,
   onMoveComment,
   onMoveImage,
@@ -335,12 +344,14 @@ export default function CanvasWorkspace({
   selectedType,
   selectedBoat,
   selectedMark,
+  selectedConnection,
   selectedArrow,
   selectedComment,
   selectedImage,
   updateBoat,
   updateActiveFrame,
   updateMark,
+  updateConnection = () => undefined,
   updateArrow,
   updateComment,
   updateRuleComment,
@@ -443,6 +454,22 @@ export default function CanvasWorkspace({
       return { left: selectedMark.x - 40, top: selectedMark.y - 30, width: 80, height: 60 };
     }
 
+    if (selectedType === 'connection' && selectedConnection) {
+      const points = getConnectionPoints(selectedConnection, activeFrame.marks);
+      if (points) {
+        const xValues = points.map((point) => point.x);
+        const yValues = points.map((point) => point.y);
+        const left = Math.min(...xValues) - 18;
+        const top = Math.min(...yValues) - 18;
+        return {
+          left,
+          top,
+          width: Math.max(...xValues) - left + 18,
+          height: Math.max(...yValues) - top + 18,
+        };
+      }
+    }
+
     if (selectedType === 'comment' && selectedComment) {
       const text = getCommentText(selectedComment);
       return {
@@ -488,8 +515,10 @@ export default function CanvasWorkspace({
         ? 220
         : selectedType === 'boat'
           ? 560
-          : selectedType === 'mark'
+      : selectedType === 'mark'
             ? 520
+            : selectedType === 'connection'
+              ? 360
             : 360;
   const isCompactLayout = typeof window !== 'undefined' && window.innerWidth <= 768;
   const inspectorLayoutHeight = isCompactLayout
@@ -607,6 +636,7 @@ export default function CanvasWorkspace({
           onMoveBoat={onMoveBoat}
           onRotateBoat={onRotateBoat}
           onMoveMark={onMoveMark}
+          onConnectMarks={onConnectMarks}
           onMoveArrow={onMoveArrow}
           onMoveComment={onMoveComment}
           onMoveImage={onMoveImage}
@@ -663,6 +693,7 @@ export default function CanvasWorkspace({
               playSpeed={playSpeed}
               selectedBoat={selectedBoat}
               selectedMark={selectedMark}
+              selectedConnection={selectedConnection}
               selectedArrow={selectedArrow}
               selectedComment={selectedComment}
               selectedImage={selectedImage}
@@ -671,6 +702,10 @@ export default function CanvasWorkspace({
               updateBoat={updateBoat}
               updateActiveFrame={updateActiveFrame}
               updateMark={updateMark}
+              updateConnection={updateConnection}
+              onConnectMarks={onConnectMarks}
+              onRemoveMarkConnection={onRemoveMarkConnection}
+              onReplaceMarkConnection={onReplaceMarkConnection}
               updateArrow={updateArrow}
               updateComment={updateComment}
               updateRuleComment={updateRuleComment}

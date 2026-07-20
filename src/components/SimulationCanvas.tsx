@@ -1,5 +1,5 @@
-import { Fragment, type RefObject } from 'react';
-import { Layer, Rect, Stage } from 'react-konva';
+import { Fragment, useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { Layer, Line, Rect, Stage } from 'react-konva';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import type { DisplayMode, Frame, Theme } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
@@ -15,6 +15,7 @@ import TacticalArrow from './TacticalArrow';
 import WindIndicator from './WindIndicator';
 import type { SnapTarget } from '../hooks/useGridSnap';
 import { canvasToWorldPosition, getCanvasWorldBounds, worldToCanvasPosition, type Position } from '../utils/simulation';
+import { getMarkConnectionAnchor, getMarkConnectionPoint, getMarkConnectionRadius } from '../utils/markConnections';
 
 interface SimulationCanvasProps {
   activeFrame: Frame;
@@ -34,6 +35,7 @@ interface SimulationCanvasProps {
   onMoveBoat: (boatId: string, position: Position) => void;
   onRotateBoat: (boatId: string, heading: number) => void;
   onMoveMark: (markId: string, position: Position) => void;
+  onConnectMarks: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: Position; end?: Position }) => void;
   onMoveArrow: (arrowId: string, points: NonNullable<Frame['arrows']>[number]['points']) => void;
   onMoveComment: (commentId: string, position: Position) => void;
   onMoveImage: (imageId: string, position: Position) => void;
@@ -51,6 +53,14 @@ interface SimulationCanvasProps {
   onCanvasTouchEnd: (event: { evt: TouchEvent }) => void;
   onCanvasTouchMove: (event: { evt: TouchEvent }) => void;
   onCanvasTouchStart: (event: { evt: TouchEvent }) => void;
+}
+
+interface ConnectionDrag {
+  sourceMarkId: string;
+  pointer: Position;
+  targetMarkId: string | null;
+  startAnchor: Position;
+  endAnchor: Position | null;
 }
 
 export default function SimulationCanvas({
@@ -71,6 +81,7 @@ export default function SimulationCanvas({
   onMoveBoat,
   onRotateBoat,
   onMoveMark,
+  onConnectMarks,
   onMoveArrow,
   onMoveComment,
   onMoveImage,
@@ -89,6 +100,8 @@ export default function SimulationCanvas({
   onCanvasTouchMove,
   onCanvasTouchStart,
 }: SimulationCanvasProps) {
+  const [connectionDrag, setConnectionDrag] = useState<ConnectionDrag | null>(null);
+  const connectionDragRef = useRef<ConnectionDrag | null>(null);
   const previousFrames = displayMode === 'cumulative'
     ? frames.slice(0, currentFrameIndex)
     : frames[currentFrameIndex - 1]
@@ -115,6 +128,101 @@ export default function SimulationCanvas({
     return worldToCanvasPosition(snappedWorldPosition, canvasPosition, canvasZoom);
   };
 
+  const setActiveConnectionDrag = useCallback((nextDrag: ConnectionDrag | null) => {
+    connectionDragRef.current = nextDrag;
+    setConnectionDrag(nextDrag);
+  }, []);
+
+  const getPointerWorldPosition = useCallback((): Position | null => {
+    const pointerPosition = stageRef.current?.getPointerPosition();
+    if (!pointerPosition) return null;
+    return canvasToWorldPosition(pointerPosition, canvasPosition, canvasZoom);
+  }, [canvasPosition, canvasZoom, stageRef]);
+
+  const findConnectionTarget = useCallback((sourceMarkId: string, pointer: Position): string | null => {
+    const candidates = activeFrame.marks
+      .filter((mark) => mark.id !== sourceMarkId)
+      .map((mark) => ({
+        mark,
+        distance: Math.hypot(mark.x - pointer.x, mark.y - pointer.y),
+        hitRadius: getMarkConnectionRadius(mark) + 16,
+      }))
+      .filter(({ distance, hitRadius }) => distance <= hitRadius)
+      .sort((left, right) => left.distance - right.distance);
+
+    return candidates[0]?.mark.id ?? null;
+  }, [activeFrame.marks]);
+
+  const updateConnectionDrag = useCallback(() => {
+    const activeDrag = connectionDragRef.current;
+    const pointer = getPointerWorldPosition();
+    if (!activeDrag || !pointer) return;
+
+    setActiveConnectionDrag({
+      ...activeDrag,
+      pointer,
+      targetMarkId: findConnectionTarget(activeDrag.sourceMarkId, pointer),
+      endAnchor: (() => {
+        const targetMarkId = findConnectionTarget(activeDrag.sourceMarkId, pointer);
+        const targetMark = activeFrame.marks.find((mark) => mark.id === targetMarkId);
+        return targetMark ? getMarkConnectionAnchor(targetMark, pointer) : null;
+      })(),
+    });
+  }, [activeFrame.marks, findConnectionTarget, getPointerWorldPosition, setActiveConnectionDrag]);
+
+  const finishConnectionDrag = useCallback(() => {
+    const activeDrag = connectionDragRef.current;
+    setActiveConnectionDrag(null);
+
+    if (activeDrag?.targetMarkId) {
+      onConnectMarks(activeDrag.sourceMarkId, activeDrag.targetMarkId, {
+        start: activeDrag.startAnchor,
+        end: activeDrag.endAnchor ?? { x: 0, y: 0 },
+      });
+    }
+  }, [onConnectMarks, setActiveConnectionDrag]);
+
+  const startConnectionDrag = useCallback((sourceMarkId: string) => {
+    if (readOnly) return;
+
+    const sourceMark = activeFrame.marks.find((mark) => mark.id === sourceMarkId);
+    if (!sourceMark) return;
+
+    const pointer = getPointerWorldPosition() ?? { x: sourceMark.x, y: sourceMark.y };
+    setActiveConnectionDrag({
+      sourceMarkId,
+      pointer,
+      targetMarkId: null,
+      startAnchor: getMarkConnectionAnchor(sourceMark, pointer),
+      endAnchor: null,
+    });
+    onSelectObject(sourceMarkId, 'mark');
+    onSnapPreview(null);
+  }, [activeFrame.marks, getPointerWorldPosition, onSelectObject, onSnapPreview, readOnly, setActiveConnectionDrag]);
+
+  useEffect(() => {
+    if (!connectionDrag) return undefined;
+
+    const handleWindowPointerUp = () => finishConnectionDrag();
+    window.addEventListener('mouseup', handleWindowPointerUp);
+    window.addEventListener('touchend', handleWindowPointerUp);
+
+    return () => {
+      window.removeEventListener('mouseup', handleWindowPointerUp);
+      window.removeEventListener('touchend', handleWindowPointerUp);
+    };
+  }, [connectionDrag, finishConnectionDrag]);
+
+  const handleStageTouchMove = (event: { evt: TouchEvent }) => {
+    onCanvasTouchMove(event);
+    if (connectionDrag) updateConnectionDrag();
+  };
+
+  const handleStageTouchEnd = (event: { evt: TouchEvent }) => {
+    onCanvasTouchEnd(event);
+    if (connectionDrag) finishConnectionDrag();
+  };
+
   return (
     <Stage
       ref={stageRef}
@@ -128,10 +236,16 @@ export default function SimulationCanvas({
       dragBoundFunc={constrainPosition}
       onDragEnd={onCanvasDragEnd}
       onTouchCancel={onCanvasTouchEnd}
-      onTouchEnd={onCanvasTouchEnd}
-      onTouchMove={onCanvasTouchMove}
+      onTouchEnd={handleStageTouchEnd}
+      onTouchMove={handleStageTouchMove}
       onTouchStart={onCanvasTouchStart}
       onWheel={onCanvasWheel}
+      onMouseMove={connectionDrag ? updateConnectionDrag : undefined}
+      onMouseUp={connectionDrag ? finishConnectionDrag : undefined}
+      onMouseLeave={connectionDrag ? () => {
+        const activeDrag = connectionDragRef.current;
+        if (activeDrag) setActiveConnectionDrag({ ...activeDrag, targetMarkId: null, endAnchor: null });
+      } : undefined}
     >
       <Layer>
         <Rect
@@ -159,7 +273,7 @@ export default function SimulationCanvas({
       <Layer>
         {previousFrames.map((previousFrame, shadowIndex) => (
           <Fragment key={`history-${previousFrame.id}`}>
-            <MarkConnections marks={previousFrame.marks} isShadow />
+            <MarkConnections marks={previousFrame.marks} connections={previousFrame.connections} isShadow />
             {previousFrame.marks.map((mark) => (
               <Fragment key={`shadow-${shadowIndex}-${mark.id}`}>
                 <MarkRotationArrow mark={mark} isShadow />
@@ -183,8 +297,35 @@ export default function SimulationCanvas({
 
         <MarkConnections
           marks={activeFrame.marks}
+          connections={activeFrame.connections}
+          interactive={!isExporting}
           highlightMarkId={selectedType === 'mark' ? selectedId : null}
+          selectedConnectionId={selectedType === 'connection' ? selectedId : null}
+          onSelectConnection={(id) => onSelectObject(id, 'connection')}
+          onOpenInspector={onOpenInspector}
         />
+
+        {connectionDrag && (
+          <Line
+            points={[
+              (() => {
+                const sourceMark = activeFrame.marks.find((mark) => mark.id === connectionDrag.sourceMarkId);
+                return sourceMark ? getMarkConnectionPoint(sourceMark, connectionDrag.startAnchor).x : connectionDrag.pointer.x;
+              })(),
+              (() => {
+                const sourceMark = activeFrame.marks.find((mark) => mark.id === connectionDrag.sourceMarkId);
+                return sourceMark ? getMarkConnectionPoint(sourceMark, connectionDrag.startAnchor).y : connectionDrag.pointer.y;
+              })(),
+              connectionDrag.pointer.x,
+              connectionDrag.pointer.y,
+            ]}
+            stroke="#22d3ee"
+            strokeWidth={3}
+            dash={[10, 8]}
+            opacity={0.9}
+            listening={false}
+          />
+        )}
 
         {activeFrame.marks.map((mark) => (
           <Fragment key={mark.id}>
@@ -196,8 +337,9 @@ export default function SimulationCanvas({
               mark={mark}
               isSelected={selectedId === mark.id}
               offenseColor={offenseTargetColors.get(`mark:${mark.id}`)}
-              readOnly={readOnly}
-              onOpenInspector={readOnly ? undefined : () => onOpenInspector(mark.id, 'mark')}
+              isConnectionTarget={connectionDrag?.targetMarkId === mark.id}
+              readOnly={readOnly || isExporting}
+              onOpenInspector={readOnly || isExporting ? undefined : () => onOpenInspector(mark.id, 'mark')}
               snapFn={(position) => getSnappedAbsolutePosition(mark.id, position)}
               onSelect={(id) => {
                 onSelectObject(id, 'mark');
@@ -207,6 +349,7 @@ export default function SimulationCanvas({
                 onSnapPreview(null);
                 onMoveMark(id, position);
               }}
+              onStartConnection={startConnectionDrag}
             />
           </Fragment>
         ))}
