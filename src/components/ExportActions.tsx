@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FilePlus, FileVideoCamera, FolderOpen, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
+import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FilePlus, FileVideoCamera, FolderOpen, GitPullRequest, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
 import type { SituationTemplate } from '../data/situationTemplates';
 import type { VideoExportType } from '../types';
 
@@ -12,10 +12,13 @@ interface ExportActionsProps {
   onExportJson: () => void;
   onImportJson: (file: File) => void;
   onLoadTemplate?: (template: SituationTemplate) => void;
+  onContributeTemplate?: () => void;
+  onUpdateTemplate?: () => void;
+  canUpdateTemplate?: boolean;
   templates?: SituationTemplate[];
 }
 
-export default function ExportActions({ className = 'export-actions', isExporting, onNewScenario, onExport, onExportImage, onExportJson, onImportJson, onLoadTemplate, templates = [] }: ExportActionsProps) {
+export default function ExportActions({ className = 'export-actions', isExporting, onNewScenario, onExport, onExportImage, onExportJson, onImportJson, onLoadTemplate, onContributeTemplate, onUpdateTemplate, canUpdateTemplate = false, templates = [] }: ExportActionsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
@@ -123,6 +126,21 @@ export default function ExportActions({ className = 'export-actions', isExportin
               <span className="file-submenu-chevron" aria-hidden="true"><ChevronRight size={14} /></span>
             </button>
             {openSubmenu === 'templates' && <div className="file-submenu-menu" role="menu" aria-label="Templates">
+              {onContributeTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title="Submit the current diagram as a template" onClick={() => {
+                onContributeTemplate();
+                closeFileMenu();
+              }}>
+                <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
+                <span className="action-label">Submit current diagram</span>
+              </button>}
+              {onUpdateTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title={canUpdateTemplate ? 'Update the loaded template through a pull request' : 'Load a built-in template to update it through a pull request'} disabled={!canUpdateTemplate} onClick={() => {
+                onUpdateTemplate();
+                closeFileMenu();
+              }}>
+                <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
+                <span className="action-label">Update current template</span>
+              </button>}
+              {(onContributeTemplate || onUpdateTemplate) && <div className="template-menu-divider" role="separator" />}
               <div className="template-search">
                 <Search aria-hidden="true" size={15} />
                 <input

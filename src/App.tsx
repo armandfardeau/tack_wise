@@ -5,6 +5,7 @@ import AppHeader from './components/AppHeader';
 import CanvasWorkspace, { type InspectorRequest } from './components/CanvasWorkspace';
 import ExportOverlay from './components/ExportOverlay';
 import Sidebar from './components/Sidebar';
+import TemplateContributionDialog from './components/TemplateContributionDialog';
 import { CANVAS_ZOOM_STEP } from './constants';
 import { useCanvasViewport } from './hooks/useCanvasViewport';
 import { useGridSnap } from './hooks/useGridSnap';
@@ -14,9 +15,11 @@ import { useScenarioExport } from './hooks/useScenarioExport';
 import { scenarioPayloadFromTemplate, situationTemplates } from './data/situationTemplates';
 import { createScenarioShareUrl, parseScenarioFromJson, parseScenarioShareUrl } from './utils/exporter';
 import { getCanvasContentBounds, getCanvasContentRect } from './utils/simulation';
+import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
 import type { Theme } from './types';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
+const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
@@ -48,6 +51,8 @@ export default function App() {
   const [inspectorRequest, setInspectorRequest] = useState<InspectorRequest | null>(null);
   const [isImageExporting, setIsImageExporting] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [loadedTemplateId, setLoadedTemplateId] = useState<string | null>(null);
+  const [templateContributionMode, setTemplateContributionMode] = useState<TemplateContributionMode | null>(null);
   const gridSnap = useGridSnap(gridSnapEnabled);
   const { redo, undo } = scenario;
   const { importScenario } = scenario;
@@ -64,8 +69,23 @@ export default function App() {
     if (loadedShareRef.current) return;
     loadedShareRef.current = true;
     const sharedScenario = parseScenarioShareUrl();
-    if (sharedScenario) importScenario(sharedScenario);
+    if (sharedScenario) {
+      importScenario(sharedScenario);
+      setLoadedTemplateId(null);
+    }
   }, [importScenario]);
+
+  const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
+
+  const handleNewScenario = () => {
+    scenario.createNewScenario();
+    setLoadedTemplateId(null);
+  };
+
+  const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
+    scenario.importScenario(scenarioPayloadFromTemplate(template));
+    setLoadedTemplateId(template.id);
+  };
 
   const handleShareScenario = async () => {
     const shareUrl = createScenarioShareUrl({
@@ -132,6 +152,7 @@ export default function App() {
     try {
       const payload = parseScenarioFromJson(await file.text());
       scenario.importScenario(payload);
+      setLoadedTemplateId(null);
     } catch (error) {
       console.error('Import error: ', error);
       window.alert('Could not import scenario. Please select a valid Tack Wise JSON file.');
@@ -143,13 +164,18 @@ export default function App() {
       <AppHeader
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
-        onNewScenario={scenario.createNewScenario}
+        onNewScenario={handleNewScenario}
         onExport={exportState.triggerExport}
         onExportImage={handleImageExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}
         onImportJson={handleImportJson}
         onShareScenario={handleShareScenario}
-        onLoadTemplate={(template) => scenario.importScenario(scenarioPayloadFromTemplate(template))}
+        onLoadTemplate={handleLoadTemplate}
+        onContributeTemplate={() => setTemplateContributionMode('create')}
+        onUpdateTemplate={() => {
+          if (loadedTemplate) setTemplateContributionMode('update');
+        }}
+        canUpdateTemplate={Boolean(loadedTemplate)}
         templates={situationTemplates}
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
@@ -261,6 +287,19 @@ export default function App() {
         <ExportOverlay
           exportProgress={exportState.exportProgress}
           exportType={exportState.exportType}
+        />
+      )}
+
+      {templateContributionMode && (
+        <TemplateContributionDialog
+          key={`${templateContributionMode}-${loadedTemplateId ?? 'new'}`}
+          mode={templateContributionMode}
+          frames={scenario.frames}
+          initialTitle={scenario.settings.title ?? loadedTemplate?.title ?? 'Untitled situation'}
+          existingTemplateIds={situationTemplates.map((template) => template.id)}
+          templateId={loadedTemplate?.id}
+          repository={templateRepository}
+          onClose={() => setTemplateContributionMode(null)}
         />
       )}
     </main>
