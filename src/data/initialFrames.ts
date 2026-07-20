@@ -1,4 +1,4 @@
-import type { Boat, Frame } from '../types';
+import { getRuleReferences, type Boat, type Frame } from '../types';
 import situationData from './situations/tacking-basics.json';
 
 interface SituationData {
@@ -42,13 +42,17 @@ export function cloneFrames(frames: Frame[] = initialFrames): Frame[] {
         ...arrow,
         points: arrow.points.map((point) => ({ ...point })),
       })),
-      comments: frame.comments?.map((comment) => comment.type === 'rule'
-        ? {
-            ...comment,
-            rule: { ...comment.rule },
-            offenseTargets: comment.offenseTargets.map((target) => ({ ...target })),
-          }
-        : { ...comment }),
+      comments: frame.comments?.map((comment) => {
+        if (comment.type !== 'rule') return { ...comment };
+
+        const normalizedComment = { ...comment };
+        delete normalizedComment.rule;
+        return {
+          ...normalizedComment,
+          rules: getRuleReferences(comment).map((rule) => ({ ...rule })),
+          offenseTargets: comment.offenseTargets.map((target) => ({ ...target })),
+        };
+      }),
       images: frame.images?.map((image) => ({ ...image })),
       rules: frame.rules?.map((rule) => ({ ...rule })),
     };

@@ -51,7 +51,7 @@ const ruleComment: RuleComment = {
   id: 'rule-comment-1',
   name: 'RRS 10 breach',
   type: 'rule',
-  rule: { id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' },
+  rules: [{ id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' }],
   offenseTargets: [],
   color: '#facc15',
   x: 180,
@@ -194,11 +194,62 @@ describe('rule comment controls', () => {
       />,
     );
 
-    fireEvent.change(screen.getByLabelText('Rule reference'), { target: { value: 'RRS 18' } });
-    fireEvent.click(screen.getByRole('checkbox', { name: 'Alpha' }));
+    fireEvent.change(screen.getByLabelText('Search rule references'), { target: { value: '18' } });
+    expect(screen.getByRole('option', { name: 'RRS 18' })).toBeInTheDocument();
+    expect(screen.queryByRole('option', { name: 'RRS 11' })).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Search rule references'), { target: { value: '' } });
 
-    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', { rule: { ...ruleComment.rule, label: 'RRS 18' } });
-    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', { offenseTargets: [{ id: 'boat-1', type: 'boat' }] });
+    const ruleSelect = screen.getByLabelText('Rule references') as HTMLSelectElement;
+    Array.from(ruleSelect.options).forEach((option) => {
+      option.selected = option.value === 'rrs-10' || option.value === 'rrs-18';
+    });
+    fireEvent.change(ruleSelect);
+    fireEvent.change(screen.getByLabelText('Add offending object'), { target: { value: 'boat:boat-1' } });
+
+
+    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', {
+      rules: [{ id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' }, { id: 'rrs-18', label: 'RRS 18' }],
+    });
+    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', {
+      offenseTargets: [{ id: 'boat-1', type: 'boat', color: '#ef4444' }],
+    });
+  });
+
+  it('edits an offense row color and removes the row', () => {
+    const updateRuleComment = jest.fn();
+    const selectedComment: RuleComment = {
+      ...ruleComment,
+      offenseTargets: [{ id: 'boat-1', type: 'boat', color: '#ef4444' }],
+    };
+
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [boat] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        selectedComment={selectedComment}
+        selectedType="comment"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={jest.fn()}
+        updateMark={jest.fn()}
+        updateRuleComment={updateRuleComment}
+      />,
+    );
+
+    fireEvent.change(screen.getByLabelText('Color for Alpha'), { target: { value: '#00ff00' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Remove offending object Alpha' }));
+
+    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', {
+      offenseTargets: [{ id: 'boat-1', type: 'boat', color: '#00ff00' }],
+    });
+    expect(updateRuleComment).toHaveBeenCalledWith('rule-comment-1', { offenseTargets: [] });
   });
 });
 

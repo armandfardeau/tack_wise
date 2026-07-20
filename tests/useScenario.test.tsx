@@ -353,31 +353,32 @@ describe('useScenario', () => {
     const ruleComment = result.current.selectedComment;
     expect(ruleComment?.type).toBe('rule');
     expect(result.current.activeFrame.rules).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: 'rule-789', label: 'RRS rule' }),
+      expect.objectContaining({ id: 'rrs-10', label: 'RRS 10' }),
     ]));
     expect(result.current.frames.slice(1).every((frame) => frame.comments?.some((comment) => comment.id === ruleComment?.id))).toBe(true);
 
     if (!ruleComment || ruleComment.type !== 'rule') return;
-    expect(ruleComment.rule.label).toBe('RRS rule');
+    expect(ruleComment.rules?.[0].label).toBe('RRS 10');
 
     act(() => {
       result.current.updateRuleComment(ruleComment.id, {
-        rule: { ...ruleComment.rule, label: 'RRS 10' },
+        rules: [{ id: 'rrs-10', label: 'RRS 10' }, { id: 'rrs-18', label: 'RRS 18' }],
         offenseTargets: [{ id: 'boat-1', type: 'boat' }],
       });
     });
 
     expect(result.current.activeFrame.comments?.find((comment) => comment.id === ruleComment.id)).toMatchObject({
-      rule: { label: 'RRS 10' },
+      rules: [{ label: 'RRS 10' }, { label: 'RRS 18' }],
       offenseTargets: [{ id: 'boat-1', type: 'boat' }],
     });
     expect(result.current.activeFrame.rules).toEqual(expect.arrayContaining([
-      expect.objectContaining({ id: 'rule-789', label: 'RRS 10' }),
+      expect.objectContaining({ id: 'rrs-10', label: 'RRS 10' }),
+      expect.objectContaining({ id: 'rrs-18', label: 'RRS 18' }),
     ]));
 
     act(() => result.current.deleteSelected());
     expect(result.current.frames.every((frame) => !frame.comments?.some((comment) => comment.id === ruleComment.id))).toBe(true);
-    expect(result.current.frames.every((frame) => !frame.rules?.some((rule) => rule.id === 'rule-789'))).toBe(true);
+    expect(result.current.frames.every((frame) => !frame.rules?.some((rule) => ['rrs-10', 'rrs-18'].includes(rule.id)))).toBe(true);
   });
 
   it('restores and clears a valid autosave, while rejecting missing or invalid data', () => {

@@ -149,7 +149,7 @@ describe('scenario JSON export', () => {
           id: 'rule-comment-1',
           name: 'RRS 10 breach',
           type: 'rule' as const,
-          rule: { id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' },
+          rules: [{ id: 'rrs-10', label: 'RRS 10', description: 'Keep clear.' }],
           offenseTargets: [{ id: 'boat-1', type: 'boat' as const }],
           color: '#facc15',
           x: 40,
@@ -167,7 +167,7 @@ describe('scenario JSON export', () => {
     expect(result.frames[0].comments?.[0].text).toBe('Tack here');
     expect(result.frames[0].comments?.[1]).toMatchObject({
       type: 'rule',
-      rule: { id: 'rrs-10', label: 'RRS 10' },
+      rules: [{ id: 'rrs-10', label: 'RRS 10' }],
       offenseTargets: [{ id: 'boat-1', type: 'boat' }],
     });
   });

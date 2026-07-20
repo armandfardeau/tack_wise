@@ -5,7 +5,7 @@ import type { DisplayMode, Frame, Theme } from '../types';
 import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, RuleComment, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import type { SnapTarget } from '../hooks/useGridSnap';
-import { getCommentHeight, type Position } from '../utils/simulation';
+import { getCommentHeight, getCommentText, type Position } from '../utils/simulation';
 import CanvasZoomControls from './CanvasZoomControls';
 import SimulationCanvas from './SimulationCanvas';
 import WindHud from './WindHud';
@@ -444,9 +444,7 @@ export default function CanvasWorkspace({
     }
 
     if (selectedType === 'comment' && selectedComment) {
-      const text = selectedComment.type === 'rule'
-        ? [selectedComment.rule.label, selectedComment.rule.description].filter(Boolean).join('\n')
-        : selectedComment.text;
+      const text = getCommentText(selectedComment);
       return {
         left: selectedComment.x,
         top: selectedComment.y,

@@ -162,7 +162,8 @@ function isArrow(value: unknown): value is TacticalArrow {
 function isOffenseTarget(value: unknown): boolean {
   return isRecord(value)
     && typeof value.id === 'string'
-    && (value.type === 'boat' || value.type === 'mark');
+    && (value.type === 'boat' || value.type === 'mark')
+    && (value.color === undefined || typeof value.color === 'string');
 }
 
 function isComment(value: unknown): value is FrameComment {
@@ -180,7 +181,11 @@ function isComment(value: unknown): value is FrameComment {
 
   if (!commonFields) return false;
   if (value.type === 'rule') {
-    return isRule(value.rule)
+    const hasRuleReferences = Array.isArray(value.rules)
+      ? value.rules.length > 0 && value.rules.every(isRule)
+      : isRule(value.rule);
+
+    return hasRuleReferences
       && Array.isArray(value.offenseTargets)
       && value.offenseTargets.every(isOffenseTarget);
   }

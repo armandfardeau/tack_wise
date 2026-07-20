@@ -7,7 +7,7 @@ import {
   MAX_CANVAS_ZOOM,
   MIN_CANVAS_ZOOM,
 } from '../constants';
-import type { Frame, FrameComment } from '../types';
+import { getRuleReferences, type Frame, type FrameComment } from '../types';
 import { COMMENT_PADDING_Y } from '../constants';
 
 export interface Position {
@@ -32,15 +32,20 @@ export interface CanvasWorldBounds {
   bottom: number;
 }
 
+export const RULE_COMMENT_HEADER_HEIGHT = 24;
+
 export function getCommentText(comment: FrameComment): string {
   if (comment.type === 'rule') {
-    return [comment.rule.label, comment.rule.description].filter(Boolean).join('\n');
+    const references = getRuleReferences(comment);
+    return references.length > 0
+      ? references.map((rule) => rule.description ? `${rule.label}: ${rule.description}` : rule.label).join('\n')
+      : 'Select a rule reference';
   }
 
   return comment.text;
 }
 
-export function getCommentHeight(comment: Pick<FrameComment, 'fontSize' | 'width'> & { text: string }): number {
+export function getCommentHeight(comment: Pick<FrameComment, 'fontSize' | 'width'> & { text: string; type?: FrameComment['type'] }): number {
   const fontSize = comment.fontSize ?? 14;
   const width = comment.width ?? 180;
   const availableTextWidth = Math.max(1, width - COMMENT_PADDING_X * 2);
@@ -51,7 +56,8 @@ export function getCommentHeight(comment: Pick<FrameComment, 'fontSize' | 'width
     0,
   );
 
-  return Math.max(64, lineCount * fontSize * 1.25 + COMMENT_PADDING_Y * 2);
+  const baseHeight = Math.max(64, lineCount * fontSize * 1.25 + COMMENT_PADDING_Y * 2);
+  return baseHeight + (comment.type === 'rule' ? RULE_COMMENT_HEADER_HEIGHT : 0);
 }
 
 export function canvasToWorldPosition(position: Position, canvasPosition: Position, canvasZoom: number): Position {

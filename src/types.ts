@@ -62,17 +62,24 @@ export interface CommentNote extends CommentVisualProperties {
 export interface RuleOffenseTarget {
   id: string;
   type: 'boat' | 'mark';
+  color?: string;
 }
 
 export interface RuleComment extends CommentVisualProperties {
   type: 'rule';
   /** Kept optional for compatibility with code that treats all comments as text notes. */
   text?: string;
-  rule: RuleReference;
+  rules?: RuleReference[];
+  /** Legacy single-reference shape; normalized to rules when scenarios are loaded. */
+  rule?: RuleReference;
   offenseTargets: RuleOffenseTarget[];
 }
 
 export type FrameComment = CommentNote | RuleComment;
+
+export function getRuleReferences(comment: RuleComment): RuleReference[] {
+  return comment.rules?.length ? comment.rules : comment.rule ? [comment.rule] : [];
+}
 
 export interface DiagramImage {
   id: string;

@@ -100,10 +100,13 @@ export default function SimulationCanvas({
     height: worldBounds.bottom - worldBounds.top,
   };
   const isLightTheme = theme === 'light';
-  const offenseTargetKeys = new Set(
+  const offenseTargetColors = new Map(
     (activeFrame.comments ?? [])
       .filter((comment) => comment.type === 'rule')
-      .flatMap((comment) => comment.offenseTargets.map((target) => `${target.type}:${target.id}`)),
+      .flatMap((comment) => comment.offenseTargets.map((target) => [
+        `${target.type}:${target.id}`,
+        target.color ?? '#ef4444',
+      ] as const)),
   );
 
   const getSnappedAbsolutePosition = (objectId: string, absolutePosition: Position) => {
@@ -192,7 +195,7 @@ export default function SimulationCanvas({
             <Mark
               mark={mark}
               isSelected={selectedId === mark.id}
-              isOffense={offenseTargetKeys.has(`mark:${mark.id}`)}
+              offenseColor={offenseTargetColors.get(`mark:${mark.id}`)}
               readOnly={readOnly}
               onOpenInspector={readOnly ? undefined : () => onOpenInspector(mark.id, 'mark')}
               snapFn={(position) => getSnappedAbsolutePosition(mark.id, position)}
@@ -213,7 +216,7 @@ export default function SimulationCanvas({
             key={boat.id}
             boat={boat}
             isSelected={selectedId === boat.id}
-            isOffense={offenseTargetKeys.has(`boat:${boat.id}`)}
+            offenseColor={offenseTargetColors.get(`boat:${boat.id}`)}
             readOnly={readOnly}
             onOpenInspector={readOnly ? undefined : () => onOpenInspector(boat.id, 'boat')}
             snapFn={

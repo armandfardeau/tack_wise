@@ -13,10 +13,12 @@ interface MarkProps {
   readOnly?: boolean;
   isShadow?: boolean;
   isOffense?: boolean;
+  offenseColor?: string;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false, isOffense = false }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor }: MarkProps) {
   const markSize = mark.size ?? 28;
+  const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
 
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
@@ -169,11 +171,11 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       }}
     >
       {/* Visual representation of the buoy */}
-      {isOffense && (
+      {offenseStroke && (
         <Circle
           radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
           fill="transparent"
-          stroke="#ef4444"
+          stroke={offenseStroke}
           strokeWidth={4}
           dash={[8, 5]}
           opacity={0.95}

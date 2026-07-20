@@ -14,6 +14,7 @@ import type {
   ScenarioSettings,
   TacticalArrow,
 } from '../types';
+import { getRuleReferences } from '../types';
 import { calculateAutoSailAngle, type Position } from '../utils/simulation';
 import { getCurvedArrowPoints } from '../utils/arrows';
 import { parseScenarioFromJson } from '../utils/exporter';
@@ -323,11 +324,20 @@ export function useScenario() {
         const currentComment = frame.comments?.find((comment) => comment.id === commentId);
         if (!currentComment || currentComment.type !== 'rule') return frame;
 
-        const updatedComment: RuleComment = { ...currentComment, ...changes };
-        const rules = [...(frame.rules ?? [])];
-        const ruleIndex = rules.findIndex((rule) => rule.id === currentComment.rule.id);
-        if (ruleIndex >= 0) rules[ruleIndex] = { ...updatedComment.rule };
-        else rules.push({ ...updatedComment.rule });
+        const currentReferences = getRuleReferences(currentComment);
+        const updatedReferences = changes.rules ?? currentReferences;
+        const currentReferenceIds = new Set(currentReferences.map((rule) => rule.id));
+        const referencesUsedByOtherComments = new Set(
+          (frame.comments ?? [])
+            .filter((comment) => comment.id !== commentId && comment.type === 'rule')
+            .flatMap((comment) => comment.type === 'rule' ? getRuleReferences(comment).map((rule) => rule.id) : []),
+        );
+        const retainedRules = (frame.rules ?? []).filter((rule) => !currentReferenceIds.has(rule.id) || referencesUsedByOtherComments.has(rule.id));
+        const rules = [
+          ...retainedRules,
+          ...updatedReferences.filter((rule) => !retainedRules.some((existingRule) => existingRule.id === rule.id)),
+        ];
+        const updatedComment: RuleComment = { ...currentComment, ...changes, rules: updatedReferences };
 
         return {
           ...frame,
@@ -572,11 +582,9 @@ export function useScenario() {
       id: `rule-comment-${Date.now()}`,
       name: `Rule ${(activeFrame.comments?.filter((comment) => comment.type === 'rule').length ?? 0) + 1}`,
       type: 'rule',
-      rule: {
-        id: ruleId,
-        label: 'RRS rule',
-        description: 'Describe the rule and why the highlighted objects are in breach.',
-      },
+      rules: activeFrame.rules?.length
+        ? [{ ...activeFrame.rules[0] }]
+        : [{ id: ruleId, label: 'RRS rule', description: 'Describe the rule and why the highlighted objects are in breach.' }],
       offenseTargets: [],
       color: '#facc15',
       x: 180,
@@ -587,8 +595,11 @@ export function useScenario() {
 
     updateCurrentAndFutureFrames((frame) => ({
       ...frame,
-      comments: [...(frame.comments ?? []), { ...ruleComment, rule: { ...ruleComment.rule }, offenseTargets: [] }],
-      rules: [...(frame.rules ?? []), { ...ruleComment.rule }],
+      comments: [...(frame.comments ?? []), { ...ruleComment, rules: ruleComment.rules?.map((rule) => ({ ...rule })), offenseTargets: [] }],
+      rules: [
+        ...(frame.rules ?? []),
+        ...(ruleComment.rules ?? []).filter((rule) => !(frame.rules ?? []).some((existingRule) => existingRule.id === rule.id)),
+      ],
     }));
     selectObject(ruleComment.id, 'comment');
   };
@@ -620,7 +631,9 @@ export function useScenario() {
     const selectedRuleComment = selectedType === 'comment'
       ? activeFrame.comments?.find((comment) => comment.id === selectedId)
       : undefined;
-    const selectedRuleId = selectedRuleComment?.type === 'rule' ? selectedRuleComment.rule.id : undefined;
+    const selectedRuleIds = selectedRuleComment?.type === 'rule'
+      ? new Set(getRuleReferences(selectedRuleComment).map((rule) => rule.id))
+      : new Set<string>();
 
     commitFrames((previousFrames) =>
       previousFrames.map((frame) => ({
@@ -632,7 +645,7 @@ export function useScenario() {
         arrows: frame.arrows?.filter((arrow) => arrow.id !== selectedId),
         comments: frame.comments?.filter((comment) => comment.id !== selectedId),
         images: frame.images?.filter((image) => image.id !== selectedId),
-        rules: selectedRuleId ? frame.rules?.filter((rule) => rule.id !== selectedRuleId) : frame.rules,
+        rules: selectedRuleIds.size > 0 ? frame.rules?.filter((rule) => !selectedRuleIds.has(rule.id)) : frame.rules,
       })),
     );
     setSelectedId(null);

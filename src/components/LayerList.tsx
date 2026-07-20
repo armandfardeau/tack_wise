@@ -1,7 +1,7 @@
 import type { ComponentType } from 'react';
 import { ArrowUpRight, Image, MapPin, MessageSquare, ShipWheel, Wind } from 'lucide-react';
 import type { SelectedType } from '../hooks/useScenario';
-import type { Frame } from '../types';
+import { getRuleReferences, type Frame } from '../types';
 
 type LayerObjectType = 'boat' | 'mark' | 'arrow' | 'comment' | 'image';
 type LayerIcon = ComponentType<{ 'aria-hidden'?: boolean; size?: number; strokeWidth?: number }>;
@@ -66,7 +66,7 @@ function getEntries(frame: Frame, type: LayerObjectType): LayerEntry[] {
         type,
         icon: MessageSquare,
         color: comment.color,
-        detail: comment.type === 'rule' ? comment.rule.label : undefined,
+        detail: comment.type === 'rule' ? getRuleReferences(comment).map((rule) => rule.label).join(', ') : undefined,
       }));
     case 'image':
       return (frame.images ?? []).map((image) => ({

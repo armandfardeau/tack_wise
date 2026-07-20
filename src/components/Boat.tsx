@@ -16,16 +16,18 @@ interface BoatProps {
   readOnly?: boolean;
   isShadow?: boolean;
   isOffense?: boolean;
+  offenseColor?: string;
 }
 
 function clampAspectRatio(aspectRatio: number | undefined) {
   return Math.min(Math.max(aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO), MAX_BOAT_ASPECT_RATIO);
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor }: BoatProps) {
   const boatScale = 0.5;
   const boatAspectRatio = clampAspectRatio(boat.aspectRatio);
   const boatWidthScale = boatScale * (boatAspectRatio / DEFAULT_BOAT_ASPECT_RATIO);
+  const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
 
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
@@ -122,11 +124,11 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       }}
     >
       {/* Selection Glow / Shadow Ring */}
-      {isOffense && (
+      {offenseStroke && (
         <Path
           data="M 0 -66 C 32 -43 36 24 18 60 L -18 60 C -36 24 -32 -43 0 -66 Z"
           fill="transparent"
-          stroke="#ef4444"
+          stroke={offenseStroke}
           strokeWidth={5}
           dash={[10, 6]}
           opacity={0.95}
