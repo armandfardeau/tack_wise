@@ -20,30 +20,22 @@ describe('useScenario', () => {
     });
   });
 
-  it('keeps the default mark connections across the scenario', () => {
+  it('starts with no mark connections in the opposite-tacks scenario', () => {
     const { result } = renderHook(() => useScenario());
 
-    expect(result.current.frames[0].connections).toEqual(expect.arrayContaining([
-      expect.objectContaining({
-        start: expect.objectContaining({ markId: 'mark-3' }),
-        end: expect.objectContaining({ markId: 'mark-5' }),
-      }),
-    ]));
-    expect(result.current.frames.slice(1).every((frame) => (
-      frame.connections?.some((connection) => connection.start.markId === 'mark-3' && connection.end.markId === 'mark-2')
-    ))).toBe(true);
+    expect(result.current.frames.every((frame) => (frame.connections ?? []).length === 0)).toBe(true);
   });
 
   it('updates the selected boat and keeps auto trim in sync with its heading', () => {
     const { result } = renderHook(() => useScenario());
 
     act(() => {
-      result.current.updateBoat('boat-1', { heading: 0 });
+      result.current.updateBoat('r10-port', { heading: 0 });
     });
 
     expect(result.current.selectedBoat?.heading).toBe(0);
     expect(result.current.selectedBoat?.sailAngle).toBe(2);
-    expect(result.current.frames).toHaveLength(4);
+    expect(result.current.frames).toHaveLength(5);
   });
 
   it('tracks unsaved changes and resets the state after replacing the scenario', () => {
@@ -52,7 +44,7 @@ describe('useScenario', () => {
     expect(result.current.hasUnsavedChanges).toBe(false);
 
     act(() => {
-      result.current.updateBoat('boat-1', { heading: 90 });
+      result.current.updateBoat('r10-port', { heading: 90 });
     });
 
     expect(result.current.hasUnsavedChanges).toBe(true);
@@ -96,14 +88,14 @@ describe('useScenario', () => {
       firstSession.result.current.deleteSelected();
     });
 
-    expect(firstSession.result.current.activeFrame.boats.some((boat) => boat.id === 'boat-1')).toBe(false);
-    expect(JSON.parse(localStorage.getItem('tack-wise-autosave') ?? '{}').frames[0].boats.some((boat: { id: string }) => boat.id === 'boat-1')).toBe(false);
+    expect(firstSession.result.current.activeFrame.boats.some((boat) => boat.id === 'r10-port')).toBe(false);
+    expect(JSON.parse(localStorage.getItem('tack-wise-autosave') ?? '{}').frames[0].boats.some((boat: { id: string }) => boat.id === 'r10-port')).toBe(false);
 
     firstSession.unmount();
 
     const reloadedSession = renderHook(() => useScenario());
-    expect(reloadedSession.result.current.activeFrame.boats.some((boat) => boat.id === 'boat-1')).toBe(false);
-    expect(reloadedSession.result.current.selectedId).not.toBe('boat-1');
+    expect(reloadedSession.result.current.activeFrame.boats.some((boat) => boat.id === 'r10-port')).toBe(false);
+    expect(reloadedSession.result.current.selectedId).not.toBe('r10-port');
   });
 
   it('imports frames and selects an object from the imported current frame', () => {
@@ -144,7 +136,7 @@ describe('useScenario', () => {
     });
 
     expect(result.current.frames[1].name).toBe('Mark approach');
-    expect(result.current.frames[0].name).toBe('1. Toolbox Tour');
+    expect(result.current.frames[0].name).toBe('1. Approaching on opposite tacks');
 
     act(() => {
       result.current.renameFrame(1, '   ');
@@ -300,7 +292,7 @@ describe('useScenario', () => {
     const originalName = result.current.selectedBoat?.name;
 
     act(() => {
-      result.current.updateBoat('boat-1', { name: 'Updated Boat' });
+      result.current.updateBoat('r10-port', { name: 'Updated Boat' });
     });
     expect(result.current.selectedBoat?.name).toBe('Updated Boat');
     expect(result.current.canUndo).toBe(true);
@@ -325,9 +317,9 @@ describe('useScenario', () => {
       result.current.addComment();
     });
 
-    expect(result.current.frames[0].marks.some((mark) => mark.shape === 'obstruction')).toBe(true);
-    expect(result.current.frames[0].arrows ?? []).toHaveLength(3);
-    expect(result.current.frames[0].comments ?? []).toHaveLength(2);
+    expect(result.current.frames[0].marks.some((mark) => mark.shape === 'obstruction')).toBe(false);
+    expect(result.current.frames[0].arrows ?? []).toHaveLength(2);
+    expect(result.current.frames[0].comments ?? []).toHaveLength(1);
     expect(result.current.frames.slice(1).every((frame) => frame.marks.some((mark) => mark.shape === 'obstruction'))).toBe(true);
     expect(result.current.frames.slice(1).every((frame) => frame.arrows?.length === 1)).toBe(true);
     const addedArrow = result.current.frames[1].arrows?.[0];
@@ -339,7 +331,7 @@ describe('useScenario', () => {
       x: (addedArrow.points[0].x + addedArrow.points[2].x) / 2,
       y: (addedArrow.points[0].y + addedArrow.points[2].y) / 2,
     });
-    expect(result.current.frames.slice(1).every((frame) => frame.comments?.length === 1)).toBe(true);
+    expect(result.current.frames.slice(1).every((frame) => frame.comments?.length === 2)).toBe(true);
   });
 
   it('updates presentation settings and restores a saved library scenario', () => {
@@ -354,9 +346,9 @@ describe('useScenario', () => {
     expect(result.current.settings.displayMode).toBe('cumulative');
     expect(result.current.libraryItems[0].title).toBe('Saved situation');
 
-    act(() => result.current.updateBoat('boat-1', { name: 'Changed after save' }));
+    act(() => result.current.updateBoat('r10-port', { name: 'Changed after save' }));
     act(() => result.current.loadFromLibrary(result.current.libraryItems[0].id));
-    expect(result.current.selectedBoat?.name).toBe('Alpha — dinghy');
+    expect(result.current.selectedBoat?.name).toBe('Port tack');
   });
 
   it('updates every diagram object and exposes movement helpers', () => {
@@ -496,7 +488,7 @@ describe('useScenario', () => {
       result.current.setPlaySpeed(500);
     });
 
-    expect(result.current.frames[0].images?.some((image) => image.name === 'Background')).toBe(false);
+    expect(result.current.frames[0].images ?? []).toEqual([]);
     expect(result.current.frames.slice(1).every((frame) => frame.images?.some((image) => image.name === 'Background'))).toBe(true);
     expect(result.current.frames[1].rules?.some((rule) => rule.id === 'rrs-10')).toBe(true);
     expect(result.current.frames.slice(1).every((frame) => frame.boats.length > 1)).toBe(true);
@@ -531,13 +523,13 @@ describe('useScenario', () => {
     act(() => {
       result.current.updateRuleComment(ruleComment.id, {
         rules: [{ id: 'rrs-10', label: 'RRS 10' }, { id: 'rrs-18', label: 'RRS 18' }],
-        offenseTargets: [{ id: 'boat-1', type: 'boat' }],
+        offenseTargets: [{ id: 'r10-port', type: 'boat' }],
       });
     });
 
     expect(result.current.activeFrame.comments?.find((comment) => comment.id === ruleComment.id)).toMatchObject({
       rules: [{ label: 'RRS 10' }, { label: 'RRS 18' }],
-      offenseTargets: [{ id: 'boat-1', type: 'boat' }],
+      offenseTargets: [{ id: 'r10-port', type: 'boat' }],
     });
     expect(result.current.activeFrame.rules).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: 'rrs-10', label: 'RRS 10' }),
@@ -689,8 +681,8 @@ describe('useScenario', () => {
     expect(result.current.selectedType).toBeNull();
 
     act(() => result.current.setAutoSailTrim(false));
-    act(() => result.current.selectObject('boat-1', 'boat'));
-    act(() => result.current.updateBoat('boat-1', { name: 'Manual trim' }));
+    act(() => result.current.selectObject('r10-port', 'boat'));
+    act(() => result.current.updateBoat('r10-port', { name: 'Manual trim' }));
     expect(result.current.selectedBoat?.name).toBe('Manual trim');
   });
 
