@@ -130,4 +130,15 @@ describe('ExportActions menu behavior', () => {
 
     expect(screen.queryByRole('menu', { name: /file options/i })).not.toBeInTheDocument();
   });
+
+  it('allows selecting a faster export quality', () => {
+    const onExportQualityChange = jest.fn();
+
+    render(<ExportActions {...baseProps} onExportQualityChange={onExportQualityChange} />);
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /export quality/i }), { target: { value: 'fast' } });
+
+    expect(onExportQualityChange).toHaveBeenCalledWith('fast');
+  });
 });

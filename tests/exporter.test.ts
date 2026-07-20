@@ -349,6 +349,15 @@ describe('binary exports', () => {
     expect(createGIF).toHaveBeenCalledWith(expect.objectContaining({ images: ['frame-1'], interval: 0.5, gifWidth: 320, gifHeight: 180 }), expect.any(Function));
   });
 
+  it('passes GIF quality and worker settings to gifshot', async () => {
+    const createGIF = gifshot.createGIF as jest.Mock;
+    createGIF.mockImplementationOnce((_options, callback) => callback({ image: 'data:image/gif;base64,AAE=' }));
+
+    await exportToGif(['frame-1'], 0.1, 320, 180, { sampleInterval: 20, numWorkers: 3 });
+
+    expect(createGIF).toHaveBeenCalledWith(expect.objectContaining({ sampleInterval: 20, numWorkers: 3 }), expect.any(Function));
+  });
+
   it('rejects GIF errors with a useful fallback message', async () => {
     const createGIF = gifshot.createGIF as jest.Mock;
     createGIF.mockImplementationOnce((_options, callback) => callback({ error: true }));

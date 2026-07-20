@@ -1,9 +1,10 @@
 import { useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import type { Frame, ScenarioSettings, VideoExportType } from '../types';
+import type { ExportQuality, Frame, ScenarioSettings, VideoExportType } from '../types';
 import { dataUrlToBlob, downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
-import { convertWebmToMp4 } from '../utils/mp4';
+import { DEFAULT_EXPORT_QUALITY, EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
+import { convertWebmToMp4, encodePngFramesToVideo } from '../utils/mp4';
 
 interface UseScenarioExportProps {
   currentFrameIndex: number;
@@ -17,6 +18,7 @@ interface UseScenarioExportProps {
   settings: ScenarioSettings;
   stageRef: RefObject<KonvaStage | null>;
   stageSize: { width: number; height: number };
+  exportQuality?: ExportQuality;
 }
 
 export function useScenarioExport({
@@ -31,11 +33,13 @@ export function useScenarioExport({
   settings,
   stageRef,
   stageSize,
+  exportQuality = DEFAULT_EXPORT_QUALITY,
 }: UseScenarioExportProps) {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'gif' | VideoExportType | null>(null);
-  const exportFrameInterval = 1000 / 20;
+  const { fps: exportFps, gifPixelRatio, gifSampleInterval } = EXPORT_QUALITY_PRESETS[exportQuality];
+  const exportFrameInterval = 1000 / exportFps;
 
   const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
     downloadScenarioJson(exportFrames, exportCurrentFrameIndex, settings);
@@ -49,6 +53,12 @@ export function useScenarioExport({
     stage.draw();
     const dataUrl = stage.toDataURL({ pixelRatio: 1.5, mimeType });
     downloadBlob(dataUrlToBlob(dataUrl), `tack-wise-diagram-${Date.now()}.${type === 'png' ? 'png' : 'jpg'}`);
+  };
+
+  const captureStageBlob = async (stage: KonvaStage, pixelRatio: number) => {
+    const blob = await stage.toBlob({ pixelRatio, mimeType: 'image/png' }) as Blob | null;
+    if (!blob) throw new Error('Could not capture a video frame.');
+    return blob;
   };
 
   const getRecordingMimeType = (type: VideoExportType) => {
@@ -90,36 +100,74 @@ export function useScenarioExport({
     const samplesPerSegment = Math.max(1, Math.ceil(exportDuration / exportFrameInterval));
     const segmentCount = Math.max(frames.length, 1);
     const delay = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
-    const waitForPaint = () =>
-      new Promise<void>((resolve) => {
-        window.requestAnimationFrame(() => window.requestAnimationFrame(() => resolve()));
+    const waitForPaint = () => new Promise<void>((resolve) => {
+      window.requestAnimationFrame(() => resolve());
+    });
+
+    const renderOfflineVideo = async (type: VideoExportType): Promise<Blob | null> => {
+      const stage = stageRef.current;
+      if (!stage || typeof stage.toBlob !== 'function') return null;
+
+      const capturedFrames: Blob[] = [];
+      for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+        const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
+        for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
+          flushSync(() => {
+            setCurrentFrameIndex(frameIndex);
+            setPlaybackProgress(sampleIndex / samplesPerSegment);
+            setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 45));
+          });
+
+          capturedFrames.push(await captureStageBlob(stage, gifPixelRatio));
+        }
+      }
+
+      setExportProgress(50);
+      return encodePngFramesToVideo(capturedFrames, exportFps, type, (progress) => {
+        setExportProgress(50 + Math.round(progress * 50));
       });
+    };
 
     try {
       if (type === 'gif') {
-        const capturedImages: string[] = [];
-        for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
-          const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
-          for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
-            flushSync(() => {
-              setCurrentFrameIndex(frameIndex);
-              setPlaybackProgress(sampleIndex / samplesPerSegment);
-              setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
-            });
-            await waitForPaint();
+        const capturedImageUrls: string[] = [];
+        try {
+          for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+            const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
+            for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
+              flushSync(() => {
+                setCurrentFrameIndex(frameIndex);
+                setPlaybackProgress(sampleIndex / samplesPerSegment);
+                setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
+              });
 
-            const stage = stageRef.current;
-            if (!stage) throw new Error('Canvas stage not found.');
-            stage.draw();
-            capturedImages.push(stage.toDataURL({ pixelRatio: 1.5 }));
+              const stage = stageRef.current;
+              if (!stage) throw new Error('Canvas stage not found.');
+              capturedImageUrls.push(URL.createObjectURL(await captureStageBlob(stage, gifPixelRatio)));
+            }
           }
+
+          setExportProgress(60);
+          const gifBlob = await exportToGif(capturedImageUrls, exportFrameInterval / 1000, stageSize.width, stageSize.height, {
+            sampleInterval: gifSampleInterval,
+          });
+          setExportProgress(90);
+          downloadBlob(gifBlob, `regatta-simulation-${Date.now()}.gif`);
+        } finally {
+          capturedImageUrls.forEach((url) => URL.revokeObjectURL(url));
+        }
+      } else {
+        try {
+          const offlineVideoBlob = await renderOfflineVideo(type);
+          if (offlineVideoBlob) {
+            setExportProgress(100);
+            downloadBlob(offlineVideoBlob, `regatta-simulation-${Date.now()}.${type}`);
+            return;
+          }
+        } catch (error) {
+          console.warn('Offline video export unavailable; falling back to real-time recording.', error);
         }
 
-        setExportProgress(60);
-        const gifBlob = await exportToGif(capturedImages, exportFrameInterval / 1000, stageSize.width, stageSize.height);
-        setExportProgress(90);
-        downloadBlob(gifBlob, `regatta-simulation-${Date.now()}.gif`);
-      } else {
         const canvas = document.querySelector('.canvas-wrap canvas') as HTMLCanvasElement | null;
         if (!canvas) throw new Error('Canvas element not found.');
         if (typeof canvas.captureStream !== 'function') {
@@ -127,7 +175,7 @@ export function useScenarioExport({
         }
 
         const mimeType = getRecordingMimeType(type);
-        const stream = canvas.captureStream(20);
+        const stream = canvas.captureStream(exportFps);
         let recordedBlob: Blob;
 
         try {
@@ -156,6 +204,7 @@ export function useScenarioExport({
                 });
                 await waitForPaint();
                 recorder.start();
+                let nextSampleAt = performance.now();
                 for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
                   const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
                   for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
@@ -165,7 +214,9 @@ export function useScenarioExport({
                       setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
                     });
                     await waitForPaint();
-                    await delay(exportFrameInterval);
+                    nextSampleAt += exportFrameInterval;
+                    const remainingDelay = nextSampleAt - performance.now();
+                    if (remainingDelay > 0) await delay(remainingDelay);
                   }
                 }
                 recorder.stop();

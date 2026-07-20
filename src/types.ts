@@ -4,6 +4,8 @@ export type Theme = 'light' | 'dark';
 
 export type VideoExportType = 'webm' | 'mp4';
 
+export type ExportQuality = 'fast' | 'standard' | 'high';
+
 export interface Boat {
   id: string;
   name: string;
