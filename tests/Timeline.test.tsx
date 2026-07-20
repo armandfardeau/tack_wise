@@ -137,6 +137,42 @@ describe('Timeline', () => {
     expect(onDeleteFrame).toHaveBeenCalledWith(1);
   });
 
+  it('shows an Edit button for the selected frame and starts title editing', () => {
+    render(
+      <Timeline
+        currentFrameIndex={1}
+        frames={frames}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Edit frame 1' })).not.toBeInTheDocument();
+    const editButton = screen.getByRole('button', { name: 'Edit frame 2' });
+    fireEvent.click(editButton);
+
+    expect(screen.getByRole('textbox', { name: 'Frame 2 title' })).toHaveFocus();
+  });
+
+  it('shows a contextual edit hint for a new empty scenario', () => {
+    render(
+      <Timeline
+        currentFrameIndex={0}
+        frames={[{ id: 'new-frame', name: 'Frame 1', windAngle: 0, windSpeed: 12, boats: [], marks: [] }]}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('status')).toHaveTextContent('Select a frame, then choose Edit to rename it.');
+  });
+
   it('duplicates the frame from its inline duplicate button', () => {
     const onDuplicateFrame = jest.fn();
 

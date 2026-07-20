@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Copy, Layers, Pause, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2 } from 'lucide-react';
+import { Copy, Layers, Pause, Pencil, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2 } from 'lucide-react';
 import type { Frame } from '../types';
 
 interface TimelineProps {
@@ -105,6 +105,14 @@ export default function Timeline({
       startEditing(index, event);
     }
   };
+
+  const isNewScenario = frames.length === 1
+    && frames[0].name === 'Frame 1'
+    && frames[0].boats.length === 0
+    && frames[0].marks.length === 0
+    && (frames[0].arrows?.length ?? 0) === 0
+    && (frames[0].comments?.length ?? 0) === 0
+    && (frames[0].images?.length ?? 0) === 0;
 
   return (
     <footer className={`timeline-bar${variant === 'sidebar' ? ' sidebar-timeline' : ''}`}>
@@ -225,7 +233,7 @@ export default function Timeline({
           }
 
           return (
-            <div key={frame.id} className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}`}>
+            <div key={frame.id} className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${index === currentFrameIndex ? ' has-edit-button' : ''}`}>
               <button
                 type="button"
                 className={thumbnailClassName}
@@ -244,6 +252,17 @@ export default function Timeline({
                   {frame.name}
                 </span>
               </button>
+              {index === currentFrameIndex && (
+                <button
+                  type="button"
+                  className="frame-edit-btn"
+                  aria-label={`Edit frame ${index + 1}`}
+                  onClick={(event) => startEditing(index, event)}
+                >
+                  <Pencil aria-hidden="true" size={13} />
+                  <span>Edit</span>
+                </button>
+              )}
               {variant === 'sidebar' && onOpenLayers && (
                 <button
                   type="button"
@@ -284,6 +303,12 @@ export default function Timeline({
           );
         })}
       </div>
+      {isNewScenario && (
+        <p className="timeline-context-hint" role="status">
+          <Pencil aria-hidden="true" size={14} />
+          <span>Select a frame, then choose Edit to rename it.</span>
+        </p>
+      )}
       {variant === 'sidebar' && (
         <button type="button" className="timeline-action-btn sidebar-add-frame-btn" aria-label="Add frame" onClick={onAddFrame}>
           <span className="timeline-control-icon" aria-hidden="true"><Plus size={16} /></span>
