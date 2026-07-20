@@ -6,6 +6,7 @@ import type {
   CommentNote,
   DiagramImage,
   Frame,
+  FrameComment,
   Mark,
   RuleComment,
   RuleReference,
@@ -689,12 +690,21 @@ export function useScenario() {
         arrows: [...(frame.arrows ?? []), { ...duplicate, points: duplicate.points.map((point) => ({ ...point })) }],
       }));
     } else if (selectedType === 'comment' && selectedComment) {
-      const duplicate: CommentNote = {
-        ...selectedComment,
-        id: duplicateId,
-        name: `${selectedComment.name} (Copy)`,
-        ...offsetPosition(selectedComment),
-      };
+      const duplicate: FrameComment = selectedComment.type === 'rule'
+        ? {
+            ...selectedComment,
+            id: duplicateId,
+            name: `${selectedComment.name} (Copy)`,
+            ...offsetPosition(selectedComment),
+            rules: selectedComment.rules?.map((rule) => ({ ...rule })),
+            offenseTargets: selectedComment.offenseTargets.map((target) => ({ ...target })),
+          }
+        : {
+            ...selectedComment,
+            id: duplicateId,
+            name: `${selectedComment.name} (Copy)`,
+            ...offsetPosition(selectedComment),
+          };
       updateCurrentAndFutureFrames((frame) => ({ ...frame, comments: [...(frame.comments ?? []), { ...duplicate }] }));
     } else if (selectedType === 'image' && selectedImage) {
       const duplicate: DiagramImage = {

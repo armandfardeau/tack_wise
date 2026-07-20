@@ -2,7 +2,7 @@ import { useId, useRef, useState, type ReactNode } from 'react';
 import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
-import { DEFAULT_BOAT_ASPECT_RATIO, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MAX_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO } from '../constants';
+import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import { Copy, Pause, Play, RotateCcw, Search, Trash2, X } from 'lucide-react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;

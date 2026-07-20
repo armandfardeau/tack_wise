@@ -1,5 +1,4 @@
 import { Group, Line, Path, Circle, Text } from 'react-konva';
-import { DEFAULT_BOAT_ASPECT_RATIO, MAX_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO } from '../constants';
 import type { Boat as BoatModel } from '../types';
 
 interface BoatProps {
@@ -19,14 +18,8 @@ interface BoatProps {
   offenseColor?: string;
 }
 
-function clampAspectRatio(aspectRatio: number | undefined) {
-  return Math.min(Math.max(aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO), MAX_BOAT_ASPECT_RATIO);
-}
-
 export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor }: BoatProps) {
   const boatScale = 0.5;
-  const boatAspectRatio = clampAspectRatio(boat.aspectRatio);
-  const boatWidthScale = boatScale * (boatAspectRatio / DEFAULT_BOAT_ASPECT_RATIO);
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
 
   // Mast is located slightly forward of the center of the boat
@@ -51,7 +44,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         x={boat.x}
         y={boat.y}
         rotation={boat.heading}
-        scaleX={boatWidthScale}
+        scaleX={boatScale}
         scaleY={boatScale}
         draggable={false}
         opacity={0.22}
@@ -97,7 +90,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       x={boat.x}
       y={boat.y}
       rotation={boat.heading}
-      scaleX={boatWidthScale}
+      scaleX={boatScale}
       scaleY={boatScale}
       draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}

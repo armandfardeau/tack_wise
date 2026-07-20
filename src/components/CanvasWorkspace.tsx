@@ -48,7 +48,7 @@ interface CanvasWorkspaceProps {
   onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: () => void;
   onAddComment: () => void;
-  onAddRuleComment: () => void;
+  onAddRuleComment?: () => void;
   onAddImage: (src: string, name?: string) => void;
   onMoveBoat: (boatId: string, position: Position) => void;
   onRotateBoat: (boatId: string, heading: number) => void;
@@ -295,7 +295,7 @@ export default function CanvasWorkspace({
   onAddMark,
   onAddArrow,
   onAddComment,
-  onAddRuleComment,
+  onAddRuleComment = () => undefined,
   onAddImage,
   onMoveBoat,
   onRotateBoat,
