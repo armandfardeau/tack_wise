@@ -1,10 +1,10 @@
 import { Group, Rect, Text } from 'react-konva';
 import { COMMENT_PADDING_X, COMMENT_PADDING_Y } from '../constants';
-import type { CommentNote as CommentNoteModel, Theme } from '../types';
-import { getCommentHeight } from '../utils/simulation';
+import type { FrameComment, Theme } from '../types';
+import { getCommentHeight, getCommentText, RULE_COMMENT_HEADER_HEIGHT } from '../utils/simulation';
 
 interface CommentNoteProps {
-  comment: CommentNoteModel;
+  comment: FrameComment;
   isSelected: boolean;
   theme: Theme;
   onMove?: (id: string, position: { x: number; y: number }) => void;
@@ -17,7 +17,15 @@ interface CommentNoteProps {
 export default function CommentNote({ comment, isSelected, theme, onMove, onOpenInspector, onSelect, readOnly = false, isShadow = false }: CommentNoteProps) {
   const width = comment.width ?? 180;
   const fontSize = comment.fontSize ?? 14;
-  const height = getCommentHeight(comment);
+  const text = getCommentText(comment);
+  const isRule = comment.type === 'rule';
+  const height = getCommentHeight({ ...comment, text });
+  const cardFill = isRule
+    ? theme === 'light' ? '#fffbeb' : '#2a2115'
+    : theme === 'light' ? '#ffffff' : '#172033';
+  const bodyTextColor = isRule
+    ? theme === 'light' ? '#92400e' : '#fde68a'
+    : comment.color;
 
   return (
     <Group
@@ -40,21 +48,40 @@ export default function CommentNote({ comment, isSelected, theme, onMove, onOpen
       <Rect
         width={width}
         height={height}
-        fill={theme === 'light' ? '#ffffff' : '#172033'}
-        stroke={isSelected ? '#22d3ee' : comment.color}
-        strokeWidth={isSelected ? 2 : 1}
+        fill={cardFill}
+        stroke={isSelected ? '#22d3ee' : isRule ? '#f59e0b' : comment.color}
+        strokeWidth={isSelected ? 2.5 : isRule ? 2 : 1}
         cornerRadius={6}
         shadowColor="#000"
         shadowBlur={isShadow ? 0 : 5}
         shadowOpacity={0.25}
       />
+      {isRule && (
+        <>
+          <Rect
+            width={width}
+            height={RULE_COMMENT_HEADER_HEIGHT}
+            fill="#f59e0b"
+            cornerRadius={6}
+          />
+          <Text
+            text="RULE"
+            x={COMMENT_PADDING_X}
+            y={6}
+            fontSize={10}
+            fontStyle="bold"
+            fill="#451a03"
+            letterSpacing={1.2}
+          />
+        </>
+      )}
       <Text
-        text={comment.text}
+        text={text}
         x={COMMENT_PADDING_X}
-        y={COMMENT_PADDING_Y}
+        y={COMMENT_PADDING_Y + (isRule ? RULE_COMMENT_HEADER_HEIGHT : 0)}
         width={width - COMMENT_PADDING_X * 2}
         fontSize={fontSize}
-        fill={comment.color}
+        fill={bodyTextColor}
         lineHeight={1.25}
         wrap="word"
       />

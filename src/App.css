@@ -691,6 +691,7 @@ body {
 }
 
 .form-row input[type='text'],
+.form-row input[type='search'],
 .form-row select {
   background-color: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -702,6 +703,7 @@ body {
 }
 
 .form-row input[type='text']:focus,
+.form-row input[type='search']:focus,
 .form-row select:focus {
   border-color: var(--accent-cyan);
 }
@@ -895,6 +897,68 @@ body {
   font-size: 0.78rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.rule-offense-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rule-offense-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 6px 4px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+}
+
+.rule-offense-name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.rule-offense-row input[type='color'] {
+  width: 28px;
+  height: 24px;
+  padding: 1px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.rule-offense-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.rule-offense-remove:hover,
+.rule-offense-remove:focus-visible {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.rule-offense-add select,
+#rule-offense-add {
+  width: 100%;
 }
 
 .inspector-delete-btn {

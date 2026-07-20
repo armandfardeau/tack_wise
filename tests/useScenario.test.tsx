@@ -341,6 +341,46 @@ describe('useScenario', () => {
     expect(result.current.selectedType).toBeNull();
   });
 
+  it('adds rule comments, highlights selected offense targets, and removes their frame tag on delete', () => {
+    jest.spyOn(Date, 'now').mockReturnValue(789);
+    const { result } = renderHook(() => useScenario());
+
+    act(() => {
+      result.current.selectFrame(1);
+      result.current.addRuleComment();
+    });
+
+    const ruleComment = result.current.selectedComment;
+    expect(ruleComment?.type).toBe('rule');
+    expect(result.current.activeFrame.rules).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'rrs-10', label: 'RRS 10' }),
+    ]));
+    expect(result.current.frames.slice(1).every((frame) => frame.comments?.some((comment) => comment.id === ruleComment?.id))).toBe(true);
+
+    if (!ruleComment || ruleComment.type !== 'rule') return;
+    expect(ruleComment.rules?.[0].label).toBe('RRS 10');
+
+    act(() => {
+      result.current.updateRuleComment(ruleComment.id, {
+        rules: [{ id: 'rrs-10', label: 'RRS 10' }, { id: 'rrs-18', label: 'RRS 18' }],
+        offenseTargets: [{ id: 'boat-1', type: 'boat' }],
+      });
+    });
+
+    expect(result.current.activeFrame.comments?.find((comment) => comment.id === ruleComment.id)).toMatchObject({
+      rules: [{ label: 'RRS 10' }, { label: 'RRS 18' }],
+      offenseTargets: [{ id: 'boat-1', type: 'boat' }],
+    });
+    expect(result.current.activeFrame.rules).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: 'rrs-10', label: 'RRS 10' }),
+      expect.objectContaining({ id: 'rrs-18', label: 'RRS 18' }),
+    ]));
+
+    act(() => result.current.deleteSelected());
+    expect(result.current.frames.every((frame) => !frame.comments?.some((comment) => comment.id === ruleComment.id))).toBe(true);
+    expect(result.current.frames.every((frame) => !frame.rules?.some((rule) => ['rrs-10', 'rrs-18'].includes(rule.id)))).toBe(true);
+  });
+
   it('restores and clears a valid autosave, while rejecting missing or invalid data', () => {
     localStorage.setItem('tack-wise-autosave', JSON.stringify({
       version: 2,

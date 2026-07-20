@@ -203,6 +203,7 @@ export default function App() {
           onAddMark={scenario.addMark}
           onAddArrow={scenario.addArrow}
           onAddComment={scenario.addComment}
+          onAddRuleComment={scenario.addRuleComment}
           onAddImage={scenario.addImage}
           onMoveBoat={scenario.moveBoat}
           onRotateBoat={(boatId, heading) => scenario.updateBoat(boatId, { heading })}
@@ -250,6 +251,7 @@ export default function App() {
           updateMark={scenario.updateMark}
           updateArrow={scenario.updateArrow}
           updateComment={scenario.updateComment}
+          updateRuleComment={scenario.updateRuleComment}
           updateImage={scenario.updateImage}
           canvasWrapRef={viewport.canvasWrapRef}
           handleCanvasTouchEnd={viewport.handleCanvasTouchEnd}

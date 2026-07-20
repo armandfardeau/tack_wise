@@ -1,11 +1,22 @@
-import type { CommentNote, DiagramImage, DisplayMode, Frame, Boat, Mark, TacticalArrow } from '../types';
+import { useId, useRef, useState, type ReactNode } from 'react';
+import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
-import { Copy, Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
-import { useId, useRef, useState, type ReactNode } from 'react';
+import { Copy, Pause, Play, RotateCcw, Search, Trash2, X } from 'lucide-react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
+const COMMON_RULE_REFERENCES: RuleReference[] = [
+  { id: 'rrs-10', label: 'RRS 10' },
+  { id: 'rrs-11', label: 'RRS 11' },
+  { id: 'rrs-12', label: 'RRS 12' },
+  { id: 'rrs-13', label: 'RRS 13' },
+  { id: 'rrs-14', label: 'RRS 14' },
+  { id: 'rrs-15', label: 'RRS 15' },
+  { id: 'rrs-16', label: 'RRS 16' },
+  { id: 'rrs-17', label: 'RRS 17' },
+  { id: 'rrs-18', label: 'RRS 18' },
+];
 
 function formatAngle(angle: number) {
   return `${angle > 0 && angle !== 180 ? '+' : ''}${angle}°`;
@@ -31,7 +42,7 @@ interface InspectorProps {
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
   selectedArrow?: TacticalArrow;
-  selectedComment?: CommentNote;
+  selectedComment?: FrameComment;
   selectedImage?: DiagramImage;
   selectedType: SelectedType;
   showGrid: boolean;
@@ -42,6 +53,7 @@ interface InspectorProps {
   updateMark: (markId: string, changes: Partial<Mark>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
+  updateRuleComment?: (commentId: string, changes: Partial<RuleComment>) => void;
   updateImage?: (imageId: string, changes: Partial<DiagramImage>) => void;
 }
 
@@ -76,6 +88,7 @@ export default function Inspector({
   updateMark,
   updateArrow,
   updateComment,
+  updateRuleComment,
   updateImage,
 }: InspectorProps) {
   const deletableObject =
@@ -151,7 +164,13 @@ export default function Inspector({
         />
       ) : selectedType === 'arrow' && selectedArrow && updateArrow ? (
         <ArrowInspector arrow={selectedArrow} updateArrow={updateArrow} />
-      ) : selectedType === 'comment' && selectedComment && updateComment ? (
+      ) : selectedType === 'comment' && selectedComment?.type === 'rule' && updateRuleComment ? (
+        <RuleCommentInspector
+          activeFrame={activeFrame}
+          comment={selectedComment}
+          updateRuleComment={updateRuleComment}
+        />
+      ) : selectedType === 'comment' && selectedComment && selectedComment.type !== 'rule' && updateComment ? (
         <CommentInspector comment={selectedComment} updateComment={updateComment} />
       ) : selectedType === 'image' && selectedImage && updateImage ? (
         <ImageInspector image={selectedImage} updateImage={updateImage} />
@@ -690,6 +709,136 @@ function ArrowInspector({ arrow, updateArrow }: { arrow: TacticalArrow; updateAr
         },
       ]}
     />
+  );
+}
+
+function RuleCommentInspector({
+  activeFrame,
+  comment,
+  updateRuleComment,
+}: {
+  activeFrame: Frame;
+  comment: RuleComment;
+  updateRuleComment: (id: string, changes: Partial<RuleComment>) => void;
+}) {
+  const [ruleSearch, setRuleSearch] = useState('');
+  const ruleOptions = Array.from(new Map(
+    [...COMMON_RULE_REFERENCES, ...(activeFrame.rules ?? []), ...getRuleReferences(comment)]
+      .map((rule) => [rule.id, rule] as const),
+  ).values());
+  const selectedRuleIds = getRuleReferences(comment).map((rule) => rule.id);
+  const normalizedRuleSearch = ruleSearch.trim().toLowerCase();
+  const visibleRuleOptions = ruleOptions.filter((rule) => (
+    selectedRuleIds.includes(rule.id)
+    || !normalizedRuleSearch
+    || `${rule.label} ${rule.description ?? ''}`.toLowerCase().includes(normalizedRuleSearch)
+  ));
+
+  const updateRules = (selectedIds: string[]) => {
+    updateRuleComment(comment.id, {
+      rules: ruleOptions.filter((rule) => selectedIds.includes(rule.id)),
+    });
+  };
+
+  const offenseOptions: Array<RuleOffenseTarget & { name: string }> = [
+    ...activeFrame.boats.map((boat) => ({ id: boat.id, type: 'boat' as const, name: boat.name })),
+    ...activeFrame.marks.map((mark) => ({ id: mark.id, type: 'mark' as const, name: mark.name })),
+  ];
+  const offenseKey = (target: RuleOffenseTarget) => `${target.type}:${target.id}`;
+  const selectedOffenseKeys = new Set(comment.offenseTargets.map(offenseKey));
+  const getOffenseName = (target: RuleOffenseTarget) => offenseOptions.find((option) => offenseKey(option) === offenseKey(target))?.name ?? target.id;
+
+  const addOffense = (key: string) => {
+    const target = offenseOptions.find((option) => offenseKey(option) === key);
+    if (!target || selectedOffenseKeys.has(key)) return;
+
+    updateRuleComment(comment.id, {
+      offenseTargets: [...comment.offenseTargets, { id: target.id, type: target.type, color: '#ef4444' }],
+    });
+  };
+
+  const removeOffense = (target: RuleOffenseTarget) => {
+    updateRuleComment(comment.id, {
+      offenseTargets: comment.offenseTargets.filter((candidate) => offenseKey(candidate) !== offenseKey(target)),
+    });
+  };
+
+  const updateOffenseColor = (target: RuleOffenseTarget, color: string) => {
+    updateRuleComment(comment.id, {
+      offenseTargets: comment.offenseTargets.map((candidate) => (
+        offenseKey(candidate) === offenseKey(target) ? { ...candidate, color } : candidate
+      )),
+    });
+  };
+
+  return (
+    <div className="editor-form">
+      <div className="form-row"><label htmlFor="rule-comment-name">Name</label><input id="rule-comment-name" type="text" value={comment.name} onChange={(event) => updateRuleComment(comment.id, { name: event.target.value })} /></div>
+      <div className="form-row">
+        <label htmlFor="rule-reference">Rule references</label>
+        <input
+          id="rule-reference-search"
+          type="search"
+          value={ruleSearch}
+          placeholder="Search rules"
+          aria-label="Search rule references"
+          onChange={(event) => setRuleSearch(event.target.value)}
+        />
+        <select
+          id="rule-reference"
+          multiple
+          size={Math.min(Math.max(visibleRuleOptions.length, 4), 8)}
+          value={selectedRuleIds}
+          onChange={(event) => updateRules(Array.from(event.target.selectedOptions, (option) => option.value))}
+        >
+          {visibleRuleOptions.map((rule) => <option key={rule.id} value={rule.id}>{rule.label}</option>)}
+        </select>
+        <p className="grid-hint">Select one or more rules.</p>
+      </div>
+      <div className="form-row"><label htmlFor="rule-comment-color">Highlight color</label><input id="rule-comment-color" type="color" value={comment.color} onChange={(event) => updateRuleComment(comment.id, { color: event.target.value })} /></div>
+      <div className="form-row"><label htmlFor="rule-comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="rule-comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateRuleComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
+      <div className="inspector-subsection">
+        <h4 className="inspector-subsection-title">Highlight offending objects</h4>
+        <div className="rule-offense-list">
+          {comment.offenseTargets.map((target) => (
+            <div className="rule-offense-row" key={offenseKey(target)}>
+              <span className="rule-offense-name">{getOffenseName(target)}</span>
+              <input
+                type="color"
+                value={target.color ?? '#ef4444'}
+                aria-label={`Color for ${getOffenseName(target)}`}
+                onChange={(event) => updateOffenseColor(target, event.target.value)}
+              />
+              <button
+                type="button"
+                className="rule-offense-remove"
+                aria-label={`Remove offending object ${getOffenseName(target)}`}
+                onClick={() => removeOffense(target)}
+              >
+                <X aria-hidden="true" size={14} />
+              </button>
+            </div>
+          ))}
+          {comment.offenseTargets.length === 0 && <p className="grid-hint">No offending objects highlighted yet.</p>}
+        </div>
+        <div className="rule-offense-add">
+          <select
+            id="rule-offense-add"
+            defaultValue=""
+            aria-label="Add offending object"
+            onChange={(event) => {
+              addOffense(event.target.value);
+              event.currentTarget.value = '';
+            }}
+          >
+            <option value="">Add offending object…</option>
+            {offenseOptions.filter((target) => !selectedOffenseKeys.has(offenseKey(target))).map((target) => (
+              <option key={offenseKey(target)} value={offenseKey(target)}>{target.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
   );
 }
 

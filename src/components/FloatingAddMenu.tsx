@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ArrowUpRight, DoorOpen, Flag, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
+import { ArrowUpRight, BookOpen, DoorOpen, Flag, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
 import type { Mark } from '../types';
 
 interface FloatingAddMenuProps {
@@ -7,10 +7,11 @@ interface FloatingAddMenuProps {
   onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: () => void;
   onAddComment: () => void;
+  onAddRuleComment: () => void;
   onAddImage: (src: string, name?: string) => void;
 }
 
-export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAddComment, onAddImage }: FloatingAddMenuProps) {
+export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAddComment, onAddRuleComment, onAddImage }: FloatingAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
@@ -98,6 +99,7 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('committeeBoat'))}><Flag aria-hidden="true" size={16} /> <span>Add committee boat</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(onAddArrow)}><ArrowUpRight aria-hidden="true" size={16} /> <span>Add arrow</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(onAddComment)}><MessageCircle aria-hidden="true" size={16} /> <span>Add comment</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(onAddRuleComment)}><BookOpen aria-hidden="true" size={16} /> <span>Add rule</span></button>
           <button type="button" className="floating-add-action" onClick={() => imageInputRef.current?.click()}><Image aria-hidden="true" size={16} /> <span>Add image</span></button>
           <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleImageChange} hidden />
         </div>

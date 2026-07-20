@@ -6,13 +6,16 @@ import type {
   CommentNote,
   DiagramImage,
   Frame,
+  FrameComment,
   Mark,
+  RuleComment,
   RuleReference,
   ScenarioExportPayload,
   ScenarioRepositoryItem,
   ScenarioSettings,
   TacticalArrow,
 } from '../types';
+import { getRuleReferences } from '../types';
 import { calculateAutoSailAngle, type Position } from '../utils/simulation';
 import { getCurvedArrowPoints } from '../utils/arrows';
 import { parseScenarioFromJson } from '../utils/exporter';
@@ -301,9 +304,48 @@ export function useScenario() {
     commitFrames((previousFrames) =>
       previousFrames.map((frame, index) =>
         index === currentFrameIndex
-          ? { ...frame, comments: (frame.comments ?? []).map((comment) => comment.id === commentId ? { ...comment, ...changes } : comment) }
+          ? {
+              ...frame,
+              comments: (frame.comments ?? []).map((comment) => (
+                comment.id === commentId && comment.type !== 'rule'
+                  ? { ...comment, ...changes }
+                  : comment
+              )),
+            }
           : frame,
       ),
+    );
+  };
+
+  const updateRuleComment = (commentId: string, changes: Partial<RuleComment>) => {
+    commitFrames((previousFrames) =>
+      previousFrames.map((frame, index) => {
+        if (index !== currentFrameIndex) return frame;
+
+        const currentComment = frame.comments?.find((comment) => comment.id === commentId);
+        if (!currentComment || currentComment.type !== 'rule') return frame;
+
+        const currentReferences = getRuleReferences(currentComment);
+        const updatedReferences = changes.rules ?? currentReferences;
+        const currentReferenceIds = new Set(currentReferences.map((rule) => rule.id));
+        const referencesUsedByOtherComments = new Set(
+          (frame.comments ?? [])
+            .filter((comment) => comment.id !== commentId && comment.type === 'rule')
+            .flatMap((comment) => comment.type === 'rule' ? getRuleReferences(comment).map((rule) => rule.id) : []),
+        );
+        const retainedRules = (frame.rules ?? []).filter((rule) => !currentReferenceIds.has(rule.id) || referencesUsedByOtherComments.has(rule.id));
+        const rules = [
+          ...retainedRules,
+          ...updatedReferences.filter((rule) => !retainedRules.some((existingRule) => existingRule.id === rule.id)),
+        ];
+        const updatedComment: RuleComment = { ...currentComment, ...changes, rules: updatedReferences };
+
+        return {
+          ...frame,
+          comments: (frame.comments ?? []).map((comment) => comment.id === commentId ? updatedComment : comment),
+          rules,
+        };
+      }),
     );
   };
 
@@ -535,6 +577,34 @@ export function useScenario() {
     selectObject(comment.id, 'comment');
   };
 
+  const addRuleComment = () => {
+    const ruleId = `rule-${Date.now()}`;
+    const ruleComment: RuleComment = {
+      id: `rule-comment-${Date.now()}`,
+      name: `Rule ${(activeFrame.comments?.filter((comment) => comment.type === 'rule').length ?? 0) + 1}`,
+      type: 'rule',
+      rules: activeFrame.rules?.length
+        ? [{ ...activeFrame.rules[0] }]
+        : [{ id: ruleId, label: 'RRS rule', description: 'Describe the rule and why the highlighted objects are in breach.' }],
+      offenseTargets: [],
+      color: '#facc15',
+      x: 180,
+      y: 100,
+      width: 230,
+      fontSize: 14,
+    };
+
+    updateCurrentAndFutureFrames((frame) => ({
+      ...frame,
+      comments: [...(frame.comments ?? []), { ...ruleComment, rules: ruleComment.rules?.map((rule) => ({ ...rule })), offenseTargets: [] }],
+      rules: [
+        ...(frame.rules ?? []),
+        ...(ruleComment.rules ?? []).filter((rule) => !(frame.rules ?? []).some((existingRule) => existingRule.id === rule.id)),
+      ],
+    }));
+    selectObject(ruleComment.id, 'comment');
+  };
+
   const addImage = (src: string, name = 'Diagram image') => {
     const image: DiagramImage = {
       id: `image-${Date.now()}`,
@@ -559,6 +629,13 @@ export function useScenario() {
       return;
     }
 
+    const selectedRuleComment = selectedType === 'comment'
+      ? activeFrame.comments?.find((comment) => comment.id === selectedId)
+      : undefined;
+    const selectedRuleIds = selectedRuleComment?.type === 'rule'
+      ? new Set(getRuleReferences(selectedRuleComment).map((rule) => rule.id))
+      : new Set<string>();
+
     commitFrames((previousFrames) =>
       previousFrames.map((frame) => ({
         ...frame,
@@ -569,6 +646,7 @@ export function useScenario() {
         arrows: frame.arrows?.filter((arrow) => arrow.id !== selectedId),
         comments: frame.comments?.filter((comment) => comment.id !== selectedId),
         images: frame.images?.filter((image) => image.id !== selectedId),
+        rules: selectedRuleIds.size > 0 ? frame.rules?.filter((rule) => !selectedRuleIds.has(rule.id)) : frame.rules,
       })),
     );
     setSelectedId(null);
@@ -612,12 +690,21 @@ export function useScenario() {
         arrows: [...(frame.arrows ?? []), { ...duplicate, points: duplicate.points.map((point) => ({ ...point })) }],
       }));
     } else if (selectedType === 'comment' && selectedComment) {
-      const duplicate: CommentNote = {
-        ...selectedComment,
-        id: duplicateId,
-        name: `${selectedComment.name} (Copy)`,
-        ...offsetPosition(selectedComment),
-      };
+      const duplicate: FrameComment = selectedComment.type === 'rule'
+        ? {
+            ...selectedComment,
+            id: duplicateId,
+            name: `${selectedComment.name} (Copy)`,
+            ...offsetPosition(selectedComment),
+            rules: selectedComment.rules?.map((rule) => ({ ...rule })),
+            offenseTargets: selectedComment.offenseTargets.map((target) => ({ ...target })),
+          }
+        : {
+            ...selectedComment,
+            id: duplicateId,
+            name: `${selectedComment.name} (Copy)`,
+            ...offsetPosition(selectedComment),
+          };
       updateCurrentAndFutureFrames((frame) => ({ ...frame, comments: [...(frame.comments ?? []), { ...duplicate }] }));
     } else if (selectedType === 'image' && selectedImage) {
       const duplicate: DiagramImage = {
@@ -667,6 +754,7 @@ export function useScenario() {
     addArrow,
     addBoat,
     addComment,
+    addRuleComment,
     addFrame,
     addImage,
     addMark,
@@ -700,6 +788,7 @@ export function useScenario() {
     updateArrow,
     updateBoat,
     updateComment,
+    updateRuleComment,
     updateImage,
     updateMark,
     updateSettings,

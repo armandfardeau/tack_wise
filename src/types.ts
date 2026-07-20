@@ -44,15 +44,41 @@ export interface TacticalArrow {
   showArrowhead?: boolean;
 }
 
-export interface CommentNote {
+interface CommentVisualProperties {
   id: string;
   name: string;
-  text: string;
   color: string;
   x: number;
   y: number;
   width?: number;
   fontSize?: number;
+}
+
+export interface CommentNote extends CommentVisualProperties {
+  type?: 'comment';
+  text: string;
+}
+
+export interface RuleOffenseTarget {
+  id: string;
+  type: 'boat' | 'mark';
+  color?: string;
+}
+
+export interface RuleComment extends CommentVisualProperties {
+  type: 'rule';
+  /** Kept optional for compatibility with code that treats all comments as text notes. */
+  text?: string;
+  rules?: RuleReference[];
+  /** Legacy single-reference shape; normalized to rules when scenarios are loaded. */
+  rule?: RuleReference;
+  offenseTargets: RuleOffenseTarget[];
+}
+
+export type FrameComment = CommentNote | RuleComment;
+
+export function getRuleReferences(comment: RuleComment): RuleReference[] {
+  return comment.rules?.length ? comment.rules : comment.rule ? [comment.rule] : [];
 }
 
 export interface DiagramImage {
@@ -81,7 +107,7 @@ export interface Frame {
   boats: Boat[];
   marks: Mark[];
   arrows?: TacticalArrow[];
-  comments?: CommentNote[];
+  comments?: FrameComment[];
   images?: DiagramImage[];
   rules?: RuleReference[];
 }
