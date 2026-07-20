@@ -58,7 +58,20 @@ describe('MarkConnections', () => {
       connection.start.anchor.x !== 0 || connection.start.anchor.y !== 0
         || connection.end.anchor.x !== 0 || connection.end.anchor.y !== 0
     ))).toBe(true);
+    expect(normalized.connections?.every((connection) => connection.arrowhead === false)).toBe(true);
     expect(normalized.marks[0].connectedToMarkIds).toBeUndefined();
+  });
+
+  it('only renders an arrowhead when explicitly enabled', () => {
+    const { getAllByTestId } = render(
+      <MarkConnections
+        marks={marks}
+        connections={[connections[0], { ...connections[1], arrowhead: true }]}
+      />,
+    );
+
+    expect(getAllByTestId('connection-line')[0]).not.toHaveAttribute('pointerLength');
+    expect(getAllByTestId('connection-line')[1]).toHaveAttribute('pointerLength', '12');
   });
 
   it('renders endpoints from mark-relative anchors', () => {

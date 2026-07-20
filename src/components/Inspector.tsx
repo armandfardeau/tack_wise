@@ -812,7 +812,7 @@ function ConnectionInspector({
       </div>
       <div className="form-row flex-row">
         <label className="checkbox-label">
-          <input type="checkbox" checked={connection.arrowhead !== false} onChange={(event) => updateConnection(connection.id, { arrowhead: event.target.checked })} />
+          <input type="checkbox" checked={connection.arrowhead === true} onChange={(event) => updateConnection(connection.id, { arrowhead: event.target.checked })} />
           <span>Show arrowhead</span>
         </label>
       </div>

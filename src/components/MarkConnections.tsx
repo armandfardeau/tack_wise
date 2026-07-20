@@ -58,9 +58,9 @@ export default function MarkConnections({
           onDblTap: interactive && !isShadow ? () => onOpenInspector?.(connection.id, 'connection') : undefined,
         };
 
-        const element = connection.arrowhead === false
-          ? <Line key={`conn-${connection.id}`} {...commonProps} />
-          : <Arrow key={`conn-${connection.id}`} {...commonProps} pointerLength={12} pointerWidth={10} />;
+        const element = connection.arrowhead === true
+          ? <Arrow key={`conn-${connection.id}`} {...commonProps} pointerLength={12} pointerWidth={10} />
+          : <Line key={`conn-${connection.id}`} {...commonProps} />;
 
         return [element];
       })}

@@ -70,7 +70,7 @@ export function normalizeFrameConnections(frame: Frame): Frame {
         end: { markId: targetMarkId, anchor: anchors.end },
         color: sourceMark.connectionLineColor ?? sourceMark.color,
         style: sourceMark.connectionLineStyle ?? 'dotted',
-        arrowhead: true,
+        arrowhead: false,
       };
       const key = connectionEndpointKey(legacyConnection);
       if (seenEndpoints.has(key)) continue;

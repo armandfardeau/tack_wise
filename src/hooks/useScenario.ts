@@ -332,7 +332,7 @@ export function useScenario() {
               end: { markId: targetMarkId, anchor: anchors?.end ?? defaultAnchors.end },
               color: sourceMark.connectionLineColor ?? sourceMark.color,
               style: sourceMark.connectionLineStyle ?? 'dotted',
-              arrowhead: true,
+              arrowhead: false,
             },
           ],
         };

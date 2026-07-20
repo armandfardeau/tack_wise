@@ -318,10 +318,12 @@ describe('useScenario', () => {
         id: firstConnectionId,
         start: { markId: 'mark-a', anchor: { x: 0.5, y: 0 } },
         end: { markId: 'mark-c', anchor: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }) },
+        arrowhead: false,
       }),
       expect.objectContaining({
         start: { markId: 'mark-a', anchor: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }) },
         end: { markId: 'mark-b', anchor: expect.objectContaining({ x: expect.any(Number), y: expect.any(Number) }) },
+        arrowhead: false,
       }),
     ]);
 

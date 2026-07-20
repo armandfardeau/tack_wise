@@ -337,6 +337,7 @@ describe('mark rotation controls', () => {
 
     expect(screen.getByLabelText('Line Color')).toHaveValue('#ef4444');
     expect(screen.getByLabelText('Line Style')).toHaveValue('dotted');
+    expect(screen.getByRole('checkbox', { name: /show arrowhead/i })).not.toBeChecked();
   });
 });
 
