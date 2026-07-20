@@ -79,7 +79,7 @@ export default function Inspector({
   onSetShowGrid,
   onTogglePlaying = () => undefined,
   onSetPlaySpeed = () => undefined,
-  playSpeed = 1000,
+  playSpeed = 2000,
   selectedBoat,
   selectedMark,
   selectedConnection,

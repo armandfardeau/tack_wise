@@ -124,7 +124,7 @@ export function useScenario() {
   const [selectedId, setSelectedId] = useState<string | null>(initialScenario.selectedId);
   const [selectedType, setSelectedType] = useState<SelectedType>(initialScenario.selectedType);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playSpeed, setPlaySpeed] = useState(1000);
+  const [playSpeed, setPlaySpeed] = useState(2000);
   const [playbackProgress, setPlaybackProgress] = useState(0);
   const [isPlaybackSampling, setIsPlaybackSampling] = useState(false);
   const [autoSailTrim, setAutoSailTrim] = useState(true);
