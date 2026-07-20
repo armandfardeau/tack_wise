@@ -92,6 +92,36 @@ describe('inspector deletion control', () => {
     expect(deleteButton.closest('h3')).toHaveClass('section-title');
     expect(screen.queryByText('Delete Mark')).not.toBeInTheDocument();
   });
+
+  it('places object duplication next to deletion in the inspector header', () => {
+    const onDuplicate = jest.fn();
+    render(
+      <Inspector
+        activeFrame={{ ...frame, marks: [mark] }}
+        autoSailTrim
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onDuplicate={onDuplicate}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={undefined}
+        selectedMark={mark}
+        selectedType="mark"
+        showGrid
+        updateBoat={jest.fn()}
+        updateActiveFrame={jest.fn()}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    const duplicateButton = screen.getByRole('button', { name: /duplicate mark/i });
+
+    expect(duplicateButton).toHaveClass('inspector-duplicate-btn');
+    expect(duplicateButton.nextElementSibling).toHaveClass('inspector-delete-btn');
+    fireEvent.click(duplicateButton);
+    expect(onDuplicate).toHaveBeenCalledTimes(1);
+  });
 });
 
 describe('inspector tabs', () => {

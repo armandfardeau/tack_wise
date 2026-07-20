@@ -912,6 +912,32 @@ body {
   font-size: 0.75rem;
 }
 
+.inspector-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.inspector-duplicate-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-cyan);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.inspector-duplicate-btn:hover,
+.inspector-duplicate-btn:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(34, 211, 238, 0.12);
+}
+
 .inspector-delete-btn:hover,
 .inspector-delete-btn:focus-visible {
   border-color: var(--accent-red);
@@ -1750,7 +1776,8 @@ body {
 }
 
 .light-theme .frame-delete-btn,
-.light-theme .inspector-delete-btn {
+.light-theme .inspector-delete-btn,
+.light-theme .inspector-duplicate-btn {
   background-color: rgba(255, 255, 255, 0.94);
   box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
 }
