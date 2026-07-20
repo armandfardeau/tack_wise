@@ -1,9 +1,24 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ComponentProps } from 'react';
 import AppHeader from '../src/components/AppHeader';
+
+const renderHeader = (overrides: Partial<ComponentProps<typeof AppHeader>> = {}) => render(
+  <AppHeader
+    isExporting={false}
+    onExport={jest.fn()}
+    onImportJson={jest.fn()}
+    {...overrides}
+  />,
+);
+
+function openExportDialog() {
+  fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+  fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+}
 
 describe('AppHeader', () => {
   it('renders the File menu in the top-level scenario tools bar', () => {
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+    renderHeader();
 
     const scenarioTools = document.querySelector('.header-tools');
 
@@ -12,43 +27,32 @@ describe('AppHeader', () => {
     expect(scenarioTools).toContainElement(screen.getByRole('button', { name: /view options/i }));
   });
 
-  it('delegates JSON export to the provided handler', () => {
-    const onExportJson = jest.fn();
+  it('delegates JSON export through the export dialog', () => {
+    const onExport = jest.fn();
+    renderHeader({ onExport });
 
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={onExportJson} onImportJson={jest.fn()} />);
+    openExportDialog();
+    fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'json' } });
+    fireEvent.click(screen.getByRole('button', { name: /export json scenario/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export json/i }));
-
-    expect(onExportJson).toHaveBeenCalledTimes(1);
+    expect(onExport).toHaveBeenCalledWith({ format: 'json', theme: 'dark', fps: 20 });
   });
 
-  it('keeps Import JSON direct and groups export under the File menu', () => {
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+  it('keeps Import JSON direct and opens Export as a modal', () => {
+    renderHeader();
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     expect(screen.getByRole('menuitem', { name: /import json/i })).toBeInTheDocument();
-
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
 
-    expect(screen.getByRole('menu', { name: /export options/i })).toBeInTheDocument();
+    expect(screen.getByRole('dialog', { name: /export/i })).toBeInTheDocument();
   });
 
   it('lists and loads situation templates from the File menu', () => {
     const onLoadTemplate = jest.fn();
     const template = { id: 'tacking-basics', title: 'Getting Started', frames: [] };
 
-    render(
-      <AppHeader
-        isExporting={false}
-        onExport={jest.fn()}
-        onExportJson={jest.fn()}
-        onImportJson={jest.fn()}
-        onLoadTemplate={onLoadTemplate}
-        templates={[template]}
-      />,
-    );
+    renderHeader({ onLoadTemplate, templates: [template] });
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
@@ -63,15 +67,7 @@ describe('AppHeader', () => {
       { id: 'r10', title: 'R10 — Opposite Tacks', frames: [] },
     ];
 
-    render(
-      <AppHeader
-        isExporting={false}
-        onExport={jest.fn()}
-        onExportJson={jest.fn()}
-        onImportJson={jest.fn()}
-        templates={templates}
-      />,
-    );
+    renderHeader({ templates });
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
@@ -81,37 +77,40 @@ describe('AppHeader', () => {
     expect(screen.queryByRole('menuitem', { name: /getting started/i })).not.toBeInTheDocument();
   });
 
-  it('provides titles for export menu items', () => {
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+  it('shows all format choices in the export dialog', () => {
+    renderHeader();
 
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    openExportDialog();
 
-    expect(screen.getByRole('menuitem', { name: /export json/i })).toHaveAttribute('title', 'Export JSON');
-    expect(screen.getByRole('menuitem', { name: /export gif/i })).toHaveAttribute('title', 'Export GIF');
-    expect(screen.getByRole('menuitem', { name: /export video \(webm\)/i })).toHaveAttribute('title', 'Export Video (WEBM)');
-    expect(screen.getByRole('menuitem', { name: /export video \(mp4\)/i })).toHaveAttribute('title', 'Export Video (MP4)');
+    const formatSelect = screen.getByRole('combobox', { name: /export format/i });
+    expect(formatSelect).toHaveValue('png');
+    expect(screen.getByRole('option', { name: /png image/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /jpg image/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /gif animation/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /webm video/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /mp4 video/i })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /json scenario/i })).toBeInTheDocument();
   });
 
-  it('delegates WEBM and MP4 video exports separately', () => {
+  it('delegates WEBM and MP4 exports with their selected FPS', () => {
     const onExport = jest.fn();
+    renderHeader({ onExport });
 
-    render(<AppHeader isExporting={false} onExport={onExport} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+    openExportDialog();
+    fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'webm' } });
+    fireEvent.click(screen.getByRole('button', { name: /export webm video/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export video \(webm\)/i }));
+    openExportDialog();
+    fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'mp4' } });
+    fireEvent.change(screen.getByRole('combobox', { name: /export fps/i }), { target: { value: '10' } });
+    fireEvent.click(screen.getByRole('button', { name: /export mp4 video/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export video \(mp4\)/i }));
-
-    expect(onExport).toHaveBeenNthCalledWith(1, 'webm');
-    expect(onExport).toHaveBeenNthCalledWith(2, 'mp4');
+    expect(onExport).toHaveBeenNthCalledWith(1, { format: 'webm', theme: 'dark', fps: 20 });
+    expect(onExport).toHaveBeenNthCalledWith(2, { format: 'mp4', theme: 'dark', fps: 10 });
   });
 
-  it('disables JSON export while another export is running', () => {
-    render(<AppHeader isExporting onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+  it('disables the File menu while another export is running', () => {
+    renderHeader({ isExporting: true });
 
     expect(screen.getByRole('button', { name: /file options/i })).toBeDisabled();
   });
@@ -120,7 +119,7 @@ describe('AppHeader', () => {
     const onImportJson = jest.fn();
     const file = new File(['{}'], 'scenario.json', { type: 'application/json' });
 
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={onImportJson} />);
+    renderHeader({ onImportJson });
 
     fireEvent.change(screen.getByLabelText(/import scenario json file/i), {
       target: { files: [file] },
@@ -130,7 +129,7 @@ describe('AppHeader', () => {
   });
 
   it('does not render a burger menu trigger', () => {
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
+    renderHeader();
 
     expect(screen.queryByRole('button', { name: /open controls menu/i })).not.toBeInTheDocument();
   });
@@ -139,64 +138,27 @@ describe('AppHeader', () => {
     const onToggleTheme = jest.fn();
     const onTogglePresenter = jest.fn();
 
-    render(
-      <AppHeader
-        isExporting={false}
-        onExport={jest.fn()}
-        onExportJson={jest.fn()}
-        onImportJson={jest.fn()}
-        onToggleTheme={onToggleTheme}
-        onTogglePresenter={onTogglePresenter}
-        theme="dark"
-      />,
-    );
+    renderHeader({ onToggleTheme, onTogglePresenter, theme: 'dark' });
 
     fireEvent.click(screen.getByRole('button', { name: /view options/i }));
     expect(screen.getByRole('menuitem', { name: /switch to light mode/i })).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /presenter mode/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('menuitem', { name: /switch to light mode/i }));
-
     expect(onToggleTheme).toHaveBeenCalledTimes(1);
 
     fireEvent.click(screen.getByRole('button', { name: /view options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /presenter mode/i }));
-
     expect(onTogglePresenter).toHaveBeenCalledTimes(1);
   });
 
   it('copies a share link through the optional handler', () => {
     const onShareScenario = jest.fn();
 
-    render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} onShareScenario={onShareScenario} />);
+    renderHeader({ onShareScenario });
 
     fireEvent.click(screen.getByRole('button', { name: /copy share link/i }));
 
     expect(onShareScenario).toHaveBeenCalledTimes(1);
-  });
-
-  it('exposes image export actions and delegates their selected formats', () => {
-    const onExport = jest.fn();
-    const onExportImage = jest.fn();
-
-    render(<AppHeader isExporting={false} onExport={onExport} onExportImage={onExportImage} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
-
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export gif/i }));
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export video \(mp4\)/i }));
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export png/i }));
-    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /export jpg/i }));
-
-    expect(onExport).toHaveBeenNthCalledWith(1, 'gif');
-    expect(onExport).toHaveBeenNthCalledWith(2, 'mp4');
-    expect(onExportImage).toHaveBeenNthCalledWith(1, 'png');
-    expect(onExportImage).toHaveBeenNthCalledWith(2, 'jpeg');
   });
 });

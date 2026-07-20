@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { useScenarioExport } from '../src/hooks/useScenarioExport';
-import { downloadBlob } from '../src/utils/exporter';
+import { downloadBlob, exportToGif } from '../src/utils/exporter';
 import { convertWebmToMp4, encodePngFramesToVideo } from '../src/utils/mp4';
 import type { Frame } from '../src/types';
 
@@ -56,9 +56,10 @@ const originalRequestAnimationFrame = window.requestAnimationFrame;
 function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, stage: KonvaStage | null = null) {
   const track = { stop: jest.fn() };
   const canvas = document.createElement('canvas');
+  const captureStream = jest.fn(() => ({ getTracks: () => [track] }));
   Object.defineProperty(canvas, 'captureStream', {
     configurable: true,
-    value: jest.fn(() => ({ getTracks: () => [track] })),
+    value: captureStream,
   });
   const canvasWrap = document.createElement('div');
   canvasWrap.className = 'canvas-wrap';
@@ -82,7 +83,7 @@ function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, 
     stageSize: { width: 800, height: 600 },
   }));
 
-  return { ...hook, canvas, setCurrentFrameIndex, setPlaybackProgress, setIsPlaybackSampling, setIsPlaying, track };
+  return { ...hook, canvas, captureStream, setCurrentFrameIndex, setPlaybackProgress, setIsPlaybackSampling, setIsPlaying, track };
 }
 
 describe('useScenarioExport video exports', () => {
@@ -103,6 +104,7 @@ describe('useScenarioExport video exports', () => {
     TestMediaRecorder.supportedMimeTypes = new Set();
     TestMediaRecorder.isTypeSupported.mockClear();
     jest.mocked(downloadBlob).mockClear();
+    jest.mocked(exportToGif).mockReset();
     jest.mocked(convertWebmToMp4).mockReset();
     jest.mocked(encodePngFramesToVideo).mockReset();
     jest.spyOn(Date, 'now').mockReturnValue(123);
@@ -119,7 +121,7 @@ describe('useScenarioExport video exports', () => {
 
   it('records and downloads WEBM without converting it', async () => {
     TestMediaRecorder.supportedMimeTypes.add('video/webm;codecs=vp9');
-    const { result, setIsPlaying, setIsPlaybackSampling, track } = renderVideoExport();
+    const { result, captureStream, setIsPlaying, setIsPlaybackSampling, track } = renderVideoExport();
 
     await act(async () => {
       await result.current.triggerExport('webm');
@@ -134,6 +136,7 @@ describe('useScenarioExport video exports', () => {
     expect(setIsPlaying).toHaveBeenCalledWith(false);
     expect(setIsPlaybackSampling).toHaveBeenCalledWith(true);
     expect(setIsPlaybackSampling).toHaveBeenLastCalledWith(false);
+    expect(captureStream).toHaveBeenCalledWith(15);
     expect(track.stop).toHaveBeenCalledTimes(1);
   });
 
@@ -157,6 +160,17 @@ describe('useScenarioExport video exports', () => {
       expect.any(Function),
     );
     expect(downloadBlob).toHaveBeenCalledWith(encodedBlob, 'regatta-simulation-123.webm');
+  });
+
+  it('uses the selected FPS for video capture', async () => {
+    TestMediaRecorder.supportedMimeTypes.add('video/webm;codecs=vp9');
+    const { result, captureStream } = renderVideoExport();
+
+    await act(async () => {
+      await result.current.triggerExport('webm', 30);
+    });
+
+    expect(captureStream).toHaveBeenCalledWith(30);
   });
 
   it('samples intermediate playback progress for multi-frame video exports', async () => {
@@ -203,5 +217,33 @@ describe('useScenarioExport video exports', () => {
     expect(recordedWebm.type).toBe('video/webm;codecs=vp8');
     expect(jest.mocked(convertWebmToMp4).mock.calls[0][1]).toEqual(expect.any(Function));
     expect(jest.mocked(downloadBlob)).toHaveBeenCalledWith(convertedBlob, 'regatta-simulation-123.mp4');
+  });
+
+  it('uses the selected FPS as the GIF frame delay', async () => {
+    const stage = {
+      toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
+    } as unknown as KonvaStage;
+    const { result } = renderVideoExport(frames, 0, stage);
+    const createObjectURL = jest.fn(() => 'blob:frame-1');
+    const revokeObjectURL = jest.fn();
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: revokeObjectURL });
+    jest.mocked(exportToGif).mockResolvedValue(new Blob(['gif'], { type: 'image/gif' }));
+
+    await act(async () => {
+      await result.current.triggerExport('gif', 10);
+    });
+
+    expect(jest.mocked(exportToGif)).toHaveBeenCalledWith(
+      ['blob:frame-1'],
+      0.1,
+      800,
+      600,
+      expect.objectContaining({ sampleInterval: 10 }),
+    );
+    expect(createObjectURL).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:frame-1');
+    delete (URL as unknown as { createObjectURL?: unknown }).createObjectURL;
+    delete (URL as unknown as { revokeObjectURL?: unknown }).revokeObjectURL;
   });
 });

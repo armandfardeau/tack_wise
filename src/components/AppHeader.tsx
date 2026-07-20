@@ -2,15 +2,13 @@ import ExportActions from './ExportActions';
 import ViewActions from './ViewActions';
 import type { SituationTemplate } from '../data/situationTemplates';
 import { Copy, Sailboat } from 'lucide-react';
-import type { ExportQuality, Theme, VideoExportType } from '../types';
+import type { ExportOptions, ExportQuality, Theme } from '../types';
 
 interface AppHeaderProps {
   isExporting: boolean;
   presenterMode?: boolean;
   onNewScenario?: () => void;
-  onExport: (type: 'gif' | VideoExportType) => void;
-  onExportImage?: (type: 'png' | 'jpeg') => void;
-  onExportJson: () => void;
+  onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
   onShareScenario?: () => void;
   onContributeTemplate?: () => void;
@@ -30,8 +28,6 @@ export default function AppHeader({
   presenterMode = false,
   onNewScenario,
   onExport,
-  onExportImage,
-  onExportJson,
   onImportJson,
   onShareScenario,
   onContributeTemplate,
@@ -59,8 +55,6 @@ export default function AppHeader({
           isExporting={isExporting}
           onNewScenario={onNewScenario}
           onExport={onExport}
-          onExportImage={onExportImage}
-          onExportJson={onExportJson}
           onImportJson={onImportJson}
           onLoadTemplate={onLoadTemplate}
           onContributeTemplate={onContributeTemplate}
@@ -69,6 +63,7 @@ export default function AppHeader({
           templates={templates}
           exportQuality={exportQuality}
           onExportQualityChange={onExportQualityChange}
+          theme={theme}
         />
         <ViewActions
           className="view-actions header-view-actions"
