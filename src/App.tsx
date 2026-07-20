@@ -4,6 +4,7 @@ import './App.css';
 import AppHeader from './components/AppHeader';
 import CanvasWorkspace, { type InspectorRequest } from './components/CanvasWorkspace';
 import ExportOverlay from './components/ExportOverlay';
+import NewScenarioDialog from './components/NewScenarioDialog';
 import Sidebar from './components/Sidebar';
 import TemplateContributionDialog from './components/TemplateContributionDialog';
 import { CANVAS_ZOOM_STEP } from './constants';
@@ -50,6 +51,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [inspectorRequest, setInspectorRequest] = useState<InspectorRequest | null>(null);
   const [isImageExporting, setIsImageExporting] = useState(false);
+  const [isNewScenarioDialogOpen, setIsNewScenarioDialogOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [loadedTemplateId, setLoadedTemplateId] = useState<string | null>(null);
   const [templateContributionMode, setTemplateContributionMode] = useState<TemplateContributionMode | null>(null);
@@ -77,11 +79,6 @@ export default function App() {
   }, [importScenario]);
 
   const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
-
-  const handleNewScenario = () => {
-    scenario.createNewScenario();
-    setLoadedTemplateId(null);
-  };
 
   const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
     scenario.importScenario(scenarioPayloadFromTemplate(template));
@@ -142,6 +139,26 @@ export default function App() {
   });
 
   const isCanvasExporting = exportState.isExporting || isImageExporting;
+
+  const resetToNewScenario = () => {
+    scenario.createNewScenario();
+    setLoadedTemplateId(null);
+    setIsNewScenarioDialogOpen(false);
+  };
+
+  const handleNewScenario = () => {
+    if (scenario.hasUnsavedChanges) {
+      setIsNewScenarioDialogOpen(true);
+      return;
+    }
+
+    resetToNewScenario();
+  };
+
+  const handleExportAndStartNewScenario = () => {
+    exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex);
+    resetToNewScenario();
+  };
 
   const handleImageExport = (type: 'png' | 'jpeg') => {
     flushSync(() => setIsImageExporting(true));
@@ -304,6 +321,14 @@ export default function App() {
         <ExportOverlay
           exportProgress={exportState.exportProgress}
           exportType={exportState.exportType}
+        />
+      )}
+
+      {isNewScenarioDialogOpen && (
+        <NewScenarioDialog
+          onCancel={() => setIsNewScenarioDialogOpen(false)}
+          onExportAndContinue={handleExportAndStartNewScenario}
+          onDiscard={resetToNewScenario}
         />
       )}
 

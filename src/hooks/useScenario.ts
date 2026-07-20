@@ -133,6 +133,7 @@ export function useScenario() {
   const [hasAutosave, setHasAutosave] = useState(() => {
     return Boolean(readAutosave());
   });
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [libraryItems, setLibraryItems] = useState<ScenarioRepositoryItem[]>(() => listScenarioRepositoryItems());
   const skipInitialAutosaveRef = useRef(true);
   const playbackProgressRef = useRef(0);
@@ -254,6 +255,7 @@ export function useScenario() {
       const nextFrames = updater(previousFrames);
       if (nextFrames === previousFrames) return previousFrames;
 
+      setHasUnsavedChanges(true);
       setHistory((previousHistory) => ({
         past: [...previousHistory.past, cloneScenarioFrames(previousFrames)].slice(-MAX_HISTORY_LENGTH),
         future: [],
@@ -310,6 +312,7 @@ export function useScenario() {
       title: 'Untitled situation',
     });
     setHistory({ past: [], future: [] });
+    setHasUnsavedChanges(false);
     clearSelection();
   };
 
@@ -617,6 +620,7 @@ export function useScenario() {
       showFrameNumber: payload.settings.showFrameNumber ?? true,
     } : DEFAULT_SCENARIO_SETTINGS);
     setHistory({ past: [], future: [] });
+    setHasUnsavedChanges(false);
     setSelectedId(firstBoat?.id ?? firstMark?.id ?? firstArrow?.id ?? firstComment?.id ?? null);
     setSelectedType(firstBoat ? 'boat' : firstMark ? 'mark' : firstArrow ? 'arrow' : firstComment ? 'comment' : null);
   };
@@ -923,7 +927,13 @@ export function useScenario() {
   };
 
   const updateSettings = (changes: Partial<ScenarioSettings>) => {
-    setSettings((previousSettings) => ({ ...previousSettings, ...changes }));
+    setSettings((previousSettings) => {
+      const changed = (Object.keys(changes) as Array<keyof ScenarioSettings>).some((key) => previousSettings[key] !== changes[key]);
+      if (!changed) return previousSettings;
+
+      setHasUnsavedChanges(true);
+      return { ...previousSettings, ...changes };
+    });
   };
 
   const addRuleToActiveFrame = (rule: RuleReference) => {
@@ -945,6 +955,7 @@ export function useScenario() {
     frames,
     displayFrame,
     hasAutosave,
+    hasUnsavedChanges,
     libraryItems,
     importScenario,
     isPlaying,
