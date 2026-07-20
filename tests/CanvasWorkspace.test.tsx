@@ -1,5 +1,5 @@
 import { createRef, type ReactNode } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import CanvasWorkspace from '../src/components/CanvasWorkspace';
 import type { Frame } from '../src/types';
 
@@ -124,5 +124,9 @@ describe('CanvasWorkspace', () => {
     await waitFor(() => expect(onCloseControls).toHaveBeenCalledTimes(1));
     expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
     expect(screen.getByText('Inspector')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(screen.queryByTestId('floating-inspector')).not.toBeInTheDocument());
   });
 });

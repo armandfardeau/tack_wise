@@ -1095,7 +1095,29 @@ body {
 
 .inspector-actions {
   display: inline-flex;
+  flex-shrink: 0;
   gap: 6px;
+}
+
+.inspector-close-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.inspector-close-btn:hover,
+.inspector-close-btn:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(34, 211, 238, 0.12);
+  color: var(--accent-cyan-hover);
 }
 
 .inspector-duplicate-btn {
@@ -1352,6 +1374,27 @@ body {
   justify-content: space-between;
   margin-bottom: 14px;
   color: var(--accent-cyan-hover);
+}
+
+.floating-inspector .inspector-title-content {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.inspector-object-name {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
 }
 
 .floating-add-menu {
@@ -2004,7 +2047,8 @@ body {
 
 .light-theme .frame-delete-btn,
 .light-theme .inspector-delete-btn,
-.light-theme .inspector-duplicate-btn {
+.light-theme .inspector-duplicate-btn,
+.light-theme .inspector-close-btn {
   background-color: rgba(255, 255, 255, 0.94);
   box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
 }

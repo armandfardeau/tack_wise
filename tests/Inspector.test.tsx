@@ -68,7 +68,7 @@ const image: DiagramImage = {
   height: 120,
 };
 
-function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark) {
+function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark, onClose = jest.fn()) {
   const selectedFrame = { ...frame, marks: [selectedMark] };
 
   render(
@@ -77,6 +77,7 @@ function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark) {
       autoSailTrim
       gridSnapEnabled
       onDelete={jest.fn()}
+      onClose={onClose}
       onSetGridSnapEnabled={jest.fn()}
       onSetAutoSailTrim={jest.fn()}
       onSetShowGrid={jest.fn()}
@@ -94,6 +95,18 @@ function renderMarkInspector(updateMark = jest.fn(), selectedMark = mark) {
 }
 
 describe('inspector deletion control', () => {
+  it('shows the selected object name and provides an explicit close button', () => {
+    const onClose = jest.fn();
+    renderMarkInspector(jest.fn(), mark, onClose);
+
+    expect(screen.getByRole('heading', { name: 'Inspector for Mark: Windward Mark' })).toBeInTheDocument();
+
+    const closeButton = screen.getByRole('button', { name: 'Close inspector' });
+    expect(closeButton).toHaveClass('inspector-close-btn');
+    fireEvent.click(closeButton);
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('places object deletion in the inspector header as an icon button', () => {
     renderMarkInspector();
 
