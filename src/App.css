@@ -2357,7 +2357,7 @@ body {
 }
 
 .light-theme .export-overlay {
-  background-color: rgba(238, 244, 243, 0.85);
+  background-color: rgba(20, 35, 38, 0.58);
 }
 
 .template-contribution-backdrop {
@@ -2719,6 +2719,7 @@ body {
 
 .export-spinner-box {
   background-color: var(--bg-sidebar);
+  color: var(--text-main);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 40px;
@@ -2730,6 +2731,14 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 16px;
+}
+
+.export-spinner-box h3 {
+  color: var(--text-main);
+}
+
+.export-spinner-box p {
+  color: var(--text-muted);
 }
 
 .spinner {
