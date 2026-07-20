@@ -145,9 +145,9 @@ export default function Timeline({
           <span className="timeline-control-label">Replay</span>
         </button>
         <select className="speed-selector" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))} aria-label="Playback speed">
-          <option value="2000">Slow (2s)</option>
-          <option value="1000">Normal (1s)</option>
-          <option value="500">Fast (0.5s)</option>
+          <option value="5000">Slow (5s)</option>
+          <option value="2000">Normal (2s)</option>
+          <option value="1000">Fast (1s)</option>
         </select>
         <button type="button" className="timeline-action-btn" aria-label="Add frame" onClick={onAddFrame}>
           <span className="timeline-control-icon" aria-hidden="true"><Plus size={16} /></span>

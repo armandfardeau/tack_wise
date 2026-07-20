@@ -1,7 +1,7 @@
 interface WindHudProps {
   windAngle: number;
   windSpeed: number;
-  onSelect: () => void;
+  onSelect?: () => void;
 }
 
 export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps) {

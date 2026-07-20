@@ -1,6 +1,7 @@
 import type { CommentNote, DiagramImage, DisplayMode, Frame, Boat, Mark, TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
+import { DEFAULT_BOAT_ASPECT_RATIO, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MAX_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO } from '../constants';
 import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
@@ -130,6 +131,19 @@ export default function Inspector({
           <div className="form-row">
             <label htmlFor="boat-color">Color</label>
             <input id="boat-color" type="color" value={selectedBoat.color} onChange={(event) => updateBoat(selectedBoat.id, { color: event.target.value })} />
+          </div>
+          <div className="form-row">
+            <label htmlFor="boat-aspect-ratio">Boat aspect ratio ({(selectedBoat.aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO).toFixed(2)})</label>
+            <input
+              id="boat-aspect-ratio"
+              type="range"
+              min={MIN_BOAT_ASPECT_RATIO}
+              max={MAX_BOAT_ASPECT_RATIO}
+              step="0.01"
+              value={selectedBoat.aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO}
+              onChange={(event) => updateBoat(selectedBoat.id, { aspectRatio: Number(event.target.value) })}
+            />
+            <p className="grid-hint">Beam relative to hull length.</p>
           </div>
           <div className="form-row">
             <label htmlFor="boat-heading">Heading ({selectedBoat.heading}°)</label>
@@ -311,9 +325,9 @@ function PlaybackInspector({
       <div className="form-row">
         <label htmlFor="playback-speed">Playback speed</label>
         <select id="playback-speed" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))}>
-          <option value="2000">Slow (2s)</option>
-          <option value="1000">Normal (1s)</option>
-          <option value="500">Fast (0.5s)</option>
+          <option value="5000">Slow (5s)</option>
+          <option value="2000">Normal (2s)</option>
+          <option value="1000">Fast (1s)</option>
         </select>
       </div>
       <button
@@ -370,8 +384,36 @@ function MarkInspector({ activeFrame, mark, updateMark }: MarkInspectorProps) {
           <option value="square">Spar (Square)</option>
           <option value="obstruction">Obstruction</option>
           <option value="gate">Gate</option>
+          <option value="committeeBoat">Committee boat</option>
         </select>
       </div>
+      <div className="form-row">
+        <label htmlFor="mark-size">Mark size ({mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}px)</label>
+        <input
+          id="mark-size"
+          type="range"
+          min="12"
+          max="160"
+          step="1"
+          value={mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}
+          onChange={(event) => updateMark(mark.id, { size: Number(event.target.value) })}
+        />
+      </div>
+      {mark.shape === 'obstruction' && (
+        <div className="form-row">
+          <label htmlFor="mark-proximity-radius">Proximity radius ({mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS} boat lengths)</label>
+          <input
+            id="mark-proximity-radius"
+            type="range"
+            min="1"
+            max="8"
+            step="0.5"
+            value={mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS}
+            onChange={(event) => updateMark(mark.id, { proximityRadius: Number(event.target.value) })}
+          />
+          <p className="grid-hint">Default: three boat lengths.</p>
+        </div>
+      )}
       <div className="form-row flex-row">
         <label className="checkbox-label">
           <input

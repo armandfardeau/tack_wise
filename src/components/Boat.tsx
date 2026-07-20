@@ -1,4 +1,5 @@
 import { Group, Line, Path, Circle, Text } from 'react-konva';
+import { DEFAULT_BOAT_ASPECT_RATIO, MAX_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO } from '../constants';
 import type { Boat as BoatModel } from '../types';
 
 interface BoatProps {
@@ -12,11 +13,18 @@ interface BoatProps {
   onDragMove?: (boatId: string, pos: { x: number; y: number }) => void;
   /** Optional function that snaps a raw {x,y} to a constrained position */
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, isShadow = false }: BoatProps) {
+function clampAspectRatio(aspectRatio: number | undefined) {
+  return Math.min(Math.max(aspectRatio ?? DEFAULT_BOAT_ASPECT_RATIO, MIN_BOAT_ASPECT_RATIO), MAX_BOAT_ASPECT_RATIO);
+}
+
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false }: BoatProps) {
   const boatScale = 0.5;
+  const boatAspectRatio = clampAspectRatio(boat.aspectRatio);
+  const boatWidthScale = boatScale * (boatAspectRatio / DEFAULT_BOAT_ASPECT_RATIO);
 
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
@@ -40,7 +48,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         x={boat.x}
         y={boat.y}
         rotation={boat.heading}
-        scaleX={boatScale}
+        scaleX={boatWidthScale}
         scaleY={boatScale}
         draggable={false}
         opacity={0.22}
@@ -86,9 +94,9 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       x={boat.x}
       y={boat.y}
       rotation={boat.heading}
-      scaleX={boatScale}
+      scaleX={boatWidthScale}
       scaleY={boatScale}
-      draggable
+      draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
         onSelect?.(boat.id);
@@ -132,12 +140,12 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           stroke="#082f49"
           strokeWidth={2}
           hitStrokeWidth={24}
-          draggable
+          draggable={!readOnly}
           onMouseDown={(event) => { event.cancelBubble = true; }}
           onTouchStart={(event) => { event.cancelBubble = true; }}
           onDragStart={(event) => { event.cancelBubble = true; }}
           onDragMove={(event) => { event.cancelBubble = true; }}
-          onDragEnd={(event) => {
+            onDragEnd={readOnly ? undefined : (event) => {
             event.cancelBubble = true;
 
             const pointerPosition = event.target.getStage()?.getPointerPosition();
@@ -152,7 +160,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
             }
 
             event.target.position({ x: 0, y: -88 });
-          }}
+            }}
         />
       )}
 

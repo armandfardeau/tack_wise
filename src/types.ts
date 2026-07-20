@@ -12,6 +12,8 @@ export interface Boat {
   y: number;
   heading: number; // heading in degrees (0 = North, clockwise)
   sailAngle: number; // sail angle relative to centerline (-90 to +90 degrees)
+  /** Beam-to-length ratio used to render different boat proportions. */
+  aspectRatio?: number;
   showHeadingLine?: boolean;
 }
 
@@ -21,8 +23,10 @@ export interface Mark {
   color: string;
   x: number;
   y: number;
-  shape: 'circle' | 'triangle' | 'square' | 'obstruction' | 'gate';
+  shape: 'circle' | 'triangle' | 'square' | 'obstruction' | 'gate' | 'committeeBoat';
   size?: number;
+  /** Radius of an obstruction's proximity circle, measured in boat lengths. */
+  proximityRadius?: number;
   showRotationArrow?: boolean;
   rotationDirection?: 'clockwise' | 'counterclockwise';
   connectedToMarkId?: string | null;

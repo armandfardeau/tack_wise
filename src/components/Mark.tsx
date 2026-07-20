@@ -1,4 +1,5 @@
 import { Circle, Group, Line, Rect, RegularPolygon, Text } from 'react-konva';
+import { BOAT_LENGTH, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import type { Mark as MarkModel } from '../types';
 
 interface MarkProps {
@@ -9,10 +10,11 @@ interface MarkProps {
   onSelect?: (markId: string) => void;
   /** Optional function that snaps a raw {x,y} to a constrained position */
   snapFn?: (pos: { x: number; y: number }) => { x: number; y: number };
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, isShadow = false }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, snapFn, readOnly = false, isShadow = false }: MarkProps) {
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
     const strokeColor = isShadow ? '#94a3b8' : isSelected ? '#ffffff' : '#1e293b';
@@ -29,7 +31,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
         return (
           <RegularPolygon
             sides={3}
-            radius={16}
+            radius={markSize / 2}
             fill={fillColor}
             stroke={strokeColor}
             strokeWidth={strokeWidth}
@@ -59,17 +61,27 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
         );
       case 'obstruction':
         return (
-          <Circle
-            radius={markSize / 2}
-            fill={fillColor}
-            stroke={strokeColor}
-            strokeWidth={strokeWidth}
-            dash={[6, 5]}
-            shadowColor={shadowColor}
-            shadowBlur={shadowBlur}
-            shadowOpacity={shadowOpacity}
-            shadowOffset={shadowOffset}
-          />
+          <Group>
+            <Circle
+              radius={(mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS) * BOAT_LENGTH}
+              fill="transparent"
+              stroke={strokeColor}
+              strokeWidth={isSelected ? 2 : 1}
+              dash={[10, 8]}
+              opacity={isShadow ? 0.7 : 0.55}
+            />
+            <Circle
+              radius={markSize / 2}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              dash={[6, 5]}
+              shadowColor={shadowColor}
+              shadowBlur={shadowBlur}
+              shadowOpacity={shadowOpacity}
+              shadowOffset={shadowOffset}
+            />
+          </Group>
         );
       case 'gate':
         return (
@@ -77,6 +89,27 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
             <Line points={[-markSize, 0, markSize, 0]} stroke={strokeColor} strokeWidth={Math.max(2, strokeWidth)} />
             <Circle radius={markSize / 3} fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} x={-markSize / 2} />
             <Circle radius={markSize / 3} fill={fillColor} stroke={strokeColor} strokeWidth={strokeWidth} x={markSize / 2} />
+          </Group>
+        );
+      case 'committeeBoat':
+        return (
+          <Group>
+            <Rect
+              x={-markSize}
+              y={-markSize / 4}
+              width={markSize * 2}
+              height={markSize / 2}
+              fill={fillColor}
+              stroke={strokeColor}
+              strokeWidth={strokeWidth}
+              cornerRadius={3}
+              shadowColor={shadowColor}
+              shadowBlur={shadowBlur}
+              shadowOpacity={shadowOpacity}
+              shadowOffset={shadowOffset}
+            />
+            <Line points={[0, -markSize / 4, 0, -markSize / 1.4]} stroke={strokeColor} strokeWidth={Math.max(1, strokeWidth / 2)} />
+            <RegularPolygon x={markSize / 4} y={-markSize / 1.5} sides={3} radius={markSize / 5} rotation={90} fill={fillColor} stroke={strokeColor} strokeWidth={Math.max(1, strokeWidth / 2)} />
           </Group>
         );
       case 'circle':
@@ -114,7 +147,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
     <Group
       x={mark.x}
       y={mark.y}
-      draggable
+      draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
         onSelect?.(mark.id);

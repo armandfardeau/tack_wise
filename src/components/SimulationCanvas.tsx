@@ -23,6 +23,7 @@ interface SimulationCanvasProps {
   constrainPosition: (position: Position) => Position;
   currentFrameIndex: number;
   displayMode: DisplayMode;
+  readOnly?: boolean;
   presenterMode: boolean;
   isExporting: boolean;
   theme: Theme;
@@ -56,6 +57,7 @@ export default function SimulationCanvas({
   constrainPosition,
   currentFrameIndex,
   displayMode,
+  readOnly = false,
   presenterMode,
   isExporting,
   theme,
@@ -175,7 +177,8 @@ export default function SimulationCanvas({
               <Mark
                 mark={mark}
                 isSelected={selectedId === mark.id}
-                onOpenInspector={() => onOpenInspector(mark.id, 'mark')}
+                readOnly={readOnly}
+                onOpenInspector={readOnly ? undefined : () => onOpenInspector(mark.id, 'mark')}
                 snapFn={(position) => getSnappedAbsolutePosition(mark.id, position)}
               onSelect={(id) => {
                 onSelectObject(id, 'mark');
@@ -194,7 +197,8 @@ export default function SimulationCanvas({
             key={boat.id}
             boat={boat}
             isSelected={selectedId === boat.id}
-            onOpenInspector={() => onOpenInspector(boat.id, 'boat')}
+            readOnly={readOnly}
+            onOpenInspector={readOnly ? undefined : () => onOpenInspector(boat.id, 'boat')}
             snapFn={
               gridSnapEnabled
                 ? (position) => getSnappedAbsolutePosition(boat.id, position)
@@ -217,7 +221,8 @@ export default function SimulationCanvas({
             key={arrow.id}
             arrow={arrow}
             isSelected={selectedId === arrow.id}
-            onOpenInspector={() => onOpenInspector(arrow.id, 'arrow')}
+            readOnly={readOnly}
+            onOpenInspector={readOnly ? undefined : () => onOpenInspector(arrow.id, 'arrow')}
             onSelect={(id) => onSelectObject(id, 'arrow')}
             onMove={onMoveArrow}
           />
@@ -229,7 +234,8 @@ export default function SimulationCanvas({
             comment={comment}
             isSelected={selectedId === comment.id}
             theme={theme}
-            onOpenInspector={() => onOpenInspector(comment.id, 'comment')}
+            readOnly={readOnly}
+            onOpenInspector={readOnly ? undefined : () => onOpenInspector(comment.id, 'comment')}
             onSelect={(id) => onSelectObject(id, 'comment')}
             onMove={onMoveComment}
           />
@@ -240,7 +246,8 @@ export default function SimulationCanvas({
             key={image.id}
             image={image}
             isSelected={selectedId === image.id}
-            onOpenInspector={() => onOpenInspector(image.id, 'image')}
+            readOnly={readOnly}
+            onOpenInspector={readOnly ? undefined : () => onOpenInspector(image.id, 'image')}
             onSelect={(id) => onSelectObject(id, 'image')}
             onMove={onMoveImage}
           />

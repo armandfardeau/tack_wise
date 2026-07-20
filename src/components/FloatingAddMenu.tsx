@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ArrowUpRight, DoorOpen, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
+import { ArrowUpRight, DoorOpen, Flag, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
 import type { Mark } from '../types';
 
 interface FloatingAddMenuProps {
@@ -95,6 +95,7 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark())}><MapPin aria-hidden="true" size={16} /> <span>Add mark</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('obstruction'))}><TriangleAlert aria-hidden="true" size={16} /> <span>Add obstruction</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('gate'))}><DoorOpen aria-hidden="true" size={16} /> <span>Add gate</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('committeeBoat'))}><Flag aria-hidden="true" size={16} /> <span>Add committee boat</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(onAddArrow)}><ArrowUpRight aria-hidden="true" size={16} /> <span>Add arrow</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(onAddComment)}><MessageCircle aria-hidden="true" size={16} /> <span>Add comment</span></button>
           <button type="button" className="floating-add-action" onClick={() => imageInputRef.current?.click()}><Image aria-hidden="true" size={16} /> <span>Add image</span></button>

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { BOAT_COLORS, MARK_COLORS } from '../constants';
+import { BOAT_COLORS, DEFAULT_BOAT_ASPECT_RATIO, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MARK_COLORS } from '../constants';
 import { cloneFrames, initialScenarioTitle } from '../data/initialFrames';
 import type {
   Boat,
@@ -90,7 +90,7 @@ export function useScenario() {
   const [selectedId, setSelectedId] = useState<string | null>(initialScenario.selectedId);
   const [selectedType, setSelectedType] = useState<SelectedType>(initialScenario.selectedType);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playSpeed, setPlaySpeed] = useState(1000);
+  const [playSpeed, setPlaySpeed] = useState(2000);
   const [autoSailTrim, setAutoSailTrim] = useState(true);
   const [settings, setSettings] = useState<ScenarioSettings>(initialScenario.settings);
   const [history, setHistory] = useState<HistoryState>({ past: [], future: [] });
@@ -187,6 +187,25 @@ export function useScenario() {
   const clearSelection = () => {
     setSelectedId(null);
     setSelectedType(null);
+  };
+
+  const createNewScenario = () => {
+    setIsPlaying(false);
+    setFrames([{
+      id: `frame-${Date.now()}`,
+      name: 'Frame 1',
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [],
+      marks: [],
+    }]);
+    setCurrentFrameIndex(0);
+    setSettings({
+      ...DEFAULT_SCENARIO_SETTINGS,
+      title: 'Untitled situation',
+    });
+    setHistory({ past: [], future: [] });
+    clearSelection();
   };
 
   const updateActiveFrame = (changes: Partial<Frame>) => {
@@ -413,6 +432,7 @@ export function useScenario() {
       y: 200 + Math.random() * 200,
       heading: 0,
       sailAngle: 0,
+      aspectRatio: DEFAULT_BOAT_ASPECT_RATIO,
     };
 
     updateCurrentAndFutureFrames((frame) => ({
@@ -428,12 +448,19 @@ export function useScenario() {
   const addMark = (shape: Mark['shape'] = 'circle') => {
     const newMark: Mark = {
       id: `mark-${Date.now()}`,
-      name: shape === 'obstruction' ? 'Obstruction' : shape === 'gate' ? 'Gate' : `Mark ${activeFrame.marks.length + 1}`,
+      name: shape === 'obstruction'
+        ? 'Obstruction'
+        : shape === 'gate'
+          ? 'Gate'
+          : shape === 'committeeBoat'
+            ? 'Committee boat'
+            : `Mark ${activeFrame.marks.length + 1}`,
       color: MARK_COLORS[activeFrame.marks.length % MARK_COLORS.length],
       x: 150 + Math.random() * 300,
       y: 150 + Math.random() * 200,
       shape,
       size: shape === 'obstruction' ? 60 : 28,
+      proximityRadius: shape === 'obstruction' ? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS : undefined,
       showRotationArrow: false,
       rotationDirection: 'counterclockwise',
     };
@@ -537,6 +564,7 @@ export function useScenario() {
     autoSailTrim,
     clearAutosave,
     clearSelection,
+    createNewScenario,
     currentFrameIndex,
     deleteFrame,
     deleteSelected,

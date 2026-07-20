@@ -1,4 +1,5 @@
 import {
+  BOAT_LENGTH,
   CANVAS_PAN_MARGIN,
   COMMENT_PADDING_X,
   GRID_SNAP_RADIUS,
@@ -87,7 +88,14 @@ export function getCanvasContentRect(frames: Array<Pick<Frame, 'boats' | 'marks'
     });
 
     frame.marks.forEach((mark) => {
-      includeRect(mark.x - 40, mark.y - 40, mark.x + 40, mark.y + 40);
+      const markExtent = mark.shape === 'obstruction'
+        ? Math.max(mark.size ?? 60, (mark.proximityRadius ?? 3) * BOAT_LENGTH)
+        : mark.shape === 'gate'
+          ? Math.max(mark.size ?? 28, (mark.size ?? 28) * 1.2)
+          : mark.shape === 'committeeBoat'
+            ? Math.max(mark.size ?? 36, (mark.size ?? 36) * 2)
+            : mark.size ?? 40;
+      includeRect(mark.x - markExtent, mark.y - markExtent, mark.x + markExtent, mark.y + markExtent);
     });
 
     frame.arrows?.forEach((arrow) => {

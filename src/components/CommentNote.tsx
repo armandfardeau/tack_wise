@@ -10,10 +10,11 @@ interface CommentNoteProps {
   onMove?: (id: string, position: { x: number; y: number }) => void;
   onOpenInspector?: () => void;
   onSelect?: (id: string) => void;
+  readOnly?: boolean;
   isShadow?: boolean;
 }
 
-export default function CommentNote({ comment, isSelected, theme, onMove, onOpenInspector, onSelect, isShadow = false }: CommentNoteProps) {
+export default function CommentNote({ comment, isSelected, theme, onMove, onOpenInspector, onSelect, readOnly = false, isShadow = false }: CommentNoteProps) {
   const width = comment.width ?? 180;
   const fontSize = comment.fontSize ?? 14;
   const height = getCommentHeight(comment);
@@ -22,7 +23,7 @@ export default function CommentNote({ comment, isSelected, theme, onMove, onOpen
     <Group
       x={comment.x}
       y={comment.y}
-      draggable={!isShadow}
+      draggable={!isShadow && !readOnly}
       opacity={isShadow ? 0.22 : 1}
       listening={!isShadow}
       onClick={() => {

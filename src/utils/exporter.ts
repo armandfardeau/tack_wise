@@ -112,6 +112,7 @@ function isBoat(value: unknown): value is Boat {
     isFiniteNumber(value.y) &&
     isFiniteNumber(value.heading) &&
     isFiniteNumber(value.sailAngle) &&
+    (value.aspectRatio === undefined || isFiniteNumber(value.aspectRatio)) &&
     (value.showHeadingLine === undefined || typeof value.showHeadingLine === 'boolean')
   );
 }
@@ -125,8 +126,9 @@ function isMark(value: unknown): value is Mark {
     typeof value.color === 'string' &&
     isFiniteNumber(value.x) &&
     isFiniteNumber(value.y) &&
-    (value.shape === 'circle' || value.shape === 'triangle' || value.shape === 'square' || value.shape === 'obstruction' || value.shape === 'gate') &&
+    (value.shape === 'circle' || value.shape === 'triangle' || value.shape === 'square' || value.shape === 'obstruction' || value.shape === 'gate' || value.shape === 'committeeBoat') &&
     (value.size === undefined || isFiniteNumber(value.size)) &&
+    (value.proximityRadius === undefined || isFiniteNumber(value.proximityRadius)) &&
     (value.showRotationArrow === undefined || typeof value.showRotationArrow === 'boolean') &&
     (value.rotationDirection === undefined || value.rotationDirection === 'clockwise' || value.rotationDirection === 'counterclockwise') &&
     (value.connectedToMarkId === undefined || value.connectedToMarkId === null || typeof value.connectedToMarkId === 'string') &&
