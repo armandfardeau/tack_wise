@@ -34,6 +34,14 @@ interface HistoryState {
   future: Frame[][];
 }
 
+interface InitialScenarioState {
+  frames: Frame[];
+  currentFrameIndex: number;
+  settings: ScenarioSettings;
+  selectedId: string | null;
+  selectedType: SelectedType;
+}
+
 function cloneScenarioFrames(frames: Frame[]) {
   return cloneFrames(frames);
 }
@@ -42,19 +50,50 @@ function scenarioFramesFromPayload(payload: ScenarioExportPayload) {
   return cloneScenarioFrames(payload.frames);
 }
 
+function readAutosave(): ScenarioExportPayload | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.localStorage.getItem(AUTOSAVE_KEY);
+    return raw ? parseScenarioFromJson(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function getInitialScenarioState(): InitialScenarioState {
+  const autosave = readAutosave();
+  const frames = autosave ? scenarioFramesFromPayload(autosave) : cloneFrames();
+  const currentFrameIndex = autosave?.currentFrameIndex ?? 0;
+  const activeFrame = frames[currentFrameIndex] ?? frames[0];
+  const firstBoat = activeFrame.boats[0];
+  const firstMark = activeFrame.marks[0];
+  const firstArrow = activeFrame.arrows?.[0];
+  const firstComment = activeFrame.comments?.[0];
+  const firstImage = activeFrame.images?.[0];
+
+  return {
+    frames,
+    currentFrameIndex,
+    settings: autosave?.settings ? { ...autosave.settings } : DEFAULT_SCENARIO_SETTINGS,
+    selectedId: firstBoat?.id ?? firstMark?.id ?? firstArrow?.id ?? firstComment?.id ?? firstImage?.id ?? null,
+    selectedType: firstBoat ? 'boat' : firstMark ? 'mark' : firstArrow ? 'arrow' : firstComment ? 'comment' : firstImage ? 'image' : null,
+  };
+}
+
 export function useScenario() {
-  const [frames, setFrames] = useState<Frame[]>(() => cloneFrames());
-  const [currentFrameIndex, setCurrentFrameIndex] = useState(0);
-  const [selectedId, setSelectedId] = useState<string | null>('boat-1');
-  const [selectedType, setSelectedType] = useState<SelectedType>('boat');
+  const [initialScenario] = useState<InitialScenarioState>(getInitialScenarioState);
+  const [frames, setFrames] = useState<Frame[]>(initialScenario.frames);
+  const [currentFrameIndex, setCurrentFrameIndex] = useState(initialScenario.currentFrameIndex);
+  const [selectedId, setSelectedId] = useState<string | null>(initialScenario.selectedId);
+  const [selectedType, setSelectedType] = useState<SelectedType>(initialScenario.selectedType);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playSpeed, setPlaySpeed] = useState(1000);
   const [autoSailTrim, setAutoSailTrim] = useState(true);
-  const [settings, setSettings] = useState<ScenarioSettings>(DEFAULT_SCENARIO_SETTINGS);
+  const [settings, setSettings] = useState<ScenarioSettings>(initialScenario.settings);
   const [history, setHistory] = useState<HistoryState>({ past: [], future: [] });
   const [hasAutosave, setHasAutosave] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return Boolean(window.localStorage.getItem(AUTOSAVE_KEY));
+    return Boolean(readAutosave());
   });
   const [libraryItems, setLibraryItems] = useState<ScenarioRepositoryItem[]>(() => listScenarioRepositoryItems());
   const skipInitialAutosaveRef = useRef(true);

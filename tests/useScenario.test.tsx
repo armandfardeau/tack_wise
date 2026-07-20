@@ -61,6 +61,23 @@ describe('useScenario', () => {
     expect(result.current.selectedId).toBeNull();
   });
 
+  it('restores a boat deletion after the scenario is reloaded', () => {
+    const firstSession = renderHook(() => useScenario());
+
+    act(() => {
+      firstSession.result.current.deleteSelected();
+    });
+
+    expect(firstSession.result.current.activeFrame.boats.some((boat) => boat.id === 'boat-1')).toBe(false);
+    expect(JSON.parse(localStorage.getItem('tack-wise-autosave') ?? '{}').frames[0].boats.some((boat: { id: string }) => boat.id === 'boat-1')).toBe(false);
+
+    firstSession.unmount();
+
+    const reloadedSession = renderHook(() => useScenario());
+    expect(reloadedSession.result.current.activeFrame.boats.some((boat) => boat.id === 'boat-1')).toBe(false);
+    expect(reloadedSession.result.current.selectedId).not.toBe('boat-1');
+  });
+
   it('imports frames and selects an object from the imported current frame', () => {
     const { result } = renderHook(() => useScenario());
 

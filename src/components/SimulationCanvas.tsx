@@ -69,7 +69,7 @@ export default function SimulationCanvas({
   onMoveArrow,
   onMoveComment,
   onMoveImage,
-  onOpenControls,
+  onOpenControls: _onOpenControls,
   onOpenInspector,
   onSelectObject,
   onSnapPreview,
