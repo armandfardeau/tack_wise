@@ -1219,7 +1219,7 @@ body {
   font-size: 0.76rem;
   font-weight: 700;
   line-height: 1.35;
-  pointer-events: none;
+  pointer-events: auto;
   text-align: center;
   transform: translateX(-50%);
   animation: playbackToastIn 0.2s ease-out;
@@ -1228,6 +1228,38 @@ body {
 .playback-toast svg {
   flex: 0 0 auto;
   color: #fbbf24;
+}
+
+.playback-toast-dismiss {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  margin: -4px -6px -4px 2px;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.playback-toast-dismiss:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.playback-toast-dismiss:focus-visible {
+  background: rgba(255, 255, 255, 0.14);
+  outline: 2px solid currentColor;
+  outline-offset: 1px;
+}
+
+.light-theme .playback-toast-dismiss:hover {
+  background: rgba(146, 64, 14, 0.12);
+}
+
+.light-theme .playback-toast-dismiss:focus-visible {
+  background: rgba(146, 64, 14, 0.12);
 }
 
 .light-theme .playback-toast {

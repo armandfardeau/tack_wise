@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
-import { TriangleAlert } from 'lucide-react';
+import { TriangleAlert, X } from 'lucide-react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
 import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, MarkConnection, RuleComment, TacticalArrow } from '../types';
@@ -676,6 +676,14 @@ export default function CanvasWorkspace({
           <div className="playback-toast" role="status" aria-live="polite" aria-atomic="true">
             <TriangleAlert aria-hidden="true" size={17} />
             <span>{playbackToast}</span>
+            <button
+              type="button"
+              className="playback-toast-dismiss"
+              aria-label="Dismiss playback warning"
+              onClick={() => setPlaybackToast(null)}
+            >
+              <X aria-hidden="true" size={15} />
+            </button>
           </div>
         )}
         {shouldShowInspector && inspectorStyle && (

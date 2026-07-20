@@ -1,5 +1,5 @@
 import { createRef, type ReactNode } from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import CanvasWorkspace from '../src/components/CanvasWorkspace';
 import type { Frame } from '../src/types';
 
@@ -124,5 +124,94 @@ describe('CanvasWorkspace', () => {
     await waitFor(() => expect(onCloseControls).toHaveBeenCalledTimes(1));
     expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
     expect(screen.getByText('Inspector')).toBeInTheDocument();
+  });
+
+  it('allows the playback warning toast to be dismissed', () => {
+    render(
+      <CanvasWorkspace
+        activeFrame={frame}
+        inspectorFrame={frame}
+        autoSailTrim
+        canvasPosition={{ x: 0, y: 0 }}
+        canvasZoom={1}
+        constrainPosition={(position) => position}
+        currentFrameIndex={0}
+        displayMode="single"
+        showFrameTitle
+        showFrameNumber
+        presenterMode={false}
+        theme="dark"
+        frames={[frame]}
+        canRedo={false}
+        canUndo={false}
+        hasAutosave={false}
+        getSnappedPosition={(_, position) => position}
+        gridSnapEnabled
+        isPlaying={false}
+        playbackWarning="The boat cannot complete this manoeuvre."
+        isExporting={false}
+        handleCanvasDragEnd={jest.fn()}
+        handleCanvasTouchEnd={jest.fn()}
+        handleCanvasTouchMove={jest.fn()}
+        handleCanvasTouchStart={jest.fn()}
+        handleCanvasWheel={jest.fn()}
+        maxZoom={2}
+        minZoom={0.5}
+        onAddBoat={jest.fn()}
+        onAddMark={jest.fn()}
+        onAddArrow={jest.fn()}
+        onAddComment={jest.fn()}
+        onAddImage={jest.fn()}
+        onMoveBoat={jest.fn()}
+        onRotateBoat={jest.fn()}
+        onMoveMark={jest.fn()}
+        onMoveArrow={jest.fn()}
+        onMoveComment={jest.fn()}
+        onMoveImage={jest.fn()}
+        onDeleteSelected={jest.fn()}
+        onDuplicateSelected={jest.fn()}
+        onClearSelection={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetDisplayMode={jest.fn()}
+        onSetShowFrameTitle={jest.fn()}
+        onSetShowFrameNumber={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        onRedo={jest.fn()}
+        onRestoreAutosave={jest.fn()}
+        onTogglePlaying={jest.fn()}
+        onStepBackward={jest.fn()}
+        onStepForward={jest.fn()}
+        onReplayFromStart={jest.fn()}
+        onUndo={jest.fn()}
+        onSetPlaySpeed={jest.fn()}
+        playSpeed={1000}
+        onPanCanvasBy={jest.fn()}
+        onOpenControls={jest.fn()}
+        onCloseControls={jest.fn()}
+        onSelectObject={jest.fn()}
+        onSnapPreview={jest.fn()}
+        onZoomIn={jest.fn()}
+        onZoomOut={jest.fn()}
+        onAutoZoom={jest.fn()}
+        onResetZoom={jest.fn()}
+        selectedId={null}
+        selectedType={null}
+        selectedBoat={undefined}
+        selectedMark={undefined}
+        updateBoat={jest.fn()}
+        updateActiveFrame={jest.fn()}
+        updateMark={jest.fn()}
+        canvasWrapRef={createRef<HTMLDivElement>()}
+        showGrid
+        snapTarget={null}
+        stageRef={createRef()}
+        stageSize={{ width: 1000, height: 800 }}
+      />,
+    );
+
+    expect(screen.getByText('The boat cannot complete this manoeuvre.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss playback warning' }));
+    expect(screen.queryByText('The boat cannot complete this manoeuvre.')).not.toBeInTheDocument();
   });
 });
