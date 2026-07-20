@@ -1,4 +1,5 @@
 import { cloneFrames, initialScenarioTitle } from '../src/data/initialFrames';
+import r18Situation from '../src/data/situations/r18.json';
 
 describe('initial scenario data', () => {
   it('loads a titled scenario with frame data from the situations directory', () => {
@@ -34,5 +35,11 @@ describe('initial scenario data', () => {
     expect(frame.comments).toHaveLength(2);
     expect(frame.images?.[0].src).toMatch(/^data:image\//);
     expect(frame.rules?.map((rule) => rule.label)).toEqual(expect.arrayContaining(['RRS 10', 'RRS 18']));
+  });
+
+  it('configures the RRS 18 template with a three-boat-length mark zone', () => {
+    const mark = r18Situation.frames[0].marks[0];
+
+    expect(mark).toMatchObject({ showZone: true, zoneRadius: 3 });
   });
 });

@@ -24,6 +24,10 @@ export interface Mark {
   shape: 'circle' | 'triangle' | 'square' | 'obstruction' | 'gate' | 'committeeBoat';
   size?: number;
   rotation?: number;
+  /** Whether to show the mark-room zone around this mark. */
+  showZone?: boolean;
+  /** Radius of the mark-room zone, measured in boat lengths. */
+  zoneRadius?: number;
   /** Radius of an obstruction's proximity circle, measured in boat lengths. */
   proximityRadius?: number;
   showRotationArrow?: boolean;

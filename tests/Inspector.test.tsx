@@ -771,6 +771,26 @@ describe('boat editor', () => {
 });
 
 describe('mark editor', () => {
+  it('toggles the mark-room zone', () => {
+    const updateMark = jest.fn();
+
+    renderMarkInspector(updateMark);
+
+    const zoneToggle = screen.getByRole('checkbox', { name: /show mark-room zone/i });
+    fireEvent.click(zoneToggle);
+
+    expect(updateMark).toHaveBeenNthCalledWith(1, 'mark-1', { showZone: true });
+  });
+
+  it('edits the enabled mark-room zone radius', () => {
+    const updateMark = jest.fn();
+
+    renderMarkInspector(updateMark, { ...mark, showZone: true });
+    fireEvent.change(screen.getByLabelText(/zone radius \(3 boat lengths\)/i), { target: { value: '4.5' } });
+
+    expect(updateMark).toHaveBeenNthCalledWith(1, 'mark-1', { zoneRadius: 4.5 });
+  });
+
   it('edits mark fields, connections, styles, and deletion', () => {
     const updateMark = jest.fn();
     const onDelete = jest.fn();

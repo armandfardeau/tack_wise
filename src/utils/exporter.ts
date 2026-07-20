@@ -130,6 +130,8 @@ function isMark(value: unknown): value is Mark {
     (value.shape === 'circle' || value.shape === 'triangle' || value.shape === 'square' || value.shape === 'obstruction' || value.shape === 'gate' || value.shape === 'committeeBoat') &&
     (value.size === undefined || isFiniteNumber(value.size)) &&
     (value.rotation === undefined || isFiniteNumber(value.rotation)) &&
+    (value.showZone === undefined || typeof value.showZone === 'boolean') &&
+    (value.zoneRadius === undefined || isFiniteNumber(value.zoneRadius)) &&
     (value.proximityRadius === undefined || isFiniteNumber(value.proximityRadius)) &&
     (value.showRotationArrow === undefined || typeof value.showRotationArrow === 'boolean') &&
     (value.rotationDirection === undefined || value.rotationDirection === 'clockwise' || value.rotationDirection === 'counterclockwise') &&

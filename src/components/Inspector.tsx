@@ -2,7 +2,7 @@ import { useId, useRef, useState, type ReactNode } from 'react';
 import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type MarkConnection, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
-import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
+import { DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { Copy, Pencil, Pause, Play, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
 
@@ -603,6 +603,31 @@ function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemove
                     step="0.5"
                     value={mark.proximityRadius ?? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS}
                     onChange={(event) => updateMark(mark.id, { proximityRadius: Number(event.target.value) })}
+                  />
+                  <p className="grid-hint">Default: three boat lengths.</p>
+                </div>
+              )}
+              <div className="form-row flex-row">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={!!mark.showZone}
+                    onChange={(event) => updateMark(mark.id, { showZone: event.target.checked })}
+                  />
+                  <span>Show Mark-Room Zone</span>
+                </label>
+              </div>
+              {!!mark.showZone && (
+                <div className="form-row">
+                  <label htmlFor="mark-zone-radius">Zone radius ({mark.zoneRadius ?? DEFAULT_MARK_ZONE_RADIUS} boat lengths)</label>
+                  <input
+                    id="mark-zone-radius"
+                    type="range"
+                    min="1"
+                    max="8"
+                    step="0.5"
+                    value={mark.zoneRadius ?? DEFAULT_MARK_ZONE_RADIUS}
+                    onChange={(event) => updateMark(mark.id, { zoneRadius: Number(event.target.value) })}
                   />
                   <p className="grid-hint">Default: three boat lengths.</p>
                 </div>

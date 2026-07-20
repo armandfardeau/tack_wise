@@ -1,5 +1,5 @@
 import { Circle, Group, Line, Rect, RegularPolygon, Text } from 'react-konva';
-import { BOAT_LENGTH, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
+import { BOAT_LENGTH, DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import type { Mark as MarkModel } from '../types';
 import { getMarkConnectionHandleOffset } from '../utils/markConnections';
 
@@ -22,6 +22,17 @@ interface MarkProps {
 export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, onStartConnection, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, isConnectionTarget = false }: MarkProps) {
   const markSize = mark.size ?? 28;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
+  const renderZone = (strokeColor: string) => mark.showZone ? (
+    <Circle
+      radius={(mark.zoneRadius ?? DEFAULT_MARK_ZONE_RADIUS) * BOAT_LENGTH}
+      fill="transparent"
+      stroke={strokeColor}
+      strokeWidth={isSelected ? 2 : 1}
+      dash={[10, 8]}
+      opacity={isShadow ? 0.7 : 0.55}
+    />
+  ) : null;
+
   // Render different visual shapes based on mark.shape
   const renderShape = () => {
     const strokeColor = isShadow ? '#94a3b8' : isConnectionTarget ? '#22d3ee' : isSelected ? '#ffffff' : '#1e293b';
@@ -144,6 +155,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
         opacity={0.22}
         listening={false}
       >
+        {renderZone('#94a3b8')}
         {renderShape()}
       </Group>
     );
@@ -173,6 +185,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       }}
     >
       {/* Visual representation of the buoy */}
+      {renderZone(isConnectionTarget ? '#22d3ee' : isSelected ? '#ffffff' : '#1e293b')}
       {offenseStroke && (
         <Circle
           radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
