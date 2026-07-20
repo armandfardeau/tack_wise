@@ -479,7 +479,10 @@ export default function CanvasWorkspace({
 
   const selectedObjectRect = (() => {
     if (selectedType === 'boat' && selectedBoat) {
-      return { left: selectedBoat.x - 40, top: selectedBoat.y - 55, width: 80, height: 110 };
+      const hasSpeechBubble = Boolean(selectedBoat.speechBubble?.trim());
+      return hasSpeechBubble
+        ? { left: selectedBoat.x - 110, top: selectedBoat.y - 140, width: 220, height: 200 }
+        : { left: selectedBoat.x - 40, top: selectedBoat.y - 55, width: 80, height: 110 };
     }
 
     if (selectedType === 'mark' && selectedMark) {

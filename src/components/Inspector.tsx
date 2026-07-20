@@ -7,6 +7,14 @@ import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { Copy, Pencil, Pause, Play, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
+const SPEECH_BUBBLE_PRESETS = [
+  { emoji: '😀', label: 'Happy' },
+  { emoji: '😬', label: 'Nervous' },
+  { emoji: '😎', label: 'Confident' },
+  { emoji: '😮', label: 'Surprised' },
+  { emoji: '😡', label: 'Frustrated' },
+  { emoji: '👍', label: 'Agree' },
+] as const;
 const COMMON_RULE_REFERENCES: RuleReference[] = [
   { id: 'rrs-10', label: 'RRS 10' },
   { id: 'rrs-11', label: 'RRS 11' },
@@ -382,6 +390,40 @@ function BoatInspector({
                   <input type="checkbox" checked={!!boat.showHeadingLine} onChange={(event) => updateBoat(boat.id, { showHeadingLine: event.target.checked })} />
                   <span>Show Dotted Path Line</span>
                 </label>
+              </div>
+              <div className="form-row">
+                <label htmlFor="boat-speech-bubble">Comic bubble</label>
+                <textarea
+                  id="boat-speech-bubble"
+                  value={boat.speechBubble ?? ''}
+                  rows={2}
+                  placeholder="Share info from this boat"
+                  onChange={(event) => updateBoat(boat.id, { speechBubble: event.target.value })}
+                />
+                <div className="speech-bubble-presets" aria-label="Feeling presets">
+                  {SPEECH_BUBBLE_PRESETS.map(({ emoji, label }) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      className="speech-bubble-preset"
+                      aria-label={`Use ${label} feeling`}
+                      title={label}
+                      onClick={() => updateBoat(boat.id, { speechBubble: emoji })}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                  {boat.speechBubble && (
+                    <button
+                      type="button"
+                      className="speech-bubble-clear"
+                      onClick={() => updateBoat(boat.id, { speechBubble: '' })}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <p className="grid-hint">Type a message or pick a feeling. Leave it blank to hide the bubble.</p>
               </div>
             </div>
           ),

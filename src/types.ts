@@ -13,6 +13,8 @@ export interface Boat {
   heading: number; // heading in degrees (0 = North, clockwise)
   sailAngle: number; // sail angle relative to centerline (-90 to +90 degrees)
   showHeadingLine?: boolean;
+  /** Optional comic-style speech bubble shown above the boat. */
+  speechBubble?: string;
 }
 
 export interface Mark {
