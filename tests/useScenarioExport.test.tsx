@@ -2,7 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { useScenarioExport } from '../src/hooks/useScenarioExport';
 import { downloadBlob } from '../src/utils/exporter';
-import { convertWebmToMp4 } from '../src/utils/mp4';
+import { convertWebmToMp4, encodePngFramesToVideo } from '../src/utils/mp4';
 import type { Frame } from '../src/types';
 
 jest.mock('../src/utils/exporter', () => ({
@@ -14,6 +14,7 @@ jest.mock('../src/utils/exporter', () => ({
 
 jest.mock('../src/utils/mp4', () => ({
   convertWebmToMp4: jest.fn(),
+  encodePngFramesToVideo: jest.fn(),
 }));
 
 class TestMediaRecorder {
@@ -52,7 +53,7 @@ const frames: Frame[] = [{
 
 const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0) {
+function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, stage: KonvaStage | null = null) {
   const track = { stop: jest.fn() };
   const canvas = document.createElement('canvas');
   Object.defineProperty(canvas, 'captureStream', {
@@ -77,7 +78,7 @@ function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0) 
     setIsPlaybackSampling,
     setIsPlaying,
     settings: { displayMode: 'single', presenterMode: false },
-    stageRef: { current: null } as { current: KonvaStage | null },
+    stageRef: { current: stage } as { current: KonvaStage | null },
     stageSize: { width: 800, height: 600 },
   }));
 
@@ -103,6 +104,7 @@ describe('useScenarioExport video exports', () => {
     TestMediaRecorder.isTypeSupported.mockClear();
     jest.mocked(downloadBlob).mockClear();
     jest.mocked(convertWebmToMp4).mockReset();
+    jest.mocked(encodePngFramesToVideo).mockReset();
     jest.spyOn(Date, 'now').mockReturnValue(123);
   });
 
@@ -133,6 +135,28 @@ describe('useScenarioExport video exports', () => {
     expect(setIsPlaybackSampling).toHaveBeenCalledWith(true);
     expect(setIsPlaybackSampling).toHaveBeenLastCalledWith(false);
     expect(track.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders and encodes video frames offline when Konva can export blobs', async () => {
+    const stage = {
+      toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
+    } as unknown as KonvaStage;
+    const encodedBlob = new Blob(['offline video'], { type: 'video/webm' });
+    jest.mocked(encodePngFramesToVideo).mockResolvedValue(encodedBlob);
+    const { result } = renderVideoExport(frames, 0, stage);
+
+    await act(async () => {
+      await result.current.triggerExport('webm');
+    });
+
+    expect(stage.toBlob).toHaveBeenCalledWith({ pixelRatio: 1, mimeType: 'image/png' });
+    expect(encodePngFramesToVideo).toHaveBeenCalledWith(
+      [expect.any(Blob)],
+      15,
+      'webm',
+      expect.any(Function),
+    );
+    expect(downloadBlob).toHaveBeenCalledWith(encodedBlob, 'regatta-simulation-123.webm');
   });
 
   it('samples intermediate playback progress for multi-frame video exports', async () => {
