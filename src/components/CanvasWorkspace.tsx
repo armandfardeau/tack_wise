@@ -579,6 +579,7 @@ export default function CanvasWorkspace({
           <Rnd
             bounds="parent"
             className="floating-inspector"
+            cancel=".inspector-delete-btn"
             dragHandleClassName="inspector-drag-handle"
             enableResizing={false}
             position={{
