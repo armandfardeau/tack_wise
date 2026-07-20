@@ -1,9 +1,10 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
-import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
+import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type MarkConnection, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
-import { Copy, Pause, Play, RotateCcw, Search, Trash2, X } from 'lucide-react';
+import { getMarkConnectionAnchors } from '../utils/markConnections';
+import { Copy, Pencil, Pause, Play, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
 const COMMON_RULE_REFERENCES: RuleReference[] = [
@@ -41,6 +42,7 @@ interface InspectorProps {
   playSpeed?: number;
   selectedBoat: Boat | undefined;
   selectedMark: Mark | undefined;
+  selectedConnection?: MarkConnection;
   selectedArrow?: TacticalArrow;
   selectedComment?: FrameComment;
   selectedImage?: DiagramImage;
@@ -51,6 +53,10 @@ interface InspectorProps {
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
   updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
+  onConnectMarks?: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: { x: number; y: number }; end?: { x: number; y: number } }) => void;
+  onRemoveMarkConnection?: (connectionId: string) => void;
+  onReplaceMarkConnection?: (connectionId: string, nextTargetMarkId: string) => void;
+  updateConnection?: (connectionId: string, changes: Partial<MarkConnection>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
   updateRuleComment?: (commentId: string, changes: Partial<RuleComment>) => void;
@@ -76,6 +82,7 @@ export default function Inspector({
   playSpeed = 1000,
   selectedBoat,
   selectedMark,
+  selectedConnection,
   selectedArrow,
   selectedComment,
   selectedImage,
@@ -86,6 +93,10 @@ export default function Inspector({
   updateBoat,
   updateActiveFrame,
   updateMark,
+  onConnectMarks,
+  onRemoveMarkConnection,
+  onReplaceMarkConnection,
+  updateConnection,
   updateArrow,
   updateComment,
   updateRuleComment,
@@ -94,7 +105,8 @@ export default function Inspector({
   const deletableObject =
     selectedType === 'boat' && selectedBoat ? 'Boat' :
       selectedType === 'mark' && selectedMark ? 'Mark' :
-        selectedType === 'arrow' && selectedArrow ? 'Arrow' :
+        selectedType === 'connection' && selectedConnection ? 'Connection' :
+          selectedType === 'arrow' && selectedArrow ? 'Arrow' :
           selectedType === 'comment' && selectedComment ? 'Comment' :
             selectedType === 'image' && selectedImage ? 'Image' :
               null;
@@ -161,7 +173,12 @@ export default function Inspector({
           activeFrame={activeFrame}
           mark={selectedMark}
           updateMark={updateMark}
+          onConnectMarks={onConnectMarks}
+          onRemoveMarkConnection={onRemoveMarkConnection}
+          onReplaceMarkConnection={onReplaceMarkConnection}
         />
+      ) : selectedType === 'connection' && selectedConnection && updateConnection ? (
+        <ConnectionInspector activeFrame={activeFrame} connection={selectedConnection} updateConnection={updateConnection} />
       ) : selectedType === 'arrow' && selectedArrow && updateArrow ? (
         <ArrowInspector arrow={selectedArrow} updateArrow={updateArrow} />
       ) : selectedType === 'comment' && selectedComment?.type === 'rule' && updateRuleComment ? (
@@ -506,23 +523,33 @@ interface MarkInspectorProps {
   activeFrame: Frame;
   mark: Mark;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
+  onConnectMarks?: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: { x: number; y: number }; end?: { x: number; y: number } }) => void;
+  onRemoveMarkConnection?: (connectionId: string) => void;
+  onReplaceMarkConnection?: (connectionId: string, nextTargetMarkId: string) => void;
 }
 
-function MarkInspector({ activeFrame, mark, updateMark }: MarkInspectorProps) {
+function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemoveMarkConnection, onReplaceMarkConnection }: MarkInspectorProps) {
   const otherMarks = activeFrame.marks.filter((candidate) => candidate.id !== mark.id);
   const rotationDirection = mark.rotationDirection ?? 'counterclockwise';
+  const connections = (activeFrame.connections ?? []).filter((connection) => connection.start.markId === mark.id);
+  const connectedTargetIds = connections.map((connection) => connection.end.markId);
+  const [editingConnectionId, setEditingConnectionId] = useState<string | null>(null);
+  const [isAddingConnection, setIsAddingConnection] = useState(false);
+  const availableTargets = otherMarks.filter((candidate) => !connectedTargetIds.includes(candidate.id));
 
-  const toggleConnection = (enabled: boolean) => {
-    if (!enabled) {
-      updateMark(mark.id, { connectedToMarkId: null });
-      return;
-    }
+  const addConnection = (targetMarkId: string) => {
+    onConnectMarks?.(mark.id, targetMarkId);
+    setIsAddingConnection(false);
+  };
 
-    updateMark(mark.id, {
-      connectedToMarkId: otherMarks[0]?.id ?? null,
-      connectionLineColor: mark.connectionLineColor ?? mark.color,
-      connectionLineStyle: mark.connectionLineStyle ?? 'dotted',
-    });
+  const removeConnection = (connectionId: string) => {
+    onRemoveMarkConnection?.(connectionId);
+    if (editingConnectionId === connectionId) setEditingConnectionId(null);
+  };
+
+  const replaceConnection = (connectionId: string, nextTargetMarkId: string) => {
+    onReplaceMarkConnection?.(connectionId, nextTargetMarkId);
+    setEditingConnectionId(null);
   };
 
   return (
@@ -633,39 +660,164 @@ function MarkInspector({ activeFrame, mark, updateMark }: MarkInspectorProps) {
           label: 'Connection',
           content: (
             <div className="editor-form">
-              <div className="form-row flex-row">
-                <label className="checkbox-label">
-                  <input type="checkbox" checked={!!mark.connectedToMarkId} disabled={activeFrame.marks.length <= 1} onChange={(event) => toggleConnection(event.target.checked)} />
-                  <span>Show Dotted Line to Mark</span>
-                </label>
+              <div className="connection-list-heading">
+                <span className="connection-section-label">Connect to</span>
+                <button
+                  type="button"
+                  className="connection-add-btn"
+                  aria-label="Add connection"
+                  disabled={availableTargets.length === 0}
+                  onClick={() => setIsAddingConnection(true)}
+                >
+                  <Plus aria-hidden="true" size={14} /> Add
+                </button>
               </div>
-              {!!mark.connectedToMarkId && (
-                <>
-                  <div className="form-row">
-                    <label htmlFor="mark-connection-target">Connect to</label>
-                    <select id="mark-connection-target" value={mark.connectedToMarkId} onChange={(event) => updateMark(mark.id, { connectedToMarkId: event.target.value })}>
-                      {otherMarks.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
-                    </select>
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="mark-line-color">Line Color</label>
-                    <input id="mark-line-color" type="color" value={mark.connectionLineColor ?? mark.color} onChange={(event) => updateMark(mark.id, { connectionLineColor: event.target.value })} />
-                  </div>
-                  <div className="form-row">
-                    <label htmlFor="mark-line-style">Line Style</label>
-                    <select id="mark-line-style" value={mark.connectionLineStyle ?? 'dotted'} onChange={(event) => updateMark(mark.id, { connectionLineStyle: event.target.value as Mark['connectionLineStyle'] })}>
-                      <option value="dotted">Dotted</option>
-                      <option value="dashed">Dashed</option>
-                      <option value="solid">Solid</option>
-                    </select>
-                  </div>
-                </>
+              {connections.length === 0 && !isAddingConnection && (
+                <p className="connection-empty">No connected marks.</p>
               )}
+              <div className="connection-list" aria-label="Mark connections">
+                {connections.map((connection) => {
+                  const targetMark = otherMarks.find((candidate) => candidate.id === connection.end.markId);
+                  const targetName = targetMark?.name ?? 'Missing mark';
+                  const isEditing = editingConnectionId === connection.id;
+                  const editOptions = otherMarks.filter((candidate) => candidate.id === connection.end.markId || !connectedTargetIds.includes(candidate.id));
+
+                  return (
+                    <div className="connection-row" key={connection.id}>
+                      {isEditing ? (
+                        <select
+                          aria-label={`Edit connection to ${targetName}`}
+                          value={connection.end.markId}
+                          onChange={(event) => replaceConnection(connection.id, event.target.value)}
+                        >
+                          {editOptions.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
+                        </select>
+                      ) : (
+                        <span className="connection-target-name">{targetName}</span>
+                      )}
+                      <button
+                        type="button"
+                        className="connection-row-btn"
+                        aria-label={`Edit connection to ${targetName}`}
+                        title="Edit connection"
+                        onClick={() => setEditingConnectionId(isEditing ? null : connection.id)}
+                      >
+                        <Pencil aria-hidden="true" size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        className="connection-row-btn connection-row-delete-btn"
+                        aria-label={`Delete connection to ${targetName}`}
+                        title="Delete connection"
+                        onClick={() => removeConnection(connection.id)}
+                      >
+                        <Trash2 aria-hidden="true" size={14} />
+                      </button>
+                    </div>
+                  );
+                })}
+                {isAddingConnection && (
+                  <div className="connection-row connection-add-row">
+                    <select
+                      aria-label="New connection target"
+                      defaultValue=""
+                      onChange={(event) => {
+                        if (event.target.value) addConnection(event.target.value);
+                      }}
+                    >
+                      <option value="">Select a mark…</option>
+                      {availableTargets.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
+                    </select>
+                    <button
+                      type="button"
+                      className="connection-row-btn"
+                      aria-label="Cancel adding connection"
+                      title="Cancel"
+                      onClick={() => setIsAddingConnection(false)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           ),
         },
       ]}
     />
+  );
+}
+
+function ConnectionInspector({
+  activeFrame,
+  connection,
+  updateConnection,
+}: {
+  activeFrame: Frame;
+  connection: MarkConnection;
+  updateConnection: (connectionId: string, changes: Partial<MarkConnection>) => void;
+}) {
+  const sourceMark = activeFrame.marks.find((mark) => mark.id === connection.start.markId);
+  const targetMark = activeFrame.marks.find((mark) => mark.id === connection.end.markId);
+  const targetOptions = activeFrame.marks.filter((mark) => mark.id !== connection.start.markId);
+  const sourceOptions = activeFrame.marks.filter((mark) => mark.id !== connection.end.markId);
+
+  return (
+    <div className="editor-form">
+      <div className="form-row">
+        <label htmlFor="connection-source">From</label>
+        <select
+          id="connection-source"
+          value={connection.start.markId}
+          onChange={(event) => {
+            const nextSourceMark = activeFrame.marks.find((mark) => mark.id === event.target.value);
+            const nextTargetMark = activeFrame.marks.find((mark) => mark.id === connection.end.markId);
+            if (!nextSourceMark || !nextTargetMark) return;
+            updateConnection(connection.id, {
+              start: { ...connection.start, markId: event.target.value, anchor: getMarkConnectionAnchors(nextSourceMark, nextTargetMark).start },
+            });
+          }}
+        >
+          {sourceOptions.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label htmlFor="connection-target">To</label>
+        <select
+          id="connection-target"
+          value={connection.end.markId}
+          onChange={(event) => {
+            const nextSourceMark = activeFrame.marks.find((mark) => mark.id === connection.start.markId);
+            const nextTargetMark = activeFrame.marks.find((mark) => mark.id === event.target.value);
+            if (!nextSourceMark || !nextTargetMark) return;
+            updateConnection(connection.id, {
+              end: { ...connection.end, markId: event.target.value, anchor: getMarkConnectionAnchors(nextSourceMark, nextTargetMark).end },
+            });
+          }}
+        >
+          {targetOptions.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
+        </select>
+      </div>
+      <div className="form-row">
+        <label htmlFor="connection-line-color">Line Color</label>
+        <input id="connection-line-color" type="color" value={connection.color ?? sourceMark?.color ?? '#38bdf8'} onChange={(event) => updateConnection(connection.id, { color: event.target.value })} />
+      </div>
+      <div className="form-row">
+        <label htmlFor="connection-line-style">Line Style</label>
+        <select id="connection-line-style" value={connection.style ?? 'dotted'} onChange={(event) => updateConnection(connection.id, { style: event.target.value as MarkConnection['style'] })}>
+          <option value="dotted">Dotted</option>
+          <option value="dashed">Dashed</option>
+          <option value="solid">Solid</option>
+        </select>
+      </div>
+      <div className="form-row flex-row">
+        <label className="checkbox-label">
+          <input type="checkbox" checked={connection.arrowhead !== false} onChange={(event) => updateConnection(connection.id, { arrowhead: event.target.checked })} />
+          <span>Show arrowhead</span>
+        </label>
+      </div>
+      <p className="grid-hint">{sourceMark?.name ?? 'Missing mark'} → {targetMark?.name ?? 'Missing mark'}</p>
+    </div>
   );
 }
 

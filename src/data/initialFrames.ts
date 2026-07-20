@@ -1,5 +1,6 @@
-import { getRuleReferences, type Boat, type Frame } from '../types';
+import { getRuleReferences, type Frame } from '../types';
 import situationData from './situations/tacking-basics.json';
+import { normalizeFrameConnections } from '../utils/markConnections';
 
 interface SituationData {
   title: string;
@@ -11,33 +12,21 @@ const situation: SituationData = situationData as SituationData;
 export const initialScenarioTitle = situation.title;
 export const initialFrames: Frame[] = situation.frames;
 
-function cloneBoat(boat: Boat): Boat {
-  const clonedBoat: Boat = {
-    id: boat.id,
-    name: boat.name,
-    color: boat.color,
-    x: boat.x,
-    y: boat.y,
-    heading: boat.heading,
-    sailAngle: boat.sailAngle,
-  };
-
-  if (boat.showHeadingLine !== undefined) {
-    clonedBoat.showHeadingLine = boat.showHeadingLine;
-  }
-
-  return clonedBoat;
-}
-
 export function cloneFrames(frames: Frame[] = initialFrames): Frame[] {
   return frames.map((frame) => {
-    const frameWithoutLegacyTransition = { ...frame } as Frame & { transition?: unknown };
+    const normalizedFrame = normalizeFrameConnections(frame);
+    const frameWithoutLegacyTransition = { ...normalizedFrame } as Frame & { transition?: unknown };
     delete frameWithoutLegacyTransition.transition;
 
     return {
       ...frameWithoutLegacyTransition,
-      boats: frame.boats.map(cloneBoat),
-      marks: frame.marks.map((mark) => ({ ...mark })),
+      boats: frame.boats.map((boat) => ({ ...boat })),
+      marks: frameWithoutLegacyTransition.marks.map((mark) => ({ ...mark })),
+      connections: frameWithoutLegacyTransition.connections?.map((connection) => ({
+        ...connection,
+        start: { ...connection.start, anchor: { ...connection.start.anchor } },
+        end: { ...connection.end, anchor: { ...connection.end.anchor } },
+      })),
       arrows: frame.arrows?.map((arrow) => ({
         ...arrow,
         points: arrow.points.map((point) => ({ ...point })),

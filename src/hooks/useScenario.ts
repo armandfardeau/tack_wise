@@ -9,6 +9,7 @@ import type {
   FrameComment,
   Mark,
   RuleComment,
+  MarkConnection,
   RuleReference,
   ScenarioExportPayload,
   ScenarioRepositoryItem,
@@ -18,10 +19,11 @@ import type {
 import { getRuleReferences } from '../types';
 import { calculateAutoSailAngle, type Position } from '../utils/simulation';
 import { getCurvedArrowPoints } from '../utils/arrows';
+import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { parseScenarioFromJson } from '../utils/exporter';
 import { deleteScenarioRepositoryItem, listScenarioRepositoryItems, loadScenarioRepositoryItem, saveScenarioRepositoryItem } from '../utils/repository';
 
-export type SelectedType = 'boat' | 'mark' | 'arrow' | 'comment' | 'image' | 'wind' | 'grid' | 'playback' | null;
+export type SelectedType = 'boat' | 'mark' | 'connection' | 'arrow' | 'comment' | 'image' | 'wind' | 'grid' | 'playback' | null;
 
 const AUTOSAVE_KEY = 'tack-wise-autosave';
 const MAX_HISTORY_LENGTH = 50;
@@ -130,6 +132,7 @@ export function useScenario() {
   const activeFrame = frames[currentFrameIndex] ?? frames[0];
   const selectedBoat = activeFrame.boats.find((boat) => boat.id === selectedId);
   const selectedMark = activeFrame.marks.find((mark) => mark.id === selectedId);
+  const selectedConnection = activeFrame.connections?.find((connection) => connection.id === selectedId);
   const selectedArrow = activeFrame.arrows?.find((arrow) => arrow.id === selectedId);
   const selectedComment = activeFrame.comments?.find((comment) => comment.id === selectedId);
   const selectedImage = activeFrame.images?.find((image) => image.id === selectedId);
@@ -288,6 +291,116 @@ export function useScenario() {
           : frame,
       ),
     );
+  };
+
+  const connectMarks = (
+    sourceMarkId: string,
+    targetMarkId: string,
+    anchors?: { start?: MarkConnection['start']['anchor']; end?: MarkConnection['end']['anchor'] },
+  ) => {
+    commitFrames((previousFrames) => {
+      let changed = false;
+
+      const nextFrames = previousFrames.map((frame, index) => {
+        if (index !== currentFrameIndex) return frame;
+
+        const sourceMark = frame.marks.find((mark) => mark.id === sourceMarkId);
+        const targetMark = frame.marks.find((mark) => mark.id === targetMarkId);
+        if (!sourceMark || !targetMark || sourceMarkId === targetMarkId) return frame;
+
+        const defaultAnchors = getMarkConnectionAnchors(sourceMark, targetMark);
+
+        const connections = frame.connections ?? [];
+        if (connections.some((connection) => connection.start.markId === sourceMarkId && connection.end.markId === targetMarkId)) return frame;
+
+        const connectionIdBase = `mark-connection-${sourceMarkId}-${targetMarkId}`;
+        let connectionId = connectionIdBase;
+        let connectionIdSuffix = 2;
+        while (connections.some((connection) => connection.id === connectionId)) {
+          connectionId = `${connectionIdBase}-${connectionIdSuffix}`;
+          connectionIdSuffix += 1;
+        }
+
+        changed = true;
+        return {
+          ...frame,
+          connections: [
+            ...connections,
+            {
+              id: connectionId,
+              start: { markId: sourceMarkId, anchor: anchors?.start ?? defaultAnchors.start },
+              end: { markId: targetMarkId, anchor: anchors?.end ?? defaultAnchors.end },
+              color: sourceMark.connectionLineColor ?? sourceMark.color,
+              style: sourceMark.connectionLineStyle ?? 'dotted',
+              arrowhead: true,
+            },
+          ],
+        };
+      });
+
+      return changed ? nextFrames : previousFrames;
+    });
+  };
+
+  const removeMarkConnection = (connectionId: string) => {
+    commitFrames((previousFrames) => {
+      let changed = false;
+
+      const nextFrames = previousFrames.map((frame, index) => {
+        if (index !== currentFrameIndex) return frame;
+
+        const connections = frame.connections ?? [];
+        if (!connections.some((connection) => connection.id === connectionId)) return frame;
+
+        changed = true;
+        return { ...frame, connections: connections.filter((connection) => connection.id !== connectionId) };
+      });
+
+      return changed ? nextFrames : previousFrames;
+    });
+  };
+
+  const updateConnection = (connectionId: string, changes: Partial<MarkConnection>) => {
+    commitFrames((previousFrames) => {
+      let changed = false;
+
+      const nextFrames = previousFrames.map((frame, index) => {
+        if (index !== currentFrameIndex) return frame;
+
+        const connections = frame.connections ?? [];
+        const connection = connections.find((candidate) => candidate.id === connectionId);
+        if (!connection) return frame;
+
+        const nextConnection = { ...connection, ...changes };
+        const hasValidMarks = frame.marks.some((mark) => mark.id === nextConnection.start.markId)
+          && frame.marks.some((mark) => mark.id === nextConnection.end.markId);
+        const isSelfConnection = nextConnection.start.markId === nextConnection.end.markId;
+        const duplicatesExisting = connections.some((candidate) => (
+          candidate.id !== connectionId
+          && candidate.start.markId === nextConnection.start.markId
+          && candidate.end.markId === nextConnection.end.markId
+        ));
+        if (!hasValidMarks || isSelfConnection || duplicatesExisting) return frame;
+
+        changed = true;
+        return { ...frame, connections: connections.map((candidate) => candidate.id === connectionId ? nextConnection : candidate) };
+      });
+
+      return changed ? nextFrames : previousFrames;
+    });
+  };
+
+  const replaceMarkConnection = (connectionId: string, nextTargetMarkId: string) => {
+    const connection = activeFrame.connections?.find((candidate) => candidate.id === connectionId);
+    if (!connection) return;
+
+    const sourceMark = activeFrame.marks.find((mark) => mark.id === connection.start.markId);
+    const targetMark = activeFrame.marks.find((mark) => mark.id === nextTargetMarkId);
+    if (!sourceMark || !targetMark) return;
+
+    updateConnection(connectionId, {
+      end: { markId: nextTargetMarkId, anchor: getMarkConnectionAnchors(sourceMark, targetMark).end },
+    });
   };
 
   const updateArrow = (arrowId: string, changes: Partial<TacticalArrow>) => {
@@ -636,19 +749,24 @@ export function useScenario() {
       ? new Set(getRuleReferences(selectedRuleComment).map((rule) => rule.id))
       : new Set<string>();
 
-    commitFrames((previousFrames) =>
-      previousFrames.map((frame) => ({
+    commitFrames((previousFrames) => previousFrames.map((frame, index) => {
+      if (selectedType === 'connection' && index !== currentFrameIndex) return frame;
+
+      return {
         ...frame,
         boats: frame.boats.filter((boat) => boat.id !== selectedId),
-        marks: frame.marks
-          .filter((mark) => mark.id !== selectedId)
-          .map((mark) => mark.connectedToMarkId === selectedId ? { ...mark, connectedToMarkId: null } : mark),
+        marks: frame.marks.filter((mark) => mark.id !== selectedId),
+        connections: frame.connections?.filter((connection) => (
+          selectedType === 'connection'
+            ? connection.id !== selectedId
+            : connection.start.markId !== selectedId && connection.end.markId !== selectedId
+        )),
         arrows: frame.arrows?.filter((arrow) => arrow.id !== selectedId),
         comments: frame.comments?.filter((comment) => comment.id !== selectedId),
         images: frame.images?.filter((image) => image.id !== selectedId),
         rules: selectedRuleIds.size > 0 ? frame.rules?.filter((rule) => !selectedRuleIds.has(rule.id)) : frame.rules,
-      })),
-    );
+      };
+    }));
     setSelectedId(null);
     setSelectedType(null);
   };
@@ -734,6 +852,7 @@ export function useScenario() {
     autoSailTrim,
     clearAutosave,
     clearSelection,
+    connectMarks,
     createNewScenario,
     currentFrameIndex,
     deleteFrame,
@@ -751,6 +870,8 @@ export function useScenario() {
     moveComment,
     moveImage,
     moveMark,
+    removeMarkConnection,
+    replaceMarkConnection,
     addArrow,
     addBoat,
     addComment,
@@ -771,6 +892,7 @@ export function useScenario() {
     selectObject,
     selectedArrow,
     selectedBoat,
+    selectedConnection,
     selectedComment,
     selectedId,
     selectedImage,
@@ -789,6 +911,7 @@ export function useScenario() {
     updateBoat,
     updateComment,
     updateRuleComment,
+    updateConnection,
     updateImage,
     updateMark,
     updateSettings,

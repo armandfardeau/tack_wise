@@ -28,9 +28,27 @@ export interface Mark {
   proximityRadius?: number;
   showRotationArrow?: boolean;
   rotationDirection?: 'clockwise' | 'counterclockwise';
+  /** Canonical list of marks this mark connects to. */
+  connectedToMarkIds?: string[];
+  /** @deprecated Use connectedToMarkIds. Kept for importing older scenarios. */
   connectedToMarkId?: string | null;
   connectionLineColor?: string;
   connectionLineStyle?: 'dotted' | 'dashed' | 'solid';
+}
+
+export interface MarkConnectionEndpoint {
+  markId: string;
+  /** Normalized mark-local coordinates. 0 is the center; +/-1 is the mark's visual radius. */
+  anchor: { x: number; y: number };
+}
+
+export interface MarkConnection {
+  id: string;
+  start: MarkConnectionEndpoint;
+  end: MarkConnectionEndpoint;
+  color?: string;
+  style?: 'dotted' | 'dashed' | 'solid';
+  arrowhead?: boolean;
 }
 
 export interface TacticalArrow {
@@ -106,6 +124,7 @@ export interface Frame {
   windSpeed: number; // wind speed in knots
   boats: Boat[];
   marks: Mark[];
+  connections?: MarkConnection[];
   arrows?: TacticalArrow[];
   comments?: FrameComment[];
   images?: DiagramImage[];
