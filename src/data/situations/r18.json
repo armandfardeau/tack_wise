@@ -37,6 +37,8 @@
           "y": 125,
           "shape": "triangle",
           "size": 30,
+          "showZone": true,
+          "zoneRadius": 3,
           "showRotationArrow": true,
           "rotationDirection": "counterclockwise"
         }

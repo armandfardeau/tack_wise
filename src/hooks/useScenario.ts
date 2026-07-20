@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { BOAT_COLORS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MARK_COLORS } from '../constants';
+import { BOAT_COLORS, DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MARK_COLORS } from '../constants';
 import { cloneFrames, initialScenarioTitle } from '../data/initialFrames';
 import type {
   Boat,
@@ -719,6 +719,8 @@ export function useScenario() {
       y: 150 + Math.random() * 200,
       shape,
       size: shape === 'obstruction' ? 60 : 28,
+      showZone: false,
+      zoneRadius: DEFAULT_MARK_ZONE_RADIUS,
       rotation: 0,
       proximityRadius: shape === 'obstruction' ? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS : undefined,
       showRotationArrow: false,

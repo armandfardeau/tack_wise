@@ -172,6 +172,23 @@ describe('simulation utilities', () => {
     expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 690, maxY: 705 });
   });
 
+  it('includes an enabled mark-room zone in the content bounds', () => {
+    expect(getCanvasContentBounds([{
+      boats: [],
+      marks: [{
+        id: 'mark',
+        name: 'Windward mark',
+        color: '#ef4444',
+        x: 100,
+        y: 120,
+        shape: 'triangle',
+        size: 30,
+        showZone: true,
+        zoneRadius: 4,
+      }],
+    }])).toEqual({ maxX: 320, maxY: 340 });
+  });
+
   it('uses default comment dimensions and returns empty bounds for empty scenarios', () => {
     expect(getCommentHeight({ text: 'Short note' })).toBe(64);
     expect(getCanvasContentBounds([])).toEqual({ maxX: 0, maxY: 0 });

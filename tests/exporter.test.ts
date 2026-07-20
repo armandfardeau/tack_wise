@@ -98,6 +98,47 @@ describe('scenario JSON export', () => {
     expect(result.frames[0].marks[0]).toEqual(markFrame.marks[0]);
   });
 
+  it('round-trips mark-room zone settings', () => {
+    const markFrame: Frame = {
+      ...frames[0],
+      marks: [{
+        id: 'mark-1',
+        name: 'Windward Mark',
+        color: '#ef4444',
+        x: 300,
+        y: 120,
+        shape: 'triangle',
+        showZone: true,
+        zoneRadius: 3,
+      }],
+    };
+
+    const result = parseScenarioFromJson(serializeScenarioToJson([markFrame], 0));
+
+    expect(result.frames[0].marks[0]).toEqual(markFrame.marks[0]);
+  });
+
+  it('rejects invalid mark-room zone fields', () => {
+    const invalidJson = JSON.stringify({
+      version: 1,
+      currentFrameIndex: 0,
+      frames: [{
+        ...frames[0],
+        marks: [{
+          id: 'mark-1',
+          name: 'Windward Mark',
+          color: '#ef4444',
+          x: 300,
+          y: 120,
+          shape: 'triangle',
+          showZone: 'yes',
+        }],
+      }],
+    });
+
+    expect(() => parseScenarioFromJson(invalidJson)).toThrow(/valid Tack Wise scenario export/i);
+  });
+
   it('accepts legacy marks without rotation settings', () => {
     const legacyMarkFrame: Frame = {
       ...frames[0],

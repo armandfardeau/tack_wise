@@ -15,6 +15,7 @@ export const MARK_COLORS = ['#ef4444', '#22c55e', '#f97316', '#eab308'] as const
 // use a meaningful sailing-specific unit without coupling them to Konva paths.
 export const BOAT_LENGTH = 55;
 export const DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS = 3;
+export const DEFAULT_MARK_ZONE_RADIUS = 3;
 
 export const MIN_CANVAS_ZOOM = 0.5;
 export const MAX_CANVAS_ZOOM = 3;
