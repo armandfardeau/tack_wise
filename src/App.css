@@ -706,23 +706,57 @@ body {
   border-color: var(--accent-cyan);
 }
 
-.quick-angle-options {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 4px;
+.quick-angle-dial {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  margin: 8px auto 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--bg-card);
+}
+
+.quick-angle-dial::before {
+  content: '';
+  position: absolute;
+  inset: 22px;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.quick-angle-dial::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--accent-cyan);
+  border-radius: 50%;
+  background: var(--bg-card);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 .quick-angle-button {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
   min-height: 30px;
   padding: 4px 2px;
   border: 1px solid var(--border-color);
-  border-radius: 5px;
+  border-radius: 999px;
   background-color: var(--bg-card);
   color: var(--text-muted);
   cursor: pointer;
   font-size: 0.72rem;
   font-variant-numeric: tabular-nums;
-  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .quick-angle-button:hover,
@@ -730,6 +764,15 @@ body {
   border-color: var(--accent-cyan);
   background-color: rgba(6, 182, 212, 0.12);
   color: var(--accent-cyan-hover);
+}
+
+.quick-angle-button:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.quick-angle-button[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.14);
 }
 
 .form-row input[type='color'] {

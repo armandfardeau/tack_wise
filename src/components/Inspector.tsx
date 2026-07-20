@@ -3,10 +3,10 @@ import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
 
-const QUICK_HEADING_ANGLES = [-180, -90, -45, 0, 45, 90, 180] as const;
+const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
 
 function formatAngle(angle: number) {
-  return `${angle > 0 ? '+' : ''}${angle}°`;
+  return `${angle > 0 && angle !== 180 ? '+' : ''}${angle}°`;
 }
 
 interface InspectorProps {
@@ -134,14 +134,18 @@ export default function Inspector({
           <div className="form-row">
             <label htmlFor="boat-heading">Heading ({selectedBoat.heading}°)</label>
             <input id="boat-heading" type="range" min="-360" max="360" value={selectedBoat.heading} onChange={(event) => updateBoat(selectedBoat.id, { heading: Number(event.target.value) })} />
-            <div className="quick-angle-options" aria-label="Quick heading angles">
+            <div className="quick-angle-dial" aria-label="Quick heading angles">
               {QUICK_HEADING_ANGLES.map((angle) => (
                 <button
                   key={angle}
                   type="button"
-                  className="quick-angle-button"
+                  className={`quick-angle-button quick-angle-button-${angle < 0 ? `negative-${Math.abs(angle)}` : angle}`}
                   aria-pressed={selectedBoat.heading === angle}
                   title={`Set heading to ${formatAngle(angle)}`}
+                  style={{
+                    left: `${50 + Math.sin((angle * Math.PI) / 180) * 35}%`,
+                    top: `${50 - Math.cos((angle * Math.PI) / 180) * 35}%`,
+                  }}
                   onClick={() => updateBoat(selectedBoat.id, { heading: angle })}
                 >
                   {formatAngle(angle)}

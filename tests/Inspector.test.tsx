@@ -367,15 +367,15 @@ describe('boat controls', () => {
       />,
     );
 
-    const quickAngles = ['-180°', '-90°', '-45°', '0°', '+45°', '+90°', '+180°'];
+    const quickAngles = ['0°', '+45°', '+90°', '+135°', '180°', '-135°', '-90°', '-45°'];
 
     quickAngles.forEach((angle) => {
       expect(screen.getByRole('button', { name: angle })).toBeInTheDocument();
     });
 
-    fireEvent.click(screen.getByRole('button', { name: '+45°' }));
+    fireEvent.click(screen.getByRole('button', { name: '+135°' }));
 
-    expect(updateBoat).toHaveBeenCalledWith('boat-1', { heading: 45 });
+    expect(updateBoat).toHaveBeenCalledWith('boat-1', { heading: 135 });
   });
 });
 
