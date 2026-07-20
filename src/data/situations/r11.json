@@ -11,8 +11,8 @@
           "id": "r11-alpha",
           "name": "Alpha — leeward",
           "color": "#38bdf8",
-          "x": 270,
-          "y": 330,
+          "x": 320,
+          "y": 320.00000000000006,
           "heading": 45,
           "sailAngle": -12,
           "showHeadingLine": true
@@ -21,29 +21,14 @@
           "id": "r11-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 320,
-          "y": 280,
+          "x": 330.0469393004115,
+          "y": 276.65102023319616,
           "heading": 45,
           "sailAngle": -12,
           "showHeadingLine": true
         }
       ],
-      "marks": [
-        {
-          "id": "mark-1784560153818",
-          "name": "Mark 1",
-          "color": "#ef4444",
-          "x": 400,
-          "y": 80,
-          "shape": "circle",
-          "size": 28,
-          "showZone": false,
-          "zoneRadius": 3,
-          "rotation": 0,
-          "showRotationArrow": true,
-          "rotationDirection": "counterclockwise"
-        }
-      ],
+      "marks": [],
       "arrows": [],
       "comments": [
         {
@@ -76,39 +61,26 @@
           "id": "r11-alpha",
           "name": "Alpha — leeward",
           "color": "#38bdf8",
-          "x": 280,
-          "y": 260,
-          "heading": 0,
-          "sailAngle": 2,
-          "showHeadingLine": true
+          "x": 360,
+          "y": 280,
+          "heading": 30,
+          "sailAngle": -2,
+          "showHeadingLine": true,
+          "speechBubble": ""
         },
         {
           "id": "r11-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 320,
-          "y": 220,
-          "heading": 0,
-          "sailAngle": 2,
-          "showHeadingLine": true
+          "x": 340,
+          "y": 240.00000000000006,
+          "heading": 21,
+          "sailAngle": -2,
+          "showHeadingLine": true,
+          "speechBubble": "😮"
         }
       ],
-      "marks": [
-        {
-          "id": "mark-1784560153818",
-          "name": "Mark 1",
-          "color": "#ef4444",
-          "x": 400,
-          "y": 80,
-          "shape": "circle",
-          "size": 28,
-          "showZone": false,
-          "zoneRadius": 3,
-          "rotation": 0,
-          "showRotationArrow": true,
-          "rotationDirection": "counterclockwise"
-        }
-      ],
+      "marks": [],
       "arrows": [],
       "comments": [
         {
@@ -141,39 +113,25 @@
           "id": "r11-alpha",
           "name": "Alpha — leeward",
           "color": "#38bdf8",
-          "x": 280,
-          "y": 260,
+          "x": 400,
+          "y": 219.99999999999997,
           "heading": 45,
           "sailAngle": -12,
-          "showHeadingLine": true
+          "showHeadingLine": true,
+          "speechBubble": "😎"
         },
         {
           "id": "r11-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 340,
-          "y": 199.99999999999997,
+          "x": 360,
+          "y": 180.00000000000003,
           "heading": 45,
           "sailAngle": -12,
           "showHeadingLine": true
         }
       ],
-      "marks": [
-        {
-          "id": "mark-1784560153818",
-          "name": "Mark 1",
-          "color": "#ef4444",
-          "x": 400.00000000000006,
-          "y": 80,
-          "shape": "circle",
-          "size": 28,
-          "showZone": false,
-          "zoneRadius": 3,
-          "rotation": 0,
-          "showRotationArrow": true,
-          "rotationDirection": "counterclockwise"
-        }
-      ],
+      "marks": [],
       "arrows": [],
       "comments": [
         {
@@ -206,39 +164,25 @@
           "id": "r11-alpha",
           "name": "Alpha — leeward",
           "color": "#38bdf8",
-          "x": 320,
-          "y": 239.99999999999997,
+          "x": 460,
+          "y": 160.00000000000003,
           "heading": 64,
           "sailAngle": -35,
-          "showHeadingLine": true
+          "showHeadingLine": true,
+          "speechBubble": ""
         },
         {
           "id": "r11-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 360,
-          "y": 180,
+          "x": 400,
+          "y": 140,
           "heading": 73,
           "sailAngle": -35,
           "showHeadingLine": true
         }
       ],
-      "marks": [
-        {
-          "id": "mark-1784560153818",
-          "name": "Mark 1",
-          "color": "#ef4444",
-          "x": 400,
-          "y": 80,
-          "shape": "circle",
-          "size": 28,
-          "showZone": false,
-          "zoneRadius": 3,
-          "rotation": 0,
-          "showRotationArrow": true,
-          "rotationDirection": "counterclockwise"
-        }
-      ],
+      "marks": [],
       "arrows": [],
       "comments": [
         {
@@ -271,8 +215,8 @@
           "id": "r11-alpha",
           "name": "Alpha — leeward",
           "color": "#38bdf8",
-          "x": 380,
-          "y": 180.00000000000003,
+          "x": 520,
+          "y": 140,
           "heading": 45,
           "sailAngle": -12,
           "showHeadingLine": true
@@ -281,29 +225,14 @@
           "id": "r11-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 420,
-          "y": 120.00000000000003,
+          "x": 460,
+          "y": 120,
           "heading": 45,
           "sailAngle": -12,
           "showHeadingLine": true
         }
       ],
-      "marks": [
-        {
-          "id": "mark-1784560153818",
-          "name": "Mark 1",
-          "color": "#ef4444",
-          "x": 400,
-          "y": 80,
-          "shape": "circle",
-          "size": 28,
-          "showZone": false,
-          "zoneRadius": 3,
-          "rotation": 0,
-          "showRotationArrow": true,
-          "rotationDirection": "counterclockwise"
-        }
-      ],
+      "marks": [],
       "arrows": [],
       "comments": [
         {
