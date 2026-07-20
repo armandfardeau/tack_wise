@@ -2532,29 +2532,31 @@ body {
   .canvas-zoom-controls {
     right: 8px;
     bottom: calc(62px + env(safe-area-inset-bottom, 0px));
-    gap: 2px;
-    padding: 3px;
-    border-radius: 6px;
+    width: calc(100% - 16px);
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
   }
 
   .canvas-history-controls {
     top: calc(8px + env(safe-area-inset-top, 0px));
     right: 8px;
-    gap: 2px;
-    padding: 3px;
-    border-radius: 6px;
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
   }
 
   .canvas-history-btn {
-    width: 28px;
-    height: 28px;
-    font-size: 0.95rem;
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
   }
 
   .canvas-history-restore-btn {
-    min-height: 28px;
-    padding: 0 6px;
-    font-size: 0.65rem;
+    min-height: 44px;
+    padding: 0 10px;
+    font-size: 0.72rem;
+    white-space: nowrap;
   }
 
   .wind-vane-container {
@@ -2580,30 +2582,48 @@ body {
 
   .canvas-playback-controls {
     left: 8px;
-    bottom: calc(62px + env(safe-area-inset-bottom, 0px));
-    width: 162px;
-    gap: 2px;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: rgba(15, 23, 42, 0.88);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
   }
 
   .canvas-playback-controls .canvas-playback-action-btn,
   .canvas-playback-controls .canvas-playback-options-btn,
   .canvas-playback-controls .canvas-play-btn {
     width: auto;
-    min-width: 0;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
     flex: 1 1 0;
   }
 
+  .light-theme .canvas-playback-controls {
+    background-color: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
+  }
+
   .canvas-zoom-btn {
-    width: 24px;
-    height: 24px;
-    font-size: 0.95rem;
+    width: auto;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex: 1 1 0;
+    font-size: 1rem;
   }
 
   .canvas-zoom-reset {
-    width: 24px;
-    height: 24px;
-    min-height: 24px;
-    padding: 0;
+    width: auto;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex: 1 1 0;
+    padding: 0 8px;
     font-size: 0;
   }
 
@@ -2614,10 +2634,12 @@ body {
   }
 
   .canvas-zoom-fit {
-    width: 24px;
-    height: 24px;
-    min-height: 24px;
-    padding: 0;
+    width: auto;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    flex: 1 1 0;
+    padding: 0 8px;
     font-size: 0;
   }
 
@@ -2628,15 +2650,10 @@ body {
   }
 
   .canvas-zoom-level {
-    min-width: 28px;
-    width: 28px;
-    font-size: 0.65rem;
-  }
-
-  .canvas-zoom-controls {
-    width: 140px;
-    gap: 1px;
-    justify-content: space-between;
+    min-width: 44px;
+    width: auto;
+    flex: 0 1 56px;
+    font-size: 0.7rem;
   }
   
   .action-btn {
