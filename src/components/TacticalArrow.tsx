@@ -11,6 +11,8 @@ interface TacticalArrowProps {
   isShadow?: boolean;
 }
 
+const ARROW_HIT_STROKE_WIDTH = 24;
+
 export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspector, onSelect, isShadow = false }: TacticalArrowProps) {
   const isCurved = arrow.curved === true;
   const pathPoints = isCurved ? ensureCurvedArrowControlPoint(arrow.points) : arrow.points;
@@ -24,6 +26,7 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspect
         stroke={color}
         fill={color}
         strokeWidth={arrow.lineWidth ?? 3}
+        hitStrokeWidth={Math.max(ARROW_HIT_STROKE_WIDTH, (arrow.lineWidth ?? 3) + 16)}
         dash={arrow.lineStyle === 'dotted' ? [3, 6] : arrow.lineStyle === 'dashed' ? [12, 6] : undefined}
         pointerLength={arrow.showArrowhead === false ? 0 : 12}
         pointerWidth={arrow.showArrowhead === false ? 0 : 10}
