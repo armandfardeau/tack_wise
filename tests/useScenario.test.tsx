@@ -160,30 +160,117 @@ describe('useScenario', () => {
     expect(result.current.currentFrameIndex).toBe(result.current.frames.length - 1);
   });
 
-  it('advances one complete frame at a time during playback', () => {
-    jest.useFakeTimers();
+  it('animates continuously and advances the frame at the end of a segment', () => {
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    let frameCallback: FrameRequestCallback | null = null;
+
+    Object.defineProperty(window, 'requestAnimationFrame', {
+      configurable: true,
+      value: (callback: FrameRequestCallback) => {
+        frameCallback = callback;
+        return 1;
+      },
+    });
+    Object.defineProperty(window, 'cancelAnimationFrame', {
+      configurable: true,
+      value: jest.fn(),
+    });
 
     try {
       const { result } = renderHook(() => useScenario());
+      const startFrame = {
+        id: 'start',
+        name: 'Start',
+        windAngle: 0,
+        windSpeed: 12,
+        boats: [{ id: 'boat', name: 'Boat', color: '#fff', x: 0, y: 0, heading: 90, sailAngle: 0 }],
+        marks: [],
+      };
+      const endFrame = {
+        ...startFrame,
+        id: 'end',
+        name: 'End',
+        boats: [{ ...startFrame.boats[0], x: 10, y: -10, heading: 0 }],
+      };
 
       act(() => {
+        result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [startFrame, endFrame] });
+        result.current.setPlaySpeed(1000);
         result.current.setIsPlaying(true);
       });
-      act(() => jest.advanceTimersByTime(999));
-      expect(result.current.currentFrameIndex).toBe(0);
 
-      act(() => jest.advanceTimersByTime(1));
+      act(() => frameCallback?.(0));
+      act(() => frameCallback?.(200));
+      expect(result.current.currentFrameIndex).toBe(0);
+      expect(result.current.playbackProgress).toBeCloseTo(0.2);
+      expect(result.current.displayFrame.boats[0].x).toBeCloseTo(5);
+
+      act(() => frameCallback?.(1000));
       expect(result.current.currentFrameIndex).toBe(1);
+      expect(result.current.playbackProgress).toBe(0);
       expect(result.current.displayFrame).toBe(result.current.frames[1]);
 
-      act(() => {
-        result.current.setCurrentFrameIndex(result.current.frames.length - 1);
-        result.current.setIsPlaying(true);
-      });
-      act(() => jest.advanceTimersByTime(1000));
+      act(() => frameCallback?.(1500));
+      expect(result.current.currentFrameIndex).toBe(1);
+      expect(result.current.playbackProgress).toBeCloseTo(0.5);
+      expect(result.current.displayFrame).toBe(result.current.frames[1]);
+
+      act(() => frameCallback?.(2000));
       expect(result.current.currentFrameIndex).toBe(0);
     } finally {
-      jest.useRealTimers();
+      Object.defineProperty(window, 'requestAnimationFrame', { configurable: true, value: originalRequestAnimationFrame });
+      Object.defineProperty(window, 'cancelAnimationFrame', { configurable: true, value: originalCancelAnimationFrame });
+    }
+  });
+
+  it('holds an invalid boat route and reports a transient warning without mutating frames', () => {
+    const originalRequestAnimationFrame = window.requestAnimationFrame;
+    const originalCancelAnimationFrame = window.cancelAnimationFrame;
+    let frameCallback: FrameRequestCallback | null = null;
+
+    Object.defineProperty(window, 'requestAnimationFrame', {
+      configurable: true,
+      value: (callback: FrameRequestCallback) => {
+        frameCallback = callback;
+        return 1;
+      },
+    });
+    Object.defineProperty(window, 'cancelAnimationFrame', {
+      configurable: true,
+      value: jest.fn(),
+    });
+
+    try {
+      const { result } = renderHook(() => useScenario());
+      const startFrame = {
+        id: 'start',
+        name: 'Start',
+        windAngle: 0,
+        windSpeed: 12,
+        boats: [{ id: 'boat', name: 'Boat', color: '#fff', x: 0, y: 0, heading: 90, sailAngle: 0 }],
+        marks: [],
+      };
+      const endFrame = {
+        ...startFrame,
+        id: 'end',
+        name: 'End',
+        boats: [{ ...startFrame.boats[0], x: 10, y: 10, heading: 0 }],
+      };
+
+      act(() => {
+        result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [startFrame, endFrame] });
+        result.current.setIsPlaying(true);
+      });
+
+      expect(result.current.playbackWarning).toContain('Boat cannot complete the straight-line manoeuvre');
+      act(() => frameCallback?.(0));
+      act(() => frameCallback?.(500));
+      expect(result.current.displayFrame.boats[0]).toMatchObject({ x: 0, y: 0, heading: 90 });
+      expect(result.current.frames[0].boats[0]).toMatchObject({ x: 0, y: 0, heading: 90 });
+    } finally {
+      Object.defineProperty(window, 'requestAnimationFrame', { configurable: true, value: originalRequestAnimationFrame });
+      Object.defineProperty(window, 'cancelAnimationFrame', { configurable: true, value: originalCancelAnimationFrame });
     }
   });
 

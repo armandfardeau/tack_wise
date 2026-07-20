@@ -3,18 +3,117 @@ import {
   canvasToWorldPosition,
   clampCanvasZoom,
   constrainCanvasPosition,
+  getBoatManeuver,
   getCommentHeight,
   getCanvasWorldBounds,
   getCanvasContentBounds,
+  getHeadingVector,
   getGridSnap,
+  getShortestHeadingDelta,
   getSnappedPosition,
+  interpolateBoatManeuver,
   isWithinGridSnapRadius,
   worldToCanvasPosition,
 } from '../src/utils/simulation';
+import type { Boat } from '../src/types';
 import { GRID_SPACING, MOBILE_INITIAL_CANVAS_ZOOM } from '../src/constants';
 import { initialFrames } from '../src/data/initialFrames';
 
 describe('simulation utilities', () => {
+  const boat = (changes: Partial<Boat> = {}): Boat => ({
+    id: 'boat-1',
+    name: 'Boat',
+    color: '#fff',
+    x: 0,
+    y: 0,
+    heading: 90,
+    sailAngle: 0,
+    ...changes,
+  });
+
+  it('converts compass headings to canvas direction vectors', () => {
+    expect(getHeadingVector(0)).toEqual({ x: 0, y: -1 });
+    expect(getHeadingVector(90).x).toBeCloseTo(1);
+    expect(getHeadingVector(90).y).toBeCloseTo(0);
+    expect(getHeadingVector(180).x).toBeCloseTo(0);
+    expect(getHeadingVector(180).y).toBeCloseTo(1);
+  });
+
+  it('finds a forward two-leg route and its intersection', () => {
+    const result = getBoatManeuver(
+      boat({ x: 0, y: 0, heading: 90 }),
+      boat({ x: 10, y: -10, heading: 0 }),
+    );
+
+    expect(result.valid).toBe(true);
+    if (!result.valid) return;
+    expect(result.maneuver.intersection.x).toBeCloseTo(10);
+    expect(result.maneuver.intersection.y).toBeCloseTo(0);
+    expect(result.maneuver.firstLegDistance).toBeCloseTo(10);
+    expect(result.maneuver.secondLegDistance).toBeCloseTo(10);
+    expect(result.maneuver.turnDelta).toBe(-90);
+  });
+
+  it('rejects an intersection that is behind the destination heading', () => {
+    expect(getBoatManeuver(
+      boat({ x: 0, y: 0, heading: 90 }),
+      boat({ x: 10, y: 10, heading: 0 }),
+    )).toEqual({ valid: false, reason: 'intersection-behind-end' });
+  });
+
+  it('handles parallel courses and zero-distance turns', () => {
+    expect(getBoatManeuver(
+      boat({ heading: 90 }),
+      boat({ x: 10, heading: 90 }),
+    )).toEqual({
+      valid: true,
+      maneuver: {
+        intersection: { x: 10, y: 0 },
+        firstLegDistance: 10,
+        secondLegDistance: 0,
+        turnDelta: 0,
+      },
+    });
+
+    expect(getBoatManeuver(
+      boat({ heading: 90 }),
+      boat({ heading: 0 }),
+    )).toEqual({
+      valid: true,
+      maneuver: {
+        intersection: { x: 0, y: 0 },
+        firstLegDistance: 0,
+        secondLegDistance: 0,
+        turnDelta: -90,
+      },
+    });
+  });
+
+  it('interpolates travel, turn-in-place, and the destination leg', () => {
+    const start = boat({ heading: 90 });
+    const end = boat({ x: 10, y: -10, heading: 0 });
+
+    expect(interpolateBoatManeuver(start, end, 0.2).x).toBeCloseTo(5);
+    expect(interpolateBoatManeuver(start, end, 0.2).y).toBeCloseTo(0);
+    expect(interpolateBoatManeuver(start, end, 0.2).heading).toBe(90);
+    expect(interpolateBoatManeuver(start, end, 0.5).x).toBeCloseTo(10);
+    expect(interpolateBoatManeuver(start, end, 0.5).y).toBeCloseTo(0);
+    expect(interpolateBoatManeuver(start, end, 0.5).heading).toBeCloseTo(45);
+    expect(interpolateBoatManeuver(start, end, 0.8).x).toBeCloseTo(10);
+    expect(interpolateBoatManeuver(start, end, 0.8).y).toBeCloseTo(-5);
+    expect(interpolateBoatManeuver(start, end, 0.8).heading).toBe(0);
+    expect(interpolateBoatManeuver(start, end, 1)).toEqual(end);
+  });
+
+  it('uses the shortest heading rotation across zero degrees', () => {
+    expect(getShortestHeadingDelta(350, 10)).toBe(20);
+    expect(interpolateBoatManeuver(
+      boat({ heading: 350 }),
+      boat({ heading: 10 }),
+      0.5,
+    ).heading).toBe(0);
+  });
+
   it('uses the denser 20px magnetic grid spacing', () => {
     expect(GRID_SPACING).toBe(20);
   });

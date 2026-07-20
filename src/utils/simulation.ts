@@ -7,12 +7,228 @@ import {
   MAX_CANVAS_ZOOM,
   MIN_CANVAS_ZOOM,
 } from '../constants';
-import { getRuleReferences, type Frame, type FrameComment } from '../types';
+import { getRuleReferences, type Boat, type Frame, type FrameComment } from '../types';
 import { COMMENT_PADDING_Y } from '../constants';
 
 export interface Position {
   x: number;
   y: number;
+}
+
+const GEOMETRY_EPSILON = 1e-7;
+export const MANEUVER_TURN_RATIO = 0.2;
+
+export type BoatManeuverInvalidReason =
+  | 'parallel-courses'
+  | 'intersection-behind-start'
+  | 'intersection-behind-end';
+
+export interface BoatManeuver {
+  intersection: Position;
+  firstLegDistance: number;
+  secondLegDistance: number;
+  turnDelta: number;
+}
+
+export type BoatManeuverResult =
+  | { valid: true; maneuver: BoatManeuver }
+  | { valid: false; reason: BoatManeuverInvalidReason };
+
+export function normalizeHeading(heading: number): number {
+  const normalized = heading % 360;
+  return normalized < 0 ? normalized + 360 : normalized;
+}
+
+/** Returns a unit vector in the canvas coordinate system for a compass heading. */
+export function getHeadingVector(heading: number): Position {
+  const radians = (heading * Math.PI) / 180;
+  return {
+    x: Math.sin(radians),
+    y: -Math.cos(radians),
+  };
+}
+
+export function getShortestHeadingDelta(fromHeading: number, toHeading: number): number {
+  return ((toHeading - fromHeading + 540) % 360) - 180;
+}
+
+function cross(first: Position, second: Position): number {
+  return first.x * second.y - first.y * second.x;
+}
+
+function dot(first: Position, second: Position): number {
+  return first.x * second.x + first.y * second.y;
+}
+
+function getPosition(boat: Pick<Boat, 'x' | 'y'>): Position {
+  return { x: boat.x, y: boat.y };
+}
+
+function getValidManeuver(
+  intersection: Position,
+  firstLegDistance: number,
+  secondLegDistance: number,
+  startHeading: number,
+  endHeading: number,
+): BoatManeuverResult {
+  return {
+    valid: true,
+    maneuver: {
+      intersection,
+      firstLegDistance: Math.max(0, firstLegDistance),
+      secondLegDistance: Math.max(0, secondLegDistance),
+      turnDelta: getShortestHeadingDelta(startHeading, endHeading),
+    },
+  };
+}
+
+/**
+ * Finds a route made of two forward-traveling straight legs. The first leg
+ * follows the start heading and the second leg follows the destination
+ * heading, so the intersection satisfies:
+ *
+ *   start + t * startDirection = end - s * endDirection
+ *
+ * with t and s both non-negative.
+ */
+export function getBoatManeuver(
+  startBoat: Pick<Boat, 'x' | 'y' | 'heading'>,
+  endBoat: Pick<Boat, 'x' | 'y' | 'heading'>,
+): BoatManeuverResult {
+  const start = getPosition(startBoat);
+  const end = getPosition(endBoat);
+  const displacement = { x: end.x - start.x, y: end.y - start.y };
+  const startDirection = getHeadingVector(startBoat.heading);
+  const endDirection = getHeadingVector(endBoat.heading);
+  const determinant = cross(startDirection, endDirection);
+  const displacementLength = Math.hypot(displacement.x, displacement.y);
+
+  if (displacementLength <= GEOMETRY_EPSILON) {
+    return getValidManeuver(start, 0, 0, startBoat.heading, endBoat.heading);
+  }
+
+  if (Math.abs(determinant) <= GEOMETRY_EPSILON) {
+    const onStartCourse = Math.abs(cross(startDirection, displacement)) <= GEOMETRY_EPSILON;
+    const startProjection = dot(displacement, startDirection);
+    if (onStartCourse && startProjection >= -GEOMETRY_EPSILON) {
+      return getValidManeuver(end, Math.max(0, startProjection), 0, startBoat.heading, endBoat.heading);
+    }
+
+    const onEndCourse = Math.abs(cross(endDirection, displacement)) <= GEOMETRY_EPSILON;
+    const endProjection = dot(displacement, endDirection);
+    if (onEndCourse && endProjection >= -GEOMETRY_EPSILON) {
+      return getValidManeuver(start, 0, Math.max(0, endProjection), startBoat.heading, endBoat.heading);
+    }
+
+    return { valid: false, reason: 'parallel-courses' };
+  }
+
+  // Solve displacement = t * startDirection + s * endDirection.
+  const firstLegDistance = cross(displacement, endDirection) / determinant;
+  const secondLegDistance = cross(startDirection, displacement) / determinant;
+
+  if (firstLegDistance < -GEOMETRY_EPSILON) {
+    return { valid: false, reason: 'intersection-behind-start' };
+  }
+
+  if (secondLegDistance < -GEOMETRY_EPSILON) {
+    return { valid: false, reason: 'intersection-behind-end' };
+  }
+
+  return getValidManeuver(
+    {
+      x: start.x + Math.max(0, firstLegDistance) * startDirection.x,
+      y: start.y + Math.max(0, firstLegDistance) * startDirection.y,
+    },
+    firstLegDistance,
+    secondLegDistance,
+    startBoat.heading,
+    endBoat.heading,
+  );
+}
+
+function clampProgress(progress: number): number {
+  return Math.min(Math.max(progress, 0), 1);
+}
+
+function interpolateAngle(from: number, delta: number, progress: number): number {
+  return normalizeHeading(from + delta * progress);
+}
+
+/** Interpolates a boat through a computed straight-line manoeuvre. */
+export function interpolateBoatManeuver(
+  startBoat: Boat,
+  endBoat: Boat,
+  progress: number,
+  autoSailTrim = false,
+  windAngle = 0,
+): Boat {
+  const clampedProgress = clampProgress(progress);
+  if (clampedProgress <= 0) return { ...startBoat };
+  if (clampedProgress >= 1) return { ...endBoat };
+
+  const route = getBoatManeuver(startBoat, endBoat);
+  if (!route.valid) return { ...startBoat };
+
+  const { intersection, firstLegDistance, secondLegDistance, turnDelta } = route.maneuver;
+  const totalTravelDistance = firstLegDistance + secondLegDistance;
+  const hasTurn = Math.abs(turnDelta) > GEOMETRY_EPSILON;
+  const turnDuration = hasTurn && totalTravelDistance > GEOMETRY_EPSILON ? MANEUVER_TURN_RATIO : 0;
+  const travelDuration = 1 - turnDuration;
+  const firstLegDuration = totalTravelDistance > GEOMETRY_EPSILON
+    ? travelDuration * (firstLegDistance / totalTravelDistance)
+    : 0;
+  const secondLegDuration = totalTravelDistance > GEOMETRY_EPSILON
+    ? travelDuration * (secondLegDistance / totalTravelDistance)
+    : 0;
+  const startDirection = getHeadingVector(startBoat.heading);
+  const endDirection = getHeadingVector(endBoat.heading);
+  let position = getPosition(startBoat);
+  let heading = startBoat.heading;
+
+  if (totalTravelDistance <= GEOMETRY_EPSILON) {
+    heading = interpolateAngle(startBoat.heading, turnDelta, clampedProgress);
+  } else if (clampedProgress < firstLegDuration || turnDuration === 0) {
+    const legProgress = turnDuration === 0
+      ? clampedProgress
+      : firstLegDuration <= GEOMETRY_EPSILON
+        ? 0
+        : clampedProgress / firstLegDuration;
+    const distanceAlongLeg = firstLegDistance * clampProgress(legProgress);
+    position = {
+      x: startBoat.x + distanceAlongLeg * startDirection.x,
+      y: startBoat.y + distanceAlongLeg * startDirection.y,
+    };
+  } else if (clampedProgress <= firstLegDuration + turnDuration) {
+    position = intersection;
+    const turnProgress = turnDuration <= GEOMETRY_EPSILON
+      ? 1
+      : (clampedProgress - firstLegDuration) / turnDuration;
+    heading = interpolateAngle(startBoat.heading, turnDelta, clampProgress(turnProgress));
+  } else {
+    position = intersection;
+    const secondLegProgress = secondLegDuration <= GEOMETRY_EPSILON
+      ? 1
+      : (clampedProgress - firstLegDuration - turnDuration) / secondLegDuration;
+    const distanceAlongLeg = secondLegDistance * clampProgress(secondLegProgress);
+    position = {
+      x: intersection.x + distanceAlongLeg * endDirection.x,
+      y: intersection.y + distanceAlongLeg * endDirection.y,
+    };
+    heading = endBoat.heading;
+  }
+
+  const interpolatedBoat: Boat = {
+    ...startBoat,
+    x: position.x,
+    y: position.y,
+    heading: normalizeHeading(heading),
+    sailAngle: autoSailTrim
+      ? calculateAutoSailAngle(normalizeHeading(heading), windAngle)
+      : startBoat.sailAngle + (endBoat.sailAngle - startBoat.sailAngle) * clampedProgress,
+  };
+
+  return interpolatedBoat;
 }
 
 export interface CanvasContentBounds {

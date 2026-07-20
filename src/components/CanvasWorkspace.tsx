@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { TriangleAlert } from 'lucide-react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
 import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, MarkConnection, RuleComment, TacticalArrow } from '../types';
@@ -37,6 +38,7 @@ interface CanvasWorkspaceProps {
   getSnappedPosition: (objectId: string, position: Position) => Position;
   gridSnapEnabled: boolean;
   isPlaying: boolean;
+  playbackWarning?: string | null;
   isExporting: boolean;
   handleCanvasDragEnd: () => void;
   handleCanvasTouchEnd: (event: { evt: TouchEvent }) => void;
@@ -289,6 +291,7 @@ export default function CanvasWorkspace({
   getSnappedPosition,
   gridSnapEnabled,
   isPlaying,
+  playbackWarning,
   isExporting,
   handleCanvasDragEnd,
   handleCanvasTouchEnd,
@@ -368,6 +371,18 @@ export default function CanvasWorkspace({
   const handledInspectorRequestRef = useRef<number | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [inspectorPosition, setInspectorPosition] = useState<Position | null>(null);
+  const [playbackToast, setPlaybackToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!playbackWarning) return undefined;
+
+    setPlaybackToast(playbackWarning);
+    const timeoutId = window.setTimeout(() => {
+      setPlaybackToast((currentToast) => currentToast === playbackWarning ? null : currentToast);
+    }, 4500);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [currentFrameIndex, playbackWarning]);
 
   const resetInspectorPlacement = useCallback(() => {
     autoPanKeyRef.current = null;
@@ -657,6 +672,12 @@ export default function CanvasWorkspace({
           showTitle={showFrameTitle}
           showNumber={showFrameNumber}
         />
+        {playbackToast && (
+          <div className="playback-toast" role="status" aria-live="polite" aria-atomic="true">
+            <TriangleAlert aria-hidden="true" size={17} />
+            <span>{playbackToast}</span>
+          </div>
+        )}
         {shouldShowInspector && inspectorStyle && (
           <Rnd
             bounds="parent"

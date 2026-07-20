@@ -9,7 +9,10 @@ interface UseScenarioExportProps {
   currentFrameIndex: number;
   frames: Frame[];
   playSpeed: number;
+  playbackProgress?: number;
   setCurrentFrameIndex: (index: number) => void;
+  setPlaybackProgress?: (progress: number) => void;
+  setIsPlaybackSampling?: (sampling: boolean) => void;
   setIsPlaying: (isPlaying: boolean) => void;
   settings: ScenarioSettings;
   stageRef: RefObject<KonvaStage | null>;
@@ -20,7 +23,10 @@ export function useScenarioExport({
   currentFrameIndex,
   frames,
   playSpeed,
+  playbackProgress = 0,
   setCurrentFrameIndex,
+  setPlaybackProgress = () => undefined,
+  setIsPlaybackSampling = () => undefined,
   setIsPlaying,
   settings,
   stageRef,
@@ -29,6 +35,7 @@ export function useScenarioExport({
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'gif' | VideoExportType | null>(null);
+  const exportFrameInterval = 1000 / 20;
 
   const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
     downloadScenarioJson(exportFrames, exportCurrentFrameIndex, settings);
@@ -72,11 +79,16 @@ export function useScenarioExport({
 
   const triggerExport = async (type: 'gif' | VideoExportType) => {
     setIsPlaying(false);
+    setIsPlaybackSampling(true);
     setIsExporting(true);
     setExportType(type);
     setExportProgress(0);
 
     const originalFrame = currentFrameIndex;
+    const originalProgress = playbackProgress;
+    const exportDuration = Math.max(playSpeed, exportFrameInterval);
+    const samplesPerSegment = Math.max(1, Math.ceil(exportDuration / exportFrameInterval));
+    const segmentCount = Math.max(frames.length, 1);
     const delay = (milliseconds: number) => new Promise((resolve) => window.setTimeout(resolve, milliseconds));
     const waitForPaint = () =>
       new Promise<void>((resolve) => {
@@ -86,21 +98,25 @@ export function useScenarioExport({
     try {
       if (type === 'gif') {
         const capturedImages: string[] = [];
-        for (let index = 0; index < frames.length; index += 1) {
-          flushSync(() => {
-            setCurrentFrameIndex(index);
-            setExportProgress(Math.round((index / frames.length) * 50));
-          });
-          await waitForPaint();
+        for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+          const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
+          for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
+            flushSync(() => {
+              setCurrentFrameIndex(frameIndex);
+              setPlaybackProgress(sampleIndex / samplesPerSegment);
+              setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
+            });
+            await waitForPaint();
 
-          const stage = stageRef.current;
-          if (!stage) throw new Error('Canvas stage not found.');
-          stage.draw();
-          capturedImages.push(stage.toDataURL({ pixelRatio: 1.5 }));
+            const stage = stageRef.current;
+            if (!stage) throw new Error('Canvas stage not found.');
+            stage.draw();
+            capturedImages.push(stage.toDataURL({ pixelRatio: 1.5 }));
+          }
         }
 
         setExportProgress(60);
-        const gifBlob = await exportToGif(capturedImages, playSpeed / 1000, stageSize.width, stageSize.height);
+        const gifBlob = await exportToGif(capturedImages, exportFrameInterval / 1000, stageSize.width, stageSize.height);
         setExportProgress(90);
         downloadBlob(gifBlob, `regatta-simulation-${Date.now()}.gif`);
       } else {
@@ -135,19 +151,22 @@ export function useScenarioExport({
               try {
                 flushSync(() => {
                   setCurrentFrameIndex(0);
+                  setPlaybackProgress(0);
                   setExportProgress(0);
                 });
                 await waitForPaint();
                 recorder.start();
-                for (let index = 0; index < frames.length; index += 1) {
-                  if (index > 0) {
+                for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+                  const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
+                  for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
                     flushSync(() => {
-                      setCurrentFrameIndex(index);
-                      setExportProgress(Math.round((index / Math.max(frames.length - 1, 1)) * 50));
+                      setCurrentFrameIndex(frameIndex);
+                      setPlaybackProgress(sampleIndex / samplesPerSegment);
+                      setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
                     });
                     await waitForPaint();
+                    await delay(exportFrameInterval);
                   }
-                  await delay(playSpeed);
                 }
                 recorder.stop();
               } catch (error) {
@@ -182,6 +201,8 @@ export function useScenarioExport({
       window.alert(`Could not export ${exportLabel}. ${message}`);
     } finally {
       setCurrentFrameIndex(originalFrame);
+      setPlaybackProgress(originalProgress);
+      setIsPlaybackSampling(false);
       setIsExporting(false);
       setExportType(null);
     }

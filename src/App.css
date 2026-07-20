@@ -1201,6 +1201,52 @@ body {
   box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
 }
 
+.playback-toast {
+  position: absolute;
+  bottom: 84px;
+  left: 50%;
+  z-index: 8;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(72%, 680px);
+  padding: 10px 14px;
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  border-radius: 10px;
+  background-color: rgba(120, 53, 15, 0.92);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  color: #fef3c7;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.35;
+  pointer-events: none;
+  text-align: center;
+  transform: translateX(-50%);
+  animation: playbackToastIn 0.2s ease-out;
+}
+
+.playback-toast svg {
+  flex: 0 0 auto;
+  color: #fbbf24;
+}
+
+.light-theme .playback-toast {
+  background-color: rgba(255, 251, 235, 0.96);
+  color: #92400e;
+}
+
+@keyframes playbackToastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 .canvas-history-controls {
   position: absolute;
   top: 16px;
