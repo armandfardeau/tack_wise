@@ -389,19 +389,36 @@ export default function CanvasWorkspace({
     setInspectorPosition(null);
   }, []);
 
+  const handleCloseInspector = useCallback(() => {
+    setIsInspectorOpen(false);
+    resetInspectorPlacement();
+    onClearSelection();
+  }, [onClearSelection, resetInspectorPlacement]);
+
   useEffect(() => {
     if (!selectedId || !isInspectorOpen) return undefined;
 
     const handlePointerOutside = (event: PointerEvent) => {
       if (event.target instanceof Node && inspectorRef.current?.contains(event.target)) return;
-      setIsInspectorOpen(false);
-      resetInspectorPlacement();
-      onClearSelection();
+      handleCloseInspector();
     };
 
     document.addEventListener('pointerdown', handlePointerOutside, true);
     return () => document.removeEventListener('pointerdown', handlePointerOutside, true);
-  }, [isInspectorOpen, onClearSelection, resetInspectorPlacement, selectedId]);
+  }, [handleCloseInspector, isInspectorOpen, selectedId]);
+
+  useEffect(() => {
+    if (!isInspectorOpen) return undefined;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      handleCloseInspector();
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [handleCloseInspector, isInspectorOpen]);
 
   const handleSelectObject = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     resetInspectorPlacement();
@@ -690,7 +707,7 @@ export default function CanvasWorkspace({
           <Rnd
             bounds="parent"
             className="floating-inspector"
-            cancel=".inspector-delete-btn, .inspector-duplicate-btn"
+            cancel=".inspector-close-btn, .inspector-delete-btn, .inspector-duplicate-btn"
             dragHandleClassName="inspector-drag-handle"
             enableResizing={false}
             position={{
@@ -709,6 +726,7 @@ export default function CanvasWorkspace({
               isPlaying={isPlaying}
               onDelete={onDeleteSelected}
               onDuplicate={onDuplicateSelected}
+              onClose={handleCloseInspector}
               onSetGridSnapEnabled={onSetGridSnapEnabled}
               onSetAutoSailTrim={onSetAutoSailTrim}
               onSetDisplayMode={onSetDisplayMode}

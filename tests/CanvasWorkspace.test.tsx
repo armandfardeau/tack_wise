@@ -124,6 +124,10 @@ describe('CanvasWorkspace', () => {
     await waitFor(() => expect(onCloseControls).toHaveBeenCalledTimes(1));
     expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
     expect(screen.getByText('Inspector')).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(screen.queryByTestId('floating-inspector')).not.toBeInTheDocument());
   });
 
   it('allows the playback warning toast to be dismissed', () => {

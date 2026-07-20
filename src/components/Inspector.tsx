@@ -23,6 +23,11 @@ function formatAngle(angle: number) {
   return `${angle > 0 && angle !== 180 ? '+' : ''}${angle}°`;
 }
 
+function getConnectionName(frame: Frame, connection: MarkConnection) {
+  const getMarkName = (markId: string) => frame.marks.find((mark) => mark.id === markId)?.name || 'Unnamed mark';
+  return `Connection: ${getMarkName(connection.start.markId)} → ${getMarkName(connection.end.markId)}`;
+}
+
 interface InspectorProps {
   activeFrame: Frame;
   autoSailTrim: boolean;
@@ -31,6 +36,7 @@ interface InspectorProps {
   isPlaying?: boolean;
   onDelete: () => void;
   onDuplicate?: () => void;
+  onClose?: () => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetDisplayMode?: (mode: DisplayMode) => void;
@@ -71,6 +77,7 @@ export default function Inspector({
   isPlaying = false,
   onDelete,
   onDuplicate = () => undefined,
+  onClose = () => undefined,
   onSetGridSnapEnabled,
   onSetAutoSailTrim,
   onSetDisplayMode = () => undefined,
@@ -111,32 +118,54 @@ export default function Inspector({
             selectedType === 'image' && selectedImage ? 'Image' :
               null;
 
+  const objectName = selectedType === 'boat' && selectedBoat ? `Boat: ${selectedBoat.name || 'Unnamed boat'}` :
+    selectedType === 'mark' && selectedMark ? `Mark: ${selectedMark.name || 'Unnamed mark'}` :
+      selectedType === 'connection' && selectedConnection ? getConnectionName(activeFrame, selectedConnection) :
+        selectedType === 'arrow' && selectedArrow ? `Arrow: ${selectedArrow.name || 'Unnamed arrow'}` :
+          selectedType === 'comment' && selectedComment ? `${selectedComment.type === 'rule' ? 'Rule' : 'Comment'}: ${selectedComment.name || (selectedComment.type === 'rule' ? 'Unnamed rule' : 'Unnamed comment')}` :
+            selectedType === 'image' && selectedImage ? `Image: ${selectedImage.name || 'Unnamed image'}` :
+              selectedType === 'wind' ? 'Wind settings' :
+                selectedType === 'grid' ? 'Canvas settings' :
+                  selectedType === 'playback' ? 'Playback settings' :
+                    null;
+
   return (
     <div className="control-section inspector">
-      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector">
-        <span className="inspector-title-content"><Search aria-hidden="true" size={16} /> Inspector</span>
-        {deletableObject && (
-          <span className="inspector-actions">
-            <button
-              type="button"
-              className="inspector-duplicate-btn"
-              aria-label={`Duplicate ${deletableObject}`}
-              title={`Duplicate ${deletableObject}`}
-              onClick={onDuplicate}
-            >
-              <Copy aria-hidden="true" size={16} />
-            </button>
-            <button
-              type="button"
-              className="inspector-delete-btn"
-              aria-label={`Delete ${deletableObject}`}
-              title={`Delete ${deletableObject}`}
-              onClick={onDelete}
-            >
-              <Trash2 aria-hidden="true" size={16} />
-            </button>
-          </span>
-        )}
+      <h3 className="section-title inspector-drag-handle" title="Drag to move inspector" aria-label={objectName ? `Inspector for ${objectName}` : 'Inspector'}>
+        <span className="inspector-title-content"><Search aria-hidden="true" size={16} /><span>Inspector</span>{objectName && <span className="inspector-object-name" title={objectName}>{objectName}</span>}</span>
+        <span className="inspector-actions">
+          {deletableObject && (
+            <>
+              <button
+                type="button"
+                className="inspector-duplicate-btn"
+                aria-label={`Duplicate ${deletableObject}`}
+                title={`Duplicate ${deletableObject}`}
+                onClick={onDuplicate}
+              >
+                <Copy aria-hidden="true" size={16} />
+              </button>
+              <button
+                type="button"
+                className="inspector-delete-btn"
+                aria-label={`Delete ${deletableObject}`}
+                title={`Delete ${deletableObject}`}
+                onClick={onDelete}
+              >
+                <Trash2 aria-hidden="true" size={16} />
+              </button>
+            </>
+          )}
+          <button
+            type="button"
+            className="inspector-close-btn"
+            aria-label="Close inspector"
+            title="Close inspector (Esc)"
+            onClick={onClose}
+          >
+            <X aria-hidden="true" size={16} />
+          </button>
+        </span>
       </h3>
 
       {selectedType === 'wind' ? (
