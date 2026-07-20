@@ -22,6 +22,7 @@ export type SelectedType = 'boat' | 'mark' | 'arrow' | 'comment' | 'image' | 'wi
 
 const AUTOSAVE_KEY = 'tack-wise-autosave';
 const MAX_HISTORY_LENGTH = 50;
+const DUPLICATE_OFFSET = 24;
 
 export const DEFAULT_SCENARIO_SETTINGS: ScenarioSettings = {
   title: initialScenarioTitle,
@@ -50,6 +51,29 @@ function cloneScenarioFrames(frames: Frame[]) {
 
 function scenarioFramesFromPayload(payload: ScenarioExportPayload) {
   return cloneScenarioFrames(payload.frames);
+}
+
+function objectIdExists(frames: Frame[], id: string) {
+  return frames.some((frame) => (
+    frame.boats.some((boat) => boat.id === id)
+      || frame.marks.some((mark) => mark.id === id)
+      || frame.arrows?.some((arrow) => arrow.id === id)
+      || frame.comments?.some((comment) => comment.id === id)
+      || frame.images?.some((image) => image.id === id)
+  ));
+}
+
+function createDuplicateId(type: Exclude<SelectedType, null>, frames: Frame[]) {
+  const prefix = `${type}-`;
+  let id = `${prefix}${Date.now()}`;
+  let suffix = 1;
+
+  while (objectIdExists(frames, id)) {
+    id = `${prefix}${Date.now()}-${suffix}`;
+    suffix += 1;
+  }
+
+  return id;
 }
 
 function readAutosave(): ScenarioExportPayload | null {
@@ -551,6 +575,65 @@ export function useScenario() {
     setSelectedType(null);
   };
 
+  const duplicateSelected = () => {
+    if (!selectedId || !selectedType || selectedType === 'wind' || selectedType === 'grid' || selectedType === 'playback') return;
+
+    const duplicateId = createDuplicateId(selectedType, frames);
+    const offsetPosition = (position: Position) => ({
+      x: position.x + DUPLICATE_OFFSET,
+      y: position.y + DUPLICATE_OFFSET,
+    });
+
+    if (selectedType === 'boat' && selectedBoat) {
+      const duplicate: Boat = {
+        ...selectedBoat,
+        id: duplicateId,
+        name: `${selectedBoat.name} (Copy)`,
+        ...offsetPosition(selectedBoat),
+      };
+      updateCurrentAndFutureFrames((frame) => ({ ...frame, boats: [...frame.boats, { ...duplicate }] }));
+    } else if (selectedType === 'mark' && selectedMark) {
+      const duplicate: Mark = {
+        ...selectedMark,
+        id: duplicateId,
+        name: `${selectedMark.name} (Copy)`,
+        ...offsetPosition(selectedMark),
+      };
+      updateCurrentAndFutureFrames((frame) => ({ ...frame, marks: [...frame.marks, { ...duplicate }] }));
+    } else if (selectedType === 'arrow' && selectedArrow) {
+      const duplicate: TacticalArrow = {
+        ...selectedArrow,
+        id: duplicateId,
+        name: `${selectedArrow.name} (Copy)`,
+        points: selectedArrow.points.map(offsetPosition),
+      };
+      updateCurrentAndFutureFrames((frame) => ({
+        ...frame,
+        arrows: [...(frame.arrows ?? []), { ...duplicate, points: duplicate.points.map((point) => ({ ...point })) }],
+      }));
+    } else if (selectedType === 'comment' && selectedComment) {
+      const duplicate: CommentNote = {
+        ...selectedComment,
+        id: duplicateId,
+        name: `${selectedComment.name} (Copy)`,
+        ...offsetPosition(selectedComment),
+      };
+      updateCurrentAndFutureFrames((frame) => ({ ...frame, comments: [...(frame.comments ?? []), { ...duplicate }] }));
+    } else if (selectedType === 'image' && selectedImage) {
+      const duplicate: DiagramImage = {
+        ...selectedImage,
+        id: duplicateId,
+        name: `${selectedImage.name} (Copy)`,
+        ...offsetPosition(selectedImage),
+      };
+      updateCurrentAndFutureFrames((frame) => ({ ...frame, images: [...(frame.images ?? []), { ...duplicate }] }));
+    } else {
+      return;
+    }
+
+    selectObject(duplicateId, selectedType);
+  };
+
   const updateSettings = (changes: Partial<ScenarioSettings>) => {
     setSettings((previousSettings) => ({ ...previousSettings, ...changes }));
   };
@@ -568,6 +651,7 @@ export function useScenario() {
     currentFrameIndex,
     deleteFrame,
     deleteSelected,
+    duplicateSelected,
     duplicateFrame,
     frames,
     displayFrame: activeFrame,

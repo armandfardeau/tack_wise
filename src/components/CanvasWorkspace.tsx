@@ -56,6 +56,7 @@ interface CanvasWorkspaceProps {
   onMoveComment: (commentId: string, position: Position) => void;
   onMoveImage: (imageId: string, position: Position) => void;
   onDeleteSelected: () => void;
+  onDuplicateSelected: () => void;
   onClearSelection: () => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetDisplayMode: (mode: DisplayMode) => void;
@@ -300,6 +301,7 @@ export default function CanvasWorkspace({
   onMoveComment,
   onMoveImage,
   onDeleteSelected,
+  onDuplicateSelected,
   onClearSelection,
   onSetAutoSailTrim,
   onSetDisplayMode,
@@ -613,7 +615,7 @@ export default function CanvasWorkspace({
           <Rnd
             bounds="parent"
             className="floating-inspector"
-            cancel=".inspector-delete-btn"
+            cancel=".inspector-delete-btn, .inspector-duplicate-btn"
             dragHandleClassName="inspector-drag-handle"
             enableResizing={false}
             position={{
@@ -631,6 +633,7 @@ export default function CanvasWorkspace({
               gridSnapEnabled={gridSnapEnabled}
               isPlaying={isPlaying}
               onDelete={onDeleteSelected}
+              onDuplicate={onDuplicateSelected}
               onSetGridSnapEnabled={onSetGridSnapEnabled}
               onSetAutoSailTrim={onSetAutoSailTrim}
               onSetDisplayMode={onSetDisplayMode}

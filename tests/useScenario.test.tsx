@@ -429,6 +429,31 @@ describe('useScenario', () => {
     expect(result.current.selectedId).toBeNull();
   });
 
+  it('duplicates the selected object, offsets it, and selects the copy', () => {
+    const { result } = renderHook(() => useScenario());
+    const frame = {
+      id: 'objects', name: 'Objects', windAngle: 0, windSpeed: 12,
+      boats: [{ id: 'boat', name: 'Boat', color: '#fff', x: 1, y: 1, heading: 0, sailAngle: 0 }],
+      marks: [],
+      arrows: [],
+      comments: [],
+      images: [],
+    };
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames: [frame] }));
+    act(() => result.current.duplicateSelected());
+
+    const duplicate = result.current.activeFrame.boats.find((boat) => boat.id === result.current.selectedId);
+    expect(duplicate).toEqual(expect.objectContaining({
+      name: 'Boat (Copy)',
+      x: 25,
+      y: 25,
+    }));
+    expect(duplicate?.id).not.toBe('boat');
+    expect(result.current.selectedType).toBe('boat');
+    expect(result.current.activeFrame.boats).toHaveLength(2);
+  });
+
   it('returns false for missing library entries and removes saved entries', () => {
     const { result } = renderHook(() => useScenario());
 

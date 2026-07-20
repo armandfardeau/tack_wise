@@ -76,6 +76,7 @@ describe('CanvasWorkspace', () => {
         onMoveComment={jest.fn()}
         onMoveImage={jest.fn()}
         onDeleteSelected={jest.fn()}
+        onDuplicateSelected={jest.fn()}
         onClearSelection={jest.fn()}
         onSetAutoSailTrim={jest.fn()}
         onSetDisplayMode={jest.fn()}

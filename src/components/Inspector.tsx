@@ -2,7 +2,7 @@ import type { CommentNote, DiagramImage, DisplayMode, Frame, Boat, Mark, Tactica
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint } from '../utils/arrows';
 import { DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
-import { Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
+import { Copy, Pause, Play, RotateCcw, Search, Trash2 } from 'lucide-react';
 import { useId, useRef, useState, type ReactNode } from 'react';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
@@ -18,6 +18,7 @@ interface InspectorProps {
   gridSnapEnabled: boolean;
   isPlaying?: boolean;
   onDelete: () => void;
+  onDuplicate?: () => void;
   onSetGridSnapEnabled: (enabled: boolean) => void;
   onSetAutoSailTrim: (enabled: boolean) => void;
   onSetDisplayMode?: (mode: DisplayMode) => void;
@@ -51,6 +52,7 @@ export default function Inspector({
   gridSnapEnabled,
   isPlaying = false,
   onDelete,
+  onDuplicate = () => undefined,
   onSetGridSnapEnabled,
   onSetAutoSailTrim,
   onSetDisplayMode = () => undefined,
@@ -89,15 +91,26 @@ export default function Inspector({
       <h3 className="section-title inspector-drag-handle" title="Drag to move inspector">
         <span className="inspector-title-content"><Search aria-hidden="true" size={16} /> Inspector</span>
         {deletableObject && (
-          <button
-            type="button"
-            className="inspector-delete-btn"
-            aria-label={`Delete ${deletableObject}`}
-            title={`Delete ${deletableObject}`}
-            onClick={onDelete}
-          >
-            <Trash2 aria-hidden="true" size={16} />
-          </button>
+          <span className="inspector-actions">
+            <button
+              type="button"
+              className="inspector-duplicate-btn"
+              aria-label={`Duplicate ${deletableObject}`}
+              title={`Duplicate ${deletableObject}`}
+              onClick={onDuplicate}
+            >
+              <Copy aria-hidden="true" size={16} />
+            </button>
+            <button
+              type="button"
+              className="inspector-delete-btn"
+              aria-label={`Delete ${deletableObject}`}
+              title={`Delete ${deletableObject}`}
+              onClick={onDelete}
+            >
+              <Trash2 aria-hidden="true" size={16} />
+            </button>
+          </span>
         )}
       </h3>
 

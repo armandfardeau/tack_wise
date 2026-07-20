@@ -211,6 +211,7 @@ export default function App() {
           onMoveComment={scenario.moveComment}
           onMoveImage={scenario.moveImage}
           onDeleteSelected={scenario.deleteSelected}
+          onDuplicateSelected={scenario.duplicateSelected}
           onClearSelection={scenario.clearSelection}
           onSetAutoSailTrim={scenario.setAutoSailTrim}
           onSetDisplayMode={(displayMode) => scenario.updateSettings({ displayMode })}
