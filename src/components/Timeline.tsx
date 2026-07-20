@@ -36,7 +36,7 @@ export default function Timeline({
   onStepBackward = () => undefined,
   onStepForward = () => undefined,
   onReplayFromStart = () => undefined,
-  playSpeed = 1000,
+  playSpeed = 2000,
   onSetPlaySpeed = () => undefined,
 }: TimelineProps) {
   const [editingFrameIndex, setEditingFrameIndex] = useState<number | null>(null);

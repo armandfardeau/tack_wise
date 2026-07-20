@@ -10,6 +10,7 @@ describe('useScenario', () => {
   it('uses discrete playback by default', () => {
     const { result } = renderHook(() => useScenario());
 
+    expect(result.current.playSpeed).toBe(2000);
     expect(result.current.settings).toEqual({
       title: expect.any(String),
       displayMode: 'single',
