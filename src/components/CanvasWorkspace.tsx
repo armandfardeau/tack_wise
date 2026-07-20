@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
 import type { DisplayMode, Frame, Theme } from '../types';
@@ -344,10 +344,10 @@ export default function CanvasWorkspace({
   const [isInspectorOpen, setIsInspectorOpen] = useState(false);
   const [inspectorPosition, setInspectorPosition] = useState<Position | null>(null);
 
-  const resetInspectorPlacement = () => {
+  const resetInspectorPlacement = useCallback(() => {
     autoPanKeyRef.current = null;
     setInspectorPosition(null);
-  };
+  }, []);
 
   useEffect(() => {
     if (!selectedId || !isInspectorOpen) return undefined;
@@ -361,20 +361,20 @@ export default function CanvasWorkspace({
 
     document.addEventListener('pointerdown', handlePointerOutside, true);
     return () => document.removeEventListener('pointerdown', handlePointerOutside, true);
-  }, [isInspectorOpen, onClearSelection, selectedId]);
+  }, [isInspectorOpen, onClearSelection, resetInspectorPlacement, selectedId]);
 
-  const handleSelectObject = (id: string, type: Exclude<SelectedType, null>) => {
+  const handleSelectObject = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     resetInspectorPlacement();
     setIsInspectorOpen(false);
     onSelectObject(id, type);
-  };
+  }, [onSelectObject, resetInspectorPlacement]);
 
-  const handleOpenInspector = (id: string, type: Exclude<SelectedType, null>) => {
+  const handleOpenInspector = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     if (presenterMode) return;
     resetInspectorPlacement();
     setIsInspectorOpen(true);
     onSelectObject(id, type);
-  };
+  }, [onSelectObject, presenterMode, resetInspectorPlacement]);
 
   useEffect(() => {
     if (!inspectorRequest || inspectorRequest.requestId === handledInspectorRequestRef.current) return;

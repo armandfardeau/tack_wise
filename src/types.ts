@@ -25,6 +25,7 @@ export interface Mark {
   y: number;
   shape: 'circle' | 'triangle' | 'square' | 'obstruction' | 'gate' | 'committeeBoat';
   size?: number;
+  rotation?: number;
   /** Radius of an obstruction's proximity circle, measured in boat lengths. */
   proximityRadius?: number;
   showRotationArrow?: boolean;

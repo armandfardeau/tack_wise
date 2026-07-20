@@ -328,6 +328,7 @@ function PlaybackInspector({
           <option value="5000">Slow (5s)</option>
           <option value="2000">Normal (2s)</option>
           <option value="1000">Fast (1s)</option>
+          <option value="500">Very fast (0.5s)</option>
         </select>
       </div>
       <button
@@ -397,6 +398,17 @@ function MarkInspector({ activeFrame, mark, updateMark }: MarkInspectorProps) {
           step="1"
           value={mark.size ?? (mark.shape === 'obstruction' ? 60 : 28)}
           onChange={(event) => updateMark(mark.id, { size: Number(event.target.value) })}
+        />
+      </div>
+      <div className="form-row">
+        <label htmlFor="mark-rotation">Mark rotation ({Math.round(mark.rotation ?? 0)}°)</label>
+        <input
+          id="mark-rotation"
+          type="range"
+          min="-180"
+          max="180"
+          value={mark.rotation ?? 0}
+          onChange={(event) => updateMark(mark.id, { rotation: Number(event.target.value) })}
         />
       </div>
       {mark.shape === 'obstruction' && (

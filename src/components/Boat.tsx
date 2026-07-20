@@ -106,14 +106,14 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       }}
       onDblClick={() => onOpenInspector?.()}
       onDblTap={() => onOpenInspector?.()}
-      onDragStart={() => onSelect?.(boat.id)}
-      onDragMove={(e) => {
+      onDragStart={readOnly ? undefined : () => onSelect?.(boat.id)}
+      onDragMove={readOnly ? undefined : (e) => {
         onDragMove?.(boat.id, {
           x: e.target.x(),
           y: e.target.y(),
         });
       }}
-      onDragEnd={(e) => {
+      onDragEnd={readOnly ? undefined : (e) => {
         onMove?.(boat.id, {
           x: e.target.x(),
           y: e.target.y(),
@@ -131,7 +131,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         />
       )}
 
-      {isSelected && (
+      {isSelected && !readOnly && (
         <Circle
           x={0}
           y={-88}
@@ -145,7 +145,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           onTouchStart={(event) => { event.cancelBubble = true; }}
           onDragStart={(event) => { event.cancelBubble = true; }}
           onDragMove={(event) => { event.cancelBubble = true; }}
-            onDragEnd={readOnly ? undefined : (event) => {
+          onDragEnd={readOnly ? undefined : (event) => {
             event.cancelBubble = true;
 
             const pointerPosition = event.target.getStage()?.getPointerPosition();
@@ -160,7 +160,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
             }
 
             event.target.position({ x: 0, y: -88 });
-            }}
+          }}
         />
       )}
 

@@ -134,6 +134,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       <Group
         x={mark.x}
         y={mark.y}
+        rotation={mark.rotation ?? 0}
         draggable={false}
         opacity={0.22}
         listening={false}
@@ -147,6 +148,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
     <Group
       x={mark.x}
       y={mark.y}
+      rotation={mark.rotation ?? 0}
       draggable={!readOnly}
       dragBoundFunc={snapFn ? (pos) => snapFn(pos) : undefined}
       onClick={() => {
@@ -157,8 +159,8 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       }}
       onDblClick={() => onOpenInspector?.()}
       onDblTap={() => onOpenInspector?.()}
-      onDragStart={() => onSelect?.(mark.id)}
-      onDragEnd={(e) => {
+      onDragStart={readOnly ? undefined : () => onSelect?.(mark.id)}
+      onDragEnd={readOnly ? undefined : (e) => {
         onMove?.(mark.id, {
           x: e.target.x(),
           y: e.target.y(),
@@ -180,18 +182,20 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       />
 
       {/* Label for the mark */}
-      <Text
-        text={mark.name}
-        x={-40}
-        y={20}
-        width={80}
-        align="center"
-        fontSize={11}
-        fontStyle="bold"
-        fill="#0f172a"
-        wrap="none"
-        ellipsis={true}
-      />
+      <Group rotation={-(mark.rotation ?? 0)}>
+        <Text
+          text={mark.name}
+          x={-40}
+          y={20}
+          width={80}
+          align="center"
+          fontSize={11}
+          fontStyle="bold"
+          fill="#0f172a"
+          wrap="none"
+          ellipsis={true}
+        />
+      </Group>
     </Group>
   );
 }

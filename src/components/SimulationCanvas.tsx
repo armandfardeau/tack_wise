@@ -174,12 +174,12 @@ export default function SimulationCanvas({
               mark={mark}
               isSelected={selectedId === mark.id}
             />
-              <Mark
-                mark={mark}
-                isSelected={selectedId === mark.id}
-                readOnly={readOnly}
-                onOpenInspector={readOnly ? undefined : () => onOpenInspector(mark.id, 'mark')}
-                snapFn={(position) => getSnappedAbsolutePosition(mark.id, position)}
+            <Mark
+              mark={mark}
+              isSelected={selectedId === mark.id}
+              readOnly={readOnly}
+              onOpenInspector={readOnly ? undefined : () => onOpenInspector(mark.id, 'mark')}
+              snapFn={(position) => getSnappedAbsolutePosition(mark.id, position)}
               onSelect={(id) => {
                 onSelectObject(id, 'mark');
                 onSnapPreview(null);

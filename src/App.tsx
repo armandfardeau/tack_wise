@@ -143,6 +143,7 @@ export default function App() {
       <AppHeader
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
+        onNewScenario={scenario.createNewScenario}
         onExport={exportState.triggerExport}
         onExportImage={handleImageExport}
         onExportJson={() => exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex)}

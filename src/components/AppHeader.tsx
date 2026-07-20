@@ -7,6 +7,7 @@ import type { Theme, VideoExportType } from '../types';
 interface AppHeaderProps {
   isExporting: boolean;
   presenterMode?: boolean;
+  onNewScenario?: () => void;
   onExport: (type: 'gif' | VideoExportType) => void;
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
@@ -22,6 +23,7 @@ interface AppHeaderProps {
 export default function AppHeader({
   isExporting,
   presenterMode = false,
+  onNewScenario,
   onExport,
   onExportImage,
   onExportJson,
@@ -45,6 +47,7 @@ export default function AppHeader({
         <ExportActions
           className="export-actions header-export-actions"
           isExporting={isExporting}
+          onNewScenario={onNewScenario}
           onExport={onExport}
           onExportImage={onExportImage}
           onExportJson={onExportJson}

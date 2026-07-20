@@ -43,8 +43,8 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspect
         }}
         onDblClick={() => onOpenInspector?.()}
         onDblTap={() => onOpenInspector?.()}
-        onDragStart={() => onSelect?.(arrow.id)}
-        onDragEnd={(event) => {
+        onDragStart={readOnly ? undefined : () => onSelect?.(arrow.id)}
+        onDragEnd={readOnly ? undefined : (event) => {
           const dx = event.target.x();
           const dy = event.target.y();
           event.target.position({ x: 0, y: 0 });

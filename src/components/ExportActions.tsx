@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FileVideoCamera, FolderOpen, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
+import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FilePlus, FileVideoCamera, FolderOpen, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
 import type { SituationTemplate } from '../data/situationTemplates';
 import type { VideoExportType } from '../types';
 
 interface ExportActionsProps {
   className?: string;
   isExporting: boolean;
+  onNewScenario?: () => void;
   onExport: (type: 'gif' | VideoExportType) => void;
   onExportImage?: (type: 'png' | 'jpeg') => void;
   onExportJson: () => void;
@@ -14,7 +15,7 @@ interface ExportActionsProps {
   templates?: SituationTemplate[];
 }
 
-export default function ExportActions({ className = 'export-actions', isExporting, onExport, onExportImage, onExportJson, onImportJson, onLoadTemplate, templates = [] }: ExportActionsProps) {
+export default function ExportActions({ className = 'export-actions', isExporting, onNewScenario, onExport, onExportImage, onExportJson, onImportJson, onLoadTemplate, templates = [] }: ExportActionsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
@@ -101,6 +102,10 @@ export default function ExportActions({ className = 'export-actions', isExportin
           <span className="file-menu-chevron" aria-hidden="true"><ChevronDown size={14} /></span>
         </button>
         {isFileMenuOpen && <div className="file-dropdown-menu" role="menu" aria-label="File options">
+          {onNewScenario && <button type="button" className="action-btn file-menu-item new-scenario-btn" role="menuitem" title="Create a new diagram" onClick={() => closeAfterExport(onNewScenario)}>
+            <span className="action-icon" aria-hidden="true"><FilePlus size={16} /></span>
+            <span className="action-label">New diagram</span>
+          </button>}
           {templates.length > 0 && <div className="file-submenu">
             <button
               type="button"

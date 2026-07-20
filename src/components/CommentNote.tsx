@@ -34,8 +34,8 @@ export default function CommentNote({ comment, isSelected, theme, onMove, onOpen
       }}
       onDblClick={() => onOpenInspector?.()}
       onDblTap={() => onOpenInspector?.()}
-      onDragStart={() => onSelect?.(comment.id)}
-      onDragEnd={(event) => onMove?.(comment.id, { x: event.target.x(), y: event.target.y() })}
+      onDragStart={readOnly ? undefined : () => onSelect?.(comment.id)}
+      onDragEnd={readOnly ? undefined : (event) => onMove?.(comment.id, { x: event.target.x(), y: event.target.y() })}
     >
       <Rect
         width={width}

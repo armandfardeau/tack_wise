@@ -90,7 +90,7 @@ export function useScenario() {
   const [selectedId, setSelectedId] = useState<string | null>(initialScenario.selectedId);
   const [selectedType, setSelectedType] = useState<SelectedType>(initialScenario.selectedType);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [playSpeed, setPlaySpeed] = useState(2000);
+  const [playSpeed, setPlaySpeed] = useState(1000);
   const [autoSailTrim, setAutoSailTrim] = useState(true);
   const [settings, setSettings] = useState<ScenarioSettings>(initialScenario.settings);
   const [history, setHistory] = useState<HistoryState>({ past: [], future: [] });
@@ -460,6 +460,7 @@ export function useScenario() {
       y: 150 + Math.random() * 200,
       shape,
       size: shape === 'obstruction' ? 60 : 28,
+      rotation: 0,
       proximityRadius: shape === 'obstruction' ? DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS : undefined,
       showRotationArrow: false,
       rotationDirection: 'counterclockwise',

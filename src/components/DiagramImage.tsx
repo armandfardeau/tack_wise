@@ -47,8 +47,8 @@ export default function DiagramImage({ image, isSelected, onMove, onOpenInspecto
       }}
       onDblClick={() => onOpenInspector?.()}
       onDblTap={() => onOpenInspector?.()}
-      onDragStart={() => onSelect?.(image.id)}
-      onDragEnd={(event) => onMove?.(image.id, { x: event.target.x(), y: event.target.y() })}
+      onDragStart={readOnly ? undefined : () => onSelect?.(image.id)}
+      onDragEnd={readOnly ? undefined : (event) => onMove?.(image.id, { x: event.target.x(), y: event.target.y() })}
     />
   );
 }
