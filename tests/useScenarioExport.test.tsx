@@ -52,7 +52,7 @@ const frames: Frame[] = [{
 
 const originalRequestAnimationFrame = window.requestAnimationFrame;
 
-function renderVideoExport() {
+function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0) {
   const track = { stop: jest.fn() };
   const canvas = document.createElement('canvas');
   Object.defineProperty(canvas, 'captureStream', {
@@ -65,19 +65,23 @@ function renderVideoExport() {
   document.body.appendChild(canvasWrap);
 
   const setCurrentFrameIndex = jest.fn();
+  const setPlaybackProgress = jest.fn();
+  const setIsPlaybackSampling = jest.fn();
   const setIsPlaying = jest.fn();
   const hook = renderHook(() => useScenarioExport({
     currentFrameIndex: 0,
-    frames,
-    playSpeed: 0,
+    frames: exportFrames,
+    playSpeed: exportPlaySpeed,
     setCurrentFrameIndex,
+    setPlaybackProgress,
+    setIsPlaybackSampling,
     setIsPlaying,
     settings: { displayMode: 'single', presenterMode: false },
     stageRef: { current: null } as { current: KonvaStage | null },
     stageSize: { width: 800, height: 600 },
   }));
 
-  return { ...hook, canvas, setCurrentFrameIndex, setIsPlaying, track };
+  return { ...hook, canvas, setCurrentFrameIndex, setPlaybackProgress, setIsPlaybackSampling, setIsPlaying, track };
 }
 
 describe('useScenarioExport video exports', () => {
@@ -113,7 +117,7 @@ describe('useScenarioExport video exports', () => {
 
   it('records and downloads WEBM without converting it', async () => {
     TestMediaRecorder.supportedMimeTypes.add('video/webm;codecs=vp9');
-    const { result, setIsPlaying, track } = renderVideoExport();
+    const { result, setIsPlaying, setIsPlaybackSampling, track } = renderVideoExport();
 
     await act(async () => {
       await result.current.triggerExport('webm');
@@ -126,7 +130,22 @@ describe('useScenarioExport video exports', () => {
     expect(webmDownload[0].type).toBe('video/webm;codecs=vp9');
     expect(webmDownload[1]).toBe('regatta-simulation-123.webm');
     expect(setIsPlaying).toHaveBeenCalledWith(false);
+    expect(setIsPlaybackSampling).toHaveBeenCalledWith(true);
+    expect(setIsPlaybackSampling).toHaveBeenLastCalledWith(false);
     expect(track.stop).toHaveBeenCalledTimes(1);
+  });
+
+  it('samples intermediate playback progress for multi-frame video exports', async () => {
+    TestMediaRecorder.supportedMimeTypes.add('video/webm;codecs=vp9');
+    const secondFrame = { ...frames[0], id: 'frame-2', name: 'End' };
+    const { result, setPlaybackProgress } = renderVideoExport([frames[0], secondFrame], 100);
+
+    await act(async () => {
+      await result.current.triggerExport('webm');
+    });
+
+    expect(setPlaybackProgress).toHaveBeenCalledWith(0.5);
+    expect(setPlaybackProgress).toHaveBeenLastCalledWith(0);
   });
 
   it('records and downloads native MP4 when the browser supports it', async () => {

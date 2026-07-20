@@ -131,7 +131,10 @@ export default function App() {
     currentFrameIndex: scenario.currentFrameIndex,
     frames: scenario.frames,
     playSpeed: scenario.playSpeed,
+    playbackProgress: scenario.playbackProgress,
     setCurrentFrameIndex: scenario.setCurrentFrameIndex,
+    setPlaybackProgress: scenario.setPlaybackProgress,
+    setIsPlaybackSampling: scenario.setIsPlaybackSampling,
     setIsPlaying: scenario.setIsPlaying,
     settings: scenario.settings,
     stageRef: viewport.stageRef,
@@ -220,6 +223,7 @@ export default function App() {
           getSnappedPosition={gridSnap.getSnappedPosition}
           gridSnapEnabled={gridSnapEnabled}
           isPlaying={scenario.isPlaying}
+          playbackWarning={scenario.playbackWarning}
           isExporting={isCanvasExporting}
           handleCanvasDragEnd={viewport.handleCanvasDragEnd}
           handleCanvasWheel={viewport.handleCanvasWheel}

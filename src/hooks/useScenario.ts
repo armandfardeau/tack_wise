@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BOAT_COLORS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS, MARK_COLORS } from '../constants';
 import { cloneFrames, initialScenarioTitle } from '../data/initialFrames';
 import type {
@@ -17,7 +17,12 @@ import type {
   TacticalArrow,
 } from '../types';
 import { getRuleReferences } from '../types';
-import { calculateAutoSailAngle, type Position } from '../utils/simulation';
+import {
+  calculateAutoSailAngle,
+  getBoatManeuver,
+  interpolateBoatManeuver,
+  type Position,
+} from '../utils/simulation';
 import { getCurvedArrowPoints } from '../utils/arrows';
 import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { parseScenarioFromJson } from '../utils/exporter';
@@ -120,6 +125,8 @@ export function useScenario() {
   const [selectedType, setSelectedType] = useState<SelectedType>(initialScenario.selectedType);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playSpeed, setPlaySpeed] = useState(1000);
+  const [playbackProgress, setPlaybackProgress] = useState(0);
+  const [isPlaybackSampling, setIsPlaybackSampling] = useState(false);
   const [autoSailTrim, setAutoSailTrim] = useState(true);
   const [settings, setSettings] = useState<ScenarioSettings>(initialScenario.settings);
   const [history, setHistory] = useState<HistoryState>({ past: [], future: [] });
@@ -128,8 +135,12 @@ export function useScenario() {
   });
   const [libraryItems, setLibraryItems] = useState<ScenarioRepositoryItem[]>(() => listScenarioRepositoryItems());
   const skipInitialAutosaveRef = useRef(true);
+  const playbackProgressRef = useRef(0);
 
   const activeFrame = frames[currentFrameIndex] ?? frames[0];
+  const nextFrame = currentFrameIndex < frames.length - 1
+    ? frames[currentFrameIndex + 1]
+    : undefined;
   const selectedBoat = activeFrame.boats.find((boat) => boat.id === selectedId);
   const selectedMark = activeFrame.marks.find((mark) => mark.id === selectedId);
   const selectedConnection = activeFrame.connections?.find((connection) => connection.id === selectedId);
@@ -137,15 +148,74 @@ export function useScenario() {
   const selectedComment = activeFrame.comments?.find((comment) => comment.id === selectedId);
   const selectedImage = activeFrame.images?.find((image) => image.id === selectedId);
 
+  const updatePlaybackProgress = (progress: number) => {
+    const clampedProgress = Math.min(Math.max(progress, 0), 1);
+    playbackProgressRef.current = clampedProgress;
+    setPlaybackProgress(clampedProgress);
+  };
+
+  const resetPlaybackProgress = () => updatePlaybackProgress(0);
+
   useEffect(() => {
-    if (!isPlaying) return undefined;
+    if (!isPlaying || frames.length <= 1) return undefined;
 
-    const interval = window.setInterval(() => {
-      setCurrentFrameIndex((index) => (index >= frames.length - 1 ? 0 : index + 1));
-    }, playSpeed);
+    const segmentDuration = Math.max(playSpeed, 1);
+    let elapsed = playbackProgressRef.current * segmentDuration;
+    let previousTimestamp: number | null = null;
+    let animationFrameId = 0;
 
-    return () => window.clearInterval(interval);
+    const tick = (timestamp: number) => {
+      if (previousTimestamp === null) previousTimestamp = timestamp;
+      elapsed += Math.max(0, timestamp - previousTimestamp);
+      previousTimestamp = timestamp;
+
+      while (elapsed >= segmentDuration) {
+        elapsed -= segmentDuration;
+        setCurrentFrameIndex((index) => (index >= frames.length - 1 ? 0 : index + 1));
+      }
+
+      updatePlaybackProgress(elapsed / segmentDuration);
+      animationFrameId = window.requestAnimationFrame(tick);
+    };
+
+    animationFrameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(animationFrameId);
   }, [frames.length, isPlaying, playSpeed]);
+
+  useEffect(() => {
+    if (!isPlaying && !isPlaybackSampling && playbackProgressRef.current > 0) {
+      resetPlaybackProgress();
+    }
+  }, [isPlaybackSampling, isPlaying]);
+
+  const playbackWarning = useMemo(() => {
+    if (!isPlaying || !nextFrame) return null;
+
+    const invalidBoatNames = activeFrame.boats
+      .filter((boat) => {
+        const nextBoat = nextFrame.boats.find((candidate) => candidate.id === boat.id);
+        return nextBoat && !getBoatManeuver(boat, nextBoat).valid;
+      })
+      .map((boat) => boat.name);
+
+    if (invalidBoatNames.length === 0) return null;
+
+    return `${invalidBoatNames.join(', ')} cannot complete the straight-line manoeuvre to ${nextFrame.name}. The boat will hold and snap to the next position.`;
+  }, [activeFrame, isPlaying, nextFrame]);
+
+  const displayFrame = useMemo(() => {
+    if ((!isPlaying && !isPlaybackSampling) || !nextFrame || playbackProgress <= 0) return activeFrame;
+
+    return {
+      ...activeFrame,
+      boats: activeFrame.boats.map((boat) => {
+        const nextBoat = nextFrame.boats.find((candidate) => candidate.id === boat.id);
+        return nextBoat
+          ? interpolateBoatManeuver(boat, nextBoat, playbackProgress, autoSailTrim, activeFrame.windAngle)
+          : boat;
+      }),
+    };
+  }, [activeFrame, autoSailTrim, isPlaybackSampling, isPlaying, nextFrame, playbackProgress]);
 
   useEffect(() => {
     if (!autoSailTrim) return;
@@ -179,6 +249,7 @@ export function useScenario() {
   }, [currentFrameIndex, frames, settings]);
 
   const commitFrames = (updater: (previousFrames: Frame[]) => Frame[]) => {
+    resetPlaybackProgress();
     setFrames((previousFrames) => {
       const nextFrames = updater(previousFrames);
       if (nextFrames === previousFrames) return previousFrames;
@@ -193,11 +264,13 @@ export function useScenario() {
 
   const selectFrame = (index: number) => {
     setIsPlaying(false);
+    resetPlaybackProgress();
     setCurrentFrameIndex(index);
   };
 
   const stepFrame = (direction: 1 | -1) => {
     setIsPlaying(false);
+    resetPlaybackProgress();
     setCurrentFrameIndex((index) => Math.min(Math.max(index + direction, 0), frames.length - 1));
   };
 
@@ -205,6 +278,7 @@ export function useScenario() {
   const stepForward = () => stepFrame(1);
 
   const replayFromStart = () => {
+    resetPlaybackProgress();
     setCurrentFrameIndex(0);
     setIsPlaying(true);
   };
@@ -221,6 +295,7 @@ export function useScenario() {
 
   const createNewScenario = () => {
     setIsPlaying(false);
+    resetPlaybackProgress();
     setFrames([{
       id: `frame-${Date.now()}`,
       name: 'Frame 1',
@@ -486,6 +561,7 @@ export function useScenario() {
 
   const addFrame = () => {
     setIsPlaying(false);
+    resetPlaybackProgress();
     const newFrame: Frame = {
       ...cloneScenarioFrames([activeFrame])[0],
       id: `frame-${Date.now()}`,
@@ -497,6 +573,7 @@ export function useScenario() {
 
   const duplicateFrame = (frameIndex = currentFrameIndex) => {
     setIsPlaying(false);
+    resetPlaybackProgress();
     const sourceFrame = frames[frameIndex] ?? activeFrame;
     const newFrame: Frame = {
       ...cloneScenarioFrames([sourceFrame])[0],
@@ -515,6 +592,7 @@ export function useScenario() {
     if (frames.length <= 1) return;
 
     setIsPlaying(false);
+    resetPlaybackProgress();
     commitFrames((previousFrames) => previousFrames.filter((_, index) => index !== indexToDelete));
     setCurrentFrameIndex(Math.max(0, indexToDelete - 1));
   };
@@ -528,6 +606,7 @@ export function useScenario() {
     const firstComment = importedFrame.comments?.[0];
 
     setIsPlaying(false);
+    resetPlaybackProgress();
     setFrames(importedFrames);
     setCurrentFrameIndex(payload.currentFrameIndex);
     setSettings(payload.settings ? {
@@ -584,6 +663,7 @@ export function useScenario() {
     const previousEntry = history.past.at(-1);
     if (!previousEntry) return;
 
+    resetPlaybackProgress();
     setFrames(cloneScenarioFrames(previousEntry));
     setHistory({
       past: history.past.slice(0, -1),
@@ -595,6 +675,7 @@ export function useScenario() {
     const nextEntry = history.future[0];
     if (!nextEntry) return;
 
+    resetPlaybackProgress();
     setFrames(cloneScenarioFrames(nextEntry));
     setHistory({
       past: [...history.past, cloneScenarioFrames(frames)],
@@ -860,11 +941,12 @@ export function useScenario() {
     duplicateSelected,
     duplicateFrame,
     frames,
-    displayFrame: activeFrame,
+    displayFrame,
     hasAutosave,
     libraryItems,
     importScenario,
     isPlaying,
+    isPlaybackSampling,
     moveArrow,
     moveBoat,
     moveComment,
@@ -881,6 +963,8 @@ export function useScenario() {
     addMark,
     addRuleToActiveFrame,
     playSpeed,
+    playbackProgress,
+    playbackWarning,
     saveToLibrary,
     loadFromLibrary,
     deleteFromLibrary,
@@ -901,6 +985,8 @@ export function useScenario() {
     setAutoSailTrim,
     setCurrentFrameIndex,
     setIsPlaying,
+    setIsPlaybackSampling,
+    setPlaybackProgress: updatePlaybackProgress,
     setPlaySpeed,
     stepBackward,
     stepForward,
