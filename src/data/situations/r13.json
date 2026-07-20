@@ -11,57 +11,74 @@
           "id": "r13-alpha",
           "name": "Alpha — tacking",
           "color": "#38bdf8",
-          "x": 290,
-          "y": 315,
-          "heading": 5,
-          "sailAngle": 0,
+          "x": 300,
+          "y": 320,
+          "heading": 45,
+          "sailAngle": -12,
           "showHeadingLine": true
         },
         {
           "id": "r13-bravo",
           "name": "Bravo — close-hauled",
           "color": "#f87171",
-          "x": 380,
-          "y": 235,
-          "heading": 315,
-          "sailAngle": 12,
+          "x": 220,
+          "y": 320,
+          "heading": 45,
+          "sailAngle": -12,
           "showHeadingLine": true
         }
       ],
       "marks": [],
-      "arrows": [
+      "arrows": [],
+      "comments": [],
+      "rules": [
         {
-          "id": "r13-tack",
-          "name": "Tacking path",
-          "color": "#38bdf8",
-          "points": [
-            { "x": 220, "y": 385 },
-            { "x": 290, "y": 315 },
-            { "x": 360, "y": 245 }
-          ],
-          "curved": true,
-          "lineWidth": 4
-        },
-        {
-          "id": "r13-bravo-course",
-          "name": "Other boat continues",
-          "color": "#f87171",
-          "points": [
-            { "x": 380, "y": 235 },
-            { "x": 455, "y": 160 }
-          ],
-          "lineWidth": 3
+          "id": "rrs-13",
+          "label": "RRS 13",
+          "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
         }
       ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784579719054",
+      "name": "Boat passing head to wind (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r13-alpha",
+          "name": "Alpha — tacking",
+          "color": "#38bdf8",
+          "x": 300,
+          "y": 320,
+          "heading": 0,
+          "sailAngle": 2,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r13-bravo",
+          "name": "Bravo — close-hauled",
+          "color": "#f87171",
+          "x": 220,
+          "y": 320,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true,
+          "speechBubble": "😬"
+        }
+      ],
+      "marks": [],
+      "arrows": [],
       "comments": [
         {
-          "id": "r13-note",
-          "name": "Tacking window",
+          "id": "comment-1784579727251",
+          "name": "Explanation",
           "text": "Alpha has passed head to wind but is not yet close-hauled.\nAlpha must keep clear until she reaches a close-hauled course.",
-          "color": "#facc15",
-          "x": 490,
-          "y": 150,
-          "width": 230,
+          "color": "#f8fafc",
+          "x": 557.8765503543668,
+          "y": 132.93163437357111,
+          "width": 180,
           "fontSize": 14
         }
       ],
@@ -71,7 +88,216 @@
           "label": "RRS 13",
           "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
         }
-      ]
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784579827192",
+      "name": "Boat passing head to wind (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r13-alpha",
+          "name": "Alpha — tacking",
+          "color": "#38bdf8",
+          "x": 300,
+          "y": 320,
+          "heading": 0,
+          "sailAngle": 2,
+          "showHeadingLine": true,
+          "speechBubble": "😡"
+        },
+        {
+          "id": "r13-bravo",
+          "name": "Bravo — close-hauled",
+          "color": "#f87171",
+          "x": 260,
+          "y": 280,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true,
+          "speechBubble": ""
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "comment-1784579727251",
+          "name": "Explanation",
+          "text": "Alpha has passed head to wind but is not yet close-hauled.\nAlpha must keep clear until she reaches a close-hauled course.",
+          "color": "#f8fafc",
+          "x": 557.8765503543668,
+          "y": 132.93163437357111,
+          "width": 180,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-13",
+          "label": "RRS 13",
+          "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784579852072",
+      "name": "Boat passing head to wind (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r13-alpha",
+          "name": "Alpha — tacking",
+          "color": "#38bdf8",
+          "x": 300,
+          "y": 320,
+          "heading": 0,
+          "sailAngle": 2,
+          "showHeadingLine": true,
+          "speechBubble": "😡"
+        },
+        {
+          "id": "r13-bravo",
+          "name": "Bravo — close-hauled",
+          "color": "#f87171",
+          "x": 300,
+          "y": 240,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true,
+          "speechBubble": ""
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "comment-1784579727251",
+          "name": "Explanation",
+          "text": "Alpha has passed head to wind but is not yet close-hauled.\nAlpha must keep clear until she reaches a close-hauled course.",
+          "color": "#f8fafc",
+          "x": 557.8765503543668,
+          "y": 132.93163437357111,
+          "width": 180,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-13",
+          "label": "RRS 13",
+          "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784579866564",
+      "name": "Boat passing head to wind (Copy) (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r13-alpha",
+          "name": "Alpha — tacking",
+          "color": "#38bdf8",
+          "x": 300,
+          "y": 340,
+          "heading": -45,
+          "sailAngle": 12,
+          "showHeadingLine": true,
+          "speechBubble": ""
+        },
+        {
+          "id": "r13-bravo",
+          "name": "Bravo — close-hauled",
+          "color": "#f87171",
+          "x": 300,
+          "y": 240,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true,
+          "speechBubble": "😎"
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "comment-1784579727251",
+          "name": "Explanation",
+          "text": "Alpha has passed head to wind but is not yet close-hauled.\nAlpha must keep clear until she reaches a close-hauled course.",
+          "color": "#f8fafc",
+          "x": 557.8765503543668,
+          "y": 132.93163437357111,
+          "width": 180,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-13",
+          "label": "RRS 13",
+          "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784579877234",
+      "name": "Boat passing head to wind (Copy) (Copy) (Copy) (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 12,
+      "boats": [
+        {
+          "id": "r13-alpha",
+          "name": "Alpha — tacking",
+          "color": "#38bdf8",
+          "x": 260,
+          "y": 300,
+          "heading": -45,
+          "sailAngle": 12,
+          "showHeadingLine": true,
+          "speechBubble": ""
+        },
+        {
+          "id": "r13-bravo",
+          "name": "Bravo — close-hauled",
+          "color": "#f87171",
+          "x": 360,
+          "y": 180,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true,
+          "speechBubble": "😎"
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "comment-1784579727251",
+          "name": "Explanation",
+          "text": "Alpha has passed head to wind but is not yet close-hauled.\nAlpha must keep clear until she reaches a close-hauled course.",
+          "color": "#f8fafc",
+          "x": 539.8765503543668,
+          "y": 178.93163437357111,
+          "width": 180,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-13",
+          "label": "RRS 13",
+          "description": "After passing head to wind, a boat keeps clear of other boats until she is on a close-hauled course."
+        }
+      ],
+      "connections": []
     }
   ]
 }
