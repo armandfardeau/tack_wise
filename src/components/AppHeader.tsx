@@ -13,6 +13,9 @@ interface AppHeaderProps {
   onExportJson: () => void;
   onImportJson: (file: File) => void;
   onShareScenario?: () => void;
+  onContributeTemplate?: () => void;
+  onUpdateTemplate?: () => void;
+  canUpdateTemplate?: boolean;
   onToggleTheme?: () => void;
   onTogglePresenter?: () => void;
   onLoadTemplate?: (template: SituationTemplate) => void;
@@ -29,6 +32,9 @@ export default function AppHeader({
   onExportJson,
   onImportJson,
   onShareScenario,
+  onContributeTemplate,
+  onUpdateTemplate,
+  canUpdateTemplate,
   onToggleTheme,
   onTogglePresenter,
   onLoadTemplate,
@@ -53,6 +59,9 @@ export default function AppHeader({
           onExportJson={onExportJson}
           onImportJson={onImportJson}
           onLoadTemplate={onLoadTemplate}
+          onContributeTemplate={onContributeTemplate}
+          onUpdateTemplate={onUpdateTemplate}
+          canUpdateTemplate={canUpdateTemplate}
           templates={templates}
         />
         <ViewActions

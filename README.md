@@ -12,6 +12,7 @@ Tack Wise is a browser-based Tactical Sailing Situations (TSS) authoring and pre
 - Canvas pan, zoom, placement grid, magnetic snapping, presenter mode, and print output.
 - Undo/redo, autosave recovery, local scenario library, JSON import/export, and portable share links.
 - PNG/JPG diagram export, animated GIF export, and MP4 video export.
+- GitHub pull-request handoff for adding or updating source templates.
 - Installable PWA with an offline app shell and locally stored scenarios.
 
 ## Development

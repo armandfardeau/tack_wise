@@ -23,6 +23,16 @@ describe('ExportActions menu behavior', () => {
     inputClick.mockRestore();
   });
 
+  it('creates a new diagram through the File menu', () => {
+    const onNewScenario = jest.fn();
+
+    render(<ExportActions {...baseProps} onNewScenario={onNewScenario} />);
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /new diagram/i }));
+
+    expect(onNewScenario).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores an import change when no file is selected', () => {
     render(<ExportActions {...baseProps} />);
 
@@ -68,6 +78,46 @@ describe('ExportActions menu behavior', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
     expect(screen.getByRole('searchbox', { name: /search templates/i })).toHaveValue('');
+  });
+
+  it('offers new and update template contribution actions', () => {
+    const onContributeTemplate = jest.fn();
+    const onUpdateTemplate = jest.fn();
+
+    render(
+      <ExportActions
+        {...baseProps}
+        templates={[{ id: 'r18', title: 'R18', frames: [] }]}
+        onContributeTemplate={onContributeTemplate}
+        onUpdateTemplate={onUpdateTemplate}
+        canUpdateTemplate
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /submit current diagram/i }));
+    expect(onContributeTemplate).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /update current template/i }));
+    expect(onUpdateTemplate).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables updating when no built-in template is loaded', () => {
+    render(
+      <ExportActions
+        {...baseProps}
+        templates={[{ id: 'r18', title: 'R18', frames: [] }]}
+        onUpdateTemplate={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+
+    expect(screen.getByRole('menuitem', { name: /update current template/i })).toBeDisabled();
   });
 
   it('closes an open menu when exporting starts', () => {

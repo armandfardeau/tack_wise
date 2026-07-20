@@ -4,6 +4,7 @@ export interface SituationTemplate {
   id: string;
   title: string;
   frames: Frame[];
+  sourcePath?: string;
 }
 
 interface SituationFile {
@@ -25,6 +26,7 @@ export const situationTemplates: SituationTemplate[] = Object.entries(situationM
     id: templateIdFromPath(path),
     title: situation.title,
     frames: situation.frames,
+    sourcePath: path,
   }))
   .sort((first, second) => first.title.localeCompare(second.title));
 
