@@ -14,7 +14,7 @@ import { useScenario } from './hooks/useScenario';
 import type { SelectedType } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
 import { scenarioPayloadFromTemplate, situationTemplates } from './data/situationTemplates';
-import { createScenarioShareUrl, parseScenarioFromJson, parseScenarioShareUrl } from './utils/exporter';
+import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
 import { getCanvasContentBounds, getCanvasContentRect } from './utils/simulation';
 import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
 import type { Theme } from './types';
@@ -71,11 +71,17 @@ export default function App() {
   useEffect(() => {
     if (loadedShareRef.current) return;
     loadedShareRef.current = true;
-    const sharedScenario = parseScenarioShareUrl();
-    if (sharedScenario) {
+
+    let isMounted = true;
+    void parseScenarioShareUrlAsync().then((sharedScenario) => {
+      if (!isMounted || !sharedScenario) return;
       importScenario(sharedScenario);
       setLoadedTemplateId(null);
-    }
+    });
+
+    return () => {
+      isMounted = false;
+    };
   }, [importScenario]);
 
   const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
@@ -86,7 +92,7 @@ export default function App() {
   };
 
   const handleShareScenario = async () => {
-    const shareUrl = createScenarioShareUrl({
+    const shareUrl = await createScenarioShareUrlAsync({
       version: 2,
       frames: scenario.frames,
       currentFrameIndex: scenario.currentFrameIndex,
