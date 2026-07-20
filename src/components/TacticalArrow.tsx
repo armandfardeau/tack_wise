@@ -1,6 +1,6 @@
 import { Arrow, Circle } from 'react-konva';
 import type { TacticalArrow as TacticalArrowModel } from '../types';
-import { ensureCurvedArrowControlPoint } from '../utils/arrows';
+import { ensureCurvedArrowControlPoint, toTacticalArrowPoints } from '../utils/arrows';
 
 interface TacticalArrowProps {
   arrow: TacticalArrowModel;
@@ -15,6 +15,8 @@ interface TacticalArrowProps {
 const ARROW_HIT_STROKE_WIDTH = 24;
 
 export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspector, onSelect, readOnly = false, isShadow = false }: TacticalArrowProps) {
+  if (!Array.isArray(arrow.points) || arrow.points.length < 2) return null;
+
   const isCurved = arrow.curved === true;
   const pathPoints = isCurved ? ensureCurvedArrowControlPoint(arrow.points) : arrow.points;
   const points = pathPoints.flatMap((point) => [point.x, point.y]);
@@ -48,7 +50,8 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspect
           const dx = event.target.x();
           const dy = event.target.y();
           event.target.position({ x: 0, y: 0 });
-          onMove?.(arrow.id, pathPoints.map((point) => ({ x: point.x + dx, y: point.y + dy })));
+          const movedPoints = toTacticalArrowPoints(pathPoints.map((point) => ({ x: point.x + dx, y: point.y + dy })));
+          if (movedPoints) onMove?.(arrow.id, movedPoints);
         }}
       />
       {isSelected && isCurved && !isShadow && !readOnly && pathPoints.slice(1, -1).map((point, pointIndex) => {
@@ -76,11 +79,12 @@ export default function TacticalArrow({ arrow, isSelected, onMove, onOpenInspect
             }}
             onDragEnd={(event) => {
               event.cancelBubble = true;
-              onMove?.(arrow.id, pathPoints.map((pathPoint, index) => (
+              const movedPoints = toTacticalArrowPoints(pathPoints.map((pathPoint, index) => (
                 index === pathPointIndex
                   ? { x: event.target.x(), y: event.target.y() }
                   : { ...pathPoint }
               )));
+              if (movedPoints) onMove?.(arrow.id, movedPoints);
             }}
           />
         );

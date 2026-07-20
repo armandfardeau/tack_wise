@@ -1,5 +1,6 @@
 import { getRuleReferences, type Frame } from '../types';
 import situationData from './situations/tacking-basics.json';
+import { cloneTacticalArrowPoints } from '../utils/arrows';
 import { normalizeFrameConnections } from '../utils/markConnections';
 
 interface SituationData {
@@ -29,7 +30,7 @@ export function cloneFrames(frames: Frame[] = initialFrames): Frame[] {
       })),
       arrows: frame.arrows?.map((arrow) => ({
         ...arrow,
-        points: arrow.points.map((point) => ({ ...point })),
+        points: cloneTacticalArrowPoints(arrow.points),
       })),
       comments: frame.comments?.map((comment) => {
         if (comment.type !== 'rule') return { ...comment };

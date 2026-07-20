@@ -1,13 +1,12 @@
-export interface ArrowPoint {
-  x: number;
-  y: number;
-}
+import type { ArrowPoint, TacticalArrowPoints } from '../types';
+
+export type { ArrowPoint, TacticalArrowPoints } from '../types';
 
 /**
  * Returns a three-point path that bends to the left of the arrow's direction.
  * Konva needs an intermediate point before its tension can produce a curve.
  */
-export function getCurvedArrowPoints(start: ArrowPoint, end: ArrowPoint): ArrowPoint[] {
+export function getCurvedArrowPoints(start: ArrowPoint, end: ArrowPoint): TacticalArrowPoints {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const length = Math.hypot(dx, dy);
@@ -33,4 +32,15 @@ export function ensureCurvedArrowControlPoint(points: ArrowPoint[]): ArrowPoint[
   if (points.length !== 2) return points;
 
   return getCurvedArrowPoints(points[0], points[1]);
+}
+
+/** Converts a point list into an arrow path only when both endpoints exist. */
+export function toTacticalArrowPoints(points: ArrowPoint[]): TacticalArrowPoints | null {
+  if (points.length < 2) return null;
+
+  return points as TacticalArrowPoints;
+}
+
+export function cloneTacticalArrowPoints(points: ArrowPoint[]): ArrowPoint[] {
+  return points.map((point) => ({ ...point }));
 }

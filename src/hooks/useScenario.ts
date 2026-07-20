@@ -23,7 +23,7 @@ import {
   interpolateBoatManeuver,
   type Position,
 } from '../utils/simulation';
-import { getCurvedArrowPoints } from '../utils/arrows';
+import { cloneTacticalArrowPoints, getCurvedArrowPoints, toTacticalArrowPoints } from '../utils/arrows';
 import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { parseScenarioFromJson } from '../utils/exporter';
 import { deleteScenarioRepositoryItem, listScenarioRepositoryItems, loadScenarioRepositoryItem, saveScenarioRepositoryItem } from '../utils/repository';
@@ -482,6 +482,8 @@ export function useScenario() {
   };
 
   const updateArrow = (arrowId: string, changes: Partial<TacticalArrow>) => {
+    if ('points' in changes && (!Array.isArray(changes.points) || changes.points.length < 2)) return;
+
     commitFrames((previousFrames) =>
       previousFrames.map((frame, index) =>
         index === currentFrameIndex
@@ -552,7 +554,10 @@ export function useScenario() {
 
   const moveBoat = (boatId: string, position: Position) => updateBoat(boatId, position);
   const moveMark = (markId: string, position: Position) => updateMark(markId, position);
-  const moveArrow = (arrowId: string, points: TacticalArrow['points']) => updateArrow(arrowId, { points });
+  const moveArrow = (arrowId: string, points: TacticalArrow['points']) => {
+    if (!Array.isArray(points) || points.length < 2) return;
+    updateArrow(arrowId, { points });
+  };
   const moveComment = (commentId: string, position: Position) => updateComment(commentId, position);
   const moveImage = (imageId: string, position: Position) => updateImage(imageId, position);
 
@@ -753,7 +758,7 @@ export function useScenario() {
       ...frame,
       arrows: [
         ...(frame.arrows ?? []),
-        { ...arrow, points: arrow.points.map((point) => ({ ...point })) },
+        { ...arrow, points: cloneTacticalArrowPoints(arrow.points) },
       ],
     }));
     selectObject(arrow.id, 'arrow');
@@ -888,11 +893,11 @@ export function useScenario() {
         ...selectedArrow,
         id: duplicateId,
         name: `${selectedArrow.name} (Copy)`,
-        points: selectedArrow.points.map(offsetPosition),
+        points: toTacticalArrowPoints(selectedArrow.points.map(offsetPosition)) ?? selectedArrow.points,
       };
       updateCurrentAndFutureFrames((frame) => ({
         ...frame,
-        arrows: [...(frame.arrows ?? []), { ...duplicate, points: duplicate.points.map((point) => ({ ...point })) }],
+        arrows: [...(frame.arrows ?? []), { ...duplicate, points: cloneTacticalArrowPoints(duplicate.points) }],
       }));
     } else if (selectedType === 'comment' && selectedComment) {
       const duplicate: FrameComment = selectedComment.type === 'rule'
