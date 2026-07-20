@@ -2,7 +2,7 @@ import ExportActions from './ExportActions';
 import ViewActions from './ViewActions';
 import type { SituationTemplate } from '../data/situationTemplates';
 import { Copy, Sailboat } from 'lucide-react';
-import type { Theme, VideoExportType } from '../types';
+import type { ExportQuality, Theme, VideoExportType } from '../types';
 
 interface AppHeaderProps {
   isExporting: boolean;
@@ -21,6 +21,8 @@ interface AppHeaderProps {
   onLoadTemplate?: (template: SituationTemplate) => void;
   templates?: SituationTemplate[];
   theme?: Theme;
+  exportQuality?: ExportQuality;
+  onExportQualityChange?: (quality: ExportQuality) => void;
 }
 
 export default function AppHeader({
@@ -40,6 +42,8 @@ export default function AppHeader({
   onLoadTemplate,
   templates,
   theme = 'dark',
+  exportQuality,
+  onExportQualityChange,
 }: AppHeaderProps) {
   return (
     <header className="app-header">
@@ -63,6 +67,8 @@ export default function AppHeader({
           onUpdateTemplate={onUpdateTemplate}
           canUpdateTemplate={canUpdateTemplate}
           templates={templates}
+          exportQuality={exportQuality}
+          onExportQualityChange={onExportQualityChange}
         />
         <ViewActions
           className="view-actions header-view-actions"

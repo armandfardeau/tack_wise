@@ -17,7 +17,8 @@ import { scenarioPayloadFromTemplate, situationTemplates } from './data/situatio
 import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
 import { getCanvasContentBounds, getCanvasContentRect } from './utils/simulation';
 import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
-import type { Theme } from './types';
+import type { ExportQuality, Theme } from './types';
+import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
 const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
@@ -53,6 +54,7 @@ export default function App() {
   const [isImageExporting, setIsImageExporting] = useState(false);
   const [isNewScenarioDialogOpen, setIsNewScenarioDialogOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [exportQuality, setExportQuality] = useState<ExportQuality>(DEFAULT_EXPORT_QUALITY);
   const [loadedTemplateId, setLoadedTemplateId] = useState<string | null>(null);
   const [templateContributionMode, setTemplateContributionMode] = useState<TemplateContributionMode | null>(null);
   const gridSnap = useGridSnap(gridSnapEnabled);
@@ -142,6 +144,7 @@ export default function App() {
     settings: scenario.settings,
     stageRef: viewport.stageRef,
     stageSize: viewport.stageSize,
+    exportQuality,
   });
 
   const isCanvasExporting = exportState.isExporting || isImageExporting;
@@ -204,6 +207,8 @@ export default function App() {
         }}
         canUpdateTemplate={Boolean(loadedTemplate)}
         templates={situationTemplates}
+        exportQuality={exportQuality}
+        onExportQualityChange={setExportQuality}
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
         theme={theme}

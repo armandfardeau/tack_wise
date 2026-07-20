@@ -19,8 +19,12 @@ export function exportToGif(
   images: string[],
   frameDelay: number, // in seconds (e.g. 0.5s for 500ms)
   width: number,
-  height: number
+  height: number,
+  options: { sampleInterval?: number; numWorkers?: number } = {},
 ): Promise<Blob> {
+  const availableCores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : undefined;
+  const numWorkers = options.numWorkers ?? (availableCores ? Math.max(2, Math.min(4, availableCores - 1)) : 2);
+
   return new Promise((resolve, reject) => {
     gifshot.createGIF(
       {
@@ -28,8 +32,8 @@ export function exportToGif(
         interval: frameDelay,
         gifWidth: width,
         gifHeight: height,
-        numWorkers: 2,
-        sampleInterval: 10,
+        numWorkers,
+        sampleInterval: options.sampleInterval ?? 10,
       },
       (obj: any) => {
         if (!obj.error) {
