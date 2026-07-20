@@ -14,6 +14,8 @@ describe('useScenario', () => {
       title: expect.any(String),
       displayMode: 'single',
       presenterMode: false,
+      showFrameTitle: true,
+      showFrameNumber: true,
     });
   });
 

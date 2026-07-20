@@ -37,6 +37,8 @@ export function scenarioPayloadFromTemplate(template: SituationTemplate): Scenar
       title: template.title,
       displayMode: 'single',
       presenterMode: false,
+      showFrameTitle: true,
+      showFrameNumber: true,
     },
   };
 }

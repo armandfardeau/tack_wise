@@ -219,6 +219,8 @@ describe('scenario JSON export', () => {
     expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, currentFrameIndex: 2 }))).toThrow(/valid Tack Wise scenario export/i);
     expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, displayMode: 'continuous' } }))).toThrow(/valid Tack Wise scenario export/i);
     expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, presenterMode: 'yes' } }))).toThrow(/valid Tack Wise scenario export/i);
+    expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, showFrameTitle: 'yes' } }))).toThrow(/valid Tack Wise scenario export/i);
+    expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, showFrameNumber: 'yes' } }))).toThrow(/valid Tack Wise scenario export/i);
     expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: null }))).toThrow(/valid Tack Wise scenario export/i);
   });
 });
