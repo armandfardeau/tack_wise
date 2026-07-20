@@ -3,7 +3,7 @@
   "frames": [
     {
       "id": "r11-frame-1",
-      "name": "Windward boat keeps clear",
+      "name": "Initial same-tack overlap",
       "windAngle": 0,
       "windSpeed": 13,
       "boats": [
@@ -68,7 +68,7 @@
     },
     {
       "id": "frame-1784559918772",
-      "name": "Windward boat keeps clear (Copy)",
+      "name": "Bravo begins to keep clear",
       "windAngle": 0,
       "windSpeed": 13,
       "boats": [
@@ -133,7 +133,7 @@
     },
     {
       "id": "frame-1784560040034",
-      "name": "Windward boat keeps clear (Copy) (Copy)",
+      "name": "Bravo continues to keep clear",
       "windAngle": 0,
       "windSpeed": 13,
       "boats": [
@@ -198,7 +198,7 @@
     },
     {
       "id": "frame-1784560071095",
-      "name": "Windward boat keeps clear (Copy) (Copy) (Copy)",
+      "name": "Bravo increases separation",
       "windAngle": 0,
       "windSpeed": 13,
       "boats": [
@@ -263,7 +263,7 @@
     },
     {
       "id": "frame-1784560218564",
-      "name": "Windward boat keeps clear (Copy) (Copy) (Copy) (Copy)",
+      "name": "Boats clear of one another",
       "windAngle": 0,
       "windSpeed": 13,
       "boats": [
