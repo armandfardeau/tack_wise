@@ -2855,12 +2855,6 @@ body {
     font-size: 0;
   }
 
-  .canvas-zoom-reset::before {
-    content: '↺';
-    font-size: 0.9rem;
-    line-height: 1;
-  }
-
   .canvas-zoom-fit {
     width: auto;
     height: 44px;
