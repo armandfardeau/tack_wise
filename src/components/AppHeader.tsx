@@ -1,5 +1,6 @@
 import ExportActions from './ExportActions';
 import ViewActions from './ViewActions';
+import SponsorshipActions, { type SponsorshipLinks } from './SponsorshipActions';
 import type { SituationTemplate } from '../data/situationTemplates';
 import { Copy, Info, Sailboat } from 'lucide-react';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
@@ -7,6 +8,8 @@ import type { ExportOptions, ExportQuality, Theme } from '../types';
 interface AppHeaderProps {
   isExporting: boolean;
   presenterMode?: boolean;
+  scenarioTitle?: string;
+  onScenarioTitleChange?: (title: string) => void;
   onNewScenario?: () => void;
   onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
@@ -22,11 +25,14 @@ interface AppHeaderProps {
   theme?: Theme;
   exportQuality?: ExportQuality;
   onExportQualityChange?: (quality: ExportQuality) => void;
+  sponsorship?: SponsorshipLinks;
 }
 
 export default function AppHeader({
   isExporting,
   presenterMode = false,
+  scenarioTitle,
+  onScenarioTitleChange,
   onNewScenario,
   onExport,
   onImportJson,
@@ -42,6 +48,7 @@ export default function AppHeader({
   theme = 'dark',
   exportQuality,
   onExportQualityChange,
+  sponsorship,
 }: AppHeaderProps) {
   return (
     <header className="app-header">
@@ -50,6 +57,21 @@ export default function AppHeader({
           <span className="eyebrow">Tactical Sailing Simulator</span>
           <h1>Tack Wise <Sailboat className="brand-icon" aria-hidden="true" size={24} /></h1>
         </div>
+        {onScenarioTitleChange && (
+          <div className="scenario-title-editor">
+            <label htmlFor="scenario-title">Scenario title</label>
+            <input
+              id="scenario-title"
+              className="scenario-title-input"
+              type="text"
+              value={scenarioTitle ?? ''}
+              placeholder="Untitled situation"
+              readOnly={presenterMode}
+              onChange={(event) => onScenarioTitleChange(event.target.value)}
+              onBlur={(event) => onScenarioTitleChange(event.target.value.trim() || 'Untitled situation')}
+            />
+          </div>
+        )}
       </div>
       <div className="header-tools" aria-label="Scenario tools">
         <ExportActions
@@ -75,6 +97,7 @@ export default function AppHeader({
           onTogglePresenter={onTogglePresenter}
         />
         {onOpenAbout && <button type="button" className="header-tool-btn" onClick={onOpenAbout}><Info aria-hidden="true" size={15} /> About</button>}
+        <SponsorshipActions {...sponsorship} />
         <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
       </div>
     </header>

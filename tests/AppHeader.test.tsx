@@ -17,6 +17,28 @@ function openExportDialog() {
 }
 
 describe('AppHeader', () => {
+  it('renders and updates the scenario title', () => {
+    const onScenarioTitleChange = jest.fn();
+
+    render(
+      <AppHeader
+        isExporting={false}
+        scenarioTitle="Mark Room"
+        onScenarioTitleChange={onScenarioTitleChange}
+        onExport={jest.fn()}
+        onExportJson={jest.fn()}
+        onImportJson={jest.fn()}
+      />,
+    );
+
+    const titleInput = screen.getByRole('textbox', { name: /scenario title/i });
+    expect(titleInput).toHaveValue('Mark Room');
+
+    fireEvent.change(titleInput, { target: { value: 'Upwind Crossing' } });
+
+    expect(onScenarioTitleChange).toHaveBeenCalledWith('Upwind Crossing');
+  });
+
   it('renders the File menu in the top-level scenario tools bar', () => {
     renderHeader();
 
@@ -160,5 +182,42 @@ describe('AppHeader', () => {
     fireEvent.click(screen.getByRole('button', { name: /copy share link/i }));
 
     expect(onShareScenario).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows Stripe and GitHub sponsorship links when configured', () => {
+    renderHeader({
+      sponsorship: {
+        stripeUrl: 'https://buy.stripe.com/test-link',
+        githubUrl: 'https://github.com/sponsors/armandfardeau',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /support tack wise/i }));
+
+    expect(screen.getByRole('menuitem', { name: /support with stripe/i })).toHaveAttribute('href', 'https://buy.stripe.com/test-link');
+    expect(screen.getByRole('menuitem', { name: /sponsor on github/i })).toHaveAttribute('href', 'https://github.com/sponsors/armandfardeau');
+  });
+
+  it('shows an open-source donation link when configured', () => {
+    renderHeader({ sponsorship: { donationUrl: 'https://opencollective.com/tack-wise' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /support tack wise/i }));
+
+    expect(screen.getByRole('menuitem', { name: /donate to open source/i })).toHaveAttribute('href', 'https://opencollective.com/tack-wise');
+  });
+
+  it('shows the Stripe Checkout donation form with a publishable key', () => {
+    renderHeader({ sponsorship: { stripePublishableKey: 'pk_test_example' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /support tack wise/i }));
+
+    expect(screen.getByRole('spinbutton', { name: /^donation amount$/i })).toHaveValue(10);
+    expect(screen.getByRole('button', { name: /continue to stripe checkout/i })).toBeInTheDocument();
+  });
+
+  it('does not show sponsorship controls without a configured destination', () => {
+    renderHeader();
+
+    expect(screen.queryByRole('button', { name: /support tack wise/i })).not.toBeInTheDocument();
   });
 });

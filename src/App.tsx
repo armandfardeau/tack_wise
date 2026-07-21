@@ -22,6 +22,13 @@ import type { ExportOptions, ExportQuality, Theme } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
+const DEFAULT_GITHUB_SPONSORS_URL = 'https://github.com/sponsors/armandfardeau';
+const sponsorshipLinks = {
+  stripeUrl: import.meta.env.VITE_STRIPE_PAYMENT_LINK,
+  stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
+  githubUrl: import.meta.env.VITE_GITHUB_SPONSORS_URL || DEFAULT_GITHUB_SPONSORS_URL,
+  donationUrl: import.meta.env.VITE_DONATION_URL,
+};
 const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
 
 function getInitialTheme(): Theme {
@@ -242,6 +249,8 @@ export default function App() {
       <AppHeader
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
+        scenarioTitle={scenario.settings.title ?? 'Untitled situation'}
+        onScenarioTitleChange={(title) => scenario.updateSettings({ title })}
         onNewScenario={handleNewScenario}
         onExport={handleExport}
         onImportJson={handleImportJson}
@@ -259,6 +268,7 @@ export default function App() {
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
         theme={theme}
+        sponsorship={sponsorshipLinks}
       />
 
       <section className="workspace">

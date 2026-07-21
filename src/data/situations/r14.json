@@ -53,7 +53,7 @@
     },
     {
       "id": "frame-1784583831916",
-      "name": "Avoiding a collision (Copy)",
+      "name": "Approaching conflict",
       "windAngle": 0,
       "windSpeed": 14,
       "boats": [
@@ -104,7 +104,7 @@
     },
     {
       "id": "frame-1784583942709",
-      "name": "Avoiding a collision (Copy) (Copy)",
+      "name": "Keep-clear boat changes course",
       "windAngle": 0,
       "windSpeed": 14,
       "boats": [
@@ -155,7 +155,7 @@
     },
     {
       "id": "frame-1784583969440",
-      "name": "Avoiding a collision (Copy) (Copy) (Copy)",
+      "name": "Contact avoided",
       "windAngle": 0,
       "windSpeed": 14,
       "boats": [
