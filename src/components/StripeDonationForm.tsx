@@ -1,0 +1,76 @@
+import { useState, type FormEvent } from 'react';
+
+const QUICK_AMOUNTS = [5, 10, 25, 50];
+
+export default function StripeDonationForm() {
+  const [amount, setAmount] = useState('10');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError(null);
+
+    const parsedAmount = Number(amount);
+    if (!Number.isFinite(parsedAmount) || parsedAmount < 1 || parsedAmount > 10000) {
+      setError('Choose an amount between 1 and 10,000.');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: parsedAmount }),
+      });
+      const payload = await response.json() as { error?: string; sessionId?: string; url?: string | null };
+      if (!response.ok || !payload.sessionId || !payload.url) throw new Error(payload.error || 'Unable to start Stripe Checkout.');
+
+      // Stripe now returns the hosted Checkout URL directly. The publishable
+      // key remains a public deployment setting and gates this client flow.
+      window.location.assign(payload.url);
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : 'Unable to start Stripe Checkout.');
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <form className="stripe-donation-form" onSubmit={handleSubmit}>
+      <label htmlFor="stripe-donation-amount">Donation amount</label>
+      <div className="stripe-donation-amount-field">
+        <span aria-hidden="true">$</span>
+        <input
+          id="stripe-donation-amount"
+          type="number"
+          min="1"
+          max="10000"
+          step="0.01"
+          inputMode="decimal"
+          value={amount}
+          onChange={(event) => setAmount(event.target.value)}
+          disabled={isSubmitting}
+        />
+      </div>
+      <div className="stripe-donation-quick-amounts" aria-label="Quick donation amounts">
+        {QUICK_AMOUNTS.map((quickAmount) => (
+          <button
+            key={quickAmount}
+            type="button"
+            className={amount === String(quickAmount) ? 'is-selected' : ''}
+            onClick={() => setAmount(String(quickAmount))}
+            disabled={isSubmitting}
+          >
+            ${quickAmount}
+          </button>
+        ))}
+      </div>
+      {error && <p className="stripe-donation-error" role="alert">{error}</p>}
+      <button type="submit" className="stripe-donation-submit" disabled={isSubmitting}>
+        {isSubmitting ? 'Opening Stripe…' : 'Continue to Stripe Checkout'}
+      </button>
+      <small>Secure payment handled by Stripe.</small>
+    </form>
+  );
+}
