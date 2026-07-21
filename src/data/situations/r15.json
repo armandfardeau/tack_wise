@@ -11,8 +11,8 @@
           "id": "r15-alpha",
           "name": "Alpha — newly leeward",
           "color": "#38bdf8",
-          "x": 285,
-          "y": 345,
+          "x": 300,
+          "y": 340,
           "heading": 45,
           "sailAngle": -12,
           "showHeadingLine": true
@@ -21,39 +21,15 @@
           "id": "r15-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 335,
-          "y": 295,
-          "heading": 45,
-          "sailAngle": -12,
+          "x": 240,
+          "y": 280,
+          "heading": 90,
+          "sailAngle": -55,
           "showHeadingLine": true
         }
       ],
       "marks": [],
-      "arrows": [
-        {
-          "id": "r15-overlap",
-          "name": "New leeward overlap",
-          "color": "#38bdf8",
-          "points": [
-            { "x": 220, "y": 405 },
-            { "x": 285, "y": 345 },
-            { "x": 350, "y": 280 }
-          ],
-          "curved": true,
-          "lineWidth": 4
-        },
-        {
-          "id": "r15-room",
-          "name": "Room to keep clear",
-          "color": "#facc15",
-          "points": [
-            { "x": 335, "y": 295 },
-            { "x": 395, "y": 345 }
-          ],
-          "lineStyle": "dotted",
-          "lineWidth": 3
-        }
-      ],
+      "arrows": [],
       "comments": [
         {
           "id": "r15-note",
@@ -72,7 +48,109 @@
           "label": "RRS 15",
           "description": "When a boat acquires right of way, she initially gives the other boat room to keep clear, unless the right of way came from the other boat's action."
         }
-      ]
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784670505144",
+      "name": "New leeward overlap (Copy)",
+      "windAngle": 0,
+      "windSpeed": 13,
+      "boats": [
+        {
+          "id": "r15-alpha",
+          "name": "Alpha — newly leeward",
+          "color": "#38bdf8",
+          "x": 340,
+          "y": 300,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r15-bravo",
+          "name": "Bravo — windward",
+          "color": "#f87171",
+          "x": 400,
+          "y": 280,
+          "heading": 90,
+          "sailAngle": -55,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r15-note",
+          "name": "Transition",
+          "text": "Alpha has just acquired right of way by becoming the leeward boat.\nAlpha must initially give Bravo room to keep clear.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-15",
+          "label": "RRS 15",
+          "description": "When a boat acquires right of way, she initially gives the other boat room to keep clear, unless the right of way came from the other boat's action."
+        }
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784670556173",
+      "name": "New leeward overlap (Copy) (Copy)",
+      "windAngle": 0,
+      "windSpeed": 13,
+      "boats": [
+        {
+          "id": "r15-alpha",
+          "name": "Alpha — newly leeward",
+          "color": "#38bdf8",
+          "x": 360,
+          "y": 280,
+          "heading": 45,
+          "sailAngle": -12,
+          "showHeadingLine": true,
+          "speechBubble": "Protest!"
+        },
+        {
+          "id": "r15-bravo",
+          "name": "Bravo — windward",
+          "color": "#f87171",
+          "x": 400,
+          "y": 260,
+          "heading": -45,
+          "sailAngle": 12,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r15-note",
+          "name": "Transition",
+          "text": "Alpha has just acquired right of way by becoming the leeward boat.\nAlpha must initially give Bravo room to keep clear.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-15",
+          "label": "RRS 15",
+          "description": "When a boat acquires right of way, she initially gives the other boat room to keep clear, unless the right of way came from the other boat's action."
+        }
+      ],
+      "connections": []
     }
   ]
 }
