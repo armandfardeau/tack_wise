@@ -20,6 +20,7 @@ import { getRuleReferences } from '../types';
 import {
   calculateAutoSailAngle,
   getBoatManeuver,
+  getUnanimatableTransitionIndices,
   interpolateBoatManeuver,
   type Position,
 } from '../utils/simulation';
@@ -142,6 +143,10 @@ export function useScenario() {
   const nextFrame = currentFrameIndex < frames.length - 1
     ? frames[currentFrameIndex + 1]
     : undefined;
+  const unanimatableTransitionIndices = useMemo(
+    () => getUnanimatableTransitionIndices(frames),
+    [frames],
+  );
   const selectedBoat = activeFrame.boats.find((boat) => boat.id === selectedId);
   const selectedMark = activeFrame.marks.find((mark) => mark.id === selectedId);
   const selectedConnection = activeFrame.connections?.find((connection) => connection.id === selectedId);
@@ -958,6 +963,7 @@ export function useScenario() {
     duplicateSelected,
     duplicateFrame,
     frames,
+    unanimatableTransitionIndices,
     displayFrame,
     hasAutosave,
     hasUnsavedChanges,

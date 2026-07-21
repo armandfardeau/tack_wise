@@ -1,11 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import { Copy, Layers, Pause, Pencil, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2 } from 'lucide-react';
+import { Fragment, useEffect, useRef, useState } from 'react';
+import { Copy, Layers, Pause, Pencil, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2, TriangleAlert } from 'lucide-react';
 import type { Frame } from '../types';
 
 interface TimelineProps {
   variant?: 'bottom' | 'sidebar';
   currentFrameIndex: number;
   frames: Frame[];
+  unanimatableTransitionIndices?: number[];
   isPlaying?: boolean;
   onAddFrame: () => void;
   onDeleteFrame: (frameIndex: number) => void;
@@ -25,6 +26,7 @@ export default function Timeline({
   variant = 'bottom',
   currentFrameIndex,
   frames,
+  unanimatableTransitionIndices = [],
   isPlaying = false,
   onAddFrame,
   onDeleteFrame,
@@ -43,6 +45,7 @@ export default function Timeline({
   const [draftTitle, setDraftTitle] = useState('');
   const titleInputRef = useRef<HTMLInputElement>(null);
   const lastPointerTypeRef = useRef<string | null>(null);
+  const unanimatableTransitionIndexSet = new Set(unanimatableTransitionIndices);
 
   useEffect(() => {
     if (editingFrameIndex === null) return;
@@ -175,10 +178,23 @@ export default function Timeline({
         {frames.map((frame, index) => {
           const isEditing = editingFrameIndex === index;
           const thumbnailClassName = `frame-thumbnail ${index === currentFrameIndex ? 'active' : ''}`;
+          const hasUnanimatableIncomingTransition = unanimatableTransitionIndexSet.has(index - 1);
+          const hasUnanimatableOutgoingTransition = unanimatableTransitionIndexSet.has(index);
+          const hasUnanimatableTransition = hasUnanimatableIncomingTransition || hasUnanimatableOutgoingTransition;
+          const transitionWarningLabel = hasUnanimatableIncomingTransition
+            ? `Transition from frame ${index} to frame ${index + 1} cannot be animated`
+            : '';
 
           if (isEditing) {
             return (
-              <div key={frame.id} className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}`}>
+              <Fragment key={frame.id}>
+                {variant === 'sidebar' && hasUnanimatableIncomingTransition && (
+                  <div className="frame-transition-warning" role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
+                    <TriangleAlert aria-hidden="true" size={14} />
+                    <span>Cannot animate transition</span>
+                  </div>
+                )}
+                <div className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${variant === 'sidebar' && hasUnanimatableTransition ? ' has-unanimatable-transition' : ''}`}>
                 <div className={thumbnailClassName} role="group" aria-label={`Edit frame ${index + 1}`}>
                   <span className="thumbnail-num">{index + 1}</span>
                   <input
@@ -228,12 +244,20 @@ export default function Timeline({
                 >
                   <Trash2 aria-hidden="true" size={14} />
                 </button>
-              </div>
+                </div>
+              </Fragment>
             );
           }
 
           return (
-            <div key={frame.id} className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${index === currentFrameIndex ? ' has-edit-button' : ''}`}>
+            <Fragment key={frame.id}>
+              {variant === 'sidebar' && hasUnanimatableIncomingTransition && (
+                <div className="frame-transition-warning" role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
+                  <TriangleAlert aria-hidden="true" size={14} />
+                  <span>Cannot animate transition</span>
+                </div>
+              )}
+              <div className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${index === currentFrameIndex ? ' has-edit-button' : ''}${variant === 'sidebar' && hasUnanimatableTransition ? ' has-unanimatable-transition' : ''}`}>
               <button
                 type="button"
                 className={thumbnailClassName}
@@ -299,7 +323,8 @@ export default function Timeline({
               >
                 <Trash2 aria-hidden="true" size={14} />
               </button>
-            </div>
+              </div>
+            </Fragment>
           );
         })}
       </div>

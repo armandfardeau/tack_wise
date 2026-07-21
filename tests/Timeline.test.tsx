@@ -113,6 +113,26 @@ describe('Timeline', () => {
     expect(onAddFrame).toHaveBeenCalledTimes(1);
   });
 
+  it('highlights an unanimated transition between affected sidebar frames', () => {
+    render(
+      <Timeline
+        variant="sidebar"
+        currentFrameIndex={0}
+        frames={frames}
+        unanimatableTransitionIndices={[0]}
+        onAddFrame={jest.fn()}
+        onDeleteFrame={jest.fn()}
+        onDuplicateFrame={jest.fn()}
+        onRenameFrame={jest.fn()}
+        onSelectFrame={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByRole('status', { name: 'Transition from frame 1 to frame 2 cannot be animated' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /1\. Preparation/i }).parentElement).toHaveClass('has-unanimatable-transition');
+    expect(screen.getByRole('button', { name: /2\. Upwind Tack/i }).parentElement).toHaveClass('has-unanimatable-transition');
+  });
+
   it('deletes the frame from its inline delete button', () => {
     const onDeleteFrame = jest.fn();
 

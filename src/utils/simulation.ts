@@ -148,6 +148,24 @@ export function getBoatManeuver(
   );
 }
 
+/** Returns the source-frame indexes whose transition contains an unrouteable boat manoeuvre. */
+export function getUnanimatableTransitionIndices(frames: Array<Pick<Frame, 'boats'>>): number[] {
+  const invalidTransitionIndices: number[] = [];
+
+  for (let index = 0; index < frames.length - 1; index += 1) {
+    const frame = frames[index];
+    const nextFrame = frames[index + 1];
+    const hasInvalidBoatManeuver = frame.boats.some((boat) => {
+      const nextBoat = nextFrame.boats.find((candidate) => candidate.id === boat.id);
+      return nextBoat ? !getBoatManeuver(boat, nextBoat).valid : false;
+    });
+
+    if (hasInvalidBoatManeuver) invalidTransitionIndices.push(index);
+  }
+
+  return invalidTransitionIndices;
+}
+
 function clampProgress(progress: number): number {
   return Math.min(Math.max(progress, 0), 1);
 }

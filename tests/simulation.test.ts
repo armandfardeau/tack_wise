@@ -11,6 +11,7 @@ import {
   getGridSnap,
   getShortestHeadingDelta,
   getSnappedPosition,
+  getUnanimatableTransitionIndices,
   interpolateBoatManeuver,
   isWithinGridSnapRadius,
   worldToCanvasPosition,
@@ -59,6 +60,18 @@ describe('simulation utilities', () => {
       boat({ x: 0, y: 0, heading: 90 }),
       boat({ x: 10, y: 10, heading: 0 }),
     )).toEqual({ valid: false, reason: 'intersection-behind-end' });
+  });
+
+  it('identifies transitions containing an invalid matching boat manoeuvre', () => {
+    const startBoat = boat({ id: 'boat-1', x: 0, y: 0, heading: 90 });
+    const validDestinationBoat = boat({ id: 'boat-1', x: 10, y: -10, heading: 0 });
+    const invalidDestinationBoat = boat({ id: 'boat-1', x: 10, y: 10, heading: 0 });
+
+    expect(getUnanimatableTransitionIndices([
+      { boats: [startBoat] },
+      { boats: [invalidDestinationBoat] },
+      { boats: [validDestinationBoat] },
+    ])).toEqual([0]);
   });
 
   it('handles parallel courses and zero-distance turns', () => {

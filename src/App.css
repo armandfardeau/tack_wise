@@ -2134,6 +2134,31 @@ body {
   flex: 0 0 auto;
 }
 
+.frame-transition-warning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid rgba(244, 63, 94, 0.48);
+  border-radius: 6px;
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--accent-red-hover);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.frame-transition-warning svg {
+  flex: 0 0 auto;
+}
+
+.sidebar-timeline .frame-transition-warning {
+  margin: 2px 0;
+}
+
 .frame-duplicate-btn {
   position: absolute;
   top: 6px;
@@ -2280,6 +2305,20 @@ body {
 .frame-thumbnail.active {
   border-color: var(--accent-cyan);
   background-color: rgba(6, 182, 212, 0.08);
+}
+
+.frame-thumbnail-row.has-unanimatable-transition > .frame-thumbnail {
+  border-color: rgba(244, 63, 94, 0.7);
+}
+
+.frame-thumbnail-row.has-unanimatable-transition > .frame-thumbnail.active {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.22);
+}
+
+.light-theme .frame-transition-warning {
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--accent-red);
 }
 
 .thumbnail-num {
