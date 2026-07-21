@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
-import { Copy, Layers, Pause, Pencil, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2, TriangleAlert } from 'lucide-react';
+import { Copy, Layers, Pause, Pencil, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2, TriangleAlert, Wrench } from 'lucide-react';
 import type { Frame } from '../types';
 
 interface TimelineProps {
@@ -7,6 +7,7 @@ interface TimelineProps {
   currentFrameIndex: number;
   frames: Frame[];
   unanimatableTransitionIndices?: number[];
+  onFixTransition?: (transitionIndex: number) => void;
   isPlaying?: boolean;
   onAddFrame: () => void;
   onDeleteFrame: (frameIndex: number) => void;
@@ -27,6 +28,7 @@ export default function Timeline({
   currentFrameIndex,
   frames,
   unanimatableTransitionIndices = [],
+  onFixTransition = () => undefined,
   isPlaying = false,
   onAddFrame,
   onDeleteFrame,
@@ -192,6 +194,19 @@ export default function Timeline({
                   <div className="frame-transition-warning" role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
                     <TriangleAlert aria-hidden="true" size={14} />
                     <span>Cannot animate transition</span>
+                    <button
+                      type="button"
+                      className="frame-transition-fix-btn"
+                      aria-label={`Fix transition from frame ${index} to frame ${index + 1}`}
+                      title="Fix transition"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onFixTransition(index - 1);
+                      }}
+                    >
+                      <Wrench aria-hidden="true" size={12} />
+                      <span>Fix</span>
+                    </button>
                   </div>
                 )}
                 <div className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${variant === 'sidebar' && hasUnanimatableTransition ? ' has-unanimatable-transition' : ''}`}>
@@ -255,6 +270,19 @@ export default function Timeline({
                 <div className="frame-transition-warning" role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
                   <TriangleAlert aria-hidden="true" size={14} />
                   <span>Cannot animate transition</span>
+                  <button
+                    type="button"
+                    className="frame-transition-fix-btn"
+                    aria-label={`Fix transition from frame ${index} to frame ${index + 1}`}
+                    title="Fix transition"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onFixTransition(index - 1);
+                    }}
+                  >
+                    <Wrench aria-hidden="true" size={12} />
+                    <span>Fix</span>
+                  </button>
                 </div>
               )}
               <div className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${index === currentFrameIndex ? ' has-edit-button' : ''}${variant === 'sidebar' && hasUnanimatableTransition ? ' has-unanimatable-transition' : ''}`}>

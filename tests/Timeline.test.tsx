@@ -114,12 +114,15 @@ describe('Timeline', () => {
   });
 
   it('highlights an unanimated transition between affected sidebar frames', () => {
+    const onFixTransition = jest.fn();
+
     render(
       <Timeline
         variant="sidebar"
         currentFrameIndex={0}
         frames={frames}
         unanimatableTransitionIndices={[0]}
+        onFixTransition={onFixTransition}
         onAddFrame={jest.fn()}
         onDeleteFrame={jest.fn()}
         onDuplicateFrame={jest.fn()}
@@ -131,6 +134,9 @@ describe('Timeline', () => {
     expect(screen.getByRole('status', { name: 'Transition from frame 1 to frame 2 cannot be animated' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /1\. Preparation/i }).parentElement).toHaveClass('has-unanimatable-transition');
     expect(screen.getByRole('button', { name: /2\. Upwind Tack/i }).parentElement).toHaveClass('has-unanimatable-transition');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fix transition from frame 1 to frame 2' }));
+    expect(onFixTransition).toHaveBeenCalledWith(0);
   });
 
   it('deletes the frame from its inline delete button', () => {

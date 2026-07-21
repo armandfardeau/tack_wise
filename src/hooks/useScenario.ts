@@ -20,6 +20,7 @@ import { getRuleReferences } from '../types';
 import {
   calculateAutoSailAngle,
   getBoatManeuver,
+  getHeadingTowardPosition,
   getUnanimatableTransitionIndices,
   interpolateBoatManeuver,
   type Position,
@@ -610,6 +611,39 @@ export function useScenario() {
     setCurrentFrameIndex(Math.max(0, indexToDelete - 1));
   };
 
+  const fixTransition = (transitionIndex: number) => {
+    if (transitionIndex < 0 || transitionIndex >= frames.length - 1) return;
+
+    commitFrames((previousFrames) => {
+      const frame = previousFrames[transitionIndex];
+      const nextFrame = previousFrames[transitionIndex + 1];
+      if (!frame || !nextFrame) return previousFrames;
+
+      let changed = false;
+      const fixedBoats = nextFrame.boats.map((nextBoat) => {
+        const sourceBoat = frame.boats.find((boat) => boat.id === nextBoat.id);
+        if (!sourceBoat || getBoatManeuver(sourceBoat, nextBoat).valid) return nextBoat;
+
+        const heading = getHeadingTowardPosition(sourceBoat, nextBoat);
+        changed = true;
+
+        return {
+          ...nextBoat,
+          heading,
+          ...(autoSailTrim ? { sailAngle: calculateAutoSailAngle(heading, nextFrame.windAngle) } : {}),
+        };
+      });
+
+      if (!changed) return previousFrames;
+
+      return previousFrames.map((candidateFrame, index) => (
+        index === transitionIndex + 1
+          ? { ...candidateFrame, boats: fixedBoats }
+          : candidateFrame
+      ));
+    });
+  };
+
   const importScenario = (payload: ScenarioExportPayload) => {
     const importedFrames = scenarioFramesFromPayload(payload);
     const importedFrame = importedFrames[payload.currentFrameIndex];
@@ -963,6 +997,7 @@ export function useScenario() {
     duplicateSelected,
     duplicateFrame,
     frames,
+    fixTransition,
     unanimatableTransitionIndices,
     displayFrame,
     hasAutosave,

@@ -9,6 +9,7 @@ import {
   getCanvasContentBounds,
   getHeadingVector,
   getGridSnap,
+  getHeadingTowardPosition,
   getShortestHeadingDelta,
   getSnappedPosition,
   getUnanimatableTransitionIndices,
@@ -38,6 +39,11 @@ describe('simulation utilities', () => {
     expect(getHeadingVector(90).y).toBeCloseTo(0);
     expect(getHeadingVector(180).x).toBeCloseTo(0);
     expect(getHeadingVector(180).y).toBeCloseTo(1);
+  });
+
+  it('calculates a compass heading toward a canvas position', () => {
+    expect(getHeadingTowardPosition({ x: 0, y: 0 }, { x: 10, y: -10 })).toBeCloseTo(45);
+    expect(getHeadingTowardPosition({ x: 0, y: 0 }, { x: 10, y: 10 })).toBeCloseTo(135);
   });
 
   it('finds a forward two-leg route and its intersection', () => {

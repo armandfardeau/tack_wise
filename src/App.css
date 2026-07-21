@@ -2329,6 +2329,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  flex-wrap: wrap;
   flex: 0 0 auto;
   min-height: 28px;
   padding: 4px 8px;
@@ -2347,6 +2348,28 @@ body {
 
 .sidebar-timeline .frame-transition-warning {
   margin: 2px 0;
+}
+
+.frame-transition-fix-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid rgba(244, 63, 94, 0.62);
+  border-radius: 4px;
+  background: rgba(244, 63, 94, 0.16);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.frame-transition-fix-btn:hover,
+.frame-transition-fix-btn:focus-visible {
+  border-color: currentColor;
+  background: rgba(244, 63, 94, 0.28);
 }
 
 .frame-duplicate-btn {

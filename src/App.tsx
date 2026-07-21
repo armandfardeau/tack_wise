@@ -243,6 +243,7 @@ export default function App() {
           currentFrameIndex={scenario.currentFrameIndex}
           frames={scenario.frames}
           unanimatableTransitionIndices={scenario.unanimatableTransitionIndices}
+          onFixTransition={scenario.fixTransition}
           onAddFrame={scenario.addFrame}
           onDeleteFrame={scenario.deleteFrame}
           onDuplicateFrame={scenario.duplicateFrame}

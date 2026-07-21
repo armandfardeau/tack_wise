@@ -282,6 +282,10 @@ describe('useScenario', () => {
       act(() => frameCallback?.(500));
       expect(result.current.displayFrame.boats[0]).toMatchObject({ x: 0, y: 0, heading: 90 });
       expect(result.current.frames[0].boats[0]).toMatchObject({ x: 0, y: 0, heading: 90 });
+
+      act(() => result.current.fixTransition(0));
+      expect(result.current.frames[1].boats[0].heading).toBeCloseTo(135);
+      expect(result.current.unanimatableTransitionIndices).toEqual([]);
     } finally {
       Object.defineProperty(window, 'requestAnimationFrame', { configurable: true, value: originalRequestAnimationFrame });
       Object.defineProperty(window, 'cancelAnimationFrame', { configurable: true, value: originalCancelAnimationFrame });

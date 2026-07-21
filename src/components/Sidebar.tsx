@@ -11,6 +11,7 @@ interface SidebarProps {
   currentFrameIndex: number;
   frames: Frame[];
   unanimatableTransitionIndices?: number[];
+  onFixTransition: (transitionIndex: number) => void;
   isOpen: boolean;
   onAddFrame: () => void;
   onDeleteFrame: (frameIndex: number) => void;
@@ -28,6 +29,7 @@ export default function Sidebar({
   currentFrameIndex,
   frames,
   unanimatableTransitionIndices = [],
+  onFixTransition,
   isOpen,
   onAddFrame,
   onDeleteFrame,
@@ -77,6 +79,7 @@ export default function Sidebar({
               currentFrameIndex={currentFrameIndex}
               frames={frames}
               unanimatableTransitionIndices={unanimatableTransitionIndices}
+              onFixTransition={onFixTransition}
               onAddFrame={onAddFrame}
               onDeleteFrame={onDeleteFrame}
               onDuplicateFrame={onDuplicateFrame}
