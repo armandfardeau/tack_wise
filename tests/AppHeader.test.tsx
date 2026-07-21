@@ -26,7 +26,6 @@ describe('AppHeader', () => {
         scenarioTitle="Mark Room"
         onScenarioTitleChange={onScenarioTitleChange}
         onExport={jest.fn()}
-        onExportJson={jest.fn()}
         onImportJson={jest.fn()}
       />,
     );
