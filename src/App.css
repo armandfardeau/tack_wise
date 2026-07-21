@@ -71,6 +71,46 @@ body {
 .header-main {
   display: flex;
   align-items: center;
+  gap: 24px;
+  min-width: 0;
+}
+
+.scenario-title-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: min(320px, 28vw);
+}
+
+.scenario-title-editor label {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scenario-title-input {
+  width: min(320px, 28vw);
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.scenario-title-input:focus {
+  border-color: var(--accent-cyan);
+  outline: 2px solid rgba(6, 182, 212, 0.2);
+}
+
+.scenario-title-input[readonly] {
+  cursor: default;
+  opacity: 0.85;
 }
 
 .branding h1 {
@@ -3071,6 +3111,16 @@ body {
   .header-main {
     width: 100%;
     justify-content: space-between;
+    gap: 12px;
+  }
+
+  .scenario-title-editor {
+    min-width: 0;
+    flex: 1;
+  }
+
+  .scenario-title-input {
+    width: 100%;
   }
 
   .header-tools {

@@ -17,6 +17,28 @@ function openExportDialog() {
 }
 
 describe('AppHeader', () => {
+  it('renders and updates the scenario title', () => {
+    const onScenarioTitleChange = jest.fn();
+
+    render(
+      <AppHeader
+        isExporting={false}
+        scenarioTitle="Mark Room"
+        onScenarioTitleChange={onScenarioTitleChange}
+        onExport={jest.fn()}
+        onExportJson={jest.fn()}
+        onImportJson={jest.fn()}
+      />,
+    );
+
+    const titleInput = screen.getByRole('textbox', { name: /scenario title/i });
+    expect(titleInput).toHaveValue('Mark Room');
+
+    fireEvent.change(titleInput, { target: { value: 'Upwind Crossing' } });
+
+    expect(onScenarioTitleChange).toHaveBeenCalledWith('Upwind Crossing');
+  });
+
   it('renders the File menu in the top-level scenario tools bar', () => {
     renderHeader();
 

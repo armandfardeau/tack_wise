@@ -18,15 +18,6 @@ Sources:
 
 Build the foundational 2D authoring model for sailing situations.
 
-- Create and open top-down sailing diagrams for rules, protests, tactics, and
-  boat movements.
-- Place, move, rotate, select, and edit boats and marks.
-- Represent wind direction and boat headings.
-- Support adjustable mark sizes.
-- Provide gate areas, committee boats, and other mark arrangements.
-- Represent obstructions with a configurable proximity circle; the default
-  radius is three boat lengths.
-- Open diagrams in read-only mode for presentation or review.
 
 Historical TSS references: 2.4A, 2.5G, 2.6A.
 
@@ -38,7 +29,6 @@ Expand the visual vocabulary and sailing-specific behavior of diagram objects.
   representations.
 - Improve sail rendering and representation quality.
 - Support symmetric and asymmetric spinnakers.
-- Support manual sail trimming.
 - Represent a flogging spinnaker when luffing above close-hauled.
 - Represent boat-by-the-lee sail behavior.
 
