@@ -12,49 +12,25 @@
           "name": "Alpha — leeward, luffing",
           "color": "#38bdf8",
           "x": 280,
-          "y": 345,
-          "heading": 20,
-          "sailAngle": -4,
+          "y": 320,
+          "heading": 45,
+          "sailAngle": -12,
           "showHeadingLine": true
         },
         {
           "id": "r16-bravo",
           "name": "Bravo — windward",
           "color": "#f87171",
-          "x": 345,
-          "y": 295,
+          "x": 260,
+          "y": 300,
           "heading": 45,
           "sailAngle": -12,
-          "showHeadingLine": true
+          "showHeadingLine": true,
+          "speechBubble": "😡"
         }
       ],
       "marks": [],
-      "arrows": [
-        {
-          "id": "r16-luff",
-          "name": "Course change",
-          "color": "#38bdf8",
-          "points": [
-            { "x": 280, "y": 345 },
-            { "x": 285, "y": 285 },
-            { "x": 300, "y": 225 }
-          ],
-          "curved": true,
-          "lineWidth": 4
-        },
-        {
-          "id": "r16-escape",
-          "name": "Room to keep clear",
-          "color": "#f87171",
-          "points": [
-            { "x": 345, "y": 295 },
-            { "x": 405, "y": 330 },
-            { "x": 460, "y": 375 }
-          ],
-          "curved": true,
-          "lineWidth": 4
-        }
-      ],
+      "arrows": [],
       "comments": [
         {
           "id": "r16-note",
@@ -73,7 +49,58 @@
           "label": "RRS 16",
           "description": "When a right-of-way boat changes course, she gives the other boat room to keep clear."
         }
-      ]
+      ],
+      "connections": []
+    },
+    {
+      "id": "frame-1784669523065",
+      "name": "Right-of-way boat luffs (Copy)",
+      "windAngle": 0,
+      "windSpeed": 13,
+      "boats": [
+        {
+          "id": "r16-alpha",
+          "name": "Alpha — leeward, luffing",
+          "color": "#38bdf8",
+          "x": 340,
+          "y": 240,
+          "heading": 0,
+          "sailAngle": 2,
+          "showHeadingLine": true
+        },
+        {
+          "id": "r16-bravo",
+          "name": "Bravo — windward",
+          "color": "#f87171",
+          "x": 300,
+          "y": 260,
+          "heading": 0,
+          "sailAngle": 2,
+          "showHeadingLine": true
+        }
+      ],
+      "marks": [],
+      "arrows": [],
+      "comments": [
+        {
+          "id": "r16-note",
+          "name": "Course change",
+          "text": "Alpha has right of way but is changing course toward Bravo.\nThe luff must leave Bravo room to keep clear.",
+          "color": "#facc15",
+          "x": 490,
+          "y": 150,
+          "width": 230,
+          "fontSize": 14
+        }
+      ],
+      "rules": [
+        {
+          "id": "rrs-16",
+          "label": "RRS 16",
+          "description": "When a right-of-way boat changes course, she gives the other boat room to keep clear."
+        }
+      ],
+      "connections": []
     }
   ]
 }
