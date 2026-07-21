@@ -49,6 +49,14 @@ export function getHeadingVector(heading: number): Position {
   };
 }
 
+/** Returns the compass heading from one canvas position to another. */
+export function getHeadingTowardPosition(from: Position, to: Position): number {
+  const displacement = { x: to.x - from.x, y: to.y - from.y };
+  if (Math.hypot(displacement.x, displacement.y) <= GEOMETRY_EPSILON) return 0;
+
+  return normalizeHeading((Math.atan2(displacement.x, -displacement.y) * 180) / Math.PI);
+}
+
 export function getShortestHeadingDelta(fromHeading: number, toHeading: number): number {
   return ((toHeading - fromHeading + 540) % 360) - 180;
 }
