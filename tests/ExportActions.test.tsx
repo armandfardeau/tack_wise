@@ -4,7 +4,6 @@ import ExportActions from '../src/components/ExportActions';
 const baseProps = {
   isExporting: false,
   onExport: jest.fn(),
-  onExportJson: jest.fn(),
   onImportJson: jest.fn(),
 };
 
@@ -56,15 +55,14 @@ describe('ExportActions menu behavior', () => {
   });
 
   it('resets submenu state when toggling the file menu repeatedly', () => {
-    render(<ExportActions {...baseProps} />);
+    render(<ExportActions {...baseProps} templates={[{ id: 'one', title: 'One', frames: [] }]} />);
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
 
-    expect(screen.getByRole('menu', { name: /file options/i })).toBeInTheDocument();
+    expect(screen.queryByRole('menu', { name: /templates/i })).not.toBeInTheDocument();
   });
 
   it('shows an empty search result and resets the search when toggled', () => {
@@ -120,15 +118,73 @@ describe('ExportActions menu behavior', () => {
     expect(screen.getByRole('menuitem', { name: /update current template/i })).toBeDisabled();
   });
 
-  it('closes an open menu when exporting starts', () => {
+  it('opens the export settings dialog with the current theme and format controls', () => {
+    render(<ExportActions {...baseProps} theme="light" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+
+    expect(screen.getByRole('dialog', { name: /export/i })).toBeInTheDocument();
+    expect(screen.getByRole('combobox', { name: /export format/i })).toHaveValue('png');
+    expect(screen.getByRole('radio', { name: /light/i })).toBeChecked();
+    expect(screen.queryByRole('combobox', { name: /export fps/i })).not.toBeInTheDocument();
+  });
+
+  it('shows FPS for animation formats and submits all selected options', () => {
+    render(<ExportActions {...baseProps} theme="light" />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'webm' } });
+    fireEvent.click(screen.getByRole('radio', { name: /dark/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /export fps/i }), { target: { value: '30' } });
+    fireEvent.click(screen.getByRole('button', { name: /export webm video/i }));
+
+    expect(baseProps.onExport).toHaveBeenCalledWith({ format: 'webm', theme: 'dark', fps: 30 });
+    expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
+  });
+
+  it('hides visual-only settings for JSON exports', () => {
+    render(<ExportActions {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'json' } });
+
+    expect(screen.queryByRole('radio', { name: /dark/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('radio', { name: /light/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('combobox', { name: /export fps/i })).not.toBeInTheDocument();
+  });
+
+  it('supports cancel, Escape, and backdrop dismissal', () => {
+    render(<ExportActions {...baseProps} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.keyDown(document, { key: 'Escape' });
+    expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.mouseDown(document.querySelector('.export-dialog-backdrop')!);
+    expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
+  });
+
+  it('closes an open menu and dialog when exporting starts', () => {
     const { rerender } = render(<ExportActions {...baseProps} />);
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
-    expect(screen.getByRole('menu', { name: /file options/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
 
     rerender(<ExportActions {...baseProps} isExporting />);
 
     expect(screen.queryByRole('menu', { name: /file options/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
   });
 
   it('allows selecting a faster export quality', () => {
@@ -137,6 +193,7 @@ describe('ExportActions menu behavior', () => {
     render(<ExportActions {...baseProps} onExportQualityChange={onExportQualityChange} />);
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'webm' } });
     fireEvent.change(screen.getByRole('combobox', { name: /export quality/i }), { target: { value: 'fast' } });
 
     expect(onExportQualityChange).toHaveBeenCalledWith('fast');

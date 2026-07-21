@@ -6,6 +6,20 @@ export type VideoExportType = 'webm' | 'mp4';
 
 export type ExportQuality = 'fast' | 'standard' | 'high';
 
+export type ExportFormat = 'png' | 'jpeg' | 'gif' | VideoExportType | 'json';
+
+export const EXPORT_FPS_OPTIONS = [10, 15, 20, 30] as const;
+
+export type ExportFps = typeof EXPORT_FPS_OPTIONS[number];
+
+export const DEFAULT_EXPORT_FPS: ExportFps = 20;
+
+export interface ExportOptions {
+  format: ExportFormat;
+  theme: Theme;
+  fps: ExportFps;
+}
+
 export interface Boat {
   id: string;
   name: string;

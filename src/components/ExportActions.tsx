@@ -1,31 +1,46 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ChevronDown, ChevronRight, Download, File as FileIcon, FileCode, FilePlus, FileVideoCamera, FolderOpen, GitPullRequest, Image, LayoutTemplate, Search, Upload } from 'lucide-react';
+import { ChevronDown, ChevronRight, File as FileIcon, FilePlus, FolderOpen, GitPullRequest, LayoutTemplate, Search, Upload } from 'lucide-react';
 import type { SituationTemplate } from '../data/situationTemplates';
-import type { ExportQuality, VideoExportType } from '../types';
-import { DEFAULT_EXPORT_QUALITY, EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
+import type { ExportOptions, ExportQuality, Theme } from '../types';
+import { DEFAULT_EXPORT_QUALITY } from '../utils/exportSettings';
+import ExportDialog from './ExportDialog';
 
 interface ExportActionsProps {
   className?: string;
   isExporting: boolean;
   onNewScenario?: () => void;
-  onExport: (type: 'gif' | VideoExportType) => void;
-  onExportImage?: (type: 'png' | 'jpeg') => void;
-  onExportJson: () => void;
+  onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
   onLoadTemplate?: (template: SituationTemplate) => void;
   onContributeTemplate?: () => void;
   onUpdateTemplate?: () => void;
   canUpdateTemplate?: boolean;
   templates?: SituationTemplate[];
+  theme?: Theme;
   exportQuality?: ExportQuality;
   onExportQualityChange?: (quality: ExportQuality) => void;
 }
 
-export default function ExportActions({ className = 'export-actions', isExporting, onNewScenario, onExport, onExportImage, onExportJson, onImportJson, onLoadTemplate, onContributeTemplate, onUpdateTemplate, canUpdateTemplate = false, templates = [], exportQuality = DEFAULT_EXPORT_QUALITY, onExportQualityChange = () => undefined }: ExportActionsProps) {
+export default function ExportActions({
+  className = 'export-actions',
+  isExporting,
+  onNewScenario,
+  onExport,
+  onImportJson,
+  onLoadTemplate,
+  onContributeTemplate,
+  onUpdateTemplate,
+  canUpdateTemplate = false,
+  templates = [],
+  theme = 'dark',
+  exportQuality = DEFAULT_EXPORT_QUALITY,
+  onExportQualityChange = () => undefined,
+}: ExportActionsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
-  const [openSubmenu, setOpenSubmenu] = useState<'templates' | 'export' | null>(null);
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
+  const [openSubmenu, setOpenSubmenu] = useState<'templates' | null>(null);
   const [templateSearch, setTemplateSearch] = useState('');
   const filteredTemplates = templates.filter((template) => template.title.toLowerCase().includes(templateSearch.trim().toLowerCase()));
 
@@ -59,6 +74,7 @@ export default function ExportActions({ className = 'export-actions', isExportin
     if (isExporting) {
       setIsFileMenuOpen(false);
       setOpenSubmenu(null);
+      setIsExportDialogOpen(false);
       setTemplateSearch('');
     }
   }, [isExporting]);
@@ -83,6 +99,11 @@ export default function ExportActions({ className = 'export-actions', isExportin
   const closeAfterExport = (exportAction: () => void) => {
     exportAction();
     closeFileMenu();
+  };
+
+  const openExportDialog = () => {
+    closeFileMenu();
+    setIsExportDialogOpen(true);
   };
 
   return (
@@ -179,62 +200,23 @@ export default function ExportActions({ className = 'export-actions', isExportin
             <span className="action-label">Import JSON</span>
           </button>
           <div className="file-submenu">
-            <button
-              type="button"
-              className="action-btn file-submenu-trigger"
-              role="menuitem"
-              aria-expanded={openSubmenu === 'export'}
-              aria-haspopup="menu"
-              onClick={() => setOpenSubmenu((submenu) => submenu === 'export' ? null : 'export')}
-            >
+            <button type="button" className="action-btn file-submenu-trigger" role="menuitem" onClick={openExportDialog}>
               <span className="action-icon" aria-hidden="true"><Upload size={16} /></span>
               <span className="action-label">Export</span>
-              <span className="file-submenu-chevron" aria-hidden="true"><ChevronRight size={14} /></span>
             </button>
-            {openSubmenu === 'export' && <div className="file-submenu-menu" role="menu" aria-label="Export options">
-              <button type="button" className="action-btn file-menu-item json-btn" role="menuitem" title="Export JSON" onClick={() => closeAfterExport(onExportJson)}>
-                <span className="action-icon" aria-hidden="true"><FileCode size={16} /></span>
-                <span className="action-label">Export JSON</span>
-              </button>
-              <button type="button" className="action-btn file-menu-item gif-btn" role="menuitem" title="Export GIF" onClick={() => closeAfterExport(() => onExport('gif'))}>
-                <span className="action-icon" aria-hidden="true"><Download size={16} /></span>
-                <span className="action-label">Export GIF</span>
-              </button>
-              <button type="button" className="action-btn file-menu-item webm-btn" role="menuitem" title="Export Video (WEBM)" onClick={() => closeAfterExport(() => onExport('webm'))}>
-                <span className="action-icon" aria-hidden="true"><FileVideoCamera size={16} /></span>
-                <span className="action-label">Export Video (WEBM)</span>
-              </button>
-              <button type="button" className="action-btn file-menu-item mp4-btn" role="menuitem" title="Export Video (MP4)" onClick={() => closeAfterExport(() => onExport('mp4'))}>
-                <span className="action-icon" aria-hidden="true"><FileVideoCamera size={16} /></span>
-                <span className="action-label">Export Video (MP4)</span>
-              </button>
-              <label className="export-quality-control">
-                <span>Quality</span>
-                <select
-                  aria-label="Export quality"
-                  value={exportQuality}
-                  disabled={isExporting}
-                  onChange={(event) => onExportQualityChange(event.target.value as ExportQuality)}
-                >
-                  {(Object.keys(EXPORT_QUALITY_PRESETS) as ExportQuality[]).map((quality) => (
-                    <option key={quality} value={quality}>{EXPORT_QUALITY_PRESETS[quality].label}</option>
-                  ))}
-                </select>
-              </label>
-              {onExportImage && <>
-                <button type="button" className="action-btn file-menu-item image-btn" role="menuitem" title="Export PNG" onClick={() => closeAfterExport(() => onExportImage('png'))}>
-                  <span className="action-icon" aria-hidden="true"><Image size={16} /></span>
-                  <span className="action-label">Export PNG</span>
-                </button>
-                <button type="button" className="action-btn file-menu-item image-btn" role="menuitem" title="Export JPG" onClick={() => closeAfterExport(() => onExportImage('jpeg'))}>
-                  <span className="action-icon" aria-hidden="true"><Image size={16} /></span>
-                  <span className="action-label">Export JPG</span>
-                </button>
-              </>}
-            </div>}
           </div>
         </div>}
       </div>
+      {isExportDialogOpen && <ExportDialog
+        theme={theme}
+        exportQuality={exportQuality}
+        onExportQualityChange={onExportQualityChange}
+        onCancel={() => setIsExportDialogOpen(false)}
+        onExport={(options) => {
+          setIsExportDialogOpen(false);
+          onExport(options);
+        }}
+      />}
       <input
         ref={fileInputRef}
         type="file"

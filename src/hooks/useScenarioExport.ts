@@ -1,7 +1,7 @@
 import { useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import type { ExportQuality, Frame, ScenarioSettings, VideoExportType } from '../types';
+import { type ExportFps, type ExportQuality, type Frame, type ScenarioSettings, type VideoExportType } from '../types';
 import { dataUrlToBlob, downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
 import { DEFAULT_EXPORT_QUALITY, EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
 import { convertWebmToMp4, encodePngFramesToVideo } from '../utils/mp4';
@@ -38,8 +38,8 @@ export function useScenarioExport({
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'gif' | VideoExportType | null>(null);
-  const { fps: exportFps, gifPixelRatio, gifSampleInterval } = EXPORT_QUALITY_PRESETS[exportQuality];
-  const exportFrameInterval = 1000 / exportFps;
+  const { fps: configuredExportFps, gifPixelRatio, gifSampleInterval } = EXPORT_QUALITY_PRESETS[exportQuality];
+  const defaultExportFps = configuredExportFps as ExportFps;
 
   const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
     downloadScenarioJson(exportFrames, exportCurrentFrameIndex, settings);
@@ -87,7 +87,7 @@ export function useScenarioExport({
     return mimeType;
   };
 
-  const triggerExport = async (type: 'gif' | VideoExportType) => {
+  const triggerExport = async (type: 'gif' | VideoExportType, fps: ExportFps = defaultExportFps) => {
     setIsPlaying(false);
     setIsPlaybackSampling(true);
     setIsExporting(true);
@@ -96,6 +96,8 @@ export function useScenarioExport({
 
     const originalFrame = currentFrameIndex;
     const originalProgress = playbackProgress;
+    const exportFps = fps;
+    const exportFrameInterval = 1000 / fps;
     const exportDuration = Math.max(playSpeed, exportFrameInterval);
     const samplesPerSegment = Math.max(1, Math.ceil(exportDuration / exportFrameInterval));
     const segmentCount = Math.max(frames.length, 1);
