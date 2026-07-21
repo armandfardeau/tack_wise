@@ -2,6 +2,28 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import AppHeader from '../src/components/AppHeader';
 
 describe('AppHeader', () => {
+  it('renders and updates the scenario title', () => {
+    const onScenarioTitleChange = jest.fn();
+
+    render(
+      <AppHeader
+        isExporting={false}
+        scenarioTitle="Mark Room"
+        onScenarioTitleChange={onScenarioTitleChange}
+        onExport={jest.fn()}
+        onExportJson={jest.fn()}
+        onImportJson={jest.fn()}
+      />,
+    );
+
+    const titleInput = screen.getByRole('textbox', { name: /scenario title/i });
+    expect(titleInput).toHaveValue('Mark Room');
+
+    fireEvent.change(titleInput, { target: { value: 'Upwind Crossing' } });
+
+    expect(onScenarioTitleChange).toHaveBeenCalledWith('Upwind Crossing');
+  });
+
   it('renders the File menu in the top-level scenario tools bar', () => {
     render(<AppHeader isExporting={false} onExport={jest.fn()} onExportJson={jest.fn()} onImportJson={jest.fn()} />);
 
