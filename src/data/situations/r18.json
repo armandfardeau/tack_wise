@@ -77,7 +77,7 @@
           "color": "#38bdf8",
           "x": 320,
           "y": 180,
-          "heading": 45,
+          "heading": 42.51044707800085,
           "sailAngle": -12,
           "showHeadingLine": true
         },
@@ -87,7 +87,7 @@
           "color": "#f87171",
           "x": 440,
           "y": 200,
-          "heading": 45,
+          "heading": 46.8476102659946,
           "sailAngle": -12,
           "showHeadingLine": true
         }
@@ -141,8 +141,8 @@
           "color": "#38bdf8",
           "x": 380,
           "y": 120,
-          "heading": -45,
-          "sailAngle": 12,
+          "heading": 45,
+          "sailAngle": -12,
           "showHeadingLine": true
         },
         {
