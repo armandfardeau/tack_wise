@@ -10,6 +10,7 @@ type SidebarView = 'frames' | 'layers';
 interface SidebarProps {
   currentFrameIndex: number;
   frames: Frame[];
+  unanimatableTransitionIndices?: number[];
   isOpen: boolean;
   onAddFrame: () => void;
   onDeleteFrame: (frameIndex: number) => void;
@@ -26,6 +27,7 @@ interface SidebarProps {
 export default function Sidebar({
   currentFrameIndex,
   frames,
+  unanimatableTransitionIndices = [],
   isOpen,
   onAddFrame,
   onDeleteFrame,
@@ -74,6 +76,7 @@ export default function Sidebar({
               variant="sidebar"
               currentFrameIndex={currentFrameIndex}
               frames={frames}
+              unanimatableTransitionIndices={unanimatableTransitionIndices}
               onAddFrame={onAddFrame}
               onDeleteFrame={onDeleteFrame}
               onDuplicateFrame={onDuplicateFrame}

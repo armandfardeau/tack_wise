@@ -240,6 +240,7 @@ export default function App() {
         {!scenario.settings.presenterMode && <Sidebar
           currentFrameIndex={scenario.currentFrameIndex}
           frames={scenario.frames}
+          unanimatableTransitionIndices={scenario.unanimatableTransitionIndices}
           onAddFrame={scenario.addFrame}
           onDeleteFrame={scenario.deleteFrame}
           onDuplicateFrame={scenario.duplicateFrame}

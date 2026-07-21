@@ -276,6 +276,7 @@ describe('useScenario', () => {
         result.current.setIsPlaying(true);
       });
 
+      expect(result.current.unanimatableTransitionIndices).toEqual([0]);
       expect(result.current.playbackWarning).toContain('Boat cannot complete the straight-line manoeuvre');
       act(() => frameCallback?.(0));
       act(() => frameCallback?.(500));
