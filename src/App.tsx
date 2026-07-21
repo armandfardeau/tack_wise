@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import './App.css';
 import AppHeader from './components/AppHeader';
+import AboutPage from './components/AboutPage';
 import CanvasWorkspace, { type InspectorRequest } from './components/CanvasWorkspace';
 import ExportOverlay from './components/ExportOverlay';
 import NewScenarioDialog from './components/NewScenarioDialog';
@@ -62,6 +63,9 @@ export default function App() {
   const [exportTheme, setExportTheme] = useState<Theme | null>(null);
   const [isNewScenarioDialogOpen, setIsNewScenarioDialogOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [page, setPage] = useState<'editor' | 'about'>(() => (
+    typeof window !== 'undefined' && window.location.pathname === '/about' ? 'about' : 'editor'
+  ));
   const [exportQuality, setExportQuality] = useState<ExportQuality>(DEFAULT_EXPORT_QUALITY);
   const [loadedTemplateId, setLoadedTemplateId] = useState<string | null>(null);
   const [templateContributionMode, setTemplateContributionMode] = useState<TemplateContributionMode | null>(null);
@@ -70,6 +74,24 @@ export default function App() {
   const { importScenario } = scenario;
   const loadedShareRef = useRef(false);
   const inspectorRequestIdRef = useRef(0);
+
+  const navigateTo = (nextPage: 'editor' | 'about') => {
+    const targetPath = nextPage === 'about' ? '/about' : '/';
+    if (typeof window !== 'undefined' && window.location.pathname !== targetPath) {
+      window.history.pushState({}, '', targetPath);
+    }
+    setPage(nextPage);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => setPage(window.location.pathname === '/about' ? 'about' : 'editor');
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    document.title = page === 'about' ? 'About — Tack Wise' : 'Tack Wise';
+  }, [page]);
 
   const handleLayerOpenInspector = (id: string, type: Exclude<SelectedType, null>) => {
     setIsSidebarOpen(false);
@@ -157,6 +179,16 @@ export default function App() {
 
   const isCanvasExporting = exportState.isExporting || isImageExporting;
 
+  if (page === 'about') {
+    return (
+      <AboutPage
+        theme={theme}
+        onBackToEditor={() => navigateTo('editor')}
+        onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
+      />
+    );
+  }
+
   const resetToNewScenario = () => {
     scenario.createNewScenario();
     setLoadedTemplateId(null);
@@ -223,6 +255,7 @@ export default function App() {
         onExport={handleExport}
         onImportJson={handleImportJson}
         onShareScenario={handleShareScenario}
+        onOpenAbout={() => navigateTo('about')}
         onLoadTemplate={handleLoadTemplate}
         onContributeTemplate={() => setTemplateContributionMode('create')}
         onUpdateTemplate={() => {

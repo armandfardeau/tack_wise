@@ -2,7 +2,7 @@ import ExportActions from './ExportActions';
 import ViewActions from './ViewActions';
 import SponsorshipActions, { type SponsorshipLinks } from './SponsorshipActions';
 import type { SituationTemplate } from '../data/situationTemplates';
-import { Copy, Sailboat } from 'lucide-react';
+import { Copy, Info, Sailboat } from 'lucide-react';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
 
 interface AppHeaderProps {
@@ -14,6 +14,7 @@ interface AppHeaderProps {
   onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
   onShareScenario?: () => void;
+  onOpenAbout?: () => void;
   onContributeTemplate?: () => void;
   onUpdateTemplate?: () => void;
   canUpdateTemplate?: boolean;
@@ -36,6 +37,7 @@ export default function AppHeader({
   onExport,
   onImportJson,
   onShareScenario,
+  onOpenAbout,
   onContributeTemplate,
   onUpdateTemplate,
   canUpdateTemplate,
@@ -94,6 +96,7 @@ export default function AppHeader({
           onToggleTheme={onToggleTheme}
           onTogglePresenter={onTogglePresenter}
         />
+        {onOpenAbout && <button type="button" className="header-tool-btn" onClick={onOpenAbout}><Info aria-hidden="true" size={15} /> About</button>}
         <SponsorshipActions {...sponsorship} />
         <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
       </div>
