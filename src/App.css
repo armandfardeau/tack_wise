@@ -362,6 +362,156 @@ body {
   opacity: 0.4;
 }
 
+.sponsorship-actions {
+  position: relative;
+}
+
+.sponsorship-trigger {
+  color: var(--accent-green);
+}
+
+.sponsorship-trigger:hover:not(:disabled) {
+  border-color: var(--accent-green);
+  color: var(--accent-green-hover);
+}
+
+.sponsorship-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 40;
+  display: flex;
+  min-width: 250px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-sidebar);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+.sponsorship-menu-title {
+  margin: 2px 6px 6px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.sponsorship-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 8px;
+  border-radius: 6px;
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+.sponsorship-menu-item:hover {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--accent-cyan-hover);
+}
+
+.sponsorship-menu-item span {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sponsorship-menu-item strong {
+  font-size: 0.8rem;
+}
+
+.sponsorship-menu-item small {
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.stripe-donation-form {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+.stripe-donation-amount-field {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.stripe-donation-amount-field input {
+  width: 100%;
+  min-width: 0;
+  padding: 7px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: var(--text-main);
+  font: inherit;
+}
+
+.stripe-donation-quick-amounts {
+  display: flex;
+  gap: 4px;
+}
+
+.stripe-donation-quick-amounts button {
+  flex: 1;
+  padding: 5px 4px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 0.7rem;
+}
+
+.stripe-donation-quick-amounts button:hover,
+.stripe-donation-quick-amounts button.is-selected {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan-hover);
+}
+
+.stripe-donation-submit {
+  padding: 8px 10px;
+  border: 1px solid var(--accent-cyan);
+  border-radius: 5px;
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.stripe-donation-submit:hover:not(:disabled) {
+  background: rgba(6, 182, 212, 0.22);
+}
+
+.stripe-donation-submit:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.stripe-donation-form small {
+  font-size: 0.68rem;
+}
+
+.stripe-donation-error {
+  margin: 0;
+  color: var(--accent-red-hover);
+  font-size: 0.7rem;
+}
+
 .file-add-btn {
   display: block;
   margin-top: 10px;

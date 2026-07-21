@@ -1,5 +1,6 @@
 import ExportActions from './ExportActions';
 import ViewActions from './ViewActions';
+import SponsorshipActions, { type SponsorshipLinks } from './SponsorshipActions';
 import type { SituationTemplate } from '../data/situationTemplates';
 import { Copy, Sailboat } from 'lucide-react';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
@@ -23,6 +24,7 @@ interface AppHeaderProps {
   theme?: Theme;
   exportQuality?: ExportQuality;
   onExportQualityChange?: (quality: ExportQuality) => void;
+  sponsorship?: SponsorshipLinks;
 }
 
 export default function AppHeader({
@@ -44,6 +46,7 @@ export default function AppHeader({
   theme = 'dark',
   exportQuality,
   onExportQualityChange,
+  sponsorship,
 }: AppHeaderProps) {
   return (
     <header className="app-header">
@@ -91,6 +94,7 @@ export default function AppHeader({
           onToggleTheme={onToggleTheme}
           onTogglePresenter={onTogglePresenter}
         />
+        <SponsorshipActions {...sponsorship} />
         <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
       </div>
     </header>
