@@ -1545,21 +1545,7 @@
   background-color: rgba(255, 255, 255, 0.94);
   box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
 }
-/* Export Progress Glass Overlay */
-.export-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(9, 13, 22, 0.85);
-  backdrop-filter: blur(10px);
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-.light-theme .export-overlay {
-  background-color: rgba(20, 35, 38, 0.58);
-}
 
 .template-contribution-backdrop {
   position: fixed;
@@ -2176,44 +2162,6 @@
 .template-contribution-primary:disabled {
   cursor: not-allowed;
   opacity: 0.55;
-}
-
-.export-spinner-box {
-  background-color: var(--bg-sidebar);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 40px;
-  text-align: center;
-  max-width: 400px;
-  width: 90%;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.export-spinner-box h3 {
-  color: var(--text-main);
-}
-
-.export-spinner-box p {
-  color: var(--text-muted);
-}
-
-.spinner {
-  width: 50px;
-  height: 50px;
-  border: 4px dashed var(--accent-cyan);
-  border-radius: 50%;
-  animation: rotateSpinner 2s linear infinite;
-}
-
-@keyframes rotateSpinner {
-  100% {
-    transform: rotate(360deg);
-  }
 }
 
 /* Responsive adjustments */
