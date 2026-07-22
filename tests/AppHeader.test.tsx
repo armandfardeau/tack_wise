@@ -32,7 +32,7 @@ describe('AppHeader', () => {
   it('renders the File menu in the top-level scenario tools bar', () => {
     renderHeader();
 
-    const scenarioTools = document.querySelector('.header-tools');
+    const scenarioTools = screen.getByLabelText(/scenario tools/i);
 
     expect(scenarioTools).toContainElement(screen.getByRole('button', { name: /file options/i }));
     expect(scenarioTools).toContainElement(screen.getByRole('button', { name: /copy share link/i }));

@@ -1,6 +1,7 @@
 import { ChevronDown, CreditCard, GitFork, Heart } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import StripeDonationForm from './StripeDonationForm';
+import headerStyles from './AppHeader.module.css';
 
 export interface SponsorshipLinks {
   stripeUrl?: string;
@@ -122,7 +123,7 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
     <div className="sponsorship-actions" ref={containerRef}>
       <button
         type="button"
-        className="header-tool-btn sponsorship-trigger"
+        className={`${headerStyles.headerToolButton} sponsorship-trigger`}
         ref={triggerRef}
         aria-haspopup="menu"
         aria-expanded={isOpen}

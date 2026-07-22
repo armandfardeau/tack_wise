@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Copy, ExternalLink, Heart, Info, MoreHorizontal } from 'lucide-react';
 import { SponsorshipMenuItems, type SponsorshipLinks } from './SponsorshipActions';
+import headerStyles from './AppHeader.module.css';
 
 interface HeaderMoreActionsProps {
   onShareScenario?: () => void;
@@ -83,7 +84,7 @@ export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponso
     <div className="header-more-actions" ref={menuRef}>
       <button
         type="button"
-        className="header-tool-btn header-more-trigger"
+        className={`${headerStyles.headerToolButton} header-more-trigger`}
         ref={triggerRef}
         aria-expanded={isOpen}
         aria-haspopup="menu"
