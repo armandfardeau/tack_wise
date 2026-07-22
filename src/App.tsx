@@ -16,9 +16,9 @@ import type { SelectedType } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
 import { scenarioPayloadFromTemplate, situationTemplates } from './data/situationTemplates';
 import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
-import { getCanvasContentBounds, getCanvasContentRect } from './utils/simulation';
+import { getCanvasContentBounds, getCanvasContentRect, type CanvasContentRect } from './utils/simulation';
 import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
-import type { ExportOptions, ExportQuality, Theme } from './types';
+import type { ExportFormat, ExportOptions, ExportQuality, Theme } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
@@ -30,6 +30,10 @@ const sponsorshipLinks = {
   donationUrl: import.meta.env.VITE_DONATION_URL,
 };
 const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
+
+function isStillImageFormat(format: ExportFormat): format is 'png' | 'jpeg' {
+  return format === 'png' || format === 'jpeg';
+}
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
@@ -119,7 +123,7 @@ export default function App() {
 
   const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
 
-  const saveViewportAndFitCanvas = (autoFit: boolean) => {
+  const saveViewportAndFitCanvas = (autoFit: boolean, contentRect: CanvasContentRect) => {
     if (!autoFit) return null;
 
     const previousViewport = {
@@ -127,7 +131,7 @@ export default function App() {
       zoom: viewport.canvasZoom,
     };
 
-    flushSync(() => viewport.fitCanvasToContent(exportContentRect));
+    flushSync(() => viewport.fitCanvasToContent(contentRect));
     return previousViewport;
   };
 
@@ -232,9 +236,12 @@ export default function App() {
       return;
     }
 
-    const previousViewport = saveViewportAndFitCanvas(options.autoFit);
+    const previousViewport = saveViewportAndFitCanvas(
+      options.autoFit,
+      isStillImageFormat(options.format) ? visibleCanvasContentRect : exportContentRect,
+    );
 
-    if (options.format === 'png' || options.format === 'jpeg') {
+    if (isStillImageFormat(options.format)) {
       flushSync(() => {
         setExportTheme(options.theme);
         setIsImageExporting(true);
