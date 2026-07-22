@@ -4,6 +4,7 @@ import type { Frame } from '../types';
 import { ChevronLeft, ChevronRight, Film, Layers } from 'lucide-react';
 import LayerList from './LayerList';
 import Timeline from './Timeline';
+import styles from './Sidebar.module.css';
 
 type SidebarView = 'frames' | 'layers';
 
@@ -70,7 +71,7 @@ export default function Sidebar({
     <>
       <button
         type="button"
-        className={`sidebar-drawer-handle${isOpen ? ' is-open' : ''}`}
+        className={`${styles.sidebarDrawerHandle}${isOpen ? ` ${styles.isOpen}` : ''}`}
         aria-controls="controls-sidebar"
         aria-expanded={isOpen}
         aria-label={isOpen ? 'Close frames drawer' : 'Open frames drawer'}
@@ -79,13 +80,13 @@ export default function Sidebar({
         {isOpen ? <ChevronLeft aria-hidden="true" size={16} /> : <ChevronRight aria-hidden="true" size={16} />}
         <span>Frames</span>
       </button>
-      <button type="button" className={`sidebar-backdrop${isOpen ? ' is-open' : ''}`} aria-label="Close frames drawer" onClick={onClose} />
-      <aside id="controls-sidebar" className={`step-panel${isOpen ? ' is-open' : ''}`}>
-        <div className="scenario-title-editor sidebar-scenario-title-editor">
+      <button type="button" className={`${styles.sidebarBackdrop}${isOpen ? ` ${styles.isOpen}` : ''}`} aria-label="Close frames drawer" onClick={onClose} />
+      <aside id="controls-sidebar" className={`${styles.stepPanel}${isOpen ? ` ${styles.isOpen}` : ''}`}>
+        <div className={`${styles.scenarioTitleEditor} ${styles.sidebarScenarioTitleEditor}`}>
           <label htmlFor="scenario-title">Scenario title</label>
           <input
             id="scenario-title"
-            className="scenario-title-input"
+            className={styles.scenarioTitleInput}
             type="text"
             value={scenarioTitle}
             placeholder="Untitled situation"
@@ -95,8 +96,8 @@ export default function Sidebar({
           />
         </div>
         {view === 'frames' ? (
-          <div className="control-section sidebar-frame-section">
-            <h3 className="section-title"><Film aria-hidden="true" size={16} /> Frames</h3>
+          <div className={`${styles.controlSection} ${styles.sidebarFrameSection}`}>
+            <h3 className={styles.sectionTitle}><Film aria-hidden="true" size={16} /> Frames</h3>
             <Timeline
               variant="sidebar"
               currentFrameIndex={currentFrameIndex}
@@ -112,14 +113,14 @@ export default function Sidebar({
             />
           </div>
         ) : (
-          <div className="sidebar-layers-section">
-            <button type="button" className="sidebar-back-btn" onClick={() => setView('frames')}>
+          <div className={styles.sidebarLayersSection}>
+            <button type="button" className={styles.sidebarBackBtn} onClick={() => setView('frames')}>
               <ChevronLeft aria-hidden="true" size={16} />
               <span>Back to frames</span>
             </button>
-            <div className="sidebar-layers-heading">
-              <h3 className="section-title"><Layers aria-hidden="true" size={16} /> Layers</h3>
-              <p className="sidebar-layers-frame-name">{layersFrame?.name}</p>
+            <div className={styles.sidebarLayersHeading}>
+              <h3 className={styles.sectionTitle}><Layers aria-hidden="true" size={16} /> Layers</h3>
+              <p className={styles.sidebarLayersFrameName}>{layersFrame?.name}</p>
             </div>
             {layersFrame && <LayerList
               activeFrame={layersFrame}

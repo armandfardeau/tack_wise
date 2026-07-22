@@ -38,4 +38,19 @@ describe('LayerList', () => {
     expect(onOpenInspector).toHaveBeenNthCalledWith(1, 'boat-1', 'boat');
     expect(onOpenInspector).toHaveBeenNthCalledWith(2, 'wind', 'wind');
   });
+
+  it('marks the selected layer and keeps the wind modifier on its icon', () => {
+    render(
+      <LayerList
+        activeFrame={frame}
+        onOpenInspector={jest.fn()}
+        selectedId="boat-1"
+        selectedType="boat"
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: /alpha/i })).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getByRole('button', { name: /wind/i })).toHaveAttribute('aria-pressed', 'false');
+    expect(screen.getByRole('button', { name: /wind/i }).querySelector('svg')).toBeInTheDocument();
+  });
 });

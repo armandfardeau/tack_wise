@@ -1,6 +1,7 @@
 import { getMarkConnectionAnchors } from '../../utils/markConnections';
 import ColorPicker from '../ColorPicker';
 import type { InspectorView } from './types';
+import styles from './Inspector.module.css';
 
 type ConnectionInspectorProps = Extract<InspectorView, { kind: 'connection' }>;
 
@@ -11,8 +12,8 @@ export function ConnectionInspector({ activeFrame, connection, updateConnection 
   const sourceOptions = activeFrame.marks.filter((mark) => mark.id !== connection.end.markId);
 
   return (
-    <div className="editor-form">
-      <div className="form-row">
+    <div className={styles.editorForm}>
+      <div className={styles.formRow}>
         <label htmlFor="connection-source">From</label>
         <select
           id="connection-source"
@@ -29,7 +30,7 @@ export function ConnectionInspector({ activeFrame, connection, updateConnection 
           {sourceOptions.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
         </select>
       </div>
-      <div className="form-row">
+      <div className={styles.formRow}>
         <label htmlFor="connection-target">To</label>
         <select
           id="connection-target"
@@ -46,11 +47,11 @@ export function ConnectionInspector({ activeFrame, connection, updateConnection 
           {targetOptions.map((candidate) => <option key={candidate.id} value={candidate.id}>{candidate.name}</option>)}
         </select>
       </div>
-      <div className="form-row">
+      <div className={styles.formRow}>
         <label htmlFor="connection-line-color">Line Color</label>
         <ColorPicker id="connection-line-color" label="Line Color" value={connection.color ?? sourceMark?.color ?? '#38bdf8'} onChange={(color) => updateConnection(connection.id, { color })} />
       </div>
-      <div className="form-row">
+      <div className={styles.formRow}>
         <label htmlFor="connection-line-style">Line Style</label>
         <select id="connection-line-style" value={connection.style ?? 'dotted'} onChange={(event) => updateConnection(connection.id, { style: event.target.value as typeof connection.style })}>
           <option value="dotted">Dotted</option>
@@ -58,13 +59,13 @@ export function ConnectionInspector({ activeFrame, connection, updateConnection 
           <option value="solid">Solid</option>
         </select>
       </div>
-      <div className="form-row flex-row">
-        <label className="checkbox-label">
+      <div className={`${styles.formRow} ${styles.flexRow}`}>
+        <label className={styles.checkboxLabel}>
           <input type="checkbox" checked={connection.arrowhead === true} onChange={(event) => updateConnection(connection.id, { arrowhead: event.target.checked })} />
           <span>Show arrowhead</span>
         </label>
       </div>
-      <p className="grid-hint">{sourceMark?.name ?? 'Missing mark'} → {targetMark?.name ?? 'Missing mark'}</p>
+      <p className={styles.gridHint}>{sourceMark?.name ?? 'Missing mark'} → {targetMark?.name ?? 'Missing mark'}</p>
     </div>
   );
 }

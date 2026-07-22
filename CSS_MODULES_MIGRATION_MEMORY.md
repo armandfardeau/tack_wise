@@ -118,49 +118,92 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 7. Sidebar and frame navigation
 
-- [ ] Migrate .step-panel, .sidebar-backdrop, .sidebar-drawer-handle, .scenario-title-editor, .scenario-title-input, .sidebar-scenario-title-editor, .control-section, .sidebar-frame-section, .sidebar-layers-section, .sidebar-back-btn, .sidebar-layers-heading, .sidebar-layers-frame-name, and .section-title.
-- [ ] Preserve drawer states, mobile transitions, title input states, and responsive layout.
+- [x] Migrate .step-panel, .sidebar-backdrop, .sidebar-drawer-handle, .scenario-title-editor, .scenario-title-input, .sidebar-scenario-title-editor, .control-section, .sidebar-frame-section, .sidebar-layers-section, .sidebar-back-btn, .sidebar-layers-heading, .sidebar-layers-frame-name, and .section-title.
+- [x] Preserve drawer states, mobile transitions, title input states, and responsive layout.
 - Primary file: src/components/Sidebar.tsx.
+
+#### Item 7 migration record (2026-07-22)
+
+- Original global CSS: `.step-panel`, `.sidebar-backdrop`, `.sidebar-drawer-handle`, `.scenario-title-editor`, `.scenario-title-input`, `.sidebar-scenario-title-editor`, `.control-section`, `.sidebar-frame-section`, `.sidebar-layers-section`, `.sidebar-back-btn`, `.sidebar-layers-heading .section-title`, `.sidebar-layers-frame-name`, and `.section-title`, including their print, mobile, open-state, hover/focus, readonly, and layout declarations. The shared global `.control-section` and `.section-title` definitions remain in `src/App.css` because Inspector still consumes them; Sidebar now uses equivalent local module classes.
+- New module: `src/components/Sidebar.module.css` contains the Sidebar drawer, backdrop, title editor/input, local control section and section heading, layers view, back button, frame name, print rules, and mobile drawer transition rules. Open-state modifiers use local `isOpen`; no item 8+ layer-list selectors were moved.
+- React refactor: `Sidebar` imports the module and converts all owned selectors to local class references while preserving the existing DOM structure, ARIA attributes, title editing behavior, frame/layers navigation, and Timeline/LayerList contracts.
+- App.css cleanup: removed the Sidebar-owned global selectors and their responsive/print rules; retained shared `.control-section` and `.section-title` rules plus Inspector-specific global selectors.
+- Verification: targeted Sidebar tests (2 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. Browser checks at 1280×800 and 390×844 confirmed the desktop Sidebar, mobile closed/open drawer states, backdrop close behavior, and Frames → Layers → Back to frames navigation; the temporary viewport override was reset. The build emitted the existing large-chunk warning; no new test or lint failures occurred.
 
 ### 8. Layers list
 
-- [ ] Migrate .layers-list, .layers-summary, .layer-group, .layer-group-title, .layer-group-count, .layer-group-items, .layer-row, .layer-row-icon, .layer-row-copy, .layer-row-name, .layer-row-detail, and .layers-empty.
-- [ ] Preserve .is-selected and .is-wind modifiers, keyboard focus, and dynamic inline color behavior.
+- [x] Migrate .layers-list, .layers-summary, .layer-group, .layer-group-title, .layer-group-count, .layer-group-items, .layer-row, .layer-row-icon, .layer-row-copy, .layer-row-name, .layer-row-detail, and .layers-empty.
+- [x] Preserve .is-selected and .is-wind modifiers, keyboard focus, and dynamic inline color behavior.
 - Primary file: src/components/LayerList.tsx.
+
+#### Item 8 migration record (2026-07-22)
+
+- Original global CSS: `.layers-list`, `.layers-summary`, `.layer-group`, `.layer-group-title`, `.layer-group-count`, `.layer-group-items`, `.layer-row` with hover/focus-visible and `.is-selected` states, `.layer-row-icon` with `.is-wind`, `.layer-row-copy`, `.layer-row-name`, `.layer-row-detail`, and `.layers-empty`. These rules had no responsive, theme, print, animation, or cross-component overrides.
+- New module: `src/components/LayerList.module.css` contains the equivalent declarations under local names (`layersList`, `layersSummary`, `layerGroup`, `layerGroupTitle`, `layerGroupCount`, `layerGroupItems`, `layerRow`, `layerRowIcon`, `layerRowCopy`, `layerRowName`, `layerRowDetail`, `layersEmpty`, `isSelected`, and `isWind`). The hover/focus-visible behavior remains local, and the two state modifiers are composed only on their owning elements.
+- React refactor: `LayerList` imports the module and converts every LayerList-owned class reference to the corresponding module class. Selected rows preserve `aria-pressed` and the selected modifier; the wind icon preserves its modifier; object colors continue to be applied through the existing dynamic inline `color` style. Sidebar and Inspector class contracts are unchanged.
+- Verification: targeted LayerList tests, `npm run build`, `npm run lint`, `git diff --check`, and a repository search confirming no LayerList runtime usage remains dependent on the removed global selectors.
 
 ### 9. Inspector forms and object controls
 
-- [ ] Migrate .editor-form, .form-row, form labels/selects/textareas, .connection-list-heading, .connection-section-label, .connection-add-btn, .connection-list, .connection-row, .connection-target-name, .connection-row-btn, .connection-row-delete-btn, and .connection-empty.
-- [ ] Migrate .quick-angle-dial, .quick-angle-button, .direction-btn, .flex-row, .checkbox-label, and .grid-hint.
-- [ ] Migrate .inspector-tabs, .inspector-tab, .inspector-tab-panel, .inspector-subsection, .inspector-subsection-title, .inspector-actions, .inspector-close-btn, .inspector-duplicate-btn, .inspector-delete-btn, .inspector-object-name, .inspector-drag-handle, .inspector-title-content, and .no-selection.
-- [ ] Migrate .speech-bubble-presets, .speech-bubble-preset, .speech-bubble-clear, .rule-offense-list, .rule-offense-row, .rule-offense-name, .rule-offense-remove, and #rule-offense-add.
+- [x] Migrate .editor-form, .form-row, form labels/selects/textareas, .connection-list-heading, .connection-section-label, .connection-add-btn, .connection-list, .connection-row, .connection-target-name, .connection-row-btn, .connection-row-delete-btn, and .connection-empty.
+- [x] Migrate .quick-angle-dial, .quick-angle-button, .direction-btn, .flex-row, .checkbox-label, and .grid-hint.
+- [x] Migrate .inspector-tabs, .inspector-tab, .inspector-tab-panel, .inspector-subsection, .inspector-subsection-title, .inspector-actions, .inspector-close-btn, .inspector-duplicate-btn, .inspector-delete-btn, .inspector-object-name, .inspector-drag-handle, .inspector-title-content, and .no-selection.
+- [x] Migrate .speech-bubble-presets, .speech-bubble-preset, .speech-bubble-clear, .rule-offense-list, .rule-offense-row, .rule-offense-name, .rule-offense-remove, and #rule-offense-add.
 - Primary file: src/components/Inspector.tsx.
+
+#### Item 9 migration record (2026-07-22)
+
+- Original global CSS: `.editor-form`, `.form-row` with its label, text/search/select, focus, and textarea rules; connection selectors `.connection-list-heading`, `.connection-section-label`, `.connection-add-btn` with hover/focus/disabled states, `.connection-list`, `.connection-row` with nested select, `.connection-target-name`, `.connection-row-btn` with hover/focus and delete modifiers, and `.connection-empty`; object controls `.quick-angle-dial` with its `::before`/`::after` decorations, `.quick-angle-button` with hover/pressed/focus states, `.direction-btn`, `.flex-row`, `.checkbox-label` with checkbox sizing, and `.grid-hint`; tabs and rule-offense selectors; speech-bubble preset/clear controls; and Inspector header/fallback selectors. The `#rule-offense-add` width rule was paired with `.rule-offense-add select`. Floating-inspector overrides supplied drag behavior, local section padding/title layout, and title-content/object-name truncation. Light-theme overrides supplied the Inspector action-button background and shadow. There were no Inspector-specific responsive, print, animation, or presenter-mode rules to move; the global `.floating-inspector` container and its responsive max-height remain with item 11.
+- New module: `src/components/inspector/Inspector.module.css` contains the complete equivalent under local names: `controlSection`, `sectionTitle`, `editorForm`, `formRow`, `connectionListHeading`, `connectionSectionLabel`, `connectionAddButton`, `connectionList`, `connectionRow`, `connectionTargetName`, `connectionRowButton`, `connectionRowDeleteButton`, `connectionEmpty`, `quickAngleDial`, `quickAngleButton`, `directionButton`, `flexRow`, `checkboxLabel`, `gridHint`, `inspectorTabs`, `inspectorTab`, `inspectorTabPanel`, `inspectorSubsection`, `inspectorSubsectionTitle`, `ruleOffenseList`, `ruleOffenseRow`, `ruleOffenseName`, `ruleOffenseRemove`, `ruleOffenseAdd`, `speechBubblePresets`, `speechBubblePreset`, `speechBubbleClear`, `actions`, `closeButton`, `duplicateButton`, `deleteButton`, `dragHandle`, `titleContent`, `objectName`, and `noSelection`. Narrow `:global(.floating-inspector)` selectors preserve the floating panel contract, and `:global(.light-theme)` scopes the moved action-button theme overrides. The global `.control-section` and `.section-title` base rules remain intentionally in `App.css` for Sidebar item 7; Inspector uses its local equivalents.
+- React refactor: `Inspector` and all existing inspector form/object subcomponents import the module and convert their static and composed class names. The `quick-angle-button-*` class suffix had no CSS declaration and was removed while preserving inline angle positioning and `aria-pressed`. The rule-offense wrapper now owns the width rule through `ruleOffenseAdd`; the public `rule-offense-add` element id remains unchanged for accessibility. `CanvasWorkspace` now passes generated Inspector module classes to `react-rnd` for its cancel and drag-handle contracts. ColorPicker usage and selectors remain untouched. Inspector tests assert accessible roles, labels, and relationships instead of generated module class names.
+- Verification: targeted `Inspector.test.tsx` (30 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. A selector search confirmed the migrated Inspector selectors are no longer referenced by the Inspector components or `App.css`; the shared Sidebar `.control-section`/`.section-title` rules and ColorPicker selectors remain intentionally global.
 
 ### 10. Color picker
 
-- [ ] Migrate .color-picker, .color-picker-trigger, .color-picker-trigger-swatch, .color-picker-trigger-value, .color-picker-native-input, .color-picker-menu, .color-picker-menu-heading, .color-picker-menu-value, and open/focus states.
-- [ ] Migrate .color-picker-speed-dial, .color-picker-speed-dial-ring, .color-picker-speed-dial-center, .color-picker-dial-button, and swatch states.
-- [ ] Migrate custom, saved-color, feedback, hint, remove, save, and compact-mode selectors.
-- [ ] Preserve light-theme overrides and the data-open state selector.
+- [x] Migrate .color-picker, .color-picker-trigger, .color-picker-trigger-swatch, .color-picker-trigger-value, .color-picker-native-input, .color-picker-menu, .color-picker-menu-heading, .color-picker-menu-value, and open/focus states.
+- [x] Migrate .color-picker-speed-dial, .color-picker-speed-dial-ring, .color-picker-speed-dial-center, .color-picker-dial-button, and swatch states.
+- [x] Migrate custom, saved-color, feedback, hint, remove, save, and compact-mode selectors.
+- [x] Preserve light-theme overrides and the data-open state selector.
 - Primary file: src/components/ColorPicker.tsx.
+
+#### Item 10 migration record (2026-07-22)
+
+- Original global CSS: `.color-picker` and `.color-picker-trigger` supplied the picker container and trigger grid, sizing, typography, border, theme variables, hover/focus state, and `[data-open='true']` trigger state. `.color-picker-trigger-swatch`, `.color-picker-swatch`, `.color-picker-trigger-value`, `.color-picker-menu-value`, and `.color-picker-custom-value` supplied swatch sizing and monospace values. `.color-picker-native-input` and its focus state kept the native color input visually hidden while retaining keyboard focus feedback. `.color-picker-menu`, its `.light-theme` override, `.color-picker-menu-heading`, `.color-picker-saved-heading`, and `.color-picker-menu-value` supplied the portaled menu layout, theme, and headings. `.color-picker-speed-dial`, its `.light-theme` override, `.color-picker-speed-dial-ring`, `.color-picker-speed-dial-center`, `.color-picker-dial-button`, its hover/focus/pressed states, nested swatches, and SVG rules supplied the quick-color dial. The custom row, saved heading/list/item/button/remove rules, save button states, empty/feedback/hint text, and `.color-picker-compact` descendants supplied custom-color, persistence, feedback, and compact-mode behavior.
+- New module: `src/components/ColorPicker.module.css` contains the equivalent declarations under local names (`picker`, `trigger`, `triggerSwatch`, `swatch`, `triggerValue`, `nativeInput`, `menu`, `menuHeading`, `menuValue`, `speedDial`, `speedDialRing`, `speedDialCenter`, `dialButton`, `customRow`, `customLabel`, `customValue`, `savedHeading`, `savedList`, `savedItem`, `savedButton`, `removeButton`, `saveButton`, `empty`, `feedback`, `hint`, and `compact`). The two light-theme rules use narrow `:global(.light-theme)` ancestors. The `data-open` selector and all hover, focus-visible, pressed, disabled, nested swatch, and compact relationships are local to the module.
+- React refactor: `ColorPicker` imports the module and replaces every styling class with its local reference, including the conditional compact root class. The portaled menu composes its generated module class with the unstyled `color-picker-menu` DOM hook used by `CanvasWorkspace` for outside-click and Escape handling; no CanvasWorkspace selectors were migrated or changed.
+- Verification: targeted `ColorPicker.test.tsx` (5 tests), all 35 Jest suites (259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. The build retained the existing Vite large-chunk warning; no functional errors were reported.
 
 ### 11. Canvas workspace and overlays
 
-- [ ] Migrate .canvas-container, .canvas-wrap, .canvas-wrap.is-arrow-drawing, .canvas-wrap:active, .canvas-wrap canvas, .arrow-drawing-hint, .arrow-drawing-cancel, and .canvas-edit-hint.
-- [ ] Migrate .canvas-top-controls, grid-area relationships, presenter-mode overrides, .canvas-frame-header, and frame-header typography.
-- [ ] Migrate .playback-toast, .playback-toast-dismiss, light-theme variants, and playbackToastIn.
-- [ ] Preserve floating inspector placement and theme behavior.
+- [x] Migrate .canvas-container, .canvas-wrap, .canvas-wrap.is-arrow-drawing, .canvas-wrap:active, .canvas-wrap canvas, .arrow-drawing-hint, .arrow-drawing-cancel, and .canvas-edit-hint.
+- [x] Migrate .canvas-top-controls, grid-area relationships, presenter-mode overrides, .canvas-frame-header, and frame-header typography.
+- [x] Migrate .playback-toast, .playback-toast-dismiss, light-theme variants, and playbackToastIn.
+- [x] Preserve floating inspector placement and theme behavior.
 - Primary files: src/components/CanvasWorkspace.tsx, src/components/FrameHeader.tsx.
+
+#### Item 11 migration record (2026-07-22)
+
+- Original global CSS: `.canvas-container` supplied the flex canvas column, sizing, relative positioning, app background, and hidden overflow; its presenter-mode and print rules preserved the app background plus printable full-viewport sizing. `.canvas-wrap` supplied the flexible relative canvas viewport, canvas background, grab/active cursors, touch behavior, and the `canvas` sizing contract. `.arrow-drawing-hint`, `.arrow-drawing-cancel`, and `.canvas-edit-hint` supplied the drawing/edit overlays, light-theme colors, interaction states, and responsive edit-hint placement. `.canvas-top-controls` supplied the absolute two-row grid, pointer-event routing, control grid-area relationships, presenter-mode layout, and responsive mobile grid. `.canvas-frame-header` and its `h2`/`span` descendants supplied title typography, light-theme styling, and mobile placement. `.playback-toast`, `.playback-toast-dismiss`, their light-theme and focus/hover variants, and `playbackToastIn` supplied the playback warning overlay and entrance animation.
+- New modules: `src/components/CanvasWorkspace.module.css` contains the workspace, wrapper, canvas sizing, arrow/edit overlays, top-control grid, presenter/print/responsive overrides, playback toast, and `playbackToastIn`. `src/components/FrameHeader.module.css` contains the frame-header grid placement, typography, light-theme styling, and mobile placement. Narrow `:global(.light-theme)` and `:global(.presenter-mode)` ancestors preserve app-wide theme and presenter contracts. Narrow `:global(.canvas-settings-btn)`, `:global(.canvas-history-controls)`, and `:global(.wind-vane-container)` child selectors preserve pointer-event and mobile layout behavior while those controls remain owned by item 12.
+- React refactor: `CanvasWorkspace` imports its module and converts the canvas container, wrapper state, edit/drawing hints, top controls, playback toast, and dismiss button to local classes. `FrameHeader` imports its module and converts the frame header class. The canvas wrapper now exposes `data-canvas-wrap` for the video-export hook; `useScenarioExport` and its test use that stable runtime contract instead of a removed global CSS class. Floating inspector `Rnd` placement, presenter-mode hiding, print sizing, theme variants, and toast dismissal behavior are unchanged.
+- Verification: targeted `CanvasWorkspace`, `FrameHeader`, and `useScenarioExport` suites passed (3 suites, 17 tests); `npm run build`, `npm run lint`, and `git diff --check` passed. A repository search confirms the migrated canvas/workspace/overlay selectors no longer remain in `src/App.css`; global control selectors retained for item 12 and app-wide print/presenter foundation rules remain intentionally global.
 
 ### 12. Canvas controls
 
-- [ ] Migrate history controls: .canvas-history-controls, .canvas-history-btn, and .canvas-history-restore-btn.
-- [ ] Migrate zoom controls: .canvas-zoom-controls, .canvas-zoom-btn, .canvas-zoom-fit, .canvas-zoom-reset, and .canvas-zoom-level.
-- [ ] Migrate .canvas-settings-btn.
-- [ ] Migrate playback controls: .canvas-playback-controls, .canvas-playback-action-btn, .canvas-play-btn, and .canvas-playback-options-btn.
-- [ ] Migrate wind HUD selectors .wind-vane-container, .wind-vane-dial, .wind-vane-needle, .compass-n, .compass-s, .compass-e, .compass-w, .wind-vane-info, .wind-vane-speed, and .wind-vane-angle.
-- [ ] Preserve mobile sizing, grid areas, light-theme overrides, and pointer-event behavior.
+- [x] Migrate history controls: .canvas-history-controls, .canvas-history-btn, and .canvas-history-restore-btn.
+- [x] Migrate zoom controls: .canvas-zoom-controls, .canvas-zoom-btn, .canvas-zoom-fit, .canvas-zoom-reset, and .canvas-zoom-level.
+- [x] Migrate .canvas-settings-btn.
+- [x] Migrate playback controls: .canvas-playback-controls, .canvas-playback-action-btn, .canvas-play-btn, and .canvas-playback-options-btn.
+- [x] Migrate wind HUD selectors .wind-vane-container, .wind-vane-dial, .wind-vane-needle, .compass-n, .compass-s, .compass-e, .compass-w, .wind-vane-info, .wind-vane-speed, and .wind-vane-angle.
+- [x] Preserve mobile sizing, grid areas, light-theme overrides, and pointer-event behavior.
 - Primary files: src/components/CanvasHistoryControls.tsx, src/components/CanvasZoomControls.tsx, src/components/GridSettingsButton.tsx, src/components/PlaybackButton.tsx, src/components/WindHud.tsx.
+
+#### Item 12 migration record (2026-07-22)
+
+- Original global CSS: history layout/buttons and autosave states; zoom panel, zoom buttons, Fit/Reset actions, disabled states, and percentage label; the grid settings button; playback panel, play button, step/replay actions, playback options button, presenter-mode hiding, and light-theme variants; and the wind HUD container, dial, needle, compass labels, speed/angle readouts, light-theme shadow, print hiding, and mobile sizing. The `.canvas-top-controls` child pointer-event contract and the desktop/mobile grid-area placement were also component-owned behavior.
+- New modules: `src/components/CanvasHistoryControls.module.css`, `CanvasZoomControls.module.css`, `GridSettingsButton.module.css`, `PlaybackButton.module.css`, and `WindHud.module.css` contain the equivalent local rules. Narrow `:global(.canvas-top-controls)`, `:global(.presenter-mode)`, and `:global(.light-theme)` ancestors preserve the existing cross-component contracts; print rules now hide the local zoom and wind controls.
+- React refactor: all five components import their colocated module and use local class references for the migrated controls. `PlaybackButton` deliberately retains the global `play-pause-btn`, `playing`, and `timeline-control-icon` classes because those belong to Timeline item 13; the unused `canvas-playback-replay-btn` hook was removed without changing the button semantics.
+- Verification: targeted CanvasHistoryControls, GridSettingsButton, PlaybackButton, and WindHud tests (11 tests), all 35 Jest suites (259 tests), `npm run build`, `npm run lint`, `git diff --check`, and a search confirming the migrated selector names no longer remain in `src/App.css` or the migrated components/tests all passed. Mobile sizing, grid areas, light-theme overrides, pointer-event behavior, and print hiding are represented in the new modules.
 
 ### 13. Timeline and frame thumbnails
 
