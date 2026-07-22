@@ -391,13 +391,14 @@ function BoatInspector({
                   {!autoSailTrim && (
                     <div className="form-row">
                       <label htmlFor="boat-sail-angle">Sail Angle ({boat.sailAngle}°)</label>
-                      <input id="boat-sail-angle" type="range" min="-90" max="90" value={boat.sailAngle} onChange={(event) => updateBoat(boat.id, { sailAngle: Number(event.target.value) })} />
+                      <input id="boat-sail-angle" type="range" min="-100" max="100" value={boat.sailAngle} onChange={(event) => updateBoat(boat.id, { sailAngle: Number(event.target.value) })} />
                     </div>
                   )}
                 </>
               )}
               {boat.type === 'judge' && (
                 <p className="grid-hint">Judge boats are powered craft and keep their course while the timeline plays.</p>
+              )}
               )}
             </div>
           ),

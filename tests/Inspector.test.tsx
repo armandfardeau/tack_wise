@@ -799,7 +799,11 @@ describe('boat editor', () => {
     fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Bravo' } });
     fireEvent.change(screen.getByLabelText('Color'), { target: { value: '#ffffff' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /auto sail trim/i }));
-    fireEvent.change(screen.getByLabelText(/sail angle \(0°\)/i), { target: { value: '30' } });
+    const sailAngle = screen.getByLabelText(/sail angle \(0°\)/i);
+    expect(sailAngle).toHaveAttribute('min', '-100');
+    expect(sailAngle).toHaveAttribute('max', '100');
+    fireEvent.change(sailAngle, { target: { value: '100' } });
+    fireEvent.change(sailAngle, { target: { value: '-100' } });
     fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     fireEvent.click(screen.getByRole('checkbox', { name: /show dotted path line/i }));
     fireEvent.click(screen.getByRole('button', { name: /delete boat/i }));
@@ -807,8 +811,9 @@ describe('boat editor', () => {
     expect(updateBoat).toHaveBeenNthCalledWith(1, 'boat-1', { name: 'Bravo' });
     expect(updateBoat).toHaveBeenNthCalledWith(2, 'boat-1', { color: '#ffffff' });
     expect(onSetAutoSailTrim).toHaveBeenCalledWith(true);
-    expect(updateBoat).toHaveBeenNthCalledWith(3, 'boat-1', { sailAngle: 30 });
-    expect(updateBoat).toHaveBeenNthCalledWith(4, 'boat-1', { showHeadingLine: true });
+    expect(updateBoat).toHaveBeenNthCalledWith(3, 'boat-1', { sailAngle: 100 });
+    expect(updateBoat).toHaveBeenNthCalledWith(4, 'boat-1', { sailAngle: -100 });
+    expect(updateBoat).toHaveBeenNthCalledWith(5, 'boat-1', { showHeadingLine: true });
     expect(onDelete).toHaveBeenCalledTimes(1);
   });
 });
