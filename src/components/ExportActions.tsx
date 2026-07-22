@@ -4,6 +4,7 @@ import type { SituationTemplate } from '../data/situationTemplates';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
 import { DEFAULT_EXPORT_QUALITY } from '../utils/exportSettings';
 import ExportDialog from './ExportDialog';
+import styles from './ExportActions.module.css';
 
 interface ExportActionsProps {
   className?: string;
@@ -113,12 +114,12 @@ export default function ExportActions({
   };
 
   return (
-    <div className={className}>
-      <div ref={fileMenuRef} className="file-dropdown">
+    <div className={[styles.exportActions, className].filter(Boolean).join(' ')}>
+      <div ref={fileMenuRef} className={styles.fileDropdown}>
         <button
           ref={fileMenuTriggerRef}
           type="button"
-          className="action-btn file-menu-trigger"
+          className={`${styles.actionButton} ${styles.fileMenuTrigger}`}
           aria-expanded={isFileMenuOpen}
           aria-haspopup="menu"
           aria-label="File options"
@@ -131,19 +132,19 @@ export default function ExportActions({
           }}
           disabled={isExporting}
         >
-          <span className="action-icon" aria-hidden="true"><FileIcon size={16} /></span>
+          <span className={styles.actionIcon} aria-hidden="true"><FileIcon size={16} /></span>
           <span className="action-label">File</span>
-          <span className="file-menu-chevron" aria-hidden="true"><ChevronDown size={14} /></span>
+          <span className={styles.fileMenuChevron} aria-hidden="true"><ChevronDown size={14} /></span>
         </button>
-        {isFileMenuOpen && <div className="file-dropdown-menu" role="menu" aria-label="File options">
-          {onNewScenario && <button type="button" className="action-btn file-menu-item new-scenario-btn" role="menuitem" title="Create a new diagram" onClick={() => closeAfterExport(onNewScenario)}>
-            <span className="action-icon" aria-hidden="true"><FilePlus size={16} /></span>
+        {isFileMenuOpen && <div className={styles.fileDropdownMenu} role="menu" aria-label="File options">
+          {onNewScenario && <button type="button" className={`${styles.actionButton} ${styles.fileMenuItem}`} role="menuitem" title="Create a new diagram" onClick={() => closeAfterExport(onNewScenario)}>
+            <span className={styles.actionIcon} aria-hidden="true"><FilePlus size={16} /></span>
             <span className="action-label">New diagram</span>
           </button>}
-          {templates.length > 0 && <div className="file-submenu">
+          {templates.length > 0 && <div className={styles.fileSubmenu}>
             <button
               type="button"
-              className="action-btn file-submenu-trigger"
+              className={`${styles.actionButton} ${styles.fileSubmenuTrigger}`}
               role="menuitem"
               aria-expanded={openSubmenu === 'templates'}
               aria-haspopup="menu"
@@ -152,51 +153,51 @@ export default function ExportActions({
                 if (openSubmenu === 'templates') setTemplateSearch('');
               }}
             >
-              <span className="action-icon" aria-hidden="true"><LayoutTemplate size={16} /></span>
+              <span className={styles.actionIcon} aria-hidden="true"><LayoutTemplate size={16} /></span>
               <span className="action-label">Templates</span>
-              <span className="file-submenu-chevron" aria-hidden="true"><ChevronRight size={14} /></span>
+              <span className={styles.fileSubmenuChevron} aria-hidden="true"><ChevronRight size={14} /></span>
             </button>
             {openSubmenu === 'templates' && <>
-              <button type="button" className="template-sheet-backdrop" aria-label="Dismiss template sheet" onClick={closeTemplateSubmenu} />
-              <div className="file-submenu-menu" role="menu" aria-label="Templates">
-                <div className="template-sheet-header">
-                  <span className="template-sheet-title">Templates</span>
-                  <button type="button" className="template-sheet-close" aria-label="Close templates sheet" onClick={closeTemplateSubmenu}>
+              <button type="button" className={styles.templateSheetBackdrop} aria-label="Dismiss template sheet" onClick={closeTemplateSubmenu} />
+              <div className={styles.fileSubmenuMenu} role="menu" aria-label="Templates">
+                <div className={styles.templateSheetHeader}>
+                  <span className={styles.templateSheetTitle}>Templates</span>
+                  <button type="button" className={styles.templateSheetClose} aria-label="Close templates sheet" onClick={closeTemplateSubmenu}>
                     <X aria-hidden="true" size={18} />
                   </button>
                 </div>
-                {onContributeTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title="Submit the current diagram as a template" onClick={() => {
+                {onContributeTemplate && <button type="button" className={`${styles.actionButton} ${styles.fileMenuItem} ${styles.templateContributeButton}`} role="menuitem" title="Submit the current diagram as a template" onClick={() => {
                   onContributeTemplate(fileMenuTriggerRef.current);
                   closeFileMenu();
                 }}>
-                  <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
+                  <span className={styles.actionIcon} aria-hidden="true"><GitPullRequest size={16} /></span>
                   <span className="action-label">Submit current diagram</span>
                 </button>}
-                {onUpdateTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title={canUpdateTemplate ? 'Update the loaded template through a pull request' : 'Load a built-in template to update it through a pull request'} disabled={!canUpdateTemplate} onClick={() => {
+                {onUpdateTemplate && <button type="button" className={`${styles.actionButton} ${styles.fileMenuItem} ${styles.templateContributeButton}`} role="menuitem" title={canUpdateTemplate ? 'Update the loaded template through a pull request' : 'Load a built-in template to update it through a pull request'} disabled={!canUpdateTemplate} onClick={() => {
                   onUpdateTemplate(fileMenuTriggerRef.current);
                   closeFileMenu();
                 }}>
-                  <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
+                  <span className={styles.actionIcon} aria-hidden="true"><GitPullRequest size={16} /></span>
                   <span className="action-label">Update current template</span>
                 </button>}
-                {(onContributeTemplate || onUpdateTemplate) && <div className="template-menu-divider" role="separator" />}
-                <div className="template-search">
+                {(onContributeTemplate || onUpdateTemplate) && <div className={styles.templateMenuDivider} role="separator" />}
+                <div className={styles.templateSearch}>
                   <Search aria-hidden="true" size={15} />
                   <input
                     type="search"
-                    className="template-search-input"
+                    className={styles.templateSearchInput}
                     aria-label="Search templates"
                     placeholder="Search templates"
                     value={templateSearch}
                     onChange={(event) => setTemplateSearch(event.target.value)}
                   />
                 </div>
-                <div className="template-list">
+                <div className={styles.templateList}>
                   {filteredTemplates.map((template) => (
                     <button
                       key={template.id}
                       type="button"
-                      className="action-btn file-menu-item template-btn"
+                      className={`${styles.actionButton} ${styles.fileMenuItem}`}
                       role="menuitem"
                       title={`Load ${template.title}`}
                       onClick={() => {
@@ -204,22 +205,22 @@ export default function ExportActions({
                         closeFileMenu();
                       }}
                     >
-                      <span className="action-icon" aria-hidden="true"><LayoutTemplate size={16} /></span>
+                      <span className={styles.actionIcon} aria-hidden="true"><LayoutTemplate size={16} /></span>
                       <span className="action-label">{template.title}</span>
                     </button>
                   ))}
-                  {filteredTemplates.length === 0 && <div className="template-search-empty" role="status">No templates found</div>}
+                  {filteredTemplates.length === 0 && <div className={styles.templateSearchEmpty} role="status">No templates found</div>}
                 </div>
               </div>
             </>}
           </div>}
-          <button type="button" className="action-btn file-menu-item import-btn" role="menuitem" title="Import JSON" onClick={handleImportClick}>
-            <span className="action-icon" aria-hidden="true"><FolderOpen size={16} /></span>
+          <button type="button" className={`${styles.actionButton} ${styles.fileMenuItem}`} role="menuitem" title="Import JSON" onClick={handleImportClick}>
+            <span className={styles.actionIcon} aria-hidden="true"><FolderOpen size={16} /></span>
             <span className="action-label">Import JSON</span>
           </button>
-          <div className="file-submenu">
-            <button type="button" className="action-btn file-submenu-trigger" role="menuitem" onClick={openExportDialog}>
-              <span className="action-icon" aria-hidden="true"><Upload size={16} /></span>
+          <div className={styles.fileSubmenu}>
+            <button type="button" className={`${styles.actionButton} ${styles.fileSubmenuTrigger}`} role="menuitem" onClick={openExportDialog}>
+              <span className={styles.actionIcon} aria-hidden="true"><Upload size={16} /></span>
               <span className="action-label">Export</span>
             </button>
           </div>

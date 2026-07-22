@@ -67,9 +67,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 3. Export and file menus
 
-- [ ] Migrate .export-actions, .action-btn, .action-icon, .file-dropdown, .file-menu-trigger, .file-menu-chevron, .file-dropdown-menu, .file-submenu, .file-submenu-menu, .file-submenu-trigger, .file-submenu-chevron, .file-menu-item, and interaction states.
-- [ ] Migrate .template-search, .template-search-input, .template-search-empty, .template-list, .template-sheet-backdrop, .template-sheet-header, .template-sheet-title, .template-sheet-close, .template-menu-divider, .template-contribute-btn, and mobile template-sheet rules.
+- [x] Migrate .export-actions, the ExportActions usage of .action-btn and .action-icon, .file-dropdown, .file-menu-trigger, .file-menu-chevron, .file-dropdown-menu, .file-submenu, .file-submenu-menu, .file-submenu-trigger, .file-submenu-chevron, .file-menu-item, and interaction states.
+- [x] Migrate .template-search, .template-search-input, .template-search-empty, .template-list, .template-sheet-backdrop, .template-sheet-header, .template-sheet-title, .template-sheet-close, .template-menu-divider, .template-contribute-btn, and mobile template-sheet rules.
 - Primary file: src/components/ExportActions.tsx.
+
+#### Item 3 migration record (2026-07-22)
+
+- Original global CSS: `.export-actions` supplied the flex row and 12px gap; `.action-btn` supplied the 0.85rem/8px 16px button base, border, card background, text color, transition, weight, min-height, and hover lift/accent state; `.action-icon` supplied inline-flex icon alignment. File rules covered `.file-dropdown`, `.file-menu-trigger`, `.file-menu-chevron`, `.file-dropdown-menu`, `.file-submenu`, `.file-submenu-menu`, `.file-submenu-trigger`, `.file-submenu-chevron`, and `.file-menu-item`, including menu positioning, layering, spacing, hover transform suppression, and responsive mobile sheet placement. Template rules covered the search field/focus outline, empty state, list layout, hidden desktop sheet header, divider, disabled contribution action, mobile backdrop/theme overlay, sheet header/title/close control, and scrollable list.
+- New module: `src/components/ExportActions.module.css` contains the equivalent declarations under local names (`exportActions`, `actionButton`, `actionIcon`, `fileDropdown`, `fileMenuTrigger`, `fileMenuChevron`, `fileDropdownMenu`, `fileSubmenu`, `fileSubmenuMenu`, `fileSubmenuTrigger`, `fileSubmenuChevron`, `fileMenuItem`, `templateSearch`, `templateSearchInput`, `templateSearchEmpty`, `templateList`, `templateSheetBackdrop`, `templateSheetHeader`, `templateSheetTitle`, `templateSheetClose`, `templateMenuDivider`, and `templateContributeButton`). The narrow `:global(.header-export-actions)` modifier preserves compact header sizing, and `:global(.light-theme)` preserves the mobile backdrop color. The global `.action-btn` and `.action-icon` contract remains only for `ViewActions` until item 4; ExportActions no longer depends on it.
+- React refactor: `ExportActions` imports the module, composes its local root class with the existing `className` prop, and converts every file/template state, menu, icon, focus, disabled, and responsive class reference. `AppHeader` now passes only its header modifier because the root export styling is local. The template-list test uses the rendered element relationship instead of a global selector.
+- Verification: `npm run build`, `npm run lint`, all 35 Jest suites (259 tests), targeted export/header/view tests (38 tests), and browser checks at desktop plus 390×844 mobile passed. The mobile check confirmed the File menu, Templates bottom sheet, backdrop, close control, search field, contribution disabled state, and template list. The temporary browser viewport was reset after verification. Vite emitted existing Konva z-index console warnings during the browser check; they are unrelated to this migration.
 
 ### 4. View actions
 
@@ -245,5 +252,5 @@ The migration is complete only when:
 
 - Audit: complete.
 - Memory document: created.
-- Component migrations: items 1 and 2 complete; item 3 is next.
-- Next action: process item 3 only after confirmation.
+- Component migrations: items 1, 2, and 3 complete; item 4 is next.
+- Next action: process item 4 only after confirmation.

@@ -1,0 +1,265 @@
+.exportActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.actionButton {
+  min-height: 38px;
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.actionButton:hover:not(:disabled) {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.1);
+  transform: translateY(-1px);
+}
+
+.fileDropdown {
+  position: relative;
+}
+
+.fileMenuTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.fileMenuChevron,
+.fileSubmenuChevron {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.actionIcon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.fileDropdownMenu,
+.fileSubmenuMenu {
+  display: flex;
+  min-width: 190px;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-sidebar);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+.fileDropdownMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+}
+
+.fileSubmenu {
+  position: relative;
+}
+
+.templateSheetBackdrop {
+  display: none;
+}
+
+.fileSubmenuMenu {
+  position: absolute;
+  top: -7px;
+  right: calc(100% + 4px);
+  z-index: 31;
+}
+
+.fileSubmenuTrigger,
+.fileMenuItem {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  text-align: left;
+  transform: none;
+}
+
+.fileSubmenuTrigger {
+  justify-content: flex-start;
+}
+
+.fileSubmenuChevron {
+  margin-left: auto;
+}
+
+.fileSubmenuTrigger:hover:not(:disabled),
+.fileMenuItem:hover:not(:disabled) {
+  transform: none;
+}
+
+.templateSearch {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 6px 8px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+.templateSearchInput {
+  min-width: 0;
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 0.78rem;
+}
+
+.templateSearchInput:focus {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 1px;
+}
+
+.templateSearchEmpty {
+  padding: 10px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.templateList {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.templateSheetHeader {
+  display: none;
+}
+
+.templateMenuDivider {
+  height: 1px;
+  margin: 3px 4px;
+  background: var(--border-color);
+}
+
+.templateContributeButton:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+@media (max-width: 768px) {
+  :global(.header-export-actions) .actionButton {
+    min-height: 32px;
+    padding: 5px 8px;
+    font-size: 0.74rem;
+  }
+
+  .actionButton {
+    flex: 1;
+  }
+
+  .fileDropdownMenu {
+    right: auto;
+    left: 0;
+  }
+
+  .fileSubmenuMenu {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 41;
+    width: 100%;
+    min-width: 0;
+    height: min(82dvh, 620px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px));
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -14px 36px rgba(0, 0, 0, 0.42);
+    gap: 8px;
+  }
+
+  .templateSheetBackdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    background: rgba(9, 13, 22, 0.62);
+    cursor: pointer;
+  }
+
+  :global(.light-theme) .templateSheetBackdrop {
+    background: rgba(20, 35, 38, 0.42);
+  }
+
+  .templateSheetHeader {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px 2px;
+  }
+
+  .templateSheetTitle {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .templateSheetClose {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .templateSheetClose:hover,
+  .templateSheetClose:focus-visible {
+    border-color: var(--accent-cyan);
+    color: var(--text-main);
+  }
+
+  .templateSearch {
+    flex: 0 0 auto;
+  }
+
+  .templateList {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 2px 0;
+  }
+}
