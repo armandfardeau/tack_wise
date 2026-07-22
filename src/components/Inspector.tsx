@@ -68,6 +68,7 @@ interface InspectorProps {
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
   updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
+  updateMarkRoomZone?: (markId: string, changes: Partial<Pick<Mark, 'showZone' | 'zoneRadius'>>) => void;
   onConnectMarks?: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: { x: number; y: number }; end?: { x: number; y: number } }) => void;
   onRemoveMarkConnection?: (connectionId: string) => void;
   onReplaceMarkConnection?: (connectionId: string, nextTargetMarkId: string) => void;
@@ -109,6 +110,7 @@ export default function Inspector({
   updateBoat,
   updateActiveFrame,
   updateMark,
+  updateMarkRoomZone,
   onConnectMarks,
   onRemoveMarkConnection,
   onReplaceMarkConnection,
@@ -211,6 +213,7 @@ export default function Inspector({
           activeFrame={activeFrame}
           mark={selectedMark}
           updateMark={updateMark}
+          updateMarkRoomZone={updateMarkRoomZone}
           onConnectMarks={onConnectMarks}
           onRemoveMarkConnection={onRemoveMarkConnection}
           onReplaceMarkConnection={onReplaceMarkConnection}
@@ -595,12 +598,13 @@ interface MarkInspectorProps {
   activeFrame: Frame;
   mark: Mark;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
+  updateMarkRoomZone?: (markId: string, changes: Partial<Pick<Mark, 'showZone' | 'zoneRadius'>>) => void;
   onConnectMarks?: (sourceMarkId: string, targetMarkId: string, anchors?: { start?: { x: number; y: number }; end?: { x: number; y: number } }) => void;
   onRemoveMarkConnection?: (connectionId: string) => void;
   onReplaceMarkConnection?: (connectionId: string, nextTargetMarkId: string) => void;
 }
 
-function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemoveMarkConnection, onReplaceMarkConnection }: MarkInspectorProps) {
+function MarkInspector({ activeFrame, mark, updateMark, updateMarkRoomZone, onConnectMarks, onRemoveMarkConnection, onReplaceMarkConnection }: MarkInspectorProps) {
   const otherMarks = activeFrame.marks.filter((candidate) => candidate.id !== mark.id);
   const rotationDirection = mark.rotationDirection ?? 'counterclockwise';
   const connections = (activeFrame.connections ?? []).filter((connection) => connection.start.markId === mark.id);
@@ -608,6 +612,9 @@ function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemove
   const [editingConnectionId, setEditingConnectionId] = useState<string | null>(null);
   const [isAddingConnection, setIsAddingConnection] = useState(false);
   const availableTargets = otherMarks.filter((candidate) => !connectedTargetIds.includes(candidate.id));
+  const updateRoomZone = (changes: Partial<Pick<Mark, 'showZone' | 'zoneRadius'>>) => {
+    (updateMarkRoomZone ?? updateMark)(mark.id, changes);
+  };
 
   const addConnection = (targetMarkId: string) => {
     onConnectMarks?.(mark.id, targetMarkId);
@@ -684,7 +691,7 @@ function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemove
                   <input
                     type="checkbox"
                     checked={!!mark.showZone}
-                    onChange={(event) => updateMark(mark.id, { showZone: event.target.checked })}
+                    onChange={(event) => updateRoomZone({ showZone: event.target.checked })}
                   />
                   <span>Show Mark-Room Zone</span>
                 </label>
@@ -699,7 +706,7 @@ function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemove
                     max="8"
                     step="0.5"
                     value={mark.zoneRadius ?? DEFAULT_MARK_ZONE_RADIUS}
-                    onChange={(event) => updateMark(mark.id, { zoneRadius: Number(event.target.value) })}
+                    onChange={(event) => updateRoomZone({ zoneRadius: Number(event.target.value) })}
                   />
                   <p className="grid-hint">Default: three boat lengths.</p>
                 </div>

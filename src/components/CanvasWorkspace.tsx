@@ -101,6 +101,7 @@ interface CanvasWorkspaceProps {
   updateBoat: (boatId: string, changes: Partial<Boat>) => void;
   updateActiveFrame: (changes: Partial<Frame>) => void;
   updateMark: (markId: string, changes: Partial<Mark>) => void;
+  updateMarkRoomZone?: (markId: string, changes: Partial<Pick<Mark, 'showZone' | 'zoneRadius'>>) => void;
   updateConnection?: (connectionId: string, changes: Partial<MarkConnection>) => void;
   updateArrow?: (arrowId: string, changes: Partial<TacticalArrow>) => void;
   updateComment?: (commentId: string, changes: Partial<CommentNote>) => void;
@@ -354,6 +355,7 @@ export default function CanvasWorkspace({
   updateBoat,
   updateActiveFrame,
   updateMark,
+  updateMarkRoomZone,
   updateConnection = () => undefined,
   updateArrow,
   updateComment,
@@ -812,6 +814,7 @@ export default function CanvasWorkspace({
               updateBoat={updateBoat}
               updateActiveFrame={updateActiveFrame}
               updateMark={updateMark}
+              updateMarkRoomZone={updateMarkRoomZone}
               updateConnection={updateConnection}
               onConnectMarks={onConnectMarks}
               onRemoveMarkConnection={onRemoveMarkConnection}

@@ -395,6 +395,31 @@ describe('useScenario', () => {
     expect(result.current.activeFrame.images?.[0]).toMatchObject({ x: 160, y: 170, rotation: 45 });
   });
 
+  it('persists a mark-room zone across frames containing the mark', () => {
+    const { result } = renderHook(() => useScenario());
+    const mark = { id: 'mark-a', name: 'A', color: '#fff', x: 30, y: 40, shape: 'circle' as const };
+    const frame = {
+      id: 'zone-frame-1',
+      name: 'Approach',
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [],
+      marks: [mark],
+    };
+
+    act(() => result.current.importScenario({
+      version: 1,
+      currentFrameIndex: 1,
+      frames: [frame, { ...frame, id: 'zone-frame-2', marks: [{ ...mark, x: 80, y: 90 }] }],
+    }));
+    act(() => result.current.updateMarkRoomZone('mark-a', { showZone: true, zoneRadius: 4.5 }));
+
+    expect(result.current.frames).toEqual([
+      expect.objectContaining({ marks: [expect.objectContaining({ id: 'mark-a', showZone: true, zoneRadius: 4.5 })] }),
+      expect.objectContaining({ marks: [expect.objectContaining({ id: 'mark-a', showZone: true, zoneRadius: 4.5 })] }),
+    ]);
+  });
+
   it('adds, replaces, removes, and undoes multiple mark connections', () => {
     const { result } = renderHook(() => useScenario());
     const baseFrame = {
