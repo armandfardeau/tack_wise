@@ -63,4 +63,30 @@ describe('ColorPicker', () => {
     expect(screen.queryByRole('dialog', { name: 'Color picker' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Open color picker' })).toHaveAttribute('aria-expanded', 'false');
   });
+
+  it('merges presets saved by other mounted pickers', () => {
+    function MountedPickers() {
+      const [firstColor, setFirstColor] = useState('#38bdf8');
+      const [secondColor, setSecondColor] = useState('#38bdf8');
+
+      return (
+        <>
+          <ColorPicker label="First color" value={firstColor} onChange={setFirstColor} />
+          <ColorPicker label="Second color" value={secondColor} onChange={setSecondColor} />
+        </>
+      );
+    }
+
+    render(<MountedPickers />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open first color picker' }));
+    fireEvent.change(screen.getByLabelText('First color'), { target: { value: '#123456' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save current color' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open second color picker' }));
+    fireEvent.change(screen.getByLabelText('Second color'), { target: { value: '#654321' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save current color' }));
+
+    expect(JSON.parse(window.localStorage.getItem('tack-wise-color-presets') ?? '[]')).toEqual(['#654321', '#123456']);
+  });
 });

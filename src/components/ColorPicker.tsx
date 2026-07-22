@@ -3,6 +3,7 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { Check, Palette, Plus, Trash2 } from 'lucide-react';
 
 const COLOR_PRESETS_STORAGE_KEY = 'tack-wise-color-presets';
+const COLOR_PRESETS_UPDATED_EVENT = 'tack-wise-color-presets-updated';
 const MAX_SAVED_PRESETS = 12;
 
 const QUICK_COLOR_PRESETS = [
@@ -56,6 +57,7 @@ function readSavedPresets() {
 function persistSavedPresets(presets: string[]) {
   try {
     window.localStorage.setItem(COLOR_PRESETS_STORAGE_KEY, JSON.stringify(presets));
+    window.dispatchEvent(new Event(COLOR_PRESETS_UPDATED_EVENT));
   } catch {
     // Storage may be unavailable in private browsing or restricted embeds.
   }
@@ -131,6 +133,17 @@ export default function ColorPicker({
     };
   }, [dismissColorMenu, isOpen]);
 
+  useEffect(() => {
+    const syncSavedPresets = () => setSavedPresets(readSavedPresets());
+
+    window.addEventListener(COLOR_PRESETS_UPDATED_EVENT, syncSavedPresets);
+    window.addEventListener('storage', syncSavedPresets);
+    return () => {
+      window.removeEventListener(COLOR_PRESETS_UPDATED_EVENT, syncSavedPresets);
+      window.removeEventListener('storage', syncSavedPresets);
+    };
+  }, []);
+
   useLayoutEffect(() => {
     if (!isOpen) {
       setMenuPosition(null);
@@ -176,19 +189,27 @@ export default function ColorPicker({
   };
 
   const saveCurrentColor = () => {
-    if (isSaved || isQuickPreset) {
+    const latestSavedPresets = readSavedPresets();
+    setSavedPresets(latestSavedPresets);
+
+    if (latestSavedPresets.includes(currentColor) || isQuickPreset) {
       setSaveFeedback('This color is already a preset.');
       return;
     }
 
-    const nextPresets = [currentColor, ...savedPresets].slice(0, MAX_SAVED_PRESETS);
+    if (latestSavedPresets.length >= MAX_SAVED_PRESETS) {
+      setSaveFeedback('Preset limit reached.');
+      return;
+    }
+
+    const nextPresets = [currentColor, ...latestSavedPresets];
     setSavedPresets(nextPresets);
     persistSavedPresets(nextPresets);
     setSaveFeedback('Color saved as a preset.');
   };
 
   const removeSavedColor = (color: string) => {
-    const nextPresets = savedPresets.filter((preset) => preset !== color);
+    const nextPresets = readSavedPresets().filter((preset) => preset !== color);
     setSavedPresets(nextPresets);
     persistSavedPresets(nextPresets);
     setSaveFeedback('');
