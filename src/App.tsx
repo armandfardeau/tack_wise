@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
+import posthog from 'posthog-js';
 import './App.css';
 import AppHeader from './components/AppHeader';
 import AboutPage from './components/AboutPage';
@@ -160,6 +161,7 @@ export default function App() {
   };
 
   const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
+    posthog.capture('template_loaded', { template_id: template.id, template_title: template.title });
     loadScenarioAndFit(scenarioPayloadFromTemplate(template), template.id);
   };
 
@@ -171,6 +173,7 @@ export default function App() {
       settings: scenario.settings,
     });
 
+    posthog.capture('scenario_shared');
     try {
       await navigator.clipboard.writeText(shareUrl);
       window.alert('Share link copied to clipboard.');
@@ -230,6 +233,7 @@ export default function App() {
   }
 
   const resetToNewScenario = () => {
+    posthog.capture('new_scenario_created');
     scenario.createNewScenario();
     setLoadedTemplateId(null);
     setIsNewScenarioDialogOpen(false);
@@ -251,6 +255,12 @@ export default function App() {
   };
 
   const handleExport = (options: ExportOptions) => {
+    const exportProps: Record<string, unknown> = { format: options.format, theme: options.theme, auto_fit: options.autoFit };
+    if (isStillImageFormat(options.format) || options.format === 'gif' || options.format === 'webm' || options.format === 'mp4') {
+      exportProps.fps = options.fps;
+    }
+    posthog.capture('scenario_exported', exportProps);
+
     if (options.format === 'json') {
       exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex);
       return;
@@ -286,6 +296,7 @@ export default function App() {
   const handleImportJson = async (file: File) => {
     try {
       const payload = parseScenarioFromJson(await file.text());
+      posthog.capture('scenario_imported');
       loadScenarioAndFit(payload);
     } catch (error) {
       console.error('Import error: ', error);
@@ -307,18 +318,26 @@ export default function App() {
         onLoadTemplate={handleLoadTemplate}
         onContributeTemplate={(returnFocusTarget) => {
           modalReturnFocusRef.current = returnFocusTarget;
+          posthog.capture('template_contribution_opened', { mode: 'create' });
           setTemplateContributionMode('create');
         }}
         onUpdateTemplate={(returnFocusTarget) => {
           modalReturnFocusRef.current = returnFocusTarget;
-          if (loadedTemplate) setTemplateContributionMode('update');
+          if (loadedTemplate) {
+            posthog.capture('template_contribution_opened', { mode: 'update' });
+            setTemplateContributionMode('update');
+          }
         }}
         canUpdateTemplate={Boolean(loadedTemplate)}
         templates={situationTemplates}
         exportQuality={exportQuality}
         onExportQualityChange={setExportQuality}
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
-        onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
+        onTogglePresenter={() => {
+          const nextPresenterMode = !scenario.settings.presenterMode;
+          posthog.capture('presenter_mode_toggled', { presenter_mode: nextPresenterMode });
+          scenario.updateSettings({ presenterMode: nextPresenterMode });
+        }}
         theme={theme}
         sponsorship={sponsorshipLinks}
       />

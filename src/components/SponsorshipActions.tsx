@@ -1,5 +1,6 @@
 import { ChevronDown, CreditCard, GitFork, Heart } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import posthog from 'posthog-js';
 import StripeDonationForm from './StripeDonationForm';
 import headerStyles from './AppHeader.module.css';
 import styles from './SponsorshipActions.module.css';
@@ -17,7 +18,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
   return (
     <>
       {stripeUrl && (
-        <a className={styles.sponsorshipMenuItem} role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer" onClick={() => posthog.capture('support_link_clicked', { destination: 'stripe' })}>
           <CreditCard aria-hidden="true" size={16} />
           <span>
             <strong>Support with Stripe</strong>
@@ -29,7 +30,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
         <StripeDonationForm />
       )}
       {githubUrl && (
-        <a className={styles.sponsorshipMenuItem} role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={githubUrl} target="_blank" rel="noreferrer" onClick={() => posthog.capture('support_link_clicked', { destination: 'github' })}>
           <GitFork aria-hidden="true" size={16} />
           <span>
             <strong>Sponsor on GitHub</strong>
@@ -38,7 +39,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
         </a>
       )}
       {donationUrl && (
-        <a className={styles.sponsorshipMenuItem} role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={donationUrl} target="_blank" rel="noreferrer" onClick={() => posthog.capture('support_link_clicked', { destination: 'donation_url' })}>
           <Heart aria-hidden="true" size={16} />
           <span>
             <strong>Donate to open source</strong>

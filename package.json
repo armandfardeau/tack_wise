@@ -20,6 +20,7 @@
     "gifshot": "^0.4.5",
     "konva": "^10.3.0",
     "lucide-react": "^1.25.0",
+    "posthog-js": "^1.407.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-konva": "^19.2.5",
