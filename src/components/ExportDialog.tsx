@@ -147,6 +147,7 @@ export default function ExportDialog({
                 </select>
                 <small>Higher quality uses more processing and memory.</small>
               </label>
+              <p className="export-dialog-preparation-note">Animated exports load their encoder when started. The first export may take a moment to prepare.</p>
             </>
           )}
         </div>

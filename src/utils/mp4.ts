@@ -24,6 +24,10 @@ async function getFFmpeg() {
   return ffmpegPromise;
 }
 
+export async function prepareVideoEncoder() {
+  await getFFmpeg();
+}
+
 export async function convertWebmToMp4(webmBlob: Blob, onProgress?: ProgressHandler): Promise<Blob> {
   const [{ fetchFile }, ffmpeg] = await Promise.all([import('@ffmpeg/util'), getFFmpeg()]);
   const progressHandler = ({ progress }: { progress: number }) => {

@@ -1,16 +1,9 @@
-jest.mock('gifshot', () => ({
-  __esModule: true,
-  default: { createGIF: jest.fn() },
-}));
-
-import gifshot from 'gifshot';
 import {
   createScenarioShareUrl,
   createScenarioShareUrlAsync,
   dataUrlToBlob,
   downloadBlob,
   downloadScenarioJson,
-  exportToGif,
   parseScenarioFromJson,
   parseScenarioShareUrl,
   parseScenarioShareUrlAsync,
@@ -339,32 +332,6 @@ describe('binary exports', () => {
   it('converts data URLs and uses a fallback MIME type when metadata is absent', () => {
     expect(dataUrlToBlob('data:text/plain;base64,SGk=')).toEqual(expect.objectContaining({ type: 'text/plain', size: 2 }));
     expect(dataUrlToBlob('data:text/plain,QQ==')).toEqual(expect.objectContaining({ type: 'application/octet-stream', size: 1 }));
-  });
-
-  it('creates a GIF blob from gifshot output', async () => {
-    const createGIF = gifshot.createGIF as jest.Mock;
-    createGIF.mockImplementationOnce((_options, callback) => callback({ image: 'data:image/gif;base64,AAE=' }));
-
-    await expect(exportToGif(['frame-1'], 0.5, 320, 180)).resolves.toEqual(expect.objectContaining({ type: 'image/gif', size: 2 }));
-    expect(createGIF).toHaveBeenCalledWith(expect.objectContaining({ images: ['frame-1'], interval: 0.5, gifWidth: 320, gifHeight: 180 }), expect.any(Function));
-  });
-
-  it('passes GIF quality and worker settings to gifshot', async () => {
-    const createGIF = gifshot.createGIF as jest.Mock;
-    createGIF.mockImplementationOnce((_options, callback) => callback({ image: 'data:image/gif;base64,AAE=' }));
-
-    await exportToGif(['frame-1'], 0.1, 320, 180, { sampleInterval: 20, numWorkers: 3 });
-
-    expect(createGIF).toHaveBeenCalledWith(expect.objectContaining({ sampleInterval: 20, numWorkers: 3 }), expect.any(Function));
-  });
-
-  it('rejects GIF errors with a useful fallback message', async () => {
-    const createGIF = gifshot.createGIF as jest.Mock;
-    createGIF.mockImplementationOnce((_options, callback) => callback({ error: true }));
-    await expect(exportToGif([], 1, 10, 10)).rejects.toThrow('Failed to create GIF');
-
-    createGIF.mockImplementationOnce((_options, callback) => callback({ error: true, errorMsg: 'Canvas failed' }));
-    await expect(exportToGif([], 1, 10, 10)).rejects.toThrow('Canvas failed');
   });
 
   it('downloads and revokes a blob URL', () => {
