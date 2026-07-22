@@ -41,3 +41,30 @@ describe('Boat speech bubble', () => {
     expect(screen.getAllByTestId('konva-text')).toHaveLength(1);
   });
 });
+
+describe('Boat sail rendering', () => {
+  it('renders a filled, closed mainsail with trim detail', () => {
+    render(<Boat boat={{ ...boat, sailAngle: 35 }} isSelected={false} readOnly />);
+
+    const sail = screen.getAllByTestId('konva-path').find((path) => (
+      path.getAttribute('fill') === boat.color
+      && path.getAttribute('data')?.startsWith('M 0 -52')
+    ));
+
+    expect(sail).toBeInTheDocument();
+    expect(sail).toHaveAttribute('opacity', '0.28');
+    expect(screen.getAllByTestId('konva-path').filter((path) => path.getAttribute('data')?.startsWith('M 0')).length).toBeGreaterThanOrEqual(4);
+  });
+
+  it('uses the improved sail silhouette for cumulative-frame shadows', () => {
+    render(<Boat boat={{ ...boat, sailAngle: -35 }} isSelected={false} isShadow />);
+
+    const sail = screen.getAllByTestId('konva-path').find((path) => (
+      path.getAttribute('fill') === '#94a3b8'
+      && path.getAttribute('data')?.includes('Z')
+    ));
+
+    expect(sail).toBeInTheDocument();
+    expect(sail).toHaveAttribute('opacity', '0.65');
+  });
+});

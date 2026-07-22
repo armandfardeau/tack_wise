@@ -7,6 +7,7 @@ import {
   SPEECH_BUBBLE_TOP_Y,
   type SpeechBubblePosition,
 } from '../utils/speechBubble';
+import { getMainsailGeometry, type MainsailGeometry } from '../utils/boatSails';
 
 interface BoatProps {
   boat: BoatModel;
@@ -98,26 +99,83 @@ export function SpeechBubble({
   );
 }
 
+function SailVisual({
+  geometry,
+  sailColor,
+  isShadow,
+}: {
+  geometry: MainsailGeometry;
+  sailColor: string;
+  isShadow: boolean;
+}) {
+  const outlineColor = isShadow ? '#cbd5e1' : '#f8fafc';
+  const mastColor = isShadow ? '#94a3b8' : '#1e293b';
+  const boomColor = isShadow ? '#94a3b8' : '#475569';
+  const boomPoints = geometry.boomPoints.flatMap((point) => [point.x, point.y]);
+
+  return (
+    <>
+      <Path
+        data={geometry.sailPath}
+        fill={sailColor}
+        opacity={isShadow ? 0.65 : 0.28}
+      />
+      <Path
+        data={geometry.luffPath}
+        stroke={outlineColor}
+        strokeWidth={isShadow ? 2.5 : 2}
+        lineCap="round"
+      />
+      <Path
+        data={geometry.leechPath}
+        stroke={outlineColor}
+        strokeWidth={isShadow ? 2.5 : 2.5}
+        lineCap="round"
+        lineJoin="round"
+      />
+      <Path
+        data={geometry.footPath}
+        stroke={outlineColor}
+        strokeWidth={isShadow ? 2.5 : 2.5}
+        lineCap="round"
+      />
+      {!isShadow && geometry.battenPaths.map((path, index) => (
+        <Path
+          key={`batten-${index}`}
+          data={path}
+          stroke={outlineColor}
+          strokeWidth={1.5}
+          opacity={0.38}
+          lineCap="round"
+        />
+      ))}
+      <Line
+        points={[geometry.mastHead.x, geometry.mastHead.y, geometry.mastFoot.x, geometry.mastFoot.y]}
+        stroke={mastColor}
+        strokeWidth={isShadow ? 2.5 : 3}
+        lineCap="round"
+      />
+      <Line
+        points={boomPoints}
+        stroke={boomColor}
+        strokeWidth={isShadow ? 2.5 : 4}
+        lineCap="round"
+      />
+      <Circle
+        cx={geometry.mastFoot.x}
+        cy={geometry.mastFoot.y}
+        r={isShadow ? 3 : 4}
+        fill={mastColor}
+      />
+    </>
+  );
+}
+
 export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top' }: BoatProps) {
   const boatScale = 0.5;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
   const speechBubble = boat.speechBubble?.trim();
-
-  // Mast is located slightly forward of the center of the boat
-  const mastX = 0;
-  const mastY = -12;
-  const boomLength = 36;
-
-  // Calculate the boom endpoint
-  const boomRad = ((180 + boat.sailAngle) * Math.PI) / 180;
-  const boomEndX = mastX + boomLength * Math.sin(boomRad);
-  const boomEndY = mastY - boomLength * Math.cos(boomRad);
-
-  // Curved sail path
-  const ctrlX = mastX + (boomLength / 2) * Math.sin(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
-  const ctrlY = mastY - (boomLength / 2) * Math.cos(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
-
-  const sailPathData = `M ${mastX} ${mastY} Q ${ctrlX} ${ctrlY} ${boomEndX} ${boomEndY}`;
+  const sailGeometry = getMainsailGeometry(boat.sailAngle);
 
   if (isShadow) {
     return (
@@ -150,19 +208,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           strokeWidth={2}
           lineJoin="round"
         />
-        {/* Simplified Sail */}
-        <Line
-          points={[mastX, mastY, boomEndX, boomEndY]}
-          stroke="#94a3b8"
-          strokeWidth={2}
-        />
-        <Path
-          data={sailPathData}
-          stroke="#cbd5e1"
-          strokeWidth={3}
-          opacity={0.7}
-        />
-        <Circle cx={mastX} cy={mastY} r={3} fill="#94a3b8" />
+        <SailVisual geometry={sailGeometry} sailColor="#94a3b8" isShadow />
       </Group>
     );
   }
@@ -298,27 +344,8 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         lineJoin="round"
       />
 
-      {/* Mast */}
-      <Circle x={mastX} y={mastY} radius={4} fill="#1e293b" />
-
-      {/* Sail Boom (Mainsail Boom) */}
-      <Line
-        points={[mastX, mastY, boomEndX, boomEndY]}
-        stroke="#475569"
-        strokeWidth={3.5}
-        lineCap="round"
-      />
-
-      {/* Mainsail (represented as a filled curved canvas) */}
-      <Path
-        data={sailPathData}
-        stroke="#f8fafc"
-        strokeWidth={4.5}
-        lineCap="round"
-        opacity={0.9}
-        shadowColor="#000"
-        shadowBlur={1}
-      />
+      {/* Mainsail */}
+      <SailVisual geometry={sailGeometry} sailColor={boat.color} isShadow={false} />
 
       {/* Label Text (Unrotated so it's always readable for the user) */}
       <Group rotation={-boat.heading}>
