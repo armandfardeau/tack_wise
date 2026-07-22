@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react';
-import { ChevronDown, ChevronRight, File as FileIcon, FilePlus, FolderOpen, GitPullRequest, LayoutTemplate, Search, Upload } from 'lucide-react';
+import { ChevronDown, ChevronRight, File as FileIcon, FilePlus, FolderOpen, GitPullRequest, LayoutTemplate, Search, Upload, X } from 'lucide-react';
 import type { SituationTemplate } from '../data/situationTemplates';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
 import { DEFAULT_EXPORT_QUALITY } from '../utils/exportSettings';
@@ -92,6 +92,11 @@ export default function ExportActions({
     setTemplateSearch('');
   };
 
+  const closeTemplateSubmenu = () => {
+    setOpenSubmenu(null);
+    setTemplateSearch('');
+  };
+
   const handleImportClick = () => {
     fileInputRef.current?.click();
     closeFileMenu();
@@ -151,51 +156,62 @@ export default function ExportActions({
               <span className="action-label">Templates</span>
               <span className="file-submenu-chevron" aria-hidden="true"><ChevronRight size={14} /></span>
             </button>
-            {openSubmenu === 'templates' && <div className="file-submenu-menu" role="menu" aria-label="Templates">
-              {onContributeTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title="Submit the current diagram as a template" onClick={() => {
-                onContributeTemplate(fileMenuTriggerRef.current);
-                closeFileMenu();
-              }}>
-                <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
-                <span className="action-label">Submit current diagram</span>
-              </button>}
-              {onUpdateTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title={canUpdateTemplate ? 'Update the loaded template through a pull request' : 'Load a built-in template to update it through a pull request'} disabled={!canUpdateTemplate} onClick={() => {
-                onUpdateTemplate(fileMenuTriggerRef.current);
-                closeFileMenu();
-              }}>
-                <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
-                <span className="action-label">Update current template</span>
-              </button>}
-              {(onContributeTemplate || onUpdateTemplate) && <div className="template-menu-divider" role="separator" />}
-              <div className="template-search">
-                <Search aria-hidden="true" size={15} />
-                <input
-                  type="search"
-                  className="template-search-input"
-                  aria-label="Search templates"
-                  placeholder="Search templates"
-                  value={templateSearch}
-                  onChange={(event) => setTemplateSearch(event.target.value)}
-                />
+            {openSubmenu === 'templates' && <>
+              <button type="button" className="template-sheet-backdrop" aria-label="Dismiss template sheet" onClick={closeTemplateSubmenu} />
+              <div className="file-submenu-menu" role="menu" aria-label="Templates">
+                <div className="template-sheet-header">
+                  <span className="template-sheet-title">Templates</span>
+                  <button type="button" className="template-sheet-close" aria-label="Close templates sheet" onClick={closeTemplateSubmenu}>
+                    <X aria-hidden="true" size={18} />
+                  </button>
+                </div>
+                {onContributeTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title="Submit the current diagram as a template" onClick={() => {
+                  onContributeTemplate(fileMenuTriggerRef.current);
+                  closeFileMenu();
+                }}>
+                  <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
+                  <span className="action-label">Submit current diagram</span>
+                </button>}
+                {onUpdateTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title={canUpdateTemplate ? 'Update the loaded template through a pull request' : 'Load a built-in template to update it through a pull request'} disabled={!canUpdateTemplate} onClick={() => {
+                  onUpdateTemplate(fileMenuTriggerRef.current);
+                  closeFileMenu();
+                }}>
+                  <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
+                  <span className="action-label">Update current template</span>
+                </button>}
+                {(onContributeTemplate || onUpdateTemplate) && <div className="template-menu-divider" role="separator" />}
+                <div className="template-search">
+                  <Search aria-hidden="true" size={15} />
+                  <input
+                    type="search"
+                    className="template-search-input"
+                    aria-label="Search templates"
+                    placeholder="Search templates"
+                    value={templateSearch}
+                    onChange={(event) => setTemplateSearch(event.target.value)}
+                  />
+                </div>
+                <div className="template-list">
+                  {filteredTemplates.map((template) => (
+                    <button
+                      key={template.id}
+                      type="button"
+                      className="action-btn file-menu-item template-btn"
+                      role="menuitem"
+                      title={`Load ${template.title}`}
+                      onClick={() => {
+                        onLoadTemplate?.(template);
+                        closeFileMenu();
+                      }}
+                    >
+                      <span className="action-icon" aria-hidden="true"><LayoutTemplate size={16} /></span>
+                      <span className="action-label">{template.title}</span>
+                    </button>
+                  ))}
+                  {filteredTemplates.length === 0 && <div className="template-search-empty" role="status">No templates found</div>}
+                </div>
               </div>
-              {filteredTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  type="button"
-                  className="action-btn file-menu-item template-btn"
-                  role="menuitem"
-                  title={`Load ${template.title}`}
-                  onClick={() => {
-                    onLoadTemplate?.(template);
-                    closeFileMenu();
-                  }}
-                >
-                  <span className="action-icon" aria-hidden="true"><LayoutTemplate size={16} /></span>
-                  <span className="action-label">{template.title}</span>
-                </button>
-              ))}
-              {filteredTemplates.length === 0 && <div className="template-search-empty" role="status">No templates found</div>}
-            </div>}
+            </>}
           </div>}
           <button type="button" className="action-btn file-menu-item import-btn" role="menuitem" title="Import JSON" onClick={handleImportClick}>
             <span className="action-icon" aria-hidden="true"><FolderOpen size={16} /></span>
