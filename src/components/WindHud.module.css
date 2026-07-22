@@ -17,10 +17,6 @@
   z-index: 5;
 }
 
-:global(.canvas-top-controls) > .windVaneContainer {
-  pointer-events: auto;
-}
-
 .windVaneDial {
   position: relative;
   width: 52px;

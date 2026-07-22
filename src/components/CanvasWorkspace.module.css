@@ -126,12 +126,6 @@
   pointer-events: none;
 }
 
-.canvasTopControls > :global(.canvas-settings-btn),
-.canvasTopControls > :global(.canvas-history-controls),
-.canvasTopControls > :global(.wind-vane-container) {
-  pointer-events: auto;
-}
-
 :global(.presenter-mode) .canvasTopControls {
   grid-template-rows: auto;
   grid-template-areas: "wind title .";
@@ -243,9 +237,4 @@
     grid-template-areas: "wind title";
   }
 
-  .canvasTopControls > :global(.canvas-history-controls) {
-    gap: 4px;
-    padding: 4px;
-    border-radius: 10px;
-  }
 }

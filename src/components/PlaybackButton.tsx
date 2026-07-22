@@ -37,7 +37,7 @@ export default function PlaybackButton({
       </button>
       <button
         type="button"
-        className={`${styles.playButton} play-pause-btn ${isPlaying ? 'playing' : ''}`}
+        className={`${styles.playButton} ${isPlaying ? styles.playing : ''}`}
         aria-label={isPlaying ? 'Pause' : 'Play'}
         title={isPlaying ? 'Pause' : 'Play'}
         onClick={onTogglePlaying}
