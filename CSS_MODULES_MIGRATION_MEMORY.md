@@ -45,10 +45,11 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 1. Global shell and theme foundation
 
-- [ ] Audit and classify :root, body, .app-shell, .app-shell.light-theme, .workspace, and presenter-mode layout selectors.
-- [ ] Preserve theme custom properties and color-scheme behavior.
-- [ ] Preserve print rules for body, .app-shell, .workspace, .canvas-container, .app-header, .step-panel, .timeline-bar, .canvas-zoom-controls, .wind-vane-container, and .sidebar-backdrop.
-- [ ] Preserve playbackToastIn and rotateSpinner.
+- [x] Audit and classify :root, body, .app-shell, .app-shell.light-theme, and .workspace. The true global foundation now lives in src/index.css.
+- [x] Preserve theme custom properties and color-scheme behavior.
+- [x] Preserve print rules for body, .app-shell, .workspace, .canvas-container, .app-header, .step-panel, .timeline-bar, .canvas-zoom-controls, .wind-vane-container, and .sidebar-backdrop; retain the component-dependent selectors in App.css until their modules exist.
+- [x] Preserve playbackToastIn and rotateSpinner; their owning component rules remain in App.css until the related overlay migrations.
+- [x] Retain cross-component presenter-mode and print overrides in App.css until the dependent component modules are migrated.
 - Primary files: src/App.tsx, src/index.css, src/App.css.
 
 ### 2. Application header and branding
@@ -231,5 +232,5 @@ The migration is complete only when:
 
 - Audit: complete.
 - Memory document: created.
-- Component migrations: not started.
-- Next action: select one checklist item and process only that item.
+- Component migrations: item 1 foundation complete; component-specific migrations not started.
+- Next action: process item 2 only after confirmation.
