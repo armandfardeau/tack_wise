@@ -21,6 +21,8 @@ import { sponsorshipLinks, templateRepository } from './utils/appConfig';
 import type { TemplateContributionMode } from './utils/templateContribution';
 import type { DisplayMode, ExportFormat, ExportOptions, ExportQuality, ScenarioExportPayload, Theme } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
+import UpdateToast from './components/UpdateToast';
+import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
 
@@ -54,6 +56,7 @@ function getInitialTheme(): Theme {
 }
 
 export default function App() {
+  const { dismissUpdate, isUpdateAvailable, refresh } = useServiceWorkerUpdate();
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
   const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
@@ -292,6 +295,7 @@ export default function App() {
 
   return (
     <main className={`app-shell ${theme}-theme${scenario.settings.presenterMode ? ' presenter-mode' : ''}`}>
+      {isUpdateAvailable && <UpdateToast onDismiss={dismissUpdate} onRefresh={refresh} />}
       <AppHeader
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
