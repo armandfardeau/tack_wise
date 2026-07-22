@@ -59,7 +59,7 @@ export default function AppHeader({
       </div>
       <div className={styles.headerTools} aria-label="Scenario tools">
         <ExportActions
-          className="export-actions header-export-actions"
+          className="header-export-actions"
           isExporting={isExporting}
           onNewScenario={onNewScenario}
           onExport={onExport}

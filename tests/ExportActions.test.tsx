@@ -102,9 +102,10 @@ describe('ExportActions menu behavior', () => {
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
 
-    const templateList = document.querySelector('.template-list');
+    const templateItem = screen.getByRole('menuitem', { name: /one/i });
+    const templateList = templateItem.parentElement;
     expect(templateList).not.toBeNull();
-    expect(templateList).toContainElement(screen.getByRole('menuitem', { name: /one/i }));
+    expect(templateList).toContainElement(templateItem);
     expect(templateList).not.toContainElement(screen.getByRole('searchbox', { name: /search templates/i }));
   });
 
