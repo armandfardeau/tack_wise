@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Clipboard, ExternalLink, FileCode, GitPullRequest, X } from 'lucide-react';
 import type { Frame } from '../types';
+import useModalFocus, { type ModalFocusRef } from '../hooks/useModalFocus';
 import {
   buildTemplateContributionDraft,
   DEFAULT_TEMPLATE_REPOSITORY,
@@ -17,6 +18,7 @@ interface TemplateContributionDialogProps {
   existingTemplateIds: string[];
   templateId?: string;
   repository?: TemplateRepositoryConfig;
+  returnFocusRef?: ModalFocusRef;
   onClose: () => void;
 }
 
@@ -27,6 +29,7 @@ export default function TemplateContributionDialog({
   existingTemplateIds,
   templateId,
   repository = DEFAULT_TEMPLATE_REPOSITORY,
+  returnFocusRef,
   onClose,
 }: TemplateContributionDialogProps) {
   const [title, setTitle] = useState(initialTitle);
@@ -34,6 +37,8 @@ export default function TemplateContributionDialog({
   const [copyFeedback, setCopyFeedback] = useState('');
   const [fallbackValue, setFallbackValue] = useState('');
   const [fallbackLabel, setFallbackLabel] = useState('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useModalFocus<HTMLElement>({ initialFocusRef: titleInputRef, returnFocusRef });
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -84,7 +89,7 @@ export default function TemplateContributionDialog({
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section className="template-contribution-dialog" role="dialog" aria-modal="true" aria-labelledby="template-contribution-title">
+      <section ref={dialogRef} className="template-contribution-dialog" role="dialog" aria-modal="true" aria-labelledby="template-contribution-title" tabIndex={-1}>
         <div className="template-contribution-header">
           <div>
             <p className="template-contribution-eyebrow">GitHub contribution</p>
@@ -108,7 +113,7 @@ export default function TemplateContributionDialog({
               aria-label="Template title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
-              autoFocus
+              ref={titleInputRef}
             />
           </label>
           <label className="template-contribution-field">

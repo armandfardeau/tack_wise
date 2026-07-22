@@ -1,13 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { AlertTriangle, Download, Trash2, X } from 'lucide-react';
+import useModalFocus, { type ModalFocusRef } from '../hooks/useModalFocus';
 
 interface NewScenarioDialogProps {
+  returnFocusRef?: ModalFocusRef;
   onCancel: () => void;
   onExportAndContinue: () => void;
   onDiscard: () => void;
 }
 
-export default function NewScenarioDialog({ onCancel, onExportAndContinue, onDiscard }: NewScenarioDialogProps) {
+export default function NewScenarioDialog({ returnFocusRef, onCancel, onExportAndContinue, onDiscard }: NewScenarioDialogProps) {
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useModalFocus<HTMLElement>({ initialFocusRef: cancelButtonRef, returnFocusRef });
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCancel();
@@ -25,7 +30,7 @@ export default function NewScenarioDialog({ onCancel, onExportAndContinue, onDis
         if (event.target === event.currentTarget) onCancel();
       }}
     >
-      <section className="new-scenario-dialog" role="dialog" aria-modal="true" aria-labelledby="new-scenario-title" aria-describedby="new-scenario-description">
+      <section ref={dialogRef} className="new-scenario-dialog" role="dialog" aria-modal="true" aria-labelledby="new-scenario-title" aria-describedby="new-scenario-description" tabIndex={-1}>
         <div className="new-scenario-header">
           <div className="new-scenario-heading">
             <AlertTriangle aria-hidden="true" size={20} />
@@ -41,7 +46,7 @@ export default function NewScenarioDialog({ onCancel, onExportAndContinue, onDis
         </p>
 
         <div className="new-scenario-actions">
-          <button type="button" className="new-scenario-secondary" onClick={onCancel} autoFocus>Cancel</button>
+          <button ref={cancelButtonRef} type="button" className="new-scenario-secondary" onClick={onCancel}>Cancel</button>
           <button type="button" className="new-scenario-export" onClick={onExportAndContinue}>
             <Download aria-hidden="true" size={16} /> Export JSON &amp; continue
           </button>

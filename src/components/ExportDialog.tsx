@@ -1,13 +1,15 @@
 import { Download, X } from 'lucide-react';
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { ExportFormat, ExportFps, ExportOptions, ExportQuality, Theme } from '../types';
 import { DEFAULT_EXPORT_FPS, EXPORT_FPS_OPTIONS } from '../types';
 import { EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
+import useModalFocus, { type ModalFocusRef } from '../hooks/useModalFocus';
 
 interface ExportDialogProps {
   theme: Theme;
   exportQuality?: ExportQuality;
   onExportQualityChange?: (quality: ExportQuality) => void;
+  returnFocusRef?: ModalFocusRef;
   onCancel: () => void;
   onExport: (options: ExportOptions) => void;
 }
@@ -29,11 +31,20 @@ function isVisualFormat(format: ExportFormat) {
   return format !== 'json';
 }
 
-export default function ExportDialog({ theme, exportQuality = 'standard', onExportQualityChange = () => undefined, onCancel, onExport }: ExportDialogProps) {
+export default function ExportDialog({
+  theme,
+  exportQuality = 'standard',
+  onExportQualityChange = () => undefined,
+  returnFocusRef,
+  onCancel,
+  onExport,
+}: ExportDialogProps) {
   const [format, setFormat] = useState<ExportFormat>('png');
   const [exportTheme, setExportTheme] = useState<Theme>(theme);
   const [fps, setFps] = useState<ExportFps>(DEFAULT_EXPORT_FPS);
   const [autoFit, setAutoFit] = useState(true);
+  const formatSelectRef = useRef<HTMLSelectElement>(null);
+  const dialogRef = useModalFocus<HTMLFormElement>({ initialFocusRef: formatSelectRef, returnFocusRef });
   const selectedFormat = formatOptions.find((option) => option.value === format) ?? formatOptions[0];
 
   useEffect(() => {
@@ -57,7 +68,7 @@ export default function ExportDialog({ theme, exportQuality = 'standard', onExpo
         if (event.target === event.currentTarget) onCancel();
       }}
     >
-      <form className="export-dialog" role="dialog" aria-modal="true" aria-labelledby="export-dialog-title" onSubmit={handleSubmit}>
+      <form ref={dialogRef} className="export-dialog" role="dialog" aria-modal="true" aria-labelledby="export-dialog-title" tabIndex={-1} onSubmit={handleSubmit}>
         <header className="export-dialog-header">
           <div>
             <p className="export-dialog-eyebrow">Save your scenario</p>
@@ -71,7 +82,7 @@ export default function ExportDialog({ theme, exportQuality = 'standard', onExpo
         <div className="export-dialog-fields">
           <label className="export-dialog-field">
             <span>Format</span>
-            <select aria-label="Export format" value={format} onChange={(event) => setFormat(event.target.value as ExportFormat)}>
+            <select ref={formatSelectRef} aria-label="Export format" value={format} onChange={(event) => setFormat(event.target.value as ExportFormat)}>
               {formatOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
             </select>
             <small>{selectedFormat.description}</small>

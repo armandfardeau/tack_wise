@@ -79,6 +79,7 @@ export default function App() {
   const { importScenario } = scenario;
   const loadedShareRef = useRef(false);
   const inspectorRequestIdRef = useRef(0);
+  const modalReturnFocusRef = useRef<HTMLElement | null>(null);
 
   const navigateTo = (nextPage: 'editor' | 'about') => {
     const targetPath = nextPage === 'about' ? '/about' : '/';
@@ -216,7 +217,8 @@ export default function App() {
     setIsNewScenarioDialogOpen(false);
   };
 
-  const handleNewScenario = () => {
+  const handleNewScenario = (returnFocusTarget: HTMLElement | null) => {
+    modalReturnFocusRef.current = returnFocusTarget;
     if (scenario.hasUnsavedChanges) {
       setIsNewScenarioDialogOpen(true);
       return;
@@ -285,8 +287,12 @@ export default function App() {
         onShareScenario={handleShareScenario}
         onOpenAbout={() => navigateTo('about')}
         onLoadTemplate={handleLoadTemplate}
-        onContributeTemplate={() => setTemplateContributionMode('create')}
-        onUpdateTemplate={() => {
+        onContributeTemplate={(returnFocusTarget) => {
+          modalReturnFocusRef.current = returnFocusTarget;
+          setTemplateContributionMode('create');
+        }}
+        onUpdateTemplate={(returnFocusTarget) => {
+          modalReturnFocusRef.current = returnFocusTarget;
           if (loadedTemplate) setTemplateContributionMode('update');
         }}
         canUpdateTemplate={Boolean(loadedTemplate)}
@@ -426,6 +432,7 @@ export default function App() {
 
       {isNewScenarioDialogOpen && (
         <NewScenarioDialog
+          returnFocusRef={modalReturnFocusRef}
           onCancel={() => setIsNewScenarioDialogOpen(false)}
           onExportAndContinue={handleExportAndStartNewScenario}
           onDiscard={resetToNewScenario}
@@ -441,6 +448,7 @@ export default function App() {
           existingTemplateIds={situationTemplates.map((template) => template.id)}
           templateId={loadedTemplate?.id}
           repository={templateRepository}
+          returnFocusRef={modalReturnFocusRef}
           onClose={() => setTemplateContributionMode(null)}
         />
       )}
