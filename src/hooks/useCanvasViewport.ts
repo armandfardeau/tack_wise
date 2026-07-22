@@ -136,10 +136,11 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
       return;
     }
 
+    const currentStageSize = stageSizeRef.current;
     const topFitInset = CANVAS_FIT_PADDING + CANVAS_FIT_TOP_CONTROL_OFFSET;
     const bottomFitInset = CANVAS_FIT_PADDING + CANVAS_FIT_BOTTOM_CONTROL_OFFSET;
-    const availableWidth = Math.max(stageSize.width - CANVAS_FIT_PADDING * 2, 1);
-    const availableHeight = Math.max(stageSize.height - topFitInset - bottomFitInset, 1);
+    const availableWidth = Math.max(currentStageSize.width - CANVAS_FIT_PADDING * 2, 1);
+    const availableHeight = Math.max(currentStageSize.height - topFitInset - bottomFitInset, 1);
     const contentWidth = Math.max(contentRect.maxX - contentRect.minX, 1);
     const contentHeight = Math.max(contentRect.maxY - contentRect.minY, 1);
     const nextZoom = clampCanvasZoom(Math.min(
@@ -151,11 +152,10 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
       y: (contentRect.minY + contentRect.maxY) / 2,
     };
     const nextPosition = {
-      x: stageSize.width / 2 - contentCenter.x * nextZoom,
+      x: currentStageSize.width / 2 - contentCenter.x * nextZoom,
       y: topFitInset + availableHeight / 2 - contentCenter.y * nextZoom,
     };
 
-    const currentStageSize = stageSizeRef.current;
     setCanvasViewport(
       constrainCanvasPosition(
         nextPosition,
