@@ -93,6 +93,24 @@ describe('scenario JSON export', () => {
     expect(result.frames[0].marks[0]).toEqual(markFrame.marks[0]);
   });
 
+  it('round-trips judge boats as timeline boats', () => {
+    const judgeFrame: Frame = {
+      ...frames[0],
+      boats: [{
+        id: 'judge-1',
+        name: 'Umpire',
+        color: '#f97316',
+        type: 'judge',
+        x: 300,
+        y: 120,
+        heading: 90,
+        sailAngle: 0,
+      }],
+    };
+
+    expect(parseScenarioFromJson(serializeScenarioToJson([judgeFrame], 0)).frames[0].boats[0]).toEqual(judgeFrame.boats[0]);
+  });
+
   it('round-trips mark-room zone settings', () => {
     const markFrame: Frame = {
       ...frames[0],

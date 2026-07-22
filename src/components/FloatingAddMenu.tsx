@@ -1,9 +1,9 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from 'react';
 import { ArrowUpRight, BookOpen, DoorOpen, Flag, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
-import type { Mark } from '../types';
+import type { Boat, Mark } from '../types';
 
 interface FloatingAddMenuProps {
-  onAddBoat: () => void;
+  onAddBoat: (boatType?: Boat['type']) => void;
   onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: () => void;
   onAddComment: () => void;
@@ -92,7 +92,8 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
     <div ref={menuRef} className={`floating-add-menu${isOpen ? ' is-open' : ''}`}>
       {isOpen && (
         <div className="floating-add-actions" aria-label="Add diagram object">
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddBoat)}><Sailboat aria-hidden="true" size={16} /> <span>Add boat</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddBoat('racing'))}><Sailboat aria-hidden="true" size={16} /> <span>Add boat</span></button>
+          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddBoat('judge'))}><Flag aria-hidden="true" size={16} /> <span>Add judge boat</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark())}><MapPin aria-hidden="true" size={16} /> <span>Add mark</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('obstruction'))}><TriangleAlert aria-hidden="true" size={16} /> <span>Add obstruction</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('gate'))}><DoorOpen aria-hidden="true" size={16} /> <span>Add gate</span></button>

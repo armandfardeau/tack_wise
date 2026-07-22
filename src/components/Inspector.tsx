@@ -366,20 +366,38 @@ function BoatInspector({
                 <input id="boat-name" type="text" value={boat.name} onChange={(event) => updateBoat(boat.id, { name: event.target.value })} />
               </div>
               <div className="form-row">
+                <label htmlFor="boat-type">Boat type</label>
+                <select
+                  id="boat-type"
+                  value={boat.type ?? 'racing'}
+                  onChange={(event) => updateBoat(boat.id, { type: event.target.value as Boat['type'] })}
+                >
+                  <option value="racing">Racing sailboat</option>
+                  <option value="judge">Judge boat</option>
+                </select>
+              </div>
+              <div className="form-row">
                 <label htmlFor="boat-color">Color</label>
                 <ColorPicker id="boat-color" label="Color" value={boat.color} onChange={(color) => updateBoat(boat.id, { color })} />
               </div>
-              <div className="form-row flex-row">
-                <label className="checkbox-label">
-                  <input type="checkbox" checked={autoSailTrim} onChange={(event) => onSetAutoSailTrim(event.target.checked)} />
-                  <span>Auto Sail Trim</span>
-                </label>
-              </div>
-              {!autoSailTrim && (
-                <div className="form-row">
-                  <label htmlFor="boat-sail-angle">Sail Angle ({boat.sailAngle}°)</label>
-                  <input id="boat-sail-angle" type="range" min="-90" max="90" value={boat.sailAngle} onChange={(event) => updateBoat(boat.id, { sailAngle: Number(event.target.value) })} />
-                </div>
+              {boat.type !== 'judge' && (
+                <>
+                  <div className="form-row flex-row">
+                    <label className="checkbox-label">
+                      <input type="checkbox" checked={autoSailTrim} onChange={(event) => onSetAutoSailTrim(event.target.checked)} />
+                      <span>Auto Sail Trim</span>
+                    </label>
+                  </div>
+                  {!autoSailTrim && (
+                    <div className="form-row">
+                      <label htmlFor="boat-sail-angle">Sail Angle ({boat.sailAngle}°)</label>
+                      <input id="boat-sail-angle" type="range" min="-90" max="90" value={boat.sailAngle} onChange={(event) => updateBoat(boat.id, { sailAngle: Number(event.target.value) })} />
+                    </div>
+                  )}
+                </>
+              )}
+              {boat.type === 'judge' && (
+                <p className="grid-hint">Judge boats are powered craft and keep their course while the timeline plays.</p>
               )}
             </div>
           ),

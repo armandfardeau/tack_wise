@@ -746,11 +746,12 @@ export function useScenario() {
     });
   };
 
-  const addBoat = () => {
+  const addBoat = (boatType: Boat['type'] = 'racing') => {
     const newBoat: Boat = {
       id: `boat-${Date.now()}`,
-      name: `Boat ${activeFrame.boats.length + 1}`,
+      name: boatType === 'judge' ? 'Judge' : `Boat ${activeFrame.boats.length + 1}`,
       color: BOAT_COLORS[activeFrame.boats.length % BOAT_COLORS.length],
+      type: boatType,
       x: 100 + Math.random() * 200,
       y: 200 + Math.random() * 200,
       heading: 0,

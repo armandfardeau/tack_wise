@@ -74,6 +74,7 @@ function isBoat(value: unknown): value is Boat {
     typeof value.id === 'string' &&
     typeof value.name === 'string' &&
     typeof value.color === 'string' &&
+    (value.type === undefined || value.type === 'racing' || value.type === 'judge') &&
     isFiniteNumber(value.x) &&
     isFiniteNumber(value.y) &&
     isFiniteNumber(value.heading) &&

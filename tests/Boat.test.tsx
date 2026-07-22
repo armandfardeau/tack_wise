@@ -41,6 +41,17 @@ describe('Boat speech bubble', () => {
     expect(screen.getAllByTestId('konva-text')).toHaveLength(1);
   });
 
+  it('renders a judge boat as a powered craft with a flag and wake', () => {
+    render(<Boat boat={{ ...boat, type: 'judge', name: 'Umpire' }} isSelected={false} readOnly />);
+
+    expect(screen.getAllByTestId('konva-path').some((pathNode) => (
+      pathNode.getAttribute('data')?.startsWith('M 0 -62 C 21 -54')
+    ))).toBe(true);
+    expect(screen.getAllByTestId('konva-line').some((lineNode) => (
+      lineNode.getAttribute('points')?.includes('-12,52,-24,70,-35,82')
+    ))).toBe(true);
+  });
+
   it('opens the inspector on double-click', () => {
     const onOpenInspector = jest.fn();
 
