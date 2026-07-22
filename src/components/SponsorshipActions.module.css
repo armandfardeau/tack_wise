@@ -2,11 +2,11 @@
   position: relative;
 }
 
-.sponsorshipTrigger {
+button.sponsorshipTrigger {
   color: var(--accent-green);
 }
 
-.sponsorshipTrigger:hover:not(:disabled) {
+button.sponsorshipTrigger:hover:not(:disabled) {
   border-color: var(--accent-green);
   color: var(--accent-green-hover);
 }
