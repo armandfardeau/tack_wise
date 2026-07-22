@@ -222,9 +222,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 14. Export progress overlay
 
-- [ ] Migrate .export-overlay, .export-spinner-box, .spinner, and rotateSpinner.
-- [ ] Preserve light-theme overlay behavior and animation timing.
+- [x] Migrate .export-overlay, .export-spinner-box, .spinner, and rotateSpinner.
+- [x] Preserve light-theme overlay behavior and animation timing.
 - Primary file: src/components/ExportOverlay.tsx.
+
+#### Item 14 migration record (2026-07-22)
+
+- Original global CSS: `.export-overlay` supplied the fixed full-viewport dark glass overlay, centered layout, blur, and z-index; `.light-theme .export-overlay` supplied the light-theme translucent background; `.export-spinner-box` supplied the themed progress card, sizing, spacing, and shadow; its `h3` and `p` descendants supplied text colors; `.spinner` supplied the dashed cyan 50px spinner and `rotateSpinner 2s linear infinite`; `@keyframes rotateSpinner` rotated the spinner through 360 degrees.
+- New module: `src/components/ExportOverlay.module.css` contains the equivalent local rules under `exportOverlay`, `exportSpinnerBox`, and `spinner`. The narrow `:global(.light-theme) .exportOverlay` selector preserves the app-wide light-theme ancestor contract, and the global `rotateSpinner` keyframe preserves the existing animation name and timing.
+- React refactor: `ExportOverlay` imports the module and replaces all three static global class names with module references. DOM structure, roles, accessible live-region behavior, export messages, and progress formatting remain unchanged.
+- Verification: targeted `tests/ExportOverlay.test.tsx` (3 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, `git diff --check`, and a generated-CSS audit confirming scoped overlay/card selectors, the light-theme override, and `rotateSpinner 2s linear infinite` all passed. `rg` confirms no runtime references remain to `.export-overlay`, `.export-spinner-box`, or `.spinner`.
 
 ### 15. Export dialog
 
