@@ -23,7 +23,7 @@ interface ExportActionsProps {
 }
 
 export default function ExportActions({
-  className = 'export-actions',
+  className = '',
   isExporting,
   onNewScenario,
   onExport,

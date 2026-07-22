@@ -92,3 +92,22 @@ body {
   align-items: stretch;
   position: relative;
 }
+
+.presenter-mode .workspace {
+  grid-template-columns: 1fr;
+}
+
+@media print {
+  body,
+  .app-shell,
+  .workspace {
+    overflow: visible;
+    background: #fff;
+  }
+}
+
+@media (max-width: 768px) {
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+}

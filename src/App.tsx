@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { flushSync } from 'react-dom';
 import posthog from 'posthog-js';
-import './App.css';
 import AppHeader from './components/AppHeader';
 import AboutPage from './components/AboutPage';
 import CanvasWorkspace, { type InspectorRequest } from './components/CanvasWorkspace';
