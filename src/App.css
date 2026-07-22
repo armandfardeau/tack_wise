@@ -1,62 +1,3 @@
-/* Theme-aware styles for Tack Wise Sailing Simulator */
-
-:root {
-  --bg-app: #090d16;
-  --bg-sidebar: #0f172a;
-  --bg-card: #1e293b;
-  --border-color: #334155;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --accent-cyan: #06b6d4;
-  --accent-cyan-hover: #22d3ee;
-  --accent-red: #f43f5e;
-  --accent-red-hover: #fda4af;
-  --accent-green: #10b981;
-  --accent-green-hover: #34d399;
-  --canvas-bg: #0f172a;
-  --canvas-grid-major: #155e75;
-  --canvas-grid-minor: #1e3a4f;
-}
-
-.app-shell.light-theme {
-  --bg-app: #eef4f3;
-  --bg-sidebar: #ffffff;
-  --bg-card: #f7faf9;
-  --border-color: #d5e1df;
-  --text-main: #142326;
-  --text-muted: #617273;
-  --accent-cyan: #0891b2;
-  --accent-cyan-hover: #0e7490;
-  --accent-red: #dc2626;
-  --accent-red-hover: #b91c1c;
-  --accent-green: #059669;
-  --accent-green-hover: #047857;
-  --canvas-bg: #f8fafc;
-  --canvas-grid-major: #94a3b8;
-  --canvas-grid-minor: #cbd5e1;
-}
-
-body {
-  background-color: var(--bg-app);
-  color: var(--text-main);
-  margin: 0;
-  min-height: 100%;
-  padding: 0;
-  overflow: hidden;
-}
-
-.app-shell {
-  min-height: 100dvh;
-  padding-bottom: env(safe-area-inset-bottom);
-  display: flex;
-  flex-direction: column;
-  color-scheme: dark;
-}
-
-.app-shell.light-theme {
-  color-scheme: light;
-}
-
 .app-update-toast {
   position: fixed;
   right: 24px;
@@ -881,17 +822,6 @@ body {
     width: 100vw;
     height: 100vh;
   }
-}
-
-/* Workspace */
-.workspace {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 320px 1fr;
-  min-height: 0;
-  overflow: hidden;      /* prevent children from busting out */
-  align-items: stretch;  /* both columns fill the full grid row height */
-  position: relative;
 }
 
 /* Sidebar / Step Panel */
