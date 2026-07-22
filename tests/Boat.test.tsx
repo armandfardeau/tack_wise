@@ -56,10 +56,12 @@ describe('Boat sail plans', () => {
   it('keeps legacy boats mainsail-only and renders each auxiliary sail plan', () => {
     const { rerender } = render(<Boat boat={boat} isSelected={false} readOnly />);
     expect(screen.getAllByTestId('konva-path')).toHaveLength(4);
+    const mainSailPath = screen.getAllByTestId('konva-path')[3].getAttribute('data');
 
     rerender(<Boat boat={{ ...boat, sailPlan: 'front-sail', frontSailAngle: 20 }} isSelected={false} readOnly />);
     expect(screen.getAllByTestId('konva-path')).toHaveLength(5);
-    expect(screen.getAllByTestId('konva-path').some((path) => path.getAttribute('data')?.includes('L 0 -58'))).toBe(true);
+    expect(screen.getAllByTestId('konva-path')[4].getAttribute('data')).toContain('Q');
+    expect(screen.getAllByTestId('konva-path')[4].getAttribute('data')).not.toBe(mainSailPath);
 
     rerender(<Boat boat={{ ...boat, sailPlan: 'symmetric-spinnaker', spinnakerAngle: 20 }} isSelected={false} readOnly />);
     const symmetricPath = screen.getAllByTestId('konva-path')[4].getAttribute('data');
