@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Check, Palette, Plus, Trash2 } from 'lucide-react';
 
 const COLOR_PRESETS_STORAGE_KEY = 'tack-wise-color-presets';
@@ -93,6 +93,20 @@ export default function ColorPicker({
   const isSaved = savedPresets.includes(currentColor);
   const isQuickPreset = QUICK_COLOR_PRESETS.includes(currentColor as typeof QUICK_COLOR_PRESETS[number]);
 
+  const dismissColorMenu = useCallback(() => {
+    setIsOpen(false);
+    setMenuPosition(null);
+    triggerRef.current?.focus();
+  }, []);
+
+  const handleColorMenuKeyDown = useCallback((event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.nativeEvent.stopImmediatePropagation();
+    dismissColorMenu();
+  }, [dismissColorMenu]);
+
   useEffect(() => {
     if (!isOpen) return undefined;
 
@@ -103,7 +117,10 @@ export default function ColorPicker({
     };
 
     const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setIsOpen(false);
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      dismissColorMenu();
     };
 
     document.addEventListener('pointerdown', closeOnOutsidePointer);
@@ -112,7 +129,7 @@ export default function ColorPicker({
       document.removeEventListener('pointerdown', closeOnOutsidePointer);
       document.removeEventListener('keydown', closeOnEscape);
     };
-  }, [isOpen]);
+  }, [dismissColorMenu, isOpen]);
 
   useLayoutEffect(() => {
     if (!isOpen) {
@@ -186,6 +203,7 @@ export default function ColorPicker({
         aria-label={`Open ${accessibleLabel.toLowerCase()} picker`}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
+        onKeyDown={handleColorMenuKeyDown}
         onClick={() => {
           const nextOpen = !isOpen;
           setIsOpen(nextOpen);
@@ -215,6 +233,7 @@ export default function ColorPicker({
           className="color-picker-menu"
           role="dialog"
           aria-label={`${accessibleLabel} picker`}
+          onKeyDown={handleColorMenuKeyDown}
           style={{
             left: menuPosition?.left ?? 0,
             top: menuPosition?.top ?? 0,

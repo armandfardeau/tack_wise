@@ -415,6 +415,7 @@ export default function CanvasWorkspace({
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
+      if (document.querySelector('.color-picker-menu')) return;
       event.preventDefault();
       if (isAddingArrow) {
         setIsAddingArrow(false);

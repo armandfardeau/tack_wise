@@ -51,4 +51,16 @@ describe('ColorPicker', () => {
     expect(screen.queryByRole('button', { name: 'Use saved color #123456' })).not.toBeInTheDocument();
     expect(window.localStorage.getItem('tack-wise-color-presets')).toBe('[]');
   });
+
+  it('dismisses only the menu when Escape is pressed', () => {
+    render(<ColorPicker value="#38bdf8" onChange={jest.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open color picker' }));
+    expect(screen.getByRole('dialog', { name: 'Color picker' })).toBeInTheDocument();
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Use color #38bdf8' }), { key: 'Escape' });
+
+    expect(screen.queryByRole('dialog', { name: 'Color picker' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open color picker' })).toHaveAttribute('aria-expanded', 'false');
+  });
 });
