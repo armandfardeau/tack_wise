@@ -8,8 +8,6 @@ import type { ExportOptions, ExportQuality, Theme } from '../types';
 interface AppHeaderProps {
   isExporting: boolean;
   presenterMode?: boolean;
-  scenarioTitle?: string;
-  onScenarioTitleChange?: (title: string) => void;
   onNewScenario?: () => void;
   onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
@@ -31,8 +29,6 @@ interface AppHeaderProps {
 export default function AppHeader({
   isExporting,
   presenterMode = false,
-  scenarioTitle,
-  onScenarioTitleChange,
   onNewScenario,
   onExport,
   onImportJson,
@@ -57,21 +53,6 @@ export default function AppHeader({
           <span className="eyebrow">Tactical Sailing Simulator</span>
           <h1>Tack Wise <Sailboat className="brand-icon" aria-hidden="true" size={24} /></h1>
         </div>
-        {onScenarioTitleChange && (
-          <div className="scenario-title-editor">
-            <label htmlFor="scenario-title">Scenario title</label>
-            <input
-              id="scenario-title"
-              className="scenario-title-input"
-              type="text"
-              value={scenarioTitle ?? ''}
-              placeholder="Untitled situation"
-              readOnly={presenterMode}
-              onChange={(event) => onScenarioTitleChange(event.target.value)}
-              onBlur={(event) => onScenarioTitleChange(event.target.value.trim() || 'Untitled situation')}
-            />
-          </div>
-        )}
       </div>
       <div className="header-tools" aria-label="Scenario tools">
         <ExportActions

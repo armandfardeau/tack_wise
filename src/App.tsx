@@ -249,8 +249,6 @@ export default function App() {
       <AppHeader
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
-        scenarioTitle={scenario.settings.title ?? 'Untitled situation'}
-        onScenarioTitleChange={(title) => scenario.updateSettings({ title })}
         onNewScenario={handleNewScenario}
         onExport={handleExport}
         onImportJson={handleImportJson}
@@ -275,6 +273,8 @@ export default function App() {
         {!scenario.settings.presenterMode && <Sidebar
           currentFrameIndex={scenario.currentFrameIndex}
           frames={scenario.frames}
+          scenarioTitle={scenario.settings.title ?? 'Untitled situation'}
+          onScenarioTitleChange={(title) => scenario.updateSettings({ title })}
           unanimatableTransitionIndices={scenario.unanimatableTransitionIndices}
           onFixTransition={scenario.fixTransition}
           onAddFrame={scenario.addFrame}

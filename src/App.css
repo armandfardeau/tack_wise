@@ -79,7 +79,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-width: min(320px, 28vw);
+  min-width: 0;
 }
 
 .scenario-title-editor label {
@@ -91,7 +91,7 @@ body {
 }
 
 .scenario-title-input {
-  width: min(320px, 28vw);
+  width: 100%;
   min-height: 34px;
   padding: 6px 10px;
   border: 1px solid var(--border-color);
@@ -111,6 +111,17 @@ body {
 .scenario-title-input[readonly] {
   cursor: default;
   opacity: 0.85;
+}
+
+.sidebar-scenario-title-editor {
+  min-width: 0;
+  flex: 0 0 auto;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebar-scenario-title-editor .scenario-title-input {
+  width: 100%;
 }
 
 .branding h1 {
@@ -3289,15 +3300,6 @@ body {
     width: 100%;
     justify-content: space-between;
     gap: 12px;
-  }
-
-  .scenario-title-editor {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .scenario-title-input {
-    width: 100%;
   }
 
   .header-tools {
