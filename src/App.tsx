@@ -26,6 +26,7 @@ import UpdateToast from './components/UpdateToast';
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
+type ScenarioStartSource = 'new' | 'template' | 'import' | 'shared_link';
 
 function isStillImageFormat(format: ExportFormat): format is 'png' | 'jpeg' {
   return format === 'png' || format === 'jpeg';
@@ -41,6 +42,22 @@ function getVisibleContentRect(
     : frames.slice(Math.max(0, currentFrameIndex - 1), currentFrameIndex + 1);
 
   return getCanvasContentRect(visibleFrames);
+}
+
+function getScenarioAnalyticsProps(frames: ScenarioExportPayload['frames'], currentFrameIndex: number) {
+  const objectCount = frames.reduce((total, frame) => total
+    + frame.boats.length
+    + frame.marks.length
+    + (frame.connections?.length ?? 0)
+    + (frame.arrows?.length ?? 0)
+    + (frame.comments?.length ?? 0)
+    + (frame.images?.length ?? 0), 0);
+
+  return {
+    frame_count: frames.length,
+    object_count: objectCount,
+    current_frame_index: currentFrameIndex,
+  };
 }
 
 function getInitialTheme(): Theme {
@@ -84,7 +101,7 @@ export default function App() {
   const { redo, undo } = scenario;
   const { importScenario } = scenario;
   const shareScenarioPromiseRef = useRef<Promise<ScenarioExportPayload | null> | null>(null);
-  const loadScenarioAndFitRef = useRef<((payload: ScenarioExportPayload, templateId?: string | null) => void) | null>(null);
+  const loadScenarioAndFitRef = useRef<((payload: ScenarioExportPayload, templateId?: string | null, source?: Exclude<ScenarioStartSource, 'new'>) => void) | null>(null);
   const inspectorRequestIdRef = useRef(0);
   const modalReturnFocusRef = useRef<HTMLElement | null>(null);
 
@@ -106,6 +123,26 @@ export default function App() {
     document.title = page === 'about' ? 'About — Tack Wise' : 'Tack Wise';
   }, [page]);
 
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const donationStatus = params.get('donation');
+    if (donationStatus !== 'success' && donationStatus !== 'cancelled') return;
+
+    if (donationStatus === 'success') {
+      posthog.capture('donation_checkout_returned', {
+        provider: 'stripe',
+        has_checkout_session: Boolean(params.get('session_id')),
+      });
+    } else {
+      posthog.capture('donation_cancelled', { provider: 'stripe' });
+    }
+
+    params.delete('donation');
+    params.delete('session_id');
+    const nextSearch = params.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ''}${window.location.hash}`);
+  }, []);
+
   const handleLayerOpenInspector = (id: string, type: Exclude<SelectedType, null>) => {
     setIsSidebarOpen(false);
     scenario.selectObject(id, type);
@@ -113,7 +150,11 @@ export default function App() {
     setInspectorRequest({ id, type, requestId: inspectorRequestIdRef.current });
   };
 
-  const loadScenarioAndFit = (payload: ScenarioExportPayload, templateId: string | null = null) => {
+  const loadScenarioAndFit = (
+    payload: ScenarioExportPayload,
+    templateId: string | null = null,
+    source?: Exclude<ScenarioStartSource, 'new'>,
+  ) => {
     const contentRect = getVisibleContentRect(
       payload.frames,
       payload.currentFrameIndex,
@@ -125,6 +166,12 @@ export default function App() {
       setLoadedTemplateId(templateId);
     });
     viewport.fitCanvasToContent(contentRect);
+    if (source) {
+      posthog.capture('scenario_started', {
+        source,
+        ...getScenarioAnalyticsProps(payload.frames, payload.currentFrameIndex),
+      });
+    }
   };
   loadScenarioAndFitRef.current = loadScenarioAndFit;
 
@@ -134,7 +181,7 @@ export default function App() {
 
     void shareScenarioPromiseRef.current.then((sharedScenario) => {
       if (!isMounted || !sharedScenario) return;
-      loadScenarioAndFitRef.current?.(sharedScenario);
+      loadScenarioAndFitRef.current?.(sharedScenario, null, 'shared_link');
     });
 
     return () => {
@@ -161,24 +208,43 @@ export default function App() {
   };
 
   const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
-    posthog.capture('template_loaded', { template_id: template.id, template_title: template.title });
-    loadScenarioAndFit(scenarioPayloadFromTemplate(template), template.id);
+    posthog.capture('template_loaded', {
+      template_id: template.id,
+      ...getScenarioAnalyticsProps(template.frames, 0),
+    });
+    loadScenarioAndFit(scenarioPayloadFromTemplate(template), template.id, 'template');
   };
 
   const handleShareScenario = async () => {
-    const shareUrl = await createScenarioShareUrlAsync({
-      version: 2,
-      frames: scenario.frames,
-      currentFrameIndex: scenario.currentFrameIndex,
-      settings: scenario.settings,
-    });
+    const shareProps = {
+      source: loadedTemplateId ? 'template' : 'editor',
+      ...getScenarioAnalyticsProps(scenario.frames, scenario.currentFrameIndex),
+    };
 
-    posthog.capture('scenario_shared');
+    let shareUrl: string;
+    try {
+      shareUrl = await createScenarioShareUrlAsync({
+        version: 2,
+        frames: scenario.frames,
+        currentFrameIndex: scenario.currentFrameIndex,
+        settings: scenario.settings,
+      });
+    } catch {
+      posthog.capture('scenario_share_failed', { ...shareProps, reason: 'share_generation_failed' });
+      return;
+    }
+
     try {
       await navigator.clipboard.writeText(shareUrl);
+      posthog.capture('scenario_shared', { ...shareProps, share_method: 'clipboard' });
       window.alert('Share link copied to clipboard.');
     } catch {
-      window.prompt('Copy this share link:', shareUrl);
+      const promptResult = window.prompt('Copy this share link:', shareUrl);
+      if (promptResult !== null) {
+        posthog.capture('scenario_shared', { ...shareProps, share_method: 'prompt' });
+      } else {
+        posthog.capture('scenario_share_failed', { ...shareProps, reason: 'user_cancelled' });
+      }
     }
   };
 
@@ -233,8 +299,14 @@ export default function App() {
   }
 
   const resetToNewScenario = () => {
-    posthog.capture('new_scenario_created');
     scenario.createNewScenario();
+    posthog.capture('scenario_started', {
+      source: 'new',
+      frame_count: 1,
+      object_count: 0,
+      current_frame_index: 0,
+    });
+    posthog.capture('new_scenario_created', { source: 'new' });
     setLoadedTemplateId(null);
     setIsNewScenarioDialogOpen(false);
   };
@@ -250,19 +322,38 @@ export default function App() {
   };
 
   const handleExportAndStartNewScenario = () => {
-    exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex);
+    const exportProps = {
+      format: 'json',
+      trigger: 'new_scenario_dialog',
+      ...getScenarioAnalyticsProps(scenario.frames, scenario.currentFrameIndex),
+    };
+    try {
+      exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex);
+      posthog.capture('scenario_exported', exportProps);
+    } catch {
+      posthog.capture('scenario_export_failed', exportProps);
+    }
     resetToNewScenario();
   };
 
   const handleExport = (options: ExportOptions) => {
-    const exportProps: Record<string, unknown> = { format: options.format, theme: options.theme, auto_fit: options.autoFit };
+    const exportProps: Record<string, unknown> = {
+      format: options.format,
+      theme: options.theme,
+      auto_fit: options.autoFit,
+      ...getScenarioAnalyticsProps(scenario.frames, scenario.currentFrameIndex),
+    };
     if (isStillImageFormat(options.format) || options.format === 'gif' || options.format === 'webm' || options.format === 'mp4') {
       exportProps.fps = options.fps;
     }
-    posthog.capture('scenario_exported', exportProps);
 
     if (options.format === 'json') {
-      exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex);
+      try {
+        exportState.triggerJsonExport(scenario.frames, scenario.currentFrameIndex);
+        posthog.capture('scenario_exported', exportProps);
+      } catch {
+        posthog.capture('scenario_export_failed', exportProps);
+      }
       return;
     }
 
@@ -277,7 +368,10 @@ export default function App() {
         setIsImageExporting(true);
       });
       try {
-        exportState.triggerImageExport(options.format);
+        const succeeded = exportState.triggerImageExport(options.format);
+        posthog.capture(succeeded ? 'scenario_exported' : 'scenario_export_failed', exportProps);
+      } catch {
+        posthog.capture('scenario_export_failed', exportProps);
       } finally {
         restoreViewport(previousViewport);
         setIsImageExporting(false);
@@ -287,19 +381,27 @@ export default function App() {
     }
 
     flushSync(() => setExportTheme(options.theme));
-    void exportState.triggerExport(options.format, options.fps).finally(() => {
-      restoreViewport(previousViewport);
-      setExportTheme(null);
-    });
+    void exportState.triggerExport(options.format, options.fps)
+      .then((succeeded) => {
+        posthog.capture(succeeded ? 'scenario_exported' : 'scenario_export_failed', exportProps);
+      })
+      .finally(() => {
+        restoreViewport(previousViewport);
+        setExportTheme(null);
+      });
   };
 
   const handleImportJson = async (file: File) => {
     try {
       const payload = parseScenarioFromJson(await file.text());
-      posthog.capture('scenario_imported');
-      loadScenarioAndFit(payload);
+      posthog.capture('scenario_imported', {
+        source: 'file',
+        ...getScenarioAnalyticsProps(payload.frames, payload.currentFrameIndex),
+      });
+      loadScenarioAndFit(payload, null, 'import');
     } catch (error) {
       console.error('Import error: ', error);
+      posthog.capture('scenario_import_failed', { source: 'file', reason: 'invalid_json' });
       window.alert('Could not import scenario. Please select a valid Tack Wise JSON file.');
     }
   };
@@ -336,6 +438,12 @@ export default function App() {
         onTogglePresenter={() => {
           const nextPresenterMode = !scenario.settings.presenterMode;
           posthog.capture('presenter_mode_toggled', { presenter_mode: nextPresenterMode });
+          if (nextPresenterMode) {
+            posthog.capture('presentation_started', {
+              ...getScenarioAnalyticsProps(scenario.frames, scenario.currentFrameIndex),
+              display_mode: scenario.settings.displayMode,
+            });
+          }
           scenario.updateSettings({ presenterMode: nextPresenterMode });
         }}
         theme={theme}
@@ -415,10 +523,25 @@ export default function App() {
           onSetShowGrid={setShowGrid}
           onRedo={scenario.redo}
           onRestoreAutosave={() => scenario.restoreAutosave()}
-          onTogglePlaying={() => scenario.setIsPlaying((isPlaying) => !isPlaying)}
+          onTogglePlaying={() => {
+            const nextIsPlaying = !scenario.isPlaying;
+            if (nextIsPlaying) {
+              posthog.capture('playback_started', {
+                trigger: 'play_pause',
+                ...getScenarioAnalyticsProps(scenario.frames, scenario.currentFrameIndex),
+              });
+            }
+            scenario.setIsPlaying(nextIsPlaying);
+          }}
           onStepBackward={scenario.stepBackward}
           onStepForward={scenario.stepForward}
-          onReplayFromStart={scenario.replayFromStart}
+          onReplayFromStart={() => {
+            posthog.capture('playback_started', {
+              trigger: 'replay',
+              ...getScenarioAnalyticsProps(scenario.frames, 0),
+            });
+            scenario.replayFromStart();
+          }}
           onSetPlaySpeed={scenario.setPlaySpeed}
           playSpeed={scenario.playSpeed}
           onUndo={scenario.undo}

@@ -59,13 +59,20 @@ project settings:
 ```text
 VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
 STRIPE_SECRET_KEY=sk_live_...        # server-only; use a newly rotated key
+STRIPE_WEBHOOK_SECRET=whsec_...      # server-only; Stripe webhook signing secret
 STRIPE_CURRENCY=usd                   # optional; defaults to usd
 APP_URL=https://your-domain.vercel.app # recommended for return URLs
+POSTHOG_PROJECT_API_KEY=phc_...       # server-only; optional webhook capture token
+POSTHOG_HOST=https://eu.i.posthog.com  # server-only; defaults to client host if omitted
 ```
 
 The publishable key may be exposed to the browser. `STRIPE_SECRET_KEY` must be
 added only as a Vercel server environment variable and must never use the
 `VITE_` prefix. If `VITE_STRIPE_PAYMENT_LINK` is set, Tack Wise uses that
 directly instead of the Checkout donation form.
+
+To record verified `donation_completed` events, configure a Stripe webhook for
+`/api/stripe-webhook` and subscribe it to `checkout.session.completed` and
+`checkout.session.async_payment_succeeded`.
 
 The current scenario JSON format supports version 1 imports and version 2 exports when presentation settings are included.

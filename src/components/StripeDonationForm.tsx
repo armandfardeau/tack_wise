@@ -15,16 +15,23 @@ export default function StripeDonationForm() {
 
     const parsedAmount = Number(amount);
     if (!Number.isFinite(parsedAmount) || parsedAmount < 1 || parsedAmount > 10000) {
+      posthog.capture('donation_checkout_failed', { reason: 'invalid_amount' });
       setError('Choose an amount between 1 and 10,000.');
       return;
     }
 
     setIsSubmitting(true);
     try {
+      const distinctId = posthog.get_distinct_id();
+      const sessionId = posthog.get_session_id();
       const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: parsedAmount }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-POSTHOG-DISTINCT-ID': distinctId,
+          'X-POSTHOG-SESSION-ID': sessionId,
+        },
+        body: JSON.stringify({ amount: parsedAmount, distinct_id: distinctId, session_id: sessionId }),
       });
       const payload = await response.json() as { error?: string; sessionId?: string; url?: string | null };
       if (!response.ok || !payload.sessionId || !payload.url) throw new Error(payload.error || 'Unable to start Stripe Checkout.');
@@ -34,6 +41,7 @@ export default function StripeDonationForm() {
       posthog.capture('donation_checkout_started', { amount: parsedAmount });
       window.location.assign(payload.url);
     } catch (submitError) {
+      posthog.capture('donation_checkout_failed', { reason: 'session_creation_failed' });
       setError(submitError instanceof Error ? submitError.message : 'Unable to start Stripe Checkout.');
       setIsSubmitting(false);
     }
