@@ -7,6 +7,8 @@ import type { SituationTemplate } from '../data/situationTemplates';
 import { Copy, Info } from 'lucide-react';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
 import styles from './AppHeader.module.css';
+import exportStyles from './ExportActions.module.css';
+import viewStyles from './ViewActions.module.css';
 
 interface AppHeaderProps {
   isExporting: boolean;
@@ -59,7 +61,7 @@ export default function AppHeader({
       </div>
       <div className={styles.headerTools} aria-label="Scenario tools">
         <ExportActions
-          className="header-export-actions"
+          className={exportStyles.headerExportActions}
           isExporting={isExporting}
           onNewScenario={onNewScenario}
           onExport={onExport}
@@ -74,14 +76,14 @@ export default function AppHeader({
           theme={theme}
         />
         <ViewActions
-          className="view-actions header-view-actions"
+          className={`${viewStyles.viewActions} ${viewStyles.headerViewActions}`}
           presenterMode={presenterMode}
           theme={theme}
           onToggleTheme={onToggleTheme}
           onTogglePresenter={onTogglePresenter}
         />
         {onOpenAbout && <button type="button" className={`${styles.headerToolButton} ${styles.headerAboutButton}`} onClick={onOpenAbout}><Info aria-hidden="true" size={15} /> About</button>}
-        <div className="header-standard-utility-actions">
+        <div className={styles.headerStandardUtilityActions}>
           <SponsorshipActions {...sponsorship} />
           <button type="button" className={styles.headerToolButton} onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
         </div>

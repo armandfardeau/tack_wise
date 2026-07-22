@@ -12,7 +12,7 @@ interface ViewActionsProps {
 }
 
 export default function ViewActions({
-  className = 'view-actions',
+  className = styles.viewActions,
   presenterMode,
   theme,
   onToggleTheme,

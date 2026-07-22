@@ -46,6 +46,12 @@
   margin-left: 12px;
 }
 
+.headerStandardUtilityActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .headerToolButton {
   display: inline-flex;
   align-items: center;
@@ -99,6 +105,10 @@
     flex-wrap: wrap;
     overflow: visible;
     gap: 4px;
+  }
+
+  .headerStandardUtilityActions {
+    display: none;
   }
 
   .headerToolButton {
