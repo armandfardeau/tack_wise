@@ -226,6 +226,10 @@ body {
   position: relative;
 }
 
+.template-sheet-backdrop {
+  display: none;
+}
+
 .file-submenu-menu {
   position: absolute;
   top: -7px;
@@ -312,6 +316,17 @@ body {
   color: var(--text-muted);
   font-size: 0.78rem;
   text-align: center;
+}
+
+.template-list {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.template-sheet-header {
+  display: none;
 }
 
 .template-menu-divider {
@@ -3812,6 +3827,8 @@ body {
   }
 
   .app-header {
+    position: relative;
+    z-index: 50;
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
@@ -3842,10 +3859,87 @@ body {
   }
 
   .file-submenu-menu {
-    position: static;
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 41;
+    width: 100%;
     min-width: 0;
-    margin: 0 4px 4px 8px;
-    box-shadow: none;
+    height: min(82dvh, 620px);
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px));
+    box-sizing: border-box;
+    margin: 0;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -14px 36px rgba(0, 0, 0, 0.42);
+    gap: 8px;
+  }
+
+  .template-sheet-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    padding: 0;
+    background: rgba(9, 13, 22, 0.62);
+    cursor: pointer;
+  }
+
+  .light-theme .template-sheet-backdrop {
+    background: rgba(20, 35, 38, 0.42);
+  }
+
+  .template-sheet-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px 2px;
+  }
+
+  .template-sheet-title {
+    color: var(--text-main);
+    font-size: 0.95rem;
+    font-weight: 800;
+  }
+
+  .template-sheet-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--bg-card);
+    color: var(--text-muted);
+    cursor: pointer;
+  }
+
+  .template-sheet-close:hover,
+  .template-sheet-close:focus-visible {
+    border-color: var(--accent-cyan);
+    color: var(--text-main);
+  }
+
+  .template-search {
+    flex: 0 0 auto;
+  }
+
+  .template-list {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 2px 2px 0;
   }
 
   .header-tool-btn {

@@ -78,6 +78,36 @@ describe('ExportActions menu behavior', () => {
     expect(screen.getByRole('searchbox', { name: /search templates/i })).toHaveValue('');
   });
 
+  it('dismisses the template sheet from its close control and backdrop', () => {
+    render(<ExportActions {...baseProps} templates={[{ id: 'one', title: 'One', frames: [] }]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+    fireEvent.change(screen.getByRole('searchbox', { name: /search templates/i }), { target: { value: 'one' } });
+    fireEvent.click(screen.getByRole('button', { name: /close templates sheet/i }));
+
+    expect(screen.queryByRole('menu', { name: /templates/i })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /dismiss template sheet/i }));
+
+    expect(screen.queryByRole('menu', { name: /templates/i })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+    expect(screen.getByRole('searchbox', { name: /search templates/i })).toHaveValue('');
+  });
+
+  it('keeps template results inside the dedicated list container', () => {
+    render(<ExportActions {...baseProps} templates={[{ id: 'one', title: 'One', frames: [] }]} />);
+
+    fireEvent.click(screen.getByRole('button', { name: /file options/i }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^templates$/i }));
+
+    const templateList = document.querySelector('.template-list');
+    expect(templateList).not.toBeNull();
+    expect(templateList).toContainElement(screen.getByRole('menuitem', { name: /one/i }));
+    expect(templateList).not.toContainElement(screen.getByRole('searchbox', { name: /search templates/i }));
+  });
+
   it('offers new and update template contribution actions', () => {
     const onContributeTemplate = jest.fn();
     const onUpdateTemplate = jest.fn();
