@@ -256,9 +256,15 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 19. Orphaned legacy rules
 
-- [ ] Classify before removing .control-row, .inline-buttons, .add-btn, .file-add-btn, .object-toolbar .inline-buttons, .object-toolbar .add-btn, .rule-list, .rule-chip, .library-select-row, .library-items, .library-delete, and .export-quality-control.
-- [ ] Confirm each selector has no runtime usage, test-only usage, or dynamically generated usage.
-- [ ] Remove only after related migration and regression checks are complete.
+- [x] Classify before removing .control-row, .inline-buttons, .add-btn, .file-add-btn, .object-toolbar .inline-buttons, .object-toolbar .add-btn, .rule-list, .rule-chip, .library-select-row, .library-items, .library-delete, and .export-quality-control.
+- [x] Confirm each selector has no runtime usage, test-only usage, or dynamically generated usage.
+- [x] Remove only after related migration and regression checks are complete.
+
+#### Item 19 audit record (2026-07-22)
+
+- Original global CSS: `.export-quality-control` and its `select` descendant defined an export-quality flex row and compact select; `.file-add-btn` and its hover state defined a dashed file-menu add action; `.object-toolbar .inline-buttons` and `.object-toolbar .add-btn` supplied object-toolbar spacing and compact add-button sizing; `.rule-list` and `.rule-chip` defined wrapped rule tags; `.library-select-row`, `.library-items`, and `.library-delete` (including hover) defined library selector spacing, item stacking, and truncating delete controls; `.control-row`, its `label` descendant, and its range-input descendant defined control spacing and range layout; `.inline-buttons` and `.add-btn` defined shared inline action layout and add-button appearance/hover behavior.
+- Runtime/test/dynamic audit: exact-token searches across the complete tracked `src/`, `tests/`, and data tree found no runtime, test-only, or dynamically generated usage for any item 19 selector. The broader search only found `connection-add-btn`, which is a distinct item 9 selector and remains in `App.css` for that migration. No `object-toolbar` usage exists in the repository.
+- Classification and removal: all twelve item 19 selector groups were confirmed orphaned and removed from `src/App.css`; no replacement module or React refactor was required. No theme, responsive, print, animation, or shared-contract rule was associated with these selectors.
 
 ## Responsive and Cross-Cutting Requirements
 
