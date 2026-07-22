@@ -1,6 +1,7 @@
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { Copy, Layers, Pause, Pencil, Play, Plus, RotateCcw, SkipBack, SkipForward, Trash2, TriangleAlert, Wrench } from 'lucide-react';
 import type { Frame } from '../types';
+import styles from './Timeline.module.css';
 
 interface TimelineProps {
   variant?: 'bottom' | 'sidebar';
@@ -22,6 +23,8 @@ interface TimelineProps {
   playSpeed?: number;
   onSetPlaySpeed?: (speed: number) => void;
 }
+
+const joinClasses = (...classNames: Array<string | false | undefined>) => classNames.filter(Boolean).join(' ');
 
 export default function Timeline({
   variant = 'bottom',
@@ -120,69 +123,80 @@ export default function Timeline({
     && (frames[0].images?.length ?? 0) === 0;
 
   return (
-    <footer className={`timeline-bar${variant === 'sidebar' ? ' sidebar-timeline' : ''}`}>
-      {variant !== 'sidebar' && <div className="playback-controls">
+    <footer className={joinClasses(styles.timelineBar, variant === 'sidebar' && styles.sidebarTimeline)}>
+      {variant !== 'sidebar' && <div className={styles.playbackControls}>
         <button
           type="button"
-          className="timeline-action-btn playback-step-btn"
+          className={joinClasses(styles.timelineActionButton, styles.playbackStepButton)}
           aria-label="Step backward"
           title="Step backward"
           onClick={onStepBackward}
           disabled={currentFrameIndex <= 0}
         >
-          <span className="timeline-control-icon" aria-hidden="true"><SkipBack size={16} /></span>
-          <span className="timeline-control-label">Backward</span>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><SkipBack size={16} /></span>
+          <span className={styles.timelineControlLabel}>Backward</span>
         </button>
-        <button type="button" className={`play-pause-btn ${isPlaying ? 'playing' : ''}`} aria-label={isPlaying ? 'Pause' : 'Play'} onClick={onTogglePlaying}>
-          <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</span>
+        <button type="button" className={joinClasses(styles.playPauseButton, isPlaying && styles.playing)} aria-label={isPlaying ? 'Pause' : 'Play'} onClick={onTogglePlaying}>
+          <span className={styles.timelineControlIcon} aria-hidden="true">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</span>
         </button>
         <button
           type="button"
-          className="timeline-action-btn playback-step-btn"
+          className={joinClasses(styles.timelineActionButton, styles.playbackStepButton)}
           aria-label="Step forward"
           title="Step forward"
           onClick={onStepForward}
           disabled={currentFrameIndex >= frames.length - 1}
         >
-          <span className="timeline-control-icon" aria-hidden="true"><SkipForward size={16} /></span>
-          <span className="timeline-control-label">Forward</span>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><SkipForward size={16} /></span>
+          <span className={styles.timelineControlLabel}>Forward</span>
         </button>
         <button
           type="button"
-          className="timeline-action-btn playback-replay-btn"
+          className={joinClasses(styles.timelineActionButton, styles.playbackReplayButton)}
           aria-label="Replay from start"
           title="Replay from start"
           onClick={onReplayFromStart}
         >
-          <span className="timeline-control-icon" aria-hidden="true"><RotateCcw size={16} /></span>
-          <span className="timeline-control-label">Replay</span>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><RotateCcw size={16} /></span>
+          <span className={styles.timelineControlLabel}>Replay</span>
         </button>
-        <select className="speed-selector" value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))} aria-label="Playback speed">
+        <select className={styles.speedSelector} value={playSpeed} onChange={(event) => onSetPlaySpeed(Number(event.target.value))} aria-label="Playback speed">
           <option value="5000">Slow (5s)</option>
           <option value="2000">Normal (2s)</option>
           <option value="1000">Fast (1s)</option>
           <option value="500">Very fast (0.5s)</option>
         </select>
-        <button type="button" className="timeline-action-btn" aria-label="Add frame" onClick={onAddFrame}>
-          <span className="timeline-control-icon" aria-hidden="true"><Plus size={16} /></span>
-          <span className="timeline-control-label">Add Frame</span>
+        <button type="button" className={styles.timelineActionButton} aria-label="Add frame" onClick={onAddFrame}>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><Plus size={16} /></span>
+          <span className={styles.timelineControlLabel}>Add Frame</span>
         </button>
-        <button type="button" className="timeline-action-btn" aria-label="Duplicate frame" onClick={() => onDuplicateFrame(currentFrameIndex)}>
-          <span className="timeline-control-icon" aria-hidden="true"><Copy size={16} /></span>
-          <span className="timeline-control-label">Duplicate</span>
+        <button type="button" className={styles.timelineActionButton} aria-label="Duplicate frame" onClick={() => onDuplicateFrame(currentFrameIndex)}>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><Copy size={16} /></span>
+          <span className={styles.timelineControlLabel}>Duplicate</span>
         </button>
-        <button type="button" className="timeline-action-btn delete-frame-btn" aria-label="Delete frame" onClick={() => onDeleteFrame(currentFrameIndex)} disabled={frames.length <= 1}>
-          <span className="timeline-control-icon" aria-hidden="true"><Trash2 size={16} /></span>
-          <span className="timeline-control-label">Delete</span>
+        <button type="button" className={joinClasses(styles.timelineActionButton, styles.deleteFrameButton)} aria-label="Delete frame" onClick={() => onDeleteFrame(currentFrameIndex)} disabled={frames.length <= 1}>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><Trash2 size={16} /></span>
+          <span className={styles.timelineControlLabel}>Delete</span>
         </button>
       </div>}
-      <div className="frames-scrubber" aria-label="Scenario frames">
+      <div className={styles.framesScrubber} aria-label="Scenario frames">
         {frames.map((frame, index) => {
           const isEditing = editingFrameIndex === index;
-          const thumbnailClassName = `frame-thumbnail ${index === currentFrameIndex ? 'active' : ''}`;
           const hasUnanimatableIncomingTransition = unanimatableTransitionIndexSet.has(index - 1);
           const hasUnanimatableOutgoingTransition = unanimatableTransitionIndexSet.has(index);
           const hasUnanimatableTransition = hasUnanimatableIncomingTransition || hasUnanimatableOutgoingTransition;
+          const thumbnailClassName = joinClasses(styles.frameThumbnail, index === currentFrameIndex && styles.active);
+          const thumbnailRowClassName = joinClasses(
+            styles.frameThumbnailRow,
+            variant === 'sidebar' && onOpenLayers && styles.hasLayersButton,
+            index === currentFrameIndex && styles.hasEditButton,
+            variant === 'sidebar' && hasUnanimatableTransition && styles.hasUnanimatableTransition,
+          );
+          const editingThumbnailRowClassName = joinClasses(
+            styles.frameThumbnailRow,
+            variant === 'sidebar' && onOpenLayers && styles.hasLayersButton,
+            variant === 'sidebar' && hasUnanimatableTransition && styles.hasUnanimatableTransition,
+          );
           const transitionWarningLabel = hasUnanimatableIncomingTransition
             ? `Transition from frame ${index} to frame ${index + 1} cannot be animated`
             : '';
@@ -191,12 +205,12 @@ export default function Timeline({
             return (
               <Fragment key={frame.id}>
                 {variant === 'sidebar' && hasUnanimatableIncomingTransition && (
-                  <div className="frame-transition-warning" role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
+                  <div className={styles.frameTransitionWarning} role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
                     <TriangleAlert aria-hidden="true" size={14} />
                     <span>Cannot animate transition</span>
                     <button
                       type="button"
-                      className="frame-transition-fix-btn"
+                      className={styles.frameTransitionFixButton}
                       aria-label={`Fix transition from frame ${index} to frame ${index + 1}`}
                       title="Fix transition"
                       onClick={(event) => {
@@ -209,13 +223,13 @@ export default function Timeline({
                     </button>
                   </div>
                 )}
-                <div className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${variant === 'sidebar' && hasUnanimatableTransition ? ' has-unanimatable-transition' : ''}`}>
+                <div className={editingThumbnailRowClassName}>
                 <div className={thumbnailClassName} role="group" aria-label={`Edit frame ${index + 1}`}>
-                  <span className="thumbnail-num">{index + 1}</span>
+                  <span className={styles.thumbnailNum}>{index + 1}</span>
                   <input
                     ref={titleInputRef}
                     type="text"
-                    className="thumbnail-title-input"
+                    className={styles.thumbnailTitleInput}
                     aria-label={`Frame ${index + 1} title`}
                     value={draftTitle}
                     onChange={(event) => setDraftTitle(event.target.value)}
@@ -225,7 +239,7 @@ export default function Timeline({
                 </div>
                 <button
                   type="button"
-                  className="frame-duplicate-btn"
+                  className={styles.frameDuplicateButton}
                   aria-label={`Duplicate frame ${index + 1}`}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -237,7 +251,7 @@ export default function Timeline({
                 {variant === 'sidebar' && onOpenLayers && (
                   <button
                     type="button"
-                    className="frame-layers-btn"
+                    className={styles.frameLayersButton}
                     aria-label={`Show layers for frame ${index + 1}`}
                     onClick={(event) => {
                       event.stopPropagation();
@@ -249,7 +263,7 @@ export default function Timeline({
                 )}
                 <button
                   type="button"
-                  className="frame-delete-btn"
+                  className={styles.frameDeleteButton}
                   aria-label={`Delete frame ${index + 1}`}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -267,12 +281,12 @@ export default function Timeline({
           return (
             <Fragment key={frame.id}>
               {variant === 'sidebar' && hasUnanimatableIncomingTransition && (
-                <div className="frame-transition-warning" role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
+                <div className={styles.frameTransitionWarning} role="status" aria-label={transitionWarningLabel} title={transitionWarningLabel}>
                   <TriangleAlert aria-hidden="true" size={14} />
                   <span>Cannot animate transition</span>
                   <button
                     type="button"
-                    className="frame-transition-fix-btn"
+                    className={styles.frameTransitionFixButton}
                     aria-label={`Fix transition from frame ${index} to frame ${index + 1}`}
                     title="Fix transition"
                     onClick={(event) => {
@@ -285,16 +299,16 @@ export default function Timeline({
                   </button>
                 </div>
               )}
-              <div className={`frame-thumbnail-row${variant === 'sidebar' && onOpenLayers ? ' has-layers-button' : ''}${index === currentFrameIndex ? ' has-edit-button' : ''}${variant === 'sidebar' && hasUnanimatableTransition ? ' has-unanimatable-transition' : ''}`}>
+              <div className={thumbnailRowClassName}>
               <button
                 type="button"
                 className={thumbnailClassName}
                 onClick={() => onSelectFrame(index)}
                 aria-current={index === currentFrameIndex ? 'step' : undefined}
               >
-                <span className="thumbnail-num">{index + 1}</span>
+                <span className={styles.thumbnailNum}>{index + 1}</span>
                 <span
-                  className="thumbnail-title"
+                  className={styles.thumbnailTitle}
                   onClick={(event) => handleTitleClick(index, event)}
                   onDoubleClick={(event) => startEditing(index, event)}
                   onPointerDown={handleTitlePointerDown}
@@ -307,7 +321,7 @@ export default function Timeline({
               {index === currentFrameIndex && (
                 <button
                   type="button"
-                  className="frame-edit-btn"
+                  className={styles.frameEditButton}
                   aria-label={`Edit frame ${index + 1}`}
                   onClick={(event) => startEditing(index, event)}
                 >
@@ -318,7 +332,7 @@ export default function Timeline({
               {variant === 'sidebar' && onOpenLayers && (
                 <button
                   type="button"
-                  className="frame-layers-btn"
+                  className={styles.frameLayersButton}
                   aria-label={`Show layers for frame ${index + 1}`}
                   onClick={(event) => {
                     event.stopPropagation();
@@ -330,7 +344,7 @@ export default function Timeline({
               )}
               <button
                 type="button"
-                className="frame-duplicate-btn"
+                className={styles.frameDuplicateButton}
                 aria-label={`Duplicate frame ${index + 1}`}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -341,7 +355,7 @@ export default function Timeline({
               </button>
               <button
                 type="button"
-                className="frame-delete-btn"
+                className={styles.frameDeleteButton}
                 aria-label={`Delete frame ${index + 1}`}
                 onClick={(event) => {
                   event.stopPropagation();
@@ -357,15 +371,15 @@ export default function Timeline({
         })}
       </div>
       {isNewScenario && (
-        <p className="timeline-context-hint" role="status">
+        <p className={styles.timelineContextHint} role="status">
           <Pencil aria-hidden="true" size={14} />
           <span>Select a frame, then choose Edit to rename it.</span>
         </p>
       )}
       {variant === 'sidebar' && (
-        <button type="button" className="timeline-action-btn sidebar-add-frame-btn" aria-label="Add frame" onClick={onAddFrame}>
-          <span className="timeline-control-icon" aria-hidden="true"><Plus size={16} /></span>
-          <span className="timeline-control-label">Add Frame</span>
+        <button type="button" className={joinClasses(styles.timelineActionButton, styles.sidebarAddFrameButton)} aria-label="Add frame" onClick={onAddFrame}>
+          <span className={styles.timelineControlIcon} aria-hidden="true"><Plus size={16} /></span>
+          <span className={styles.timelineControlLabel}>Add Frame</span>
         </button>
       )}
     </footer>
