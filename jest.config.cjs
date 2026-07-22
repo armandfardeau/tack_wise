@@ -3,6 +3,9 @@ module.exports = {
   watchman: false,
   roots: ['<rootDir>/tests'],
   setupFilesAfterEnv: ['<rootDir>/tests/setup.ts'],
+  moduleNameMapper: {
+    '\\.(css)$': '<rootDir>/tests/styleMock.js',
+  },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.jest.json' }],
   },

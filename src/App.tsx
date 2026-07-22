@@ -17,22 +17,27 @@ import { useScenarioExport } from './hooks/useScenarioExport';
 import { scenarioPayloadFromTemplate, situationTemplates } from './data/situationTemplates';
 import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
 import { getCanvasContentBounds, getCanvasContentRect, type CanvasContentRect } from './utils/simulation';
-import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
-import type { ExportFormat, ExportOptions, ExportQuality, Theme } from './types';
+import { sponsorshipLinks, templateRepository } from './utils/appConfig';
+import type { TemplateContributionMode } from './utils/templateContribution';
+import type { DisplayMode, ExportFormat, ExportOptions, ExportQuality, ScenarioExportPayload, Theme } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
-const DEFAULT_GITHUB_SPONSORS_URL = 'https://github.com/sponsors/armandfardeau';
-const sponsorshipLinks = {
-  stripeUrl: import.meta.env.VITE_STRIPE_PAYMENT_LINK,
-  stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-  githubUrl: import.meta.env.VITE_GITHUB_SPONSORS_URL || DEFAULT_GITHUB_SPONSORS_URL,
-  donationUrl: import.meta.env.VITE_DONATION_URL,
-};
-const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
 
 function isStillImageFormat(format: ExportFormat): format is 'png' | 'jpeg' {
   return format === 'png' || format === 'jpeg';
+}
+
+function getVisibleContentRect(
+  frames: ScenarioExportPayload['frames'],
+  currentFrameIndex: number,
+  displayMode: DisplayMode,
+) {
+  const visibleFrames = displayMode === 'cumulative'
+    ? frames.slice(0, currentFrameIndex + 1)
+    : frames.slice(Math.max(0, currentFrameIndex - 1), currentFrameIndex + 1);
+
+  return getCanvasContentRect(visibleFrames);
 }
 
 function getInitialTheme(): Theme {
@@ -52,13 +57,10 @@ export default function App() {
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
   const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
-  const visibleCanvasContentRect = useMemo(() => {
-    const visibleFrames = scenario.settings.displayMode === 'cumulative'
-      ? scenario.frames.slice(0, scenario.currentFrameIndex + 1)
-      : scenario.frames.slice(Math.max(0, scenario.currentFrameIndex - 1), scenario.currentFrameIndex + 1);
-
-    return getCanvasContentRect(visibleFrames);
-  }, [scenario.currentFrameIndex, scenario.frames, scenario.settings.displayMode]);
+  const visibleCanvasContentRect = useMemo(
+    () => getVisibleContentRect(scenario.frames, scenario.currentFrameIndex, scenario.settings.displayMode),
+    [scenario.currentFrameIndex, scenario.frames, scenario.settings.displayMode],
+  );
   const viewport = useCanvasViewport(canvasContentBounds);
   const [showGrid, setShowGrid] = useState(true);
   const [gridSnapEnabled, setGridSnapEnabled] = useState(true);
@@ -77,7 +79,8 @@ export default function App() {
   const gridSnap = useGridSnap(gridSnapEnabled);
   const { redo, undo } = scenario;
   const { importScenario } = scenario;
-  const loadedShareRef = useRef(false);
+  const shareScenarioPromiseRef = useRef<Promise<ScenarioExportPayload | null> | null>(null);
+  const loadScenarioAndFitRef = useRef<((payload: ScenarioExportPayload, templateId?: string | null) => void) | null>(null);
   const inspectorRequestIdRef = useRef(0);
 
   const navigateTo = (nextPage: 'editor' | 'about') => {
@@ -105,21 +108,34 @@ export default function App() {
     setInspectorRequest({ id, type, requestId: inspectorRequestIdRef.current });
   };
 
-  useEffect(() => {
-    if (loadedShareRef.current) return;
-    loadedShareRef.current = true;
+  const loadScenarioAndFit = (payload: ScenarioExportPayload, templateId: string | null = null) => {
+    const contentRect = getVisibleContentRect(
+      payload.frames,
+      payload.currentFrameIndex,
+      payload.settings?.displayMode ?? 'single',
+    );
 
+    flushSync(() => {
+      importScenario(payload);
+      setLoadedTemplateId(templateId);
+    });
+    viewport.fitCanvasToContent(contentRect);
+  };
+  loadScenarioAndFitRef.current = loadScenarioAndFit;
+
+  useEffect(() => {
     let isMounted = true;
-    void parseScenarioShareUrlAsync().then((sharedScenario) => {
+    shareScenarioPromiseRef.current ??= parseScenarioShareUrlAsync();
+
+    void shareScenarioPromiseRef.current.then((sharedScenario) => {
       if (!isMounted || !sharedScenario) return;
-      importScenario(sharedScenario);
-      setLoadedTemplateId(null);
+      loadScenarioAndFitRef.current?.(sharedScenario);
     });
 
     return () => {
       isMounted = false;
     };
-  }, [importScenario]);
+  }, []);
 
   const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
 
@@ -140,8 +156,7 @@ export default function App() {
   };
 
   const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
-    scenario.importScenario(scenarioPayloadFromTemplate(template));
-    setLoadedTemplateId(template.id);
+    loadScenarioAndFit(scenarioPayloadFromTemplate(template), template.id);
   };
 
   const handleShareScenario = async () => {
@@ -266,8 +281,7 @@ export default function App() {
   const handleImportJson = async (file: File) => {
     try {
       const payload = parseScenarioFromJson(await file.text());
-      scenario.importScenario(payload);
-      setLoadedTemplateId(null);
+      loadScenarioAndFit(payload);
     } catch (error) {
       console.error('Import error: ', error);
       window.alert('Could not import scenario. Please select a valid Tack Wise JSON file.');
