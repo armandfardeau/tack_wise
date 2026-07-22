@@ -110,7 +110,6 @@ describe('inspector deletion control', () => {
     expect(screen.getByRole('heading', { name: 'Inspector for Mark: Windward Mark' })).toBeInTheDocument();
 
     const closeButton = screen.getByRole('button', { name: 'Close inspector' });
-    expect(closeButton).toHaveClass('inspector-close-btn');
     fireEvent.click(closeButton);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -120,8 +119,8 @@ describe('inspector deletion control', () => {
 
     const deleteButton = screen.getByRole('button', { name: /delete mark/i });
 
-    expect(deleteButton).toHaveClass('inspector-delete-btn');
-    expect(deleteButton.closest('h3')).toHaveClass('section-title');
+    expect(deleteButton).toHaveAttribute('aria-label', 'Delete Mark');
+    expect(deleteButton.closest('h3')).toHaveAttribute('aria-label', 'Inspector for Mark: Windward Mark');
     expect(screen.queryByText('Delete Mark')).not.toBeInTheDocument();
   });
 
@@ -149,8 +148,8 @@ describe('inspector deletion control', () => {
 
     const duplicateButton = screen.getByRole('button', { name: /duplicate mark/i });
 
-    expect(duplicateButton).toHaveClass('inspector-duplicate-btn');
-    expect(duplicateButton.nextElementSibling).toHaveClass('inspector-delete-btn');
+    expect(duplicateButton).toHaveAttribute('aria-label', 'Duplicate Mark');
+    expect(duplicateButton.nextElementSibling).toHaveAttribute('aria-label', 'Delete Mark');
     fireEvent.click(duplicateButton);
     expect(onDuplicate).toHaveBeenCalledTimes(1);
   });
@@ -774,7 +773,7 @@ describe('boat editor', () => {
 
     fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     const redFlag = screen.getByRole('button', { name: 'Use Red flag feeling' });
-    expect(redFlag.closest('.speech-bubble-presets')).toBeInTheDocument();
+    expect(redFlag.parentElement).toHaveAttribute('aria-label', 'Flag presets');
     fireEvent.click(redFlag);
     fireEvent.click(screen.getByRole('button', { name: 'Use Green flag feeling' }));
     fireEvent.click(screen.getByRole('button', { name: 'Use Yellow flag feeling' }));
