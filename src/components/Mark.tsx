@@ -185,7 +185,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       }}
     >
       {/* Visual representation of the buoy */}
-      {renderZone(isConnectionTarget ? '#22d3ee' : isSelected ? '#ffffff' : '#1e293b')}
+      {renderZone(isConnectionTarget ? '#22d3ee' : isSelected ? '#ffffff' : mark.color)}
       {offenseStroke && (
         <Circle
           radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}

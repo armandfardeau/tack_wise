@@ -46,4 +46,14 @@ describe('Mark', () => {
     rerender(<Mark mark={triangleMark} isSelected={false} readOnly />);
     expect(screen.queryByTestId('konva-circle')).not.toBeInTheDocument();
   });
+
+  it('keeps the enabled zone visible when the mark is deselected', () => {
+    const { rerender } = render(<Mark mark={{ ...triangleMark, showZone: true }} isSelected readOnly />);
+
+    expect(screen.getByTestId('konva-circle')).toHaveAttribute('stroke', '#ffffff');
+
+    rerender(<Mark mark={{ ...triangleMark, showZone: true }} isSelected={false} readOnly />);
+
+    expect(screen.getByTestId('konva-circle')).toHaveAttribute('stroke', '#ef4444');
+  });
 });
