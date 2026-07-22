@@ -219,7 +219,7 @@ describe('AppHeader', () => {
     expect(screen.getByRole('menu', { name: /about and support/i })).toHaveStyle({
       top: '82px',
       left: '28px',
-      maxHeight: '682px',
+      maxHeight: '674px',
       visibility: 'visible',
     });
 
