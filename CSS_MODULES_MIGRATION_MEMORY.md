@@ -80,9 +80,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 4. View actions
 
-- [ ] Migrate .view-dropdown, .view-menu-trigger, .view-menu-chevron, .view-dropdown-menu, .view-menu-item, and hover/focus/disabled behavior.
-- [ ] Preserve shared action-button and icon composition.
+- [x] Migrate .view-dropdown, .view-menu-trigger, .view-menu-chevron, .view-dropdown-menu, .view-menu-item, and hover/focus/disabled behavior.
+- [x] Preserve shared action-button and icon composition.
 - Primary file: src/components/ViewActions.tsx.
+
+#### Item 4 migration record (2026-07-22)
+
+- Original global CSS: `.action-btn` and its hover state supplied the shared button base; `.action-icon` supplied icon alignment; `.view-dropdown`, `.view-menu-trigger`, `.view-menu-chevron`, `.view-dropdown-menu`, `.view-menu-item`, and its hover state supplied the View menu layout, positioning, spacing, and interaction behavior. The `.header-view-actions .action-btn` rules supplied the 34px desktop header sizing and the 32px/0.74rem mobile sizing.
+- New module: `src/components/ViewActions.module.css` contains the equivalent local rules under `actionButton`, `actionIcon`, `viewDropdown`, `viewMenuTrigger`, `viewMenuChevron`, `viewDropdownMenu`, and `viewMenuItem`. The narrow `:global(.header-view-actions) .actionButton` selectors preserve the existing header modifier and its responsive sizing. The `header-view-actions` root gap remains global because it is an existing header layout contract.
+- React refactor: `ViewActions` imports the module, composes `actionButton` with the trigger and menu-item classes, and converts the dropdown, chevron, and icon references. The caller-provided `className` remains unchanged so existing `view-actions header-view-actions` modifiers continue to apply. No runtime component or test depends on the removed global View actions selectors.
+- Verification: `npm run build`, `npm run lint`, all 35 Jest suites (259 tests), targeted ViewActions tests (2 tests), `git diff --check`, and browser checks at 1280×800 and 390×844 passed. The mobile check confirmed the compact 32px trigger and an in-viewport menu. The temporary browser viewport was reset after verification.
 
 ### 5. Header more-actions menu
 
@@ -252,5 +259,5 @@ The migration is complete only when:
 
 - Audit: complete.
 - Memory document: created.
-- Component migrations: items 1, 2, and 3 complete; item 4 is next.
-- Next action: process item 4 only after confirmation.
+- Component migrations: items 1, 2, 3, and 4 complete; item 5 is next.
+- Next action: wait for confirmation or a specific next item before processing item 5.

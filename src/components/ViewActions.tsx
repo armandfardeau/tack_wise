@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, Eye, Moon, Presentation, Sun } from 'lucide-react';
 import type { Theme } from '../types';
+import styles from './ViewActions.module.css';
 
 interface ViewActionsProps {
   className?: string;
@@ -42,23 +43,23 @@ export default function ViewActions({
 
   return (
     <div className={className}>
-      <div ref={viewMenuRef} className="view-dropdown">
+      <div ref={viewMenuRef} className={styles.viewDropdown}>
         <button
           type="button"
-          className="action-btn view-menu-trigger"
+          className={`${styles.actionButton} ${styles.viewMenuTrigger}`}
           aria-expanded={isViewMenuOpen}
           aria-haspopup="menu"
           aria-label="View options"
           onClick={() => setIsViewMenuOpen((isOpen) => !isOpen)}
         >
-          <span className="action-icon" aria-hidden="true"><Eye size={16} /></span>
+          <span className={styles.actionIcon} aria-hidden="true"><Eye size={16} /></span>
           <span className="action-label">View</span>
-          <span className="view-menu-chevron" aria-hidden="true"><ChevronDown size={14} /></span>
+          <span className={styles.viewMenuChevron} aria-hidden="true"><ChevronDown size={14} /></span>
         </button>
-        {isViewMenuOpen && <div className="view-dropdown-menu" role="menu" aria-label="View options">
+        {isViewMenuOpen && <div className={styles.viewDropdownMenu} role="menu" aria-label="View options">
           <button
             type="button"
-            className="action-btn view-menu-item"
+            className={`${styles.actionButton} ${styles.viewMenuItem}`}
             role="menuitem"
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             onClick={() => {
@@ -66,19 +67,19 @@ export default function ViewActions({
               closeViewMenu();
             }}
           >
-            <span className="action-icon" aria-hidden="true">{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</span>
+            <span className={styles.actionIcon} aria-hidden="true">{theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}</span>
             <span className="action-label">{theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}</span>
           </button>
           <button
             type="button"
-            className="action-btn view-menu-item"
+            className={`${styles.actionButton} ${styles.viewMenuItem}`}
             role="menuitem"
             onClick={() => {
               onTogglePresenter?.();
               closeViewMenu();
             }}
           >
-            <span className="action-icon" aria-hidden="true"><Presentation size={16} /></span>
+            <span className={styles.actionIcon} aria-hidden="true"><Presentation size={16} /></span>
             <span className="action-label">{presenterMode ? 'Exit presenter' : 'Presenter mode'}</span>
           </button>
         </div>}
