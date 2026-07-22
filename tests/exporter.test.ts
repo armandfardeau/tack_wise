@@ -322,7 +322,7 @@ describe('scenario JSON export', () => {
 
     // The boat validator needs a real boat; keeping the fixture local makes the
     // optional-field coverage above independent from the application defaults.
-    payload.frames[0].boats = [{ id: 'boat-1', name: 'Boat', color: '#fff', x: 1, y: 2, heading: 3, sailAngle: 4, showHeadingLine: true, speechBubble: 'Room to tack?' }];
+    payload.frames[0].boats = [{ id: 'boat-1', name: 'Boat', color: '#fff', x: 1, y: 2, heading: 3, sailAngle: 4, showHeadingLine: true, speechBubble: 'Room 🟥' }];
 
     const result = parseScenarioFromJson(JSON.stringify(payload));
     const { connectedToMarkId: _legacyConnectedToMarkId, ...canonicalMark } = payload.frames[0].marks[0];
