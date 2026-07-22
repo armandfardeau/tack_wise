@@ -50,6 +50,15 @@ Open Collective, Ko-fi, Liberapay, or other public donation page. All support
 links open in a new tab. Use Stripe Payment Links rather than a secret Stripe
 API key in this frontend.
 
+### Feedback
+
+Create a Featurebase workspace and set `VITE_FEATUREBASE_APP_ID` to the App ID
+from Settings → Developers → Installation in the Vercel project settings.
+Tack Wise initializes the Featurebase feedback widget and exposes it through
+the More menu. Featurebase handles feedback boards, duplicate suggestions,
+voting, and screenshot capture. Anonymous visitors are supported; use a
+server-signed Featurebase JWT if you later add authenticated users.
+
 ### Vercel Stripe Checkout
 
 The optional donation form uses a Vercel serverless function at

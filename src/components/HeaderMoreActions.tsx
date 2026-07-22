@@ -5,6 +5,7 @@ import { SponsorshipMenuItems, type SponsorshipLinks } from './SponsorshipAction
 interface HeaderMoreActionsProps {
   onShareScenario?: () => void;
   onOpenAbout?: () => void;
+  feedbackEnabled?: boolean;
   sponsorship?: SponsorshipLinks;
 }
 
@@ -16,7 +17,7 @@ interface MenuPosition {
   maxHeight: number;
 }
 
-export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponsorship }: HeaderMoreActionsProps) {
+export default function HeaderMoreActions({ onShareScenario, onOpenAbout, feedbackEnabled = false, sponsorship }: HeaderMoreActionsProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
@@ -120,6 +121,13 @@ export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponso
               <ExternalLink aria-hidden="true" size={14} /> Explore the project
             </a>
           </div>
+
+          {feedbackEnabled && <>
+            <div className="header-more-divider" role="separator" />
+            <button type="button" className="header-more-link" role="menuitem" data-featurebase-feedback onClick={() => setIsOpen(false)}>
+              Send feedback
+            </button>
+          </>}
 
           {hasSupport && <>
             <div className="header-more-divider" role="separator" />

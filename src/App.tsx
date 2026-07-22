@@ -5,6 +5,7 @@ import AppHeader from './components/AppHeader';
 import AboutPage from './components/AboutPage';
 import CanvasWorkspace, { type InspectorRequest } from './components/CanvasWorkspace';
 import ExportOverlay from './components/ExportOverlay';
+import FeaturebaseFeedbackHost from './components/FeaturebaseFeedbackHost';
 import NewScenarioDialog from './components/NewScenarioDialog';
 import Sidebar from './components/Sidebar';
 import TemplateContributionDialog from './components/TemplateContributionDialog';
@@ -23,6 +24,7 @@ import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
 const DEFAULT_GITHUB_SPONSORS_URL = 'https://github.com/sponsors/armandfardeau';
+const featurebaseAppId = import.meta.env.VITE_FEATUREBASE_APP_ID;
 const sponsorshipLinks = {
   stripeUrl: import.meta.env.VITE_STRIPE_PAYMENT_LINK,
   stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
@@ -284,6 +286,7 @@ export default function App() {
         onImportJson={handleImportJson}
         onShareScenario={handleShareScenario}
         onOpenAbout={() => navigateTo('about')}
+        feedbackEnabled={Boolean(featurebaseAppId)}
         onLoadTemplate={handleLoadTemplate}
         onContributeTemplate={() => setTemplateContributionMode('create')}
         onUpdateTemplate={() => {
@@ -423,6 +426,8 @@ export default function App() {
           exportType={exportState.exportType}
         />
       )}
+
+      {featurebaseAppId && <FeaturebaseFeedbackHost theme={theme} />}
 
       {isNewScenarioDialogOpen && (
         <NewScenarioDialog

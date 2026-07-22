@@ -215,6 +215,16 @@ describe('AppHeader', () => {
     expect(onShareScenario).toHaveBeenCalledTimes(1);
   });
 
+  it('offers Featurebase feedback from the compact More menu when configured', () => {
+    renderHeader({ feedbackEnabled: true });
+
+    expect(screen.getByRole('button', { name: /send feedback/i })).toHaveAttribute('data-featurebase-feedback');
+
+    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+
+    expect(screen.getByRole('menuitem', { name: /send feedback/i })).toHaveAttribute('data-featurebase-feedback');
+  });
+
   it('keeps the More menu inside a narrow viewport', () => {
     const getBoundingClientRect = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
       if (this.classList.contains('header-more-trigger')) return rect(40, 318, 74, 284, 34, 34);
