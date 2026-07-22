@@ -248,11 +248,18 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 18. About page
 
-- [ ] Migrate .about-shell, .about-header, .about-back-btn, .about-page, .about-hero, .about-hero-copy, .about-eyebrow, .about-lede, .about-hero-actions, .about-primary-btn, and .about-text-link.
-- [ ] Migrate tactical board selectors: .about-hero-board, .about-board-grid, .about-board-footer, .about-board-label, .about-board-wind, .about-course-line, .about-mark, .about-boat, and .about-board-note.
-- [ ] Migrate story, capability, author, and footer selectors, including responsive layouts.
-- [ ] Preserve shared header/branding styles and theme behavior.
+- [x] Migrate .about-shell, .about-header, .about-back-btn, .about-page, .about-hero, .about-hero-copy, .about-eyebrow, .about-lede, .about-hero-actions, .about-primary-btn, and .about-text-link.
+- [x] Migrate tactical board selectors: .about-hero-board, .about-board-grid, .about-board-footer, .about-board-label, .about-board-wind, .about-course-line, .about-mark, .about-boat, and .about-board-note.
+- [x] Migrate story, capability, author, and footer selectors, including responsive layouts.
+- [x] Preserve shared header/branding styles and theme behavior.
 - Primary file: src/components/AboutPage.tsx.
+
+#### Item 18 migration record (2026-07-22)
+
+- Original global CSS: `.about-shell`, `.about-header`, `.about-back-btn` and its hover/focus state, the hero/copy/eyebrow/lede/action/button/link rules, tactical board frame/grid/labels/wind/course lines/marks/boats/note/footer, story/capability/author/footer layout and typography, and the `max-width: 900px` and `max-width: 640px` responsive overrides. The shared `AppHeader` and `BrandMark` styles were intentionally left in their existing modules/global contracts.
+- New module: `src/components/AboutPage.module.css` contains the equivalent local rules under readable names (`aboutShell`, `aboutHeader`, `aboutBackButton`, `aboutPage`, `hero`, `heroCopy`, `eyebrow`, `lede`, `heroActions`, `primaryButton`, `textLink`, `heroBoard`, `boardGrid`, `boardFooter`, `boardLabel`, `boardWind`, `courseLine`, `mark`, `boat`, `boardNote`, `story`, `capabilities`, `sectionHeading`, `capabilityGrid`, `capabilityCard`, `capabilityIcon`, `author`, `authorMark`, `authorCopy`, `authorCta`, and `footer`). The board footer active state is local as `isActive`; no broad `:global(...)` selector is needed because the About page theme variables remain supplied by the global `.dark-theme`/`.light-theme` shell contract.
+- React refactor: `AboutPage` imports the module, composes the local About shell/header modifier with the shared app shell and `AppHeader.module.css` classes, and converts all About content, tactical board, story, capability, author, footer, state, and responsive class references to module styles. DOM structure, callbacks, accessible labels, external links, and theme toggle behavior are unchanged.
+- Verification: targeted About page tests, full Jest suite, `npm run build`, `npm run lint`, `git diff --check`, and responsive/theme browser checks at desktop and mobile sizes passed.
 
 ### 19. Orphaned legacy rules
 
