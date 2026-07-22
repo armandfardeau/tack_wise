@@ -301,9 +301,35 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 - Runtime/test/dynamic audit: exact-token searches across the complete tracked `src/`, `tests/`, and data tree found no runtime, test-only, or dynamically generated usage for any item 19 selector. The broader search only found `connection-add-btn`, which is a distinct item 9 selector and remains in `App.css` for that migration. No `object-toolbar` usage exists in the repository.
 - Classification and removal: all twelve item 19 selector groups were confirmed orphaned and removed from `src/App.css`; no replacement module or React refactor was required. No theme, responsive, print, animation, or shared-contract rule was associated with these selectors.
 
+### 20. Update notification toast
+
+- [x] Migrate `.app-update-toast`, `.app-update-toast-message`, `.app-update-toast-actions`, `.app-update-toast-refresh`, and `.app-update-toast-dismiss`, including their animation, interaction states, and mobile layout.
+- [x] Preserve the toast’s status semantics, refresh/dismiss callbacks, focus-visible treatment, and responsive positioning.
+- Primary file: `src/components/UpdateToast.tsx`.
+
+#### Item 20 migration record (2026-07-22)
+
+- Original global CSS: `.app-update-toast` supplied the fixed notification layout, safe-area-aware bottom offset, sizing, surface, typography, and `appUpdateToastIn` animation. The message, icon, action-group, refresh-button, and dismiss-button selectors supplied their layout, theme, hover, and focus-visible behavior. The `max-width: 560px` media query expanded the toast to the mobile viewport margins.
+- New module: `src/components/UpdateToast.module.css` contains the equivalent local rules under `toast`, `message`, `actions`, `refresh`, and `dismiss`, with the animation and responsive rule colocated. The keyframe was scoped as the module-local `updateToastIn` animation.
+- React refactor: `UpdateToast` imports the module and converts all five legacy class references to local module properties. The DOM structure, ARIA status announcement, callbacks, button labels, and icon semantics are unchanged.
+- Verification: `npm run lint`, `npm run build`, all 36 Jest suites (263 tests), `git diff --check`, and a repository search confirming no legacy update-toast selectors remain all passed.
+
+### 21. Floating inspector and add menu
+
+- [x] Migrate `.floating-inspector`, `.floating-add-menu`, `.floating-add-button`, `.floating-add-actions`, and `.floating-add-action`, including presenter-mode, theme, responsive, open-state, hover, and sizing rules.
+- [x] Preserve draggable inspector behavior, add-menu positioning calculations, action callbacks, file input handling, and mobile layout.
+- Primary files: `src/components/CanvasWorkspace.tsx`, `src/components/FloatingAddMenu.tsx`, and `src/components/inspector/Inspector.module.css`.
+
+#### Item 21 migration record (2026-07-22)
+
+- Original global CSS: the floating inspector wrapper supplied its z-index, constrained dimensions, scroll behavior, dark/light surfaces, border, shadow, and pointer-event contract; its nested control-section and section-title overrides supplied the floating inspector spacing and heading layout. The floating add menu supplied absolute positioning, presenter-mode hiding, open-state scrolling and button rotation, mobile bottom-offset calculation, the circular trigger, action panel, light-theme surface/shadow, and action hover/icon styling.
+- New modules: `src/components/inspector/Inspector.module.css` now owns the local `floatingInspector` wrapper and its nested overrides, including the light-theme and mobile rules. `src/components/FloatingAddMenu.module.css` contains the local `menu`, `isOpen`, `addButton`, `actions`, and `action` rules, including narrow `:global(.presenter-mode)` and `:global(.light-theme)` ancestor contracts.
+- React refactor: `CanvasWorkspace` passes the inspector module class to `react-rnd`; `FloatingAddMenu` imports its module and composes the local open-state class. The existing inline CSS custom property used by the position calculation remains unchanged, and all DOM semantics and callbacks are preserved.
+- Verification: `git diff --check`, a selector search confirming no legacy floating class hooks remain in source CSS/runtime code, `npm run lint`, `npm run build`, and all 36 Jest suites (263 tests) passed.
+
 ### Post-migration audit corrections
 
-- Removed the remaining duplicate component blocks from `src/App.css` for LayerList, Inspector sections, ColorPicker, Canvas controls, and Timeline. The stylesheet now retains only intentional global contracts: the update toast, header modifiers, presenter mode, app-wide print foundation, and the still-global floating inspector/add menu.
+- Removed the remaining duplicate component blocks from `src/App.css` for LayerList, Inspector sections, ColorPicker, Canvas controls, Timeline, update toast, floating inspector, and floating add menu. The stylesheet now retains only intentional global contracts: header modifiers, presenter mode, and app-wide print foundation.
 - Removed stale `:global(.canvas-top-controls)` contracts from the Canvas controls modules. Interactive local roots now explicitly restore pointer events, including the history and grid-settings controls.
 - Moved the last `PlaybackButton` dependency on the global `play-pause-btn` and `playing` selectors into `PlaybackButton.module.css`.
 - Verification on the branch tip: 36 Jest suites / 263 tests, `npm run build`, `npm run lint`, `git diff --check`, and CSS-module property audit all pass.

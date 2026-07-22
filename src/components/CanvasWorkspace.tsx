@@ -784,7 +784,7 @@ export default function CanvasWorkspace({
         {shouldShowInspector && inspectorStyle && (
           <Rnd
             bounds="parent"
-            className="floating-inspector"
+            className={inspectorStyles.floatingInspector}
             cancel={`.${inspectorStyles.closeButton}, .${inspectorStyles.deleteButton}, .${inspectorStyles.duplicateButton}`}
             dragHandleClassName={inspectorStyles.dragHandle}
             enableResizing={false}

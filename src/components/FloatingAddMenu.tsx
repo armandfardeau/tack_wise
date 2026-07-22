@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type ChangeEvent } from '
 import { ArrowUpRight, BookOpen, DoorOpen, Flag, Image, MapPin, MessageCircle, Plus, Sailboat, TriangleAlert, X } from 'lucide-react';
 import posthog from 'posthog-js';
 import type { Boat, Mark } from '../types';
+import styles from './FloatingAddMenu.module.css';
 
 interface FloatingAddMenuProps {
   onAddBoat: (boatType?: Boat['type']) => void;
@@ -92,25 +93,25 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
   };
 
   return (
-    <div ref={menuRef} className={`floating-add-menu${isOpen ? ' is-open' : ''}`}>
+    <div ref={menuRef} className={`${styles.menu} ${isOpen ? styles.isOpen : ''}`}>
       {isOpen && (
-        <div className="floating-add-actions" aria-label="Add diagram object">
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddBoat('racing'), 'boat')}><Sailboat aria-hidden="true" size={16} /> <span>Add boat</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddBoat('judge'), 'judge_boat')}><Flag aria-hidden="true" size={16} /> <span>Add judge boat</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark(), 'mark')}><MapPin aria-hidden="true" size={16} /> <span>Add mark</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('obstruction'), 'obstruction')}><TriangleAlert aria-hidden="true" size={16} /> <span>Add obstruction</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('gate'), 'gate')}><DoorOpen aria-hidden="true" size={16} /> <span>Add gate</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('committeeBoat'), 'committee_boat')}><Flag aria-hidden="true" size={16} /> <span>Add committee boat</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddArrow, 'arrow')}><ArrowUpRight aria-hidden="true" size={16} /> <span>Add arrow</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddComment, 'comment')}><MessageCircle aria-hidden="true" size={16} /> <span>Add comment</span></button>
-          <button type="button" className="floating-add-action" onClick={() => runAction(onAddRuleComment, 'rule_comment')}><BookOpen aria-hidden="true" size={16} /> <span>Add rule</span></button>
-          <button type="button" className="floating-add-action" onClick={() => imageInputRef.current?.click()}><Image aria-hidden="true" size={16} /> <span>Add image</span></button>
+        <div className={styles.actions} aria-label="Add diagram object">
+          <button type="button" className={styles.action} onClick={() => runAction(() => onAddBoat('racing'), 'boat')}><Sailboat aria-hidden="true" size={16} /> <span>Add boat</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(() => onAddBoat('judge'), 'judge_boat')}><Flag aria-hidden="true" size={16} /> <span>Add judge boat</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(() => onAddMark(), 'mark')}><MapPin aria-hidden="true" size={16} /> <span>Add mark</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(() => onAddMark('obstruction'), 'obstruction')}><TriangleAlert aria-hidden="true" size={16} /> <span>Add obstruction</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(() => onAddMark('gate'), 'gate')}><DoorOpen aria-hidden="true" size={16} /> <span>Add gate</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(() => onAddMark('committeeBoat'), 'committee_boat')}><Flag aria-hidden="true" size={16} /> <span>Add committee boat</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(onAddArrow, 'arrow')}><ArrowUpRight aria-hidden="true" size={16} /> <span>Add arrow</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(onAddComment, 'comment')}><MessageCircle aria-hidden="true" size={16} /> <span>Add comment</span></button>
+          <button type="button" className={styles.action} onClick={() => runAction(onAddRuleComment, 'rule_comment')}><BookOpen aria-hidden="true" size={16} /> <span>Add rule</span></button>
+          <button type="button" className={styles.action} onClick={() => imageInputRef.current?.click()}><Image aria-hidden="true" size={16} /> <span>Add image</span></button>
           <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleImageChange} hidden />
         </div>
       )}
       <button
         type="button"
-        className="floating-add-button"
+        className={styles.addButton}
         aria-label={isOpen ? 'Close add menu' : 'Open add menu'}
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
