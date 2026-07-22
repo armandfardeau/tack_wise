@@ -119,7 +119,6 @@ export function BoatInspector({ autoSailTrim, boat, onSetAutoSailTrim, updateBoa
                   {SPEECH_BUBBLE_PRESETS.map(({ emoji, label }) => (
                     <button key={emoji} type="button" className="speech-bubble-preset" aria-label={`Use ${label} feeling`} title={label} onClick={() => updateBoat(boat.id, { speechBubble: emoji })}>{emoji}</button>
                   ))}
-                  {boat.speechBubble && <button type="button" className="speech-bubble-clear" onClick={() => updateBoat(boat.id, { speechBubble: '' })}>Clear</button>}
                 </div>
                 <div className="speech-bubble-presets speech-bubble-flag-presets" aria-label="Flag presets">
                   {FLAG_EMOJI_PRESETS.map(({ emoji, label }) => (
@@ -134,8 +133,9 @@ export function BoatInspector({ autoSailTrim, boat, onSetAutoSailTrim, updateBoa
                       {emoji}
                     </button>
                   ))}
+                  {boat.speechBubble && <button type="button" className="speech-bubble-clear" onClick={() => updateBoat(boat.id, { speechBubble: '' })}>Clear</button>}
                 </div>
-                <p className="grid-hint">Type a message or pick a feeling. Leave it blank to hide the bubble.</p>
+                <p className="grid-hint">Type a message or pick a feeling.</p>
               </div>
             </div>
           ),
