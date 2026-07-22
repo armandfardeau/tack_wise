@@ -175,11 +175,18 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 11. Canvas workspace and overlays
 
-- [ ] Migrate .canvas-container, .canvas-wrap, .canvas-wrap.is-arrow-drawing, .canvas-wrap:active, .canvas-wrap canvas, .arrow-drawing-hint, .arrow-drawing-cancel, and .canvas-edit-hint.
-- [ ] Migrate .canvas-top-controls, grid-area relationships, presenter-mode overrides, .canvas-frame-header, and frame-header typography.
-- [ ] Migrate .playback-toast, .playback-toast-dismiss, light-theme variants, and playbackToastIn.
-- [ ] Preserve floating inspector placement and theme behavior.
+- [x] Migrate .canvas-container, .canvas-wrap, .canvas-wrap.is-arrow-drawing, .canvas-wrap:active, .canvas-wrap canvas, .arrow-drawing-hint, .arrow-drawing-cancel, and .canvas-edit-hint.
+- [x] Migrate .canvas-top-controls, grid-area relationships, presenter-mode overrides, .canvas-frame-header, and frame-header typography.
+- [x] Migrate .playback-toast, .playback-toast-dismiss, light-theme variants, and playbackToastIn.
+- [x] Preserve floating inspector placement and theme behavior.
 - Primary files: src/components/CanvasWorkspace.tsx, src/components/FrameHeader.tsx.
+
+#### Item 11 migration record (2026-07-22)
+
+- Original global CSS: `.canvas-container` supplied the flex canvas column, sizing, relative positioning, app background, and hidden overflow; its presenter-mode and print rules preserved the app background plus printable full-viewport sizing. `.canvas-wrap` supplied the flexible relative canvas viewport, canvas background, grab/active cursors, touch behavior, and the `canvas` sizing contract. `.arrow-drawing-hint`, `.arrow-drawing-cancel`, and `.canvas-edit-hint` supplied the drawing/edit overlays, light-theme colors, interaction states, and responsive edit-hint placement. `.canvas-top-controls` supplied the absolute two-row grid, pointer-event routing, control grid-area relationships, presenter-mode layout, and responsive mobile grid. `.canvas-frame-header` and its `h2`/`span` descendants supplied title typography, light-theme styling, and mobile placement. `.playback-toast`, `.playback-toast-dismiss`, their light-theme and focus/hover variants, and `playbackToastIn` supplied the playback warning overlay and entrance animation.
+- New modules: `src/components/CanvasWorkspace.module.css` contains the workspace, wrapper, canvas sizing, arrow/edit overlays, top-control grid, presenter/print/responsive overrides, playback toast, and `playbackToastIn`. `src/components/FrameHeader.module.css` contains the frame-header grid placement, typography, light-theme styling, and mobile placement. Narrow `:global(.light-theme)` and `:global(.presenter-mode)` ancestors preserve app-wide theme and presenter contracts. Narrow `:global(.canvas-settings-btn)`, `:global(.canvas-history-controls)`, and `:global(.wind-vane-container)` child selectors preserve pointer-event and mobile layout behavior while those controls remain owned by item 12.
+- React refactor: `CanvasWorkspace` imports its module and converts the canvas container, wrapper state, edit/drawing hints, top controls, playback toast, and dismiss button to local classes. `FrameHeader` imports its module and converts the frame header class. The canvas wrapper now exposes `data-canvas-wrap` for the video-export hook; `useScenarioExport` and its test use that stable runtime contract instead of a removed global CSS class. Floating inspector `Rnd` placement, presenter-mode hiding, print sizing, theme variants, and toast dismissal behavior are unchanged.
+- Verification: targeted `CanvasWorkspace`, `FrameHeader`, and `useScenarioExport` suites passed (3 suites, 17 tests); `npm run build`, `npm run lint`, and `git diff --check` passed. A repository search confirms the migrated canvas/workspace/overlay selectors no longer remain in `src/App.css`; global control selectors retained for item 12 and app-wide print/presenter foundation rules remain intentionally global.
 
 ### 12. Canvas controls
 
