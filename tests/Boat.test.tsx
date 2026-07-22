@@ -1,12 +1,12 @@
 import { createElement, type ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import Boat from '../src/components/Boat';
 import type { Boat as BoatModel } from '../src/types';
 
 jest.mock('react-konva', () => {
-  const KonvaNode = ({ children, nodeType, ...props }: { children?: ReactNode; nodeType: string; [key: string]: unknown }) => createElement(
+  const KonvaNode = ({ children, nodeType, onDblClick, ...props }: { children?: ReactNode; nodeType: string; onDblClick?: () => void; [key: string]: unknown }) => createElement(
     'div',
-    { 'data-testid': `konva-${nodeType}`, ...props },
+    { 'data-testid': `konva-${nodeType}`, onDoubleClick: onDblClick, ...props },
     children,
   );
 
@@ -39,5 +39,15 @@ describe('Boat speech bubble', () => {
 
     rerender(<Boat boat={{ ...boat, speechBubble: '   ' }} isSelected={false} readOnly />);
     expect(screen.getAllByTestId('konva-text')).toHaveLength(1);
+  });
+
+  it('opens the inspector on double-click', () => {
+    const onOpenInspector = jest.fn();
+
+    render(<Boat boat={boat} isSelected={false} onOpenInspector={onOpenInspector} />);
+
+    fireEvent.doubleClick(screen.getAllByTestId('konva-group')[0]);
+
+    expect(onOpenInspector).toHaveBeenCalledTimes(1);
   });
 });

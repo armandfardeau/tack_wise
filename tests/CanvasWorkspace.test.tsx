@@ -1,4 +1,4 @@
-import { createRef, type ReactNode } from 'react';
+import { createRef, type ComponentProps, type ReactNode } from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import CanvasWorkspace from '../src/components/CanvasWorkspace';
 import type { Frame } from '../src/types';
@@ -31,7 +31,120 @@ const frame: Frame = {
   marks: [],
 };
 
+const canvasWorkspaceProps: ComponentProps<typeof CanvasWorkspace> = {
+  activeFrame: frame,
+  inspectorFrame: frame,
+  autoSailTrim: true,
+  canvasPosition: { x: 0, y: 0 },
+  canvasZoom: 1,
+  constrainPosition: (position) => position,
+  currentFrameIndex: 0,
+  displayMode: 'single',
+  showFrameTitle: true,
+  showFrameNumber: true,
+  presenterMode: false,
+  theme: 'dark',
+  frames: [frame],
+  canRedo: false,
+  canUndo: false,
+  hasAutosave: false,
+  getSnappedPosition: (_, position) => position,
+  gridSnapEnabled: true,
+  isPlaying: false,
+  isExporting: false,
+  handleCanvasDragEnd: jest.fn(),
+  handleCanvasTouchEnd: jest.fn(),
+  handleCanvasTouchMove: jest.fn(),
+  handleCanvasTouchStart: jest.fn(),
+  handleCanvasWheel: jest.fn(),
+  maxZoom: 2,
+  minZoom: 0.5,
+  onAddBoat: jest.fn(),
+  onAddMark: jest.fn(),
+  onAddArrow: jest.fn(),
+  onAddComment: jest.fn(),
+  onAddImage: jest.fn(),
+  onMoveBoat: jest.fn(),
+  onRotateBoat: jest.fn(),
+  onMoveMark: jest.fn(),
+  onMoveArrow: jest.fn(),
+  onMoveComment: jest.fn(),
+  onMoveImage: jest.fn(),
+  onDeleteSelected: jest.fn(),
+  onDuplicateSelected: jest.fn(),
+  onClearSelection: jest.fn(),
+  onSetAutoSailTrim: jest.fn(),
+  onSetDisplayMode: jest.fn(),
+  onSetShowFrameTitle: jest.fn(),
+  onSetShowFrameNumber: jest.fn(),
+  onSetGridSnapEnabled: jest.fn(),
+  onSetShowGrid: jest.fn(),
+  onRedo: jest.fn(),
+  onRestoreAutosave: jest.fn(),
+  onTogglePlaying: jest.fn(),
+  onStepBackward: jest.fn(),
+  onStepForward: jest.fn(),
+  onReplayFromStart: jest.fn(),
+  onUndo: jest.fn(),
+  onSetPlaySpeed: jest.fn(),
+  playSpeed: 1000,
+  onPanCanvasBy: jest.fn(),
+  onOpenControls: jest.fn(),
+  onCloseControls: jest.fn(),
+  onSelectObject: jest.fn(),
+  onSnapPreview: jest.fn(),
+  onZoomIn: jest.fn(),
+  onZoomOut: jest.fn(),
+  onAutoZoom: jest.fn(),
+  onResetZoom: jest.fn(),
+  selectedId: 'boat-1',
+  selectedType: 'boat',
+  selectedBoat: boat,
+  selectedMark: undefined,
+  selectedArrow: undefined,
+  selectedComment: undefined,
+  selectedImage: undefined,
+  updateBoat: jest.fn(),
+  updateActiveFrame: jest.fn(),
+  updateMark: jest.fn(),
+  canvasWrapRef: createRef<HTMLDivElement>(),
+  showGrid: true,
+  snapTarget: null,
+  stageRef: createRef(),
+  stageSize: { width: 1000, height: 800 },
+};
+
+function renderCanvasWorkspace(overrides: Partial<ComponentProps<typeof CanvasWorkspace>> = {}) {
+  return render(<CanvasWorkspace {...canvasWorkspaceProps} {...overrides} />);
+}
+
 describe('CanvasWorkspace', () => {
+  it('shows an edit hint for a selected object while the inspector is closed', () => {
+    renderCanvasWorkspace();
+
+    expect(screen.getByRole('status')).toHaveTextContent('Double-click or double-tap an object to edit it.');
+  });
+
+  it.each([
+    ['no selection', { selectedId: null, selectedType: null, selectedBoat: undefined }],
+    ['presenter mode', { presenterMode: true }],
+    ['exporting', { isExporting: true }],
+  ])('hides the edit hint for %s', (_, overrides) => {
+    renderCanvasWorkspace(overrides);
+
+    expect(screen.queryByText('Double-click or double-tap an object to edit it.')).not.toBeInTheDocument();
+  });
+
+  it('hides the edit hint while drawing an arrow', () => {
+    renderCanvasWorkspace();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open add menu' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add arrow' }));
+
+    expect(screen.queryByText('Double-click or double-tap an object to edit it.')).not.toBeInTheDocument();
+    expect(screen.getByText('Click the start point for the arrow.')).toBeInTheDocument();
+  });
+
   it('closes the controls panel when opening the inspector', async () => {
     const onCloseControls = jest.fn();
 
@@ -124,6 +237,7 @@ describe('CanvasWorkspace', () => {
     await waitFor(() => expect(onCloseControls).toHaveBeenCalledTimes(1));
     expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
     expect(screen.getByText('Inspector')).toBeInTheDocument();
+    expect(screen.queryByText('Double-click or double-tap an object to edit it.')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
     fireEvent.click(screen.getByRole('button', { name: 'Open color picker' }));
