@@ -2262,7 +2262,12 @@ body {
 }
 
 .sidebar-add-frame-btn {
-  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  justify-content: center;
+  width: auto;
+  gap: 7px;
   margin-top: 4px;
 }
 
