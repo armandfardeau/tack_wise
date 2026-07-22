@@ -54,9 +54,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 2. Application header and branding
 
-- [ ] Migrate .app-header, .header-main, .branding h1, .brand-icon, .branding .eyebrow, .header-tools, .header-tool-btn, .header-about-btn, and responsive header rules.
-- [ ] Preserve shared header behavior used by AppHeader and AboutPage.
+- [x] Migrate .app-header, .header-main, .branding h1, .brand-icon, .branding .eyebrow, .header-tools, .header-tool-btn, .header-about-btn, and responsive header rules.
+- [x] Preserve shared header behavior used by AppHeader and AboutPage.
 - Primary files: src/components/AppHeader.tsx, src/components/AboutPage.tsx, src/components/BrandMark.tsx.
+
+#### Item 2 migration record (2026-07-22)
+
+- Original global CSS: `.app-header`, `.header-main`, `.branding h1`, `.brand-icon`, `.branding .eyebrow`, `.header-tools`, `.header-tool-btn` with its hover/disabled states, the print hide rule for `.app-header`, and the `max-width: 768px` rules for `.app-header`, `.header-main`, `.header-tools`, `.header-tool-btn`, and `.header-about-btn`.
+- New module: `src/components/AppHeader.module.css` contains the equivalent declarations under local names (`appHeader`, `headerMain`, `branding`, `brandIcon`, `eyebrow`, `headerTools`, `headerToolButton`, `headerAboutButton`), including print and responsive rules.
+- React refactor: `AppHeader` and `AboutPage` import the shared module. `HeaderMoreActions` and `SponsorshipActions` also use the shared `headerToolButton` class so no remaining runtime usage depends on the removed global `.header-tool-btn` selector. Their item-specific modifier classes remain global for items 5 and 6.
+- Verification: `npm run build`, `npm run lint`, all 35 Jest suites (259 tests), targeted header/support tests (20 tests), and browser checks at desktop, 390px mobile, and `/about` all passed. The temporary browser viewport was reset after verification.
 
 ### 3. Export and file menus
 
@@ -232,5 +239,5 @@ The migration is complete only when:
 
 - Audit: complete.
 - Memory document: created.
-- Component migrations: item 1 foundation complete; component-specific migrations not started.
-- Next action: process item 2 only after confirmation.
+- Component migrations: items 1 and 2 complete; item 3 is next.
+- Next action: process item 3 only after confirmation.

@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import BrandMark from './BrandMark';
 import type { Theme } from '../types';
+import headerStyles from './AppHeader.module.css';
 
 interface AboutPageProps {
   theme: Theme;
@@ -23,19 +24,19 @@ const repositoryUrl = 'https://github.com/armandfardeau/tack_wise';
 export default function AboutPage({ theme, onBackToEditor, onToggleTheme }: AboutPageProps) {
   return (
     <main className={`app-shell ${theme}-theme about-shell`}>
-      <header className="app-header about-header">
-        <div className="header-main">
-          <div className="branding">
-            <span className="eyebrow">Tactical Sailing Simulator</span>
-            <h1>Tack Wise <BrandMark className="brand-icon" aria-hidden="true" size={24} /></h1>
+      <header className={`${headerStyles.appHeader} about-header`}>
+        <div className={headerStyles.headerMain}>
+          <div className={headerStyles.branding}>
+            <span className={headerStyles.eyebrow}>Tactical Sailing Simulator</span>
+            <h1>Tack Wise <BrandMark className={headerStyles.brandIcon} aria-hidden="true" size={24} /></h1>
           </div>
         </div>
-        <div className="header-tools" aria-label="About page tools">
-          <button type="button" className="header-tool-btn" onClick={onToggleTheme}>
+        <div className={headerStyles.headerTools} aria-label="About page tools">
+          <button type="button" className={headerStyles.headerToolButton} onClick={onToggleTheme}>
             <Sun aria-hidden="true" size={15} />
             {theme === 'dark' ? 'Light mode' : 'Dark mode'}
           </button>
-          <a className="header-tool-btn" href={repositoryUrl} target="_blank" rel="noreferrer">
+          <a className={headerStyles.headerToolButton} href={repositoryUrl} target="_blank" rel="noreferrer">
             <GitBranch aria-hidden="true" size={15} />
             GitHub
           </a>

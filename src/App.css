@@ -101,23 +101,6 @@
 }
 
 /* Header */
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  background-color: var(--bg-sidebar);
-  border-bottom: 1px solid var(--border-color);
-  z-index: 10;
-}
-
-.header-main {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  min-width: 0;
-}
-
 .scenario-title-editor {
   display: flex;
   flex-direction: column;
@@ -165,30 +148,6 @@
 
 .sidebar-scenario-title-editor .scenario-title-input {
   width: 100%;
-}
-
-.branding h1 {
-  font-size: 1.5rem;
-  margin: 0;
-  font-weight: 800;
-  letter-spacing: -0.025em;
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.brand-icon {
-  display: inline-block;
-  vertical-align: -0.2em;
-  flex: 0 0 auto;
-}
-
-.branding .eyebrow {
-  margin: 0;
-  font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: var(--text-muted);
 }
 
 .export-actions {
@@ -384,13 +343,6 @@
   opacity: 0.65;
 }
 
-.header-tools {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: 12px;
-}
-
 .header-export-actions {
   gap: 6px;
 }
@@ -414,32 +366,6 @@
 .header-view-actions .action-btn {
   min-height: 34px;
   padding: 6px 10px;
-}
-
-.header-tool-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 6px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--bg-card);
-  color: var(--text-main);
-  cursor: pointer;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-.header-tool-btn:hover:not(:disabled) {
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan-hover);
-}
-
-.header-tool-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
 }
 
 .header-more-menu {
@@ -809,7 +735,6 @@
     background: #fff;
   }
 
-  .app-header,
   .step-panel,
   .timeline-bar,
   .canvas-zoom-controls,
@@ -3858,28 +3783,6 @@
     pointer-events: auto;
   }
 
-  .app-header {
-    position: relative;
-    z-index: 50;
-    flex-direction: column;
-    gap: 12px;
-    align-items: flex-start;
-  }
-
-  .header-main {
-    width: 100%;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .header-tools {
-    width: 100%;
-    margin-left: 0;
-    flex-wrap: wrap;
-    overflow: visible;
-    gap: 4px;
-  }
-
   .header-export-actions {
     flex: 0 0 auto;
     width: auto;
@@ -3974,12 +3877,6 @@
     padding: 2px 2px 0;
   }
 
-  .header-tool-btn {
-    min-height: 32px;
-    padding: 5px 8px;
-    font-size: 0.74rem;
-  }
-
   .header-export-actions .action-btn,
   .header-view-actions .action-btn {
     min-height: 32px;
@@ -3988,10 +3885,6 @@
   }
 
   .header-standard-utility-actions {
-    display: none;
-  }
-
-  .header-about-btn {
     display: none;
   }
 
