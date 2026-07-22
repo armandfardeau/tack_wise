@@ -125,6 +125,15 @@ describe('CanvasWorkspace', () => {
     expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
     expect(screen.getByText('Inspector')).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Open color picker' }));
+    expect(screen.getByRole('dialog', { name: 'Color picker' })).toBeInTheDocument();
+
+    fireEvent.keyDown(document, { key: 'Escape' });
+
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Color picker' })).not.toBeInTheDocument());
+    expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
+
     fireEvent.keyDown(document, { key: 'Escape' });
 
     await waitFor(() => expect(screen.queryByTestId('floating-inspector')).not.toBeInTheDocument());

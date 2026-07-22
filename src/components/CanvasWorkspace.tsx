@@ -402,6 +402,7 @@ export default function CanvasWorkspace({
 
     const handlePointerOutside = (event: PointerEvent) => {
       if (event.target instanceof Node && inspectorRef.current?.contains(event.target)) return;
+      if (event.target instanceof Element && event.target.closest('.color-picker-menu')) return;
       handleCloseInspector();
     };
 
@@ -414,6 +415,7 @@ export default function CanvasWorkspace({
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
+      if (document.querySelector('.color-picker-menu')) return;
       event.preventDefault();
       if (isAddingArrow) {
         setIsAddingArrow(false);
