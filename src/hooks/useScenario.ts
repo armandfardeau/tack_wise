@@ -377,6 +377,21 @@ export function useScenario() {
     );
   };
 
+  const updateMarkRoomZone = (markId: string, changes: Partial<Pick<Mark, 'showZone' | 'zoneRadius'>>) => {
+    commitFrames((previousFrames) =>
+      previousFrames.map((frame) => {
+        if (!frame.marks.some((mark) => mark.id === markId)) return frame;
+
+        return {
+          ...frame,
+          marks: frame.marks.map((mark) => (
+            mark.id === markId ? { ...mark, ...changes } : mark
+          )),
+        };
+      }),
+    );
+  };
+
   const connectMarks = (
     sourceMarkId: string,
     targetMarkId: string,
@@ -1059,6 +1074,7 @@ export function useScenario() {
     updateConnection,
     updateImage,
     updateMark,
+    updateMarkRoomZone,
     updateSettings,
     canRedo: history.future.length > 0,
     canUndo: history.past.length > 0,

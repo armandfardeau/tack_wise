@@ -420,6 +420,7 @@ export default function App() {
           updateBoat={scenario.updateBoat}
           updateActiveFrame={scenario.updateActiveFrame}
           updateMark={scenario.updateMark}
+          updateMarkRoomZone={scenario.updateMarkRoomZone}
           updateConnection={scenario.updateConnection}
           updateArrow={scenario.updateArrow}
           updateComment={scenario.updateComment}
