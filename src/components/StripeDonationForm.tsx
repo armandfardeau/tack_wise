@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import styles from './SponsorshipActions.module.css';
 
 const QUICK_AMOUNTS = [5, 10, 25, 50];
 
@@ -37,9 +38,9 @@ export default function StripeDonationForm() {
   };
 
   return (
-    <form className="stripe-donation-form" onSubmit={handleSubmit}>
+    <form className={styles.stripeDonationForm} onSubmit={handleSubmit}>
       <label htmlFor="stripe-donation-amount">Donation amount</label>
-      <div className="stripe-donation-amount-field">
+      <div className={styles.stripeDonationAmountField}>
         <span aria-hidden="true">$</span>
         <input
           id="stripe-donation-amount"
@@ -53,12 +54,12 @@ export default function StripeDonationForm() {
           disabled={isSubmitting}
         />
       </div>
-      <div className="stripe-donation-quick-amounts" aria-label="Quick donation amounts">
+      <div className={styles.stripeDonationQuickAmounts} aria-label="Quick donation amounts">
         {QUICK_AMOUNTS.map((quickAmount) => (
           <button
             key={quickAmount}
             type="button"
-            className={amount === String(quickAmount) ? 'is-selected' : ''}
+            className={amount === String(quickAmount) ? styles.isSelected : ''}
             onClick={() => setAmount(String(quickAmount))}
             disabled={isSubmitting}
           >
@@ -66,8 +67,8 @@ export default function StripeDonationForm() {
           </button>
         ))}
       </div>
-      {error && <p className="stripe-donation-error" role="alert">{error}</p>}
-      <button type="submit" className="stripe-donation-submit" disabled={isSubmitting}>
+      {error && <p className={styles.stripeDonationError} role="alert">{error}</p>}
+      <button type="submit" className={styles.stripeDonationSubmit} disabled={isSubmitting}>
         {isSubmitting ? 'Opening Stripe…' : 'Continue to Stripe Checkout'}
       </button>
       <small>Secure payment handled by Stripe.</small>
