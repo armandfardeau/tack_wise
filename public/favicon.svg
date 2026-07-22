@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 512 512" fill="none">
   <title>Tack Wise</title>
   <rect width="512" height="512" rx="112" fill="#090D16"/>
-  <circle cx="256" cy="256" r="190" fill="#0B1322" stroke="#06B6D4" stroke-width="26"/>
-  <circle cx="256" cy="256" r="132" stroke="#3B82F6" stroke-width="18" stroke-dasharray="28 28"/>
-  <text x="256" y="312" text-anchor="middle" fill="#F8FAFC" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="158" font-weight="900" letter-spacing="-19">T<tspan fill="#06B6D4">W</tspan></text>
-  <path d="M78 426 190 314" stroke="#F43F5E" stroke-width="28" stroke-linecap="round"/>
-  <path d="m190 314-45 8 37 37Z" fill="#F43F5E"/>
+  <circle cx="256" cy="256" r="140" fill="#0B1322" stroke="#06B6D4" stroke-width="24"/>
+  <circle cx="256" cy="256" r="105" stroke="#3B82F6" stroke-width="16" stroke-dasharray="24 24"/>
+  <text x="256" y="312" text-anchor="middle" fill="#F8FAFC" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="146" font-weight="900" letter-spacing="-17">T<tspan fill="#06B6D4">W</tspan></text>
+  <path d="M154 358 192 320" stroke="#F43F5E" stroke-width="28" stroke-linecap="round"/>
+  <path d="m192 320-28 5 23 23Z" fill="#F43F5E"/>
 </svg>

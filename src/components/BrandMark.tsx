@@ -18,7 +18,7 @@ export default function BrandMark({ size = 24, ...props }: BrandMarkProps) {
       role={props.role ?? 'img'}
       aria-label={props['aria-label'] ?? 'Tack Wise mark'}
     >
-      <circle cx="32" cy="32" r="29" fill="#0B1322" stroke="#06B6D4" strokeWidth="3.5" />
+      <circle cx="32" cy="32" r="28" fill="#0B1322" stroke="#06B6D4" strokeWidth="3.5" />
       <circle cx="32" cy="32" r="21" stroke="#3B82F6" strokeWidth="2.5" strokeDasharray="4 5" />
       <text
         x="32"
@@ -32,8 +32,8 @@ export default function BrandMark({ size = 24, ...props }: BrandMarkProps) {
       >
         T<tspan fill="#06B6D4">W</tspan>
       </text>
-      <path d="M9 53L23 39" stroke="#F43F5E" strokeWidth="4.5" strokeLinecap="round" />
-      <path d="M23 39L17 40L22 45Z" fill="#F43F5E" />
+      <path d="M18 46L24 40" stroke="#F43F5E" strokeWidth="4.5" strokeLinecap="round" />
+      <path d="M24 40L18 41L23 46Z" fill="#F43F5E" />
     </svg>
   );
 }
