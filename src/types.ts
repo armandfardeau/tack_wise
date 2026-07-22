@@ -16,6 +16,9 @@ export type ExportFps = typeof EXPORT_FPS_OPTIONS[number];
 
 export const DEFAULT_EXPORT_FPS: ExportFps = 20;
 
+/** Visual class of a boat on the tactical canvas. */
+export type BoatType = 'racing' | 'judge';
+
 export interface ExportOptions {
   format: ExportFormat;
   theme: Theme;
@@ -27,6 +30,8 @@ export interface Boat {
   id: string;
   name: string;
   color: string;
+  /** Defaults to a sailing racing boat for older scenarios. */
+  type?: BoatType;
   x: number;
   y: number;
   heading: number; // heading in degrees (0 = North, clockwise)

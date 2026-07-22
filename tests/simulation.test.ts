@@ -124,6 +124,16 @@ describe('simulation utilities', () => {
     expect(interpolateBoatManeuver(start, end, 1)).toEqual(end);
   });
 
+  it('keeps judge boats as animated boats during playback', () => {
+    const start = boat({ type: 'judge', heading: 90 });
+    const end = boat({ type: 'judge', x: 10, y: -10, heading: 0 });
+
+    const interpolated = interpolateBoatManeuver(start, end, 0.2);
+    expect(interpolated.type).toBe('judge');
+    expect(interpolated.x).toBeCloseTo(5);
+    expect(interpolated.y).toBeCloseTo(0);
+  });
+
   it('uses the shortest heading rotation across zero degrees', () => {
     expect(getShortestHeadingDelta(350, 10)).toBe(20);
     expect(interpolateBoatManeuver(

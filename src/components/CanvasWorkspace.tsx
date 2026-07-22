@@ -47,7 +47,7 @@ interface CanvasWorkspaceProps {
   handleCanvasWheel: (event: { evt: { preventDefault: () => void; deltaY: number } }) => void;
   maxZoom: number;
   minZoom: number;
-  onAddBoat: () => void;
+  onAddBoat: (boatType?: Boat['type']) => void;
   onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: (start?: Position, end?: Position) => void;
   onAddComment: () => void;
@@ -452,9 +452,9 @@ export default function CanvasWorkspace({
     handleOpenInspector(inspectorRequest.id, inspectorRequest.type);
   }, [handleOpenInspector, inspectorRequest]);
 
-  const handleAddBoat = () => {
+  const handleAddBoat = (boatType?: Boat['type']) => {
     resetInspectorPlacement();
-    onAddBoat();
+    onAddBoat(boatType);
     setIsInspectorOpen(true);
   };
 

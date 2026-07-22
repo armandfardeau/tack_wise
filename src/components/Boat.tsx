@@ -29,6 +29,68 @@ interface BoatProps {
 
 const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
 const SPEECH_BUBBLE_TAIL_LENGTH = 20;
+const SAILING_HULL_PATH = 'M 0 -58 C 27 -37 31 21 14 52 L -14 52 C -31 21 -27 -37 0 -58 Z';
+const JUDGE_HULL_PATH = 'M 0 -62 C 21 -54 29 -21 24 18 L 14 50 C 11 58 -11 58 -14 50 L -24 18 C -29 -21 -21 -54 0 -62 Z';
+
+function JudgeBoatBody({ color, isShadow }: { color: string; isShadow: boolean }) {
+  const deckColor = isShadow ? '#cbd5e1' : '#e2e8f0';
+  const detailColor = isShadow ? '#94a3b8' : '#475569';
+  const outlineColor = isShadow ? '#94a3b8' : '#0f172a';
+
+  return (
+    <>
+      {/* A powered judge boat leaves a visible wake as it moves between frames. */}
+      <Line
+        points={[-12, 52, -24, 70, -35, 82]}
+        stroke={detailColor}
+        strokeWidth={3}
+        dash={[8, 6]}
+        lineCap="round"
+      />
+      <Line
+        points={[12, 52, 24, 70, 35, 82]}
+        stroke={detailColor}
+        strokeWidth={3}
+        dash={[8, 6]}
+        lineCap="round"
+      />
+      <Path
+        data={JUDGE_HULL_PATH}
+        fill={color}
+        stroke={outlineColor}
+        strokeWidth={3}
+        lineJoin="round"
+        shadowColor={isShadow ? undefined : 'rgba(15, 23, 42, 0.3)'}
+        shadowBlur={isShadow ? 0 : 6}
+        shadowOffset={isShadow ? undefined : { x: 0, y: 3 }}
+      />
+      {/* Console and windshield make the judge boat read as a powerboat. */}
+      <Path
+        data="M -11 -25 L 11 -25 L 10 3 L -10 3 Z"
+        fill={deckColor}
+        stroke={detailColor}
+        strokeWidth={1.5}
+        lineJoin="round"
+      />
+      <Line
+        points={[-9, -20, 9, -20, 7, -7, -7, -7]}
+        closed
+        fill={isShadow ? '#e2e8f0' : '#bae6fd'}
+        stroke={detailColor}
+        strokeWidth={1.5}
+        lineJoin="round"
+      />
+      <Line points={[0, -25, 0, -48]} stroke={detailColor} strokeWidth={3} lineCap="round" />
+      <Path
+        data="M 0 -48 L 24 -43 L 0 -36 Z"
+        fill={isShadow ? '#cbd5e1' : '#f97316'}
+        stroke={detailColor}
+        strokeWidth={1.5}
+        lineJoin="round"
+      />
+    </>
+  );
+}
 
 export function SpeechBubble({
   text,
@@ -100,6 +162,8 @@ export function SpeechBubble({
 
 export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top' }: BoatProps) {
   const boatScale = 0.5;
+  const isJudge = boat.type === 'judge';
+  const hullPath = isJudge ? JUDGE_HULL_PATH : SAILING_HULL_PATH;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
   const speechBubble = boat.speechBubble?.trim();
 
@@ -142,27 +206,33 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           />
         )}
 
-        {/* Simplified Ghost Hull */}
-        <Path
-          data="M 0 -58 C 27 -37 31 21 14 52 L -14 52 C -31 21 -27 -37 0 -58 Z"
-          fill="#475569"
-          stroke="#94a3b8"
-          strokeWidth={2}
-          lineJoin="round"
-        />
-        {/* Simplified Sail */}
-        <Line
-          points={[mastX, mastY, boomEndX, boomEndY]}
-          stroke="#94a3b8"
-          strokeWidth={2}
-        />
-        <Path
-          data={sailPathData}
-          stroke="#cbd5e1"
-          strokeWidth={3}
-          opacity={0.7}
-        />
-        <Circle cx={mastX} cy={mastY} r={3} fill="#94a3b8" />
+        {isJudge ? (
+          <JudgeBoatBody color="#475569" isShadow />
+        ) : (
+          <>
+            {/* Simplified Ghost Hull */}
+            <Path
+              data={hullPath}
+              fill="#475569"
+              stroke="#94a3b8"
+              strokeWidth={2}
+              lineJoin="round"
+            />
+            {/* Simplified Sail */}
+            <Line
+              points={[mastX, mastY, boomEndX, boomEndY]}
+              stroke="#94a3b8"
+              strokeWidth={2}
+            />
+            <Path
+              data={sailPathData}
+              stroke="#cbd5e1"
+              strokeWidth={3}
+              opacity={0.7}
+            />
+            <Circle cx={mastX} cy={mastY} r={3} fill="#94a3b8" />
+          </>
+        )}
       </Group>
     );
   }
@@ -203,7 +273,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
       {/* Selection Glow / Shadow Ring */}
       {offenseStroke && (
         <Path
-          data="M 0 -66 C 32 -43 36 24 18 60 L -18 60 C -36 24 -32 -43 0 -66 Z"
+          data={hullPath}
           fill="transparent"
           stroke={offenseStroke}
           strokeWidth={5}
@@ -214,7 +284,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
 
       {isSelected && (
         <Path
-          data="M 0 -62 C 30 -40 34 23 16 56 L -16 56 C -34 23 -30 -40 0 -62 Z"
+          data={hullPath}
           fill="transparent"
           stroke="#06b6d4"
           strokeWidth={4}
@@ -277,48 +347,54 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         fill={isSelected ? '#06b6d4' : '#64748b'}
       />
 
-      {/* Boat Hull */}
-      <Path
-        data="M 0 -58 C 27 -37 31 21 14 52 L -14 52 C -31 21 -27 -37 0 -58 Z"
-        fill={boat.color}
-        stroke="#0f172a"
-        strokeWidth={3}
-        lineJoin="round"
-        shadowColor="rgba(15, 23, 42, 0.3)"
-        shadowBlur={6}
-        shadowOffset={{ x: 0, y: 3 }}
-      />
+      {isJudge ? (
+        <JudgeBoatBody color={boat.color} isShadow={false} />
+      ) : (
+        <>
+          {/* Boat Hull */}
+          <Path
+            data={hullPath}
+            fill={boat.color}
+            stroke="#0f172a"
+            strokeWidth={3}
+            lineJoin="round"
+            shadowColor="rgba(15, 23, 42, 0.3)"
+            shadowBlur={6}
+            shadowOffset={{ x: 0, y: 3 }}
+          />
 
-      {/* Cockpit / Deck features */}
-      <Path
-        data="M -9 15 L 9 15 L 6 45 L -6 45 Z"
-        fill="#e2e8f0"
-        stroke="#475569"
-        strokeWidth={1.5}
-        lineJoin="round"
-      />
+          {/* Cockpit / Deck features */}
+          <Path
+            data="M -9 15 L 9 15 L 6 45 L -6 45 Z"
+            fill="#e2e8f0"
+            stroke="#475569"
+            strokeWidth={1.5}
+            lineJoin="round"
+          />
 
-      {/* Mast */}
-      <Circle x={mastX} y={mastY} radius={4} fill="#1e293b" />
+          {/* Mast */}
+          <Circle x={mastX} y={mastY} radius={4} fill="#1e293b" />
 
-      {/* Sail Boom (Mainsail Boom) */}
-      <Line
-        points={[mastX, mastY, boomEndX, boomEndY]}
-        stroke="#475569"
-        strokeWidth={3.5}
-        lineCap="round"
-      />
+          {/* Sail Boom (Mainsail Boom) */}
+          <Line
+            points={[mastX, mastY, boomEndX, boomEndY]}
+            stroke="#475569"
+            strokeWidth={3.5}
+            lineCap="round"
+          />
 
-      {/* Mainsail (represented as a filled curved canvas) */}
-      <Path
-        data={sailPathData}
-        stroke="#f8fafc"
-        strokeWidth={4.5}
-        lineCap="round"
-        opacity={0.9}
-        shadowColor="#000"
-        shadowBlur={1}
-      />
+          {/* Mainsail (represented as a filled curved canvas) */}
+          <Path
+            data={sailPathData}
+            stroke="#f8fafc"
+            strokeWidth={4.5}
+            lineCap="round"
+            opacity={0.9}
+            shadowColor="#000"
+            shadowBlur={1}
+          />
+        </>
+      )}
 
       {/* Label Text (Unrotated so it's always readable for the user) */}
       <Group rotation={-boat.heading}>

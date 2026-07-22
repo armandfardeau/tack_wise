@@ -39,7 +39,7 @@ function getEntries(frame: Frame, type: LayerObjectType): LayerEntry[] {
         type,
         icon: ShipWheel,
         color: boat.color,
-        detail: `${Math.round(boat.heading)}° heading`,
+        detail: `${boat.type === 'judge' ? 'Judge boat · ' : ''}${Math.round(boat.heading)}° heading`,
       }));
     case 'mark':
       return frame.marks.map((mark) => ({
