@@ -1,4 +1,5 @@
 import { Settings } from 'lucide-react';
+import styles from './GridSettingsButton.module.css';
 
 interface GridSettingsButtonProps {
   onOpenInspector: () => void;
@@ -8,7 +9,7 @@ export default function GridSettingsButton({ onOpenInspector }: GridSettingsButt
   return (
     <button
       type="button"
-      className="canvas-settings-btn"
+      className={styles.settingsButton}
       aria-label="Open canvas settings"
       title="Open canvas settings"
       onClick={onOpenInspector}

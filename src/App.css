@@ -209,8 +209,6 @@
   grid-template-columns: 1fr;
 }
 
-.presenter-mode .canvas-settings-btn,
-.presenter-mode .canvas-playback-options-btn,
 .presenter-mode .floating-add-menu {
   display: none;
 }
@@ -787,68 +785,6 @@
   right: -8px;
 }
 
-.canvas-history-controls {
-  grid-area: history;
-  justify-self: end;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px;
-  background-color: rgba(15, 23, 42, 0.88);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
-}
-
-.canvas-history-btn,
-.canvas-history-restore-btn {
-  border: 1px solid var(--border-color);
-  background-color: var(--bg-card);
-  color: var(--text-main);
-  cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
-}
-
-.canvas-history-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  padding: 0;
-  border-radius: 6px;
-  font-size: 1.1rem;
-  line-height: 1;
-}
-
-.canvas-history-restore-btn {
-  min-height: 34px;
-  padding: 0 9px;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.canvas-history-btn:hover:not(:disabled),
-.canvas-history-btn:focus-visible,
-.canvas-history-restore-btn:hover:not(:disabled),
-.canvas-history-restore-btn:focus-visible {
-  border-color: var(--accent-cyan);
-  color: var(--accent-cyan-hover);
-  background-color: rgba(6, 182, 212, 0.1);
-}
-
-.canvas-history-btn:disabled,
-.canvas-history-restore-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.4;
-}
-
-.light-theme .canvas-history-controls {
-  background-color: rgba(255, 255, 255, 0.94);
-  box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
-}
-
 .floating-inspector {
   z-index: 8;
   max-width: calc(100% - 24px);
@@ -862,9 +798,7 @@
 }
 
 .light-theme .floating-inspector,
-.light-theme .floating-add-actions,
-.light-theme .canvas-zoom-controls,
-.light-theme .wind-vane-container {
+.light-theme .floating-add-actions {
   background: rgba(255, 255, 255, 0.94);
 }
 
@@ -927,8 +861,7 @@
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
 }
 
-.light-theme .floating-add-actions,
-.light-theme .canvas-zoom-controls {
+.light-theme .floating-add-actions {
   box-shadow: 0 14px 32px rgba(20, 35, 38, 0.16);
 }
 

@@ -1,4 +1,5 @@
 import { Pause, Play, RotateCcw, Settings, SkipBack, SkipForward } from 'lucide-react';
+import styles from './PlaybackButton.module.css';
 
 interface PlaybackButtonProps {
   isPlaying: boolean;
@@ -22,10 +23,10 @@ export default function PlaybackButton({
   onOpenInspector,
 }: PlaybackButtonProps) {
   return (
-    <div className="canvas-playback-controls">
+    <div className={styles.playbackControls}>
       <button
         type="button"
-        className="canvas-playback-action-btn"
+        className={styles.playbackActionButton}
         aria-label="Step backward"
         title="Step backward"
         onClick={onStepBackward}
@@ -35,7 +36,7 @@ export default function PlaybackButton({
       </button>
       <button
         type="button"
-        className={`play-pause-btn canvas-play-btn ${isPlaying ? 'playing' : ''}`}
+        className={`${styles.playButton} play-pause-btn ${isPlaying ? 'playing' : ''}`}
         aria-label={isPlaying ? 'Pause' : 'Play'}
         title={isPlaying ? 'Pause' : 'Play'}
         onClick={onTogglePlaying}
@@ -44,7 +45,7 @@ export default function PlaybackButton({
       </button>
       <button
         type="button"
-        className="canvas-playback-action-btn"
+        className={styles.playbackActionButton}
         aria-label="Step forward"
         title="Step forward"
         onClick={onStepForward}
@@ -54,7 +55,7 @@ export default function PlaybackButton({
       </button>
       <button
         type="button"
-        className="canvas-playback-action-btn canvas-playback-replay-btn"
+        className={styles.playbackActionButton}
         aria-label="Replay from start"
         title="Replay from start"
         onClick={onReplayFromStart}
@@ -63,7 +64,7 @@ export default function PlaybackButton({
       </button>
       <button
         type="button"
-        className="canvas-playback-options-btn"
+        className={styles.playbackOptionsButton}
         aria-label="Open playback options"
         title="Open playback options"
         onClick={onOpenInspector}

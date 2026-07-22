@@ -1,0 +1,37 @@
+.settingsButton {
+  grid-area: settings;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: rgba(15, 23, 42, 0.88);
+  color: var(--text-main);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 1.15rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+:global(.canvas-top-controls) > .settingsButton {
+  pointer-events: auto;
+}
+
+.settingsButton:hover,
+.settingsButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+:global(.light-theme) .settingsButton {
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
+}
+
+:global(.presenter-mode) .settingsButton {
+  display: none;
+}
