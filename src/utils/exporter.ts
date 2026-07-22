@@ -1,4 +1,3 @@
-import gifshot from 'gifshot';
 import { cloneFrames } from '../data/initialFrames';
 import type {
   Boat,
@@ -14,45 +13,6 @@ import type {
 } from '../types';
 
 // Client-side export helper for Tactical Sailing Simulator
-
-export function exportToGif(
-  images: string[],
-  frameDelay: number, // in seconds (e.g. 0.5s for 500ms)
-  width: number,
-  height: number,
-  options: { sampleInterval?: number; numWorkers?: number } = {},
-): Promise<Blob> {
-  const availableCores = typeof navigator !== 'undefined' ? navigator.hardwareConcurrency : undefined;
-  const numWorkers = options.numWorkers ?? (availableCores ? Math.max(2, Math.min(4, availableCores - 1)) : 2);
-
-  return new Promise((resolve, reject) => {
-    gifshot.createGIF(
-      {
-        images: images,
-        interval: frameDelay,
-        gifWidth: width,
-        gifHeight: height,
-        numWorkers,
-        sampleInterval: options.sampleInterval ?? 10,
-      },
-      (obj: any) => {
-        if (!obj.error) {
-          // Convert dataURL to Blob
-          const base64 = obj.image.split(',')[1];
-          const binary = atob(base64);
-          const array = [];
-          for (let i = 0; i < binary.length; i++) {
-            array.push(binary.charCodeAt(i));
-          }
-          const blob = new Blob([new Uint8Array(array)], { type: 'image/gif' });
-          resolve(blob);
-        } else {
-          reject(new Error(obj.errorMsg || 'Failed to create GIF'));
-        }
-      }
-    );
-  });
-}
 
 export function downloadBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);

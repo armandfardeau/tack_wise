@@ -8,6 +8,8 @@ export type ExportQuality = 'fast' | 'standard' | 'high';
 
 export type ExportFormat = 'png' | 'jpeg' | 'gif' | VideoExportType | 'json';
 
+export type ExportPhase = 'preparing' | 'capturing' | 'encoding';
+
 export const EXPORT_FPS_OPTIONS = [10, 15, 20, 30] as const;
 
 export type ExportFps = typeof EXPORT_FPS_OPTIONS[number];

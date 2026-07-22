@@ -419,6 +419,7 @@ export default function App() {
 
       {exportState.isExporting && (
         <ExportOverlay
+          exportPhase={exportState.exportPhase}
           exportProgress={exportState.exportProgress}
           exportType={exportState.exportType}
         />

@@ -1,10 +1,9 @@
 import { useState, type RefObject } from 'react';
 import { flushSync } from 'react-dom';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
-import { type ExportFps, type ExportQuality, type Frame, type ScenarioSettings, type VideoExportType } from '../types';
-import { dataUrlToBlob, downloadBlob, downloadScenarioJson, exportToGif } from '../utils/exporter';
+import { type ExportFps, type ExportPhase, type ExportQuality, type Frame, type ScenarioSettings, type VideoExportType } from '../types';
+import { dataUrlToBlob, downloadBlob, downloadScenarioJson } from '../utils/exporter';
 import { DEFAULT_EXPORT_QUALITY, EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
-import { convertWebmToMp4, encodePngFramesToVideo } from '../utils/mp4';
 
 interface UseScenarioExportProps {
   currentFrameIndex: number;
@@ -38,6 +37,7 @@ export function useScenarioExport({
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'gif' | VideoExportType | null>(null);
+  const [exportPhase, setExportPhase] = useState<ExportPhase>('preparing');
   const { fps: configuredExportFps, gifPixelRatio, gifSampleInterval } = EXPORT_QUALITY_PRESETS[exportQuality];
   const defaultExportFps = configuredExportFps as ExportFps;
 
@@ -93,6 +93,7 @@ export function useScenarioExport({
     setIsExporting(true);
     setExportType(type);
     setExportProgress(0);
+    setExportPhase('preparing');
 
     const originalFrame = currentFrameIndex;
     const originalProgress = playbackProgress;
@@ -110,6 +111,7 @@ export function useScenarioExport({
       const stage = stageRef.current;
       if (!stage || typeof stage.toBlob !== 'function') return null;
 
+      setExportPhase('capturing');
       const capturedFrames: Blob[] = [];
       for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
         const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
@@ -125,6 +127,10 @@ export function useScenarioExport({
       }
 
       setExportProgress(50);
+      setExportPhase('preparing');
+      const { encodePngFramesToVideo, prepareVideoEncoder } = await import('../utils/mp4');
+      await prepareVideoEncoder();
+      setExportPhase('encoding');
       return encodePngFramesToVideo(capturedFrames, exportFps, type, (progress) => {
         setExportProgress(50 + Math.round(progress * 50));
       });
@@ -132,6 +138,8 @@ export function useScenarioExport({
 
     try {
       if (type === 'gif') {
+        const { exportToGif } = await import('../utils/gif');
+        setExportPhase('capturing');
         const capturedImageUrls: string[] = [];
         try {
           for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
@@ -150,6 +158,7 @@ export function useScenarioExport({
           }
 
           setExportProgress(60);
+          setExportPhase('encoding');
           const gifBlob = await exportToGif(capturedImageUrls, exportFrameInterval / 1000, stageSize.width, stageSize.height, {
             sampleInterval: gifSampleInterval,
           });
@@ -170,6 +179,7 @@ export function useScenarioExport({
           console.warn('Offline video export unavailable; falling back to real-time recording.', error);
         }
 
+        setExportPhase('capturing');
         const canvas = document.querySelector('.canvas-wrap canvas') as HTMLCanvasElement | null;
         if (!canvas) throw new Error('Canvas element not found.');
         if (typeof canvas.captureStream !== 'function') {
@@ -240,6 +250,10 @@ export function useScenarioExport({
           downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.mp4`);
         } else {
           setExportProgress(60);
+          setExportPhase('preparing');
+          const { convertWebmToMp4, prepareVideoEncoder } = await import('../utils/mp4');
+          await prepareVideoEncoder();
+          setExportPhase('encoding');
           const mp4Blob = await convertWebmToMp4(recordedBlob, (progress) => {
             setExportProgress(60 + Math.round(progress * 35));
           });
@@ -258,8 +272,9 @@ export function useScenarioExport({
       setIsPlaybackSampling(false);
       setIsExporting(false);
       setExportType(null);
+      setExportPhase('preparing');
     }
   };
 
-  return { exportProgress, exportType, isExporting, triggerExport, triggerImageExport, triggerJsonExport };
+  return { exportPhase, exportProgress, exportType, isExporting, triggerExport, triggerImageExport, triggerJsonExport };
 }

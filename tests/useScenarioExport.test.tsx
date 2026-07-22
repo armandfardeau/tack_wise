@@ -1,20 +1,25 @@
 import { act, renderHook } from '@testing-library/react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { useScenarioExport } from '../src/hooks/useScenarioExport';
-import { downloadBlob, exportToGif } from '../src/utils/exporter';
-import { convertWebmToMp4, encodePngFramesToVideo } from '../src/utils/mp4';
+import { downloadBlob } from '../src/utils/exporter';
+import { exportToGif } from '../src/utils/gif';
+import { convertWebmToMp4, encodePngFramesToVideo, prepareVideoEncoder } from '../src/utils/mp4';
 import type { Frame } from '../src/types';
 
 jest.mock('../src/utils/exporter', () => ({
   dataUrlToBlob: jest.fn(),
   downloadBlob: jest.fn(),
   downloadScenarioJson: jest.fn(),
+}));
+
+jest.mock('../src/utils/gif', () => ({
   exportToGif: jest.fn(),
 }));
 
 jest.mock('../src/utils/mp4', () => ({
   convertWebmToMp4: jest.fn(),
   encodePngFramesToVideo: jest.fn(),
+  prepareVideoEncoder: jest.fn(),
 }));
 
 class TestMediaRecorder {
@@ -107,6 +112,7 @@ describe('useScenarioExport video exports', () => {
     jest.mocked(exportToGif).mockReset();
     jest.mocked(convertWebmToMp4).mockReset();
     jest.mocked(encodePngFramesToVideo).mockReset();
+    jest.mocked(prepareVideoEncoder).mockReset();
     jest.spyOn(Date, 'now').mockReturnValue(123);
   });
 
@@ -159,6 +165,7 @@ describe('useScenarioExport video exports', () => {
       'webm',
       expect.any(Function),
     );
+    expect(prepareVideoEncoder).toHaveBeenCalledTimes(1);
     expect(downloadBlob).toHaveBeenCalledWith(encodedBlob, 'regatta-simulation-123.webm');
   });
 
@@ -216,6 +223,7 @@ describe('useScenarioExport video exports', () => {
     expect(recordedWebm).toBeInstanceOf(Blob);
     expect(recordedWebm.type).toBe('video/webm;codecs=vp8');
     expect(jest.mocked(convertWebmToMp4).mock.calls[0][1]).toEqual(expect.any(Function));
+    expect(prepareVideoEncoder).toHaveBeenCalledTimes(1);
     expect(jest.mocked(downloadBlob)).toHaveBeenCalledWith(convertedBlob, 'regatta-simulation-123.mp4');
   });
 

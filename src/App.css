@@ -3309,6 +3309,13 @@ body {
   line-height: 1.4;
 }
 
+.export-dialog-preparation-note {
+  margin: -2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
 .export-dialog-actions {
   justify-content: flex-end;
   gap: 8px;

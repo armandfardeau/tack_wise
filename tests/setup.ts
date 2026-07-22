@@ -1,11 +1,5 @@
 import '@testing-library/jest-dom';
 
-// gifshot probes canvas at module load, which jsdom does not implement.
-jest.mock('gifshot', () => ({
-  __esModule: true,
-  default: { createGIF: jest.fn() },
-}));
-
 // jsdom does not provide a native canvas implementation. Keep canvas-backed
 // components testable without pulling in the native `canvas` package.
 const createCanvasContextMock = () => {
