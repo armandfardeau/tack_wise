@@ -54,6 +54,14 @@ describe('Boat sail rendering', () => {
     expect(sail).toBeInTheDocument();
     expect(sail).toHaveAttribute('opacity', '0.28');
     expect(screen.getAllByTestId('konva-path').filter((path) => path.getAttribute('data')?.startsWith('M 0')).length).toBeGreaterThanOrEqual(4);
+
+    const mastFoot = screen.getAllByTestId('konva-circle').find((circle) => circle.getAttribute('fill') === '#1e293b');
+    expect(mastFoot).toHaveAttribute('x', '0');
+    expect(mastFoot).toHaveAttribute('y', '-12');
+    expect(mastFoot).toHaveAttribute('radius', '4');
+    expect(mastFoot).not.toHaveAttribute('cx');
+    expect(mastFoot).not.toHaveAttribute('cy');
+    expect(mastFoot).not.toHaveAttribute('r');
   });
 
   it('uses the improved sail silhouette for cumulative-frame shadows', () => {
@@ -66,5 +74,10 @@ describe('Boat sail rendering', () => {
 
     expect(sail).toBeInTheDocument();
     expect(sail).toHaveAttribute('opacity', '0.65');
+
+    const mastFoot = screen.getAllByTestId('konva-circle').find((circle) => circle.getAttribute('fill') === '#94a3b8');
+    expect(mastFoot).toHaveAttribute('x', '0');
+    expect(mastFoot).toHaveAttribute('y', '-12');
+    expect(mastFoot).toHaveAttribute('radius', '3');
   });
 });

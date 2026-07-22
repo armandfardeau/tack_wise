@@ -162,9 +162,9 @@ function SailVisual({
         lineCap="round"
       />
       <Circle
-        cx={geometry.mastFoot.x}
-        cy={geometry.mastFoot.y}
-        r={isShadow ? 3 : 4}
+        x={geometry.mastFoot.x}
+        y={geometry.mastFoot.y}
+        radius={isShadow ? 3 : 4}
         fill={mastColor}
       />
     </>
