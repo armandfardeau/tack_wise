@@ -249,9 +249,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 16. New scenario dialog
 
-- [ ] Migrate .new-scenario-backdrop, .new-scenario-dialog, .new-scenario-header, .new-scenario-heading, .new-scenario-close, .new-scenario-actions, .new-scenario-secondary, .new-scenario-export, and .new-scenario-danger.
-- [ ] Preserve modal focus, hover, focus-visible, and disabled behavior.
+- [x] Migrate .new-scenario-backdrop, .new-scenario-dialog, .new-scenario-header, .new-scenario-heading, .new-scenario-close, .new-scenario-actions, .new-scenario-secondary, .new-scenario-export, and .new-scenario-danger.
+- [x] Preserve modal focus, hover, focus-visible, and disabled behavior.
 - Primary file: src/components/NewScenarioDialog.tsx.
+
+#### Item 16 migration record (2026-07-22)
+
+- Original global CSS: `.new-scenario-backdrop` and its `.light-theme` override supplied the fixed modal backdrop, centered layout, blur, and theme surface. `.new-scenario-dialog` supplied the 480px dialog surface, spacing, border, radius, and shadow. `.new-scenario-header`, `.new-scenario-heading`, and `.new-scenario-actions` supplied the flex layouts; `.new-scenario-heading h2` and `.new-scenario-dialog > p` supplied title and description typography. `.new-scenario-close` and its hover/focus-visible state supplied the close control. `.new-scenario-secondary`, `.new-scenario-export`, and `.new-scenario-danger` supplied the action button base and variants, while their hover/focus-visible rules preserved the lift interaction.
+- New module: `src/components/NewScenarioDialog.module.css` contains the equivalent local rules under `backdrop`, `dialog`, `header`, `heading`, `close`, `description`, `actions`, `actionButton`, `secondary`, `export`, and `danger`. The `:global(.light-theme)` selector is retained only for the app-wide theme ancestor override.
+- React refactor: `NewScenarioDialog` imports the module and converts the backdrop, dialog, heading, close button, description, action group, and action variants to module references. Modal focus management, Escape handling, backdrop dismissal, ARIA dialog semantics, and button behavior remain unchanged.
+- Verification: targeted `NewScenarioDialog` tests, full build, full lint, `git diff --check`, and a search confirming the migrated `.new-scenario-*` selectors are no longer referenced from runtime code or App.css.
 
 ### 17. Template contribution dialog
 
