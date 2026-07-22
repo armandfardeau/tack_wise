@@ -56,6 +56,10 @@ export default function Sidebar({
     if (!frames[layersFrameIndex]) setLayersFrameIndex(currentFrameIndex);
   }, [currentFrameIndex, frames, layersFrameIndex]);
 
+  useEffect(() => {
+    if (isOpen) setView('frames');
+  }, [isOpen]);
+
   const openLayers = (frameIndex: number) => {
     onSelectFrame(frameIndex);
     setLayersFrameIndex(frameIndex);
