@@ -18,6 +18,8 @@ import PlaybackButton from './PlaybackButton';
 import CanvasHistoryControls from './CanvasHistoryControls';
 import FrameHeader from './FrameHeader';
 import { getConnectionPoints } from '../utils/markConnections';
+import inspectorStyles from './inspector/Inspector.module.css';
+import styles from './CanvasWorkspace.module.css';
 
 interface CanvasWorkspaceProps {
   activeFrame: Frame;
@@ -672,9 +674,13 @@ export default function CanvasWorkspace({
     shouldShowInspector,
   ]);
 
+  const canvasWrapClassName = [styles.canvasWrap, isAddingArrow && styles.isArrowDrawing]
+    .filter(Boolean)
+    .join(' ');
+
   return (
-    <section className="canvas-container">
-      <div ref={canvasWrapRef} className={`canvas-wrap${isAddingArrow ? ' is-arrow-drawing' : ''}`}>
+    <section className={styles.canvasContainer}>
+      <div ref={canvasWrapRef} data-canvas-wrap="true" className={canvasWrapClassName}>
         <SimulationCanvas
           activeFrame={activeFrame}
           canvasPosition={canvasPosition}
@@ -716,17 +722,17 @@ export default function CanvasWorkspace({
           stageSize={stageSize}
         />
         {!presenterMode && !isExporting && !isAddingArrow && !isInspectorOpen && selectedPosition && (
-          <div className="canvas-edit-hint" role="status" aria-live="polite">
+          <div className={styles.canvasEditHint} role="status" aria-live="polite">
             <Pencil aria-hidden="true" size={14} />
             <span>Double-click or double-tap an object to edit it.</span>
           </div>
         )}
         {isAddingArrow && (
-          <div className="arrow-drawing-hint" role="status" aria-live="polite">
+          <div className={styles.arrowDrawingHint} role="status" aria-live="polite">
             <span>{arrowDrawingStart ? 'Click the end point for the arrow.' : 'Click the start point for the arrow.'}</span>
             <button
               type="button"
-              className="arrow-drawing-cancel"
+              className={styles.arrowDrawingCancel}
               onClick={() => {
                 setIsAddingArrow(false);
                 setArrowDrawingStart(null);
@@ -736,7 +742,7 @@ export default function CanvasWorkspace({
             </button>
           </div>
         )}
-        <div className="canvas-top-controls">
+        <div className={styles.canvasTopControls}>
           {!presenterMode && <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />}
           {!presenterMode && (
             <CanvasHistoryControls
@@ -762,12 +768,12 @@ export default function CanvasWorkspace({
           />
         </div>
         {playbackToast && (
-          <div className="playback-toast" role="status" aria-live="polite" aria-atomic="true">
+          <div className={styles.playbackToast} role="status" aria-live="polite" aria-atomic="true">
             <TriangleAlert aria-hidden="true" size={17} />
             <span>{playbackToast}</span>
             <button
               type="button"
-              className="playback-toast-dismiss"
+              className={styles.playbackToastDismiss}
               aria-label="Dismiss playback warning"
               onClick={() => setPlaybackToast(null)}
             >
@@ -779,8 +785,8 @@ export default function CanvasWorkspace({
           <Rnd
             bounds="parent"
             className="floating-inspector"
-            cancel=".inspector-close-btn, .inspector-delete-btn, .inspector-duplicate-btn"
-            dragHandleClassName="inspector-drag-handle"
+            cancel={`.${inspectorStyles.closeButton}, .${inspectorStyles.deleteButton}, .${inspectorStyles.duplicateButton}`}
+            dragHandleClassName={inspectorStyles.dragHandle}
             enableResizing={false}
             position={{
               x: inspectorPosition?.x ?? inspectorStyle.left,

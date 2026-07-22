@@ -1,0 +1,567 @@
+.controlSection {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.controlSection:last-child {
+  border-bottom: none;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.editorForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formRow label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.formRow input[type='text'],
+.formRow input[type='search'],
+.formRow select {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.formRow textarea {
+  resize: vertical;
+  min-height: 72px;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.formRow input[type='text']:focus,
+.formRow input[type='search']:focus,
+.formRow select:focus {
+  border-color: var(--accent-cyan);
+}
+
+.connectionListHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.connectionSectionLabel {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.connectionAddButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background: var(--bg-card);
+  color: var(--accent-cyan-hover);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.connectionAddButton:hover:not(:disabled),
+.connectionAddButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.1);
+}
+
+.connectionAddButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.connectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.connectionRow {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 34px;
+  padding: 4px 5px 4px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: rgba(30, 41, 59, 0.45);
+}
+
+.connectionRow select {
+  min-width: 0;
+  flex: 1;
+  padding: 5px 7px;
+}
+
+.connectionTargetName {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.connectionRowButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 25px;
+  flex: 0 0 25px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.connectionRowButton:hover,
+.connectionRowButton:focus-visible {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan-hover);
+  background: rgba(6, 182, 212, 0.1);
+}
+
+.connectionRowDeleteButton:hover,
+.connectionRowDeleteButton:focus-visible {
+  border-color: var(--accent-red);
+  color: var(--accent-red-hover);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.connectionEmpty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
+.quickAngleDial {
+  position: relative;
+  width: 176px;
+  height: 176px;
+  margin: 8px auto 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
+  background: var(--bg-card);
+}
+
+.quickAngleDial::before {
+  content: '';
+  position: absolute;
+  inset: 22px;
+  border: 1px dashed rgba(148, 163, 184, 0.28);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.quickAngleDial::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 8px;
+  border: 2px solid var(--accent-cyan);
+  border-radius: 50%;
+  background: var(--bg-card);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.quickAngleButton {
+  position: absolute;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  min-height: 30px;
+  padding: 4px 2px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background-color: var(--bg-card);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-variant-numeric: tabular-nums;
+  transform: translate(-50%, -50%);
+  transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quickAngleButton:hover,
+.quickAngleButton[aria-pressed='true'] {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+.quickAngleButton:focus-visible {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.quickAngleButton[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.14);
+}
+
+.directionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.directionButton:hover {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan-hover);
+  background-color: rgba(6, 182, 212, 0.1);
+}
+
+.flexRow {
+  flex-direction: row;
+  align-items: center;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxLabel input[type='checkbox'] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-cyan);
+}
+
+.gridHint {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  margin: 10px 0 0;
+}
+
+.inspectorTabs {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 16px;
+  padding: 3px;
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: rgba(2, 6, 23, 0.34);
+}
+
+.inspectorTab {
+  flex: 1 0 auto;
+  min-width: 0;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inspectorTab:hover,
+.inspectorTab:focus-visible {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--accent-cyan-hover);
+  outline: none;
+}
+
+.inspectorTab[aria-selected='true'] {
+  background: rgba(6, 182, 212, 0.18);
+  color: var(--accent-cyan-hover);
+  box-shadow: inset 0 0 0 1px rgba(6, 182, 212, 0.35);
+}
+
+.inspectorTabPanel {
+  min-width: 0;
+}
+
+.inspectorSubsection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.inspectorSubsection + .inspectorSubsection {
+  padding-top: 14px;
+  border-top: 1px solid var(--border-color);
+}
+
+.inspectorSubsectionTitle {
+  margin: 0;
+  color: var(--accent-cyan-hover);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.ruleOffenseList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ruleOffenseRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 6px 4px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+}
+
+.ruleOffenseName {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ruleOffenseRemove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.ruleOffenseRemove:hover,
+.ruleOffenseRemove:focus-visible {
+  border-color: var(--accent-red);
+  color: var(--accent-red);
+}
+
+.ruleOffenseAdd select {
+  width: 100%;
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-red);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 6px;
+}
+
+.closeButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.closeButton:hover,
+.closeButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(34, 211, 238, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+.duplicateButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-cyan);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.duplicateButton:hover,
+.duplicateButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(34, 211, 238, 0.12);
+}
+
+.deleteButton:hover,
+.deleteButton:focus-visible {
+  border-color: var(--accent-red);
+  background-color: rgba(244, 63, 94, 0.12);
+}
+
+.noSelection {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+  line-height: 1.5;
+  text-align: center;
+  margin: 20px 0;
+}
+
+.speechBubblePresets {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 7px;
+}
+
+.speechBubblePreset,
+.speechBubbleClear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 30px;
+  height: 30px;
+  padding: 3px 7px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.speechBubblePreset:hover,
+.speechBubblePreset:focus-visible,
+.speechBubbleClear:hover,
+.speechBubbleClear:focus-visible {
+  border-color: var(--accent-cyan);
+  background: rgba(6, 182, 212, 0.12);
+  outline: none;
+}
+
+.speechBubbleClear {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.dragHandle {
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+}
+
+.titleContent {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  gap: 7px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.objectName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: normal;
+  text-overflow: ellipsis;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+:global(.floating-inspector) .controlSection {
+  margin: 0;
+  padding: 16px;
+  border-bottom: 0;
+}
+
+:global(.floating-inspector) .sectionTitle {
+  justify-content: space-between;
+  margin-bottom: 14px;
+  color: var(--accent-cyan-hover);
+}
+
+:global(.light-theme) .deleteButton,
+:global(.light-theme) .duplicateButton,
+:global(.light-theme) .closeButton {
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
+}

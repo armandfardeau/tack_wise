@@ -180,7 +180,7 @@ export function useScenarioExport({
         }
 
         setExportPhase('capturing');
-        const canvas = document.querySelector('.canvas-wrap canvas') as HTMLCanvasElement | null;
+        const canvas = document.querySelector('[data-canvas-wrap] canvas') as HTMLCanvasElement | null;
         if (!canvas) throw new Error('Canvas element not found.');
         if (typeof canvas.captureStream !== 'function') {
           throw new Error('Canvas video capture is not supported by this browser.');

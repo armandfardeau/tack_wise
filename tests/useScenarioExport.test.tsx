@@ -67,7 +67,7 @@ function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, 
     value: captureStream,
   });
   const canvasWrap = document.createElement('div');
-  canvasWrap.className = 'canvas-wrap';
+  canvasWrap.dataset.canvasWrap = 'true';
   canvasWrap.appendChild(canvas);
   document.body.appendChild(canvasWrap);
 
