@@ -43,6 +43,7 @@ export default async function handler(request: VercelRequest, response: VercelRe
     const stripe = new Stripe(secretKey);
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',
+      managed_payments: { enabled: false },
       line_items: [{
         price_data: {
           currency: process.env.STRIPE_CURRENCY || 'usd',
