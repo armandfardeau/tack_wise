@@ -4,12 +4,13 @@ import { SponsorshipMenuItems, type SponsorshipLinks } from './SponsorshipAction
 
 interface HeaderMoreActionsProps {
   onShareScenario?: () => void;
+  onOpenAbout?: () => void;
   sponsorship?: SponsorshipLinks;
 }
 
 const repositoryUrl = 'https://github.com/armandfardeau/tack_wise';
 
-export default function HeaderMoreActions({ onShareScenario, sponsorship }: HeaderMoreActionsProps) {
+export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponsorship }: HeaderMoreActionsProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const hasSupport = Boolean(sponsorship?.stripeUrl || sponsorship?.stripePublishableKey || sponsorship?.githubUrl || sponsorship?.donationUrl);
@@ -51,6 +52,12 @@ export default function HeaderMoreActions({ onShareScenario, sponsorship }: Head
           <div className="header-more-about">
             <div className="header-more-section-heading"><Info aria-hidden="true" size={15} /> About Tack Wise</div>
             <p>A browser-based workspace for drawing, explaining, and sharing tactical sailing situations.</p>
+            {onOpenAbout && <button type="button" className="header-more-link" role="menuitem" onClick={() => {
+              onOpenAbout();
+              setIsOpen(false);
+            }}>
+              <Info aria-hidden="true" size={14} /> Open About page
+            </button>}
             <a className="header-more-link" role="menuitem" href={repositoryUrl} target="_blank" rel="noreferrer" onClick={() => setIsOpen(false)}>
               <ExternalLink aria-hidden="true" size={14} /> Explore the project
             </a>

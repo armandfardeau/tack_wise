@@ -164,9 +164,11 @@ describe('AppHeader', () => {
 
   it('groups about, support, and sharing in the compact More menu', () => {
     const onShareScenario = jest.fn();
+    const onOpenAbout = jest.fn();
 
     renderHeader({
       onShareScenario,
+      onOpenAbout,
       sponsorship: {
         stripeUrl: 'https://buy.stripe.com/test-link',
       },
@@ -177,6 +179,11 @@ describe('AppHeader', () => {
     expect(screen.getByRole('menu', { name: /about and support/i })).toBeInTheDocument();
     expect(screen.getByText('About Tack Wise')).toBeInTheDocument();
     expect(screen.getByRole('menuitem', { name: /support with stripe/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /open about page/i }));
+    expect(onOpenAbout).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
 
     fireEvent.click(screen.getByRole('menuitem', { name: /copy share link/i }));
 

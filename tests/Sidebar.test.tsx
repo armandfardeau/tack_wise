@@ -7,6 +7,7 @@ const renderSidebar = (onScenarioTitleChange = jest.fn()) => render(
     frames={[]}
     scenarioTitle="Mark Room"
     onScenarioTitleChange={onScenarioTitleChange}
+    onFixTransition={jest.fn()}
     isOpen
     onAddFrame={jest.fn()}
     onDeleteFrame={jest.fn()}

@@ -83,7 +83,7 @@ export default function AppHeader({
           <SponsorshipActions {...sponsorship} />
           <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
         </div>
-        <HeaderMoreActions onShareScenario={onShareScenario} sponsorship={sponsorship} />
+        <HeaderMoreActions onShareScenario={onShareScenario} onOpenAbout={onOpenAbout} sponsorship={sponsorship} />
       </div>
     </header>
   );
