@@ -2,6 +2,18 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import AppHeader from '../src/components/AppHeader';
 
+const rect = (top: number, right: number, bottom: number, left = 0, width = right - left, height = bottom - top) => ({
+  bottom,
+  height,
+  left,
+  right,
+  top,
+  width,
+  x: left,
+  y: top,
+  toJSON: () => ({}),
+}) as DOMRect;
+
 const renderHeader = (overrides: Partial<ComponentProps<typeof AppHeader>> = {}) => render(
   <AppHeader
     isExporting={false}
@@ -188,6 +200,32 @@ describe('AppHeader', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: /copy share link/i }));
 
     expect(onShareScenario).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the More menu inside a narrow viewport', () => {
+    const getBoundingClientRect = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
+      if (this.classList.contains('header-more-trigger')) return rect(40, 318, 74, 284, 34, 34);
+      if (this.classList.contains('header-more-menu')) return rect(0, 280, 250, 0, 280, 250);
+      return rect(0, 0, 0);
+    });
+    const originalInnerWidth = window.innerWidth;
+    const originalInnerHeight = window.innerHeight;
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 320 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 768 });
+
+    render(<AppHeader isExporting={false} onExport={jest.fn()} onImportJson={jest.fn()} onOpenAbout={jest.fn()} onShareScenario={jest.fn()} />);
+    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+
+    expect(screen.getByRole('menu', { name: /about and support/i })).toHaveStyle({
+      top: '82px',
+      left: '28px',
+      maxHeight: '682px',
+      visibility: 'visible',
+    });
+
+    getBoundingClientRect.mockRestore();
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalInnerWidth });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalInnerHeight });
   });
 
   it('shows Stripe and GitHub sponsorship links when configured', () => {
