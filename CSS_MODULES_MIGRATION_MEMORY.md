@@ -124,9 +124,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 8. Layers list
 
-- [ ] Migrate .layers-list, .layers-summary, .layer-group, .layer-group-title, .layer-group-count, .layer-group-items, .layer-row, .layer-row-icon, .layer-row-copy, .layer-row-name, .layer-row-detail, and .layers-empty.
-- [ ] Preserve .is-selected and .is-wind modifiers, keyboard focus, and dynamic inline color behavior.
+- [x] Migrate .layers-list, .layers-summary, .layer-group, .layer-group-title, .layer-group-count, .layer-group-items, .layer-row, .layer-row-icon, .layer-row-copy, .layer-row-name, .layer-row-detail, and .layers-empty.
+- [x] Preserve .is-selected and .is-wind modifiers, keyboard focus, and dynamic inline color behavior.
 - Primary file: src/components/LayerList.tsx.
+
+#### Item 8 migration record (2026-07-22)
+
+- Original global CSS: `.layers-list`, `.layers-summary`, `.layer-group`, `.layer-group-title`, `.layer-group-count`, `.layer-group-items`, `.layer-row` with hover/focus-visible and `.is-selected` states, `.layer-row-icon` with `.is-wind`, `.layer-row-copy`, `.layer-row-name`, `.layer-row-detail`, and `.layers-empty`. These rules had no responsive, theme, print, animation, or cross-component overrides.
+- New module: `src/components/LayerList.module.css` contains the equivalent declarations under local names (`layersList`, `layersSummary`, `layerGroup`, `layerGroupTitle`, `layerGroupCount`, `layerGroupItems`, `layerRow`, `layerRowIcon`, `layerRowCopy`, `layerRowName`, `layerRowDetail`, `layersEmpty`, `isSelected`, and `isWind`). The hover/focus-visible behavior remains local, and the two state modifiers are composed only on their owning elements.
+- React refactor: `LayerList` imports the module and converts every LayerList-owned class reference to the corresponding module class. Selected rows preserve `aria-pressed` and the selected modifier; the wind icon preserves its modifier; object colors continue to be applied through the existing dynamic inline `color` style. Sidebar and Inspector class contracts are unchanged.
+- Verification: targeted LayerList tests, `npm run build`, `npm run lint`, `git diff --check`, and a repository search confirming no LayerList runtime usage remains dependent on the removed global selectors.
 
 ### 9. Inspector forms and object controls
 
