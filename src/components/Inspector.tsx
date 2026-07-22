@@ -11,6 +11,7 @@ import { MarkInspector } from './inspector/MarkInspector';
 import { PlaybackInspector } from './inspector/PlaybackInspector';
 import { RuleCommentInspector } from './inspector/RuleCommentInspector';
 import { WindInspector } from './inspector/WindInspector';
+import styles from './inspector/Inspector.module.css';
 
 export interface InspectorProps {
   view: InspectorView;
@@ -42,7 +43,7 @@ function InspectorContent({ view }: { view: InspectorView }) {
     case 'image':
       return <ImageInspector {...view} />;
     case 'empty':
-      return <p className="no-selection">Click an object or the wind indicator on the canvas to inspect and edit its properties.</p>;
+      return <p className={styles.noSelection}>Click an object or the wind indicator on the canvas to inspect and edit its properties.</p>;
   }
 }
 
@@ -50,7 +51,7 @@ export default function Inspector({ view, onDelete, onDuplicate = () => undefine
   const { objectName, deletableObject } = getInspectorMetadata(view);
 
   return (
-    <div className="control-section inspector">
+    <div className={styles.controlSection}>
       <InspectorHeader
         objectName={objectName}
         deletableObject={deletableObject}

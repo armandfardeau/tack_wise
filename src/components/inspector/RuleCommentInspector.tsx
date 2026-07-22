@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { getRuleReferences, type RuleOffenseTarget, type RuleReference } from '../../types';
 import ColorPicker from '../ColorPicker';
 import type { InspectorView } from './types';
+import styles from './Inspector.module.css';
 
 const COMMON_RULE_REFERENCES: RuleReference[] = [
   { id: 'rrs-10', label: 'RRS 10' },
@@ -43,13 +44,13 @@ function RuleReferencePicker({ activeFrameRules, comment, updateRuleComment }: R
   };
 
   return (
-    <div className="form-row">
+    <div className={styles.formRow}>
       <label htmlFor="rule-reference">Rule references</label>
       <input id="rule-reference-search" type="search" value={ruleSearch} placeholder="Search rules" aria-label="Search rule references" onChange={(event) => setRuleSearch(event.target.value)} />
       <select id="rule-reference" multiple size={Math.min(Math.max(visibleRuleOptions.length, 4), 8)} value={selectedRuleIds} onChange={(event) => updateRules(Array.from(event.target.selectedOptions, (option) => option.value))}>
         {visibleRuleOptions.map((rule) => <option key={rule.id} value={rule.id}>{rule.label}</option>)}
       </select>
-      <p className="grid-hint">Select one or more rules.</p>
+      <p className={styles.gridHint}>Select one or more rules.</p>
     </div>
   );
 }
@@ -89,21 +90,21 @@ function OffenseTargetEditor({ activeFrame, comment, updateRuleComment }: Offens
   };
 
   return (
-    <div className="inspector-subsection">
-      <h4 className="inspector-subsection-title">Highlight offending objects</h4>
-      <div className="rule-offense-list">
+    <div className={styles.inspectorSubsection}>
+      <h4 className={styles.inspectorSubsectionTitle}>Highlight offending objects</h4>
+      <div className={styles.ruleOffenseList}>
         {comment.offenseTargets.map((target) => (
-          <div className="rule-offense-row" key={offenseKey(target)}>
-            <span className="rule-offense-name">{getOffenseName(target)}</span>
+          <div className={styles.ruleOffenseRow} key={offenseKey(target)}>
+            <span className={styles.ruleOffenseName}>{getOffenseName(target)}</span>
             <ColorPicker compact aria-label={`Color for ${getOffenseName(target)}`} value={target.color ?? '#ef4444'} onChange={(color) => updateOffenseColor(target, color)} />
-            <button type="button" className="rule-offense-remove" aria-label={`Remove offending object ${getOffenseName(target)}`} onClick={() => removeOffense(target)}>
+            <button type="button" className={styles.ruleOffenseRemove} aria-label={`Remove offending object ${getOffenseName(target)}`} onClick={() => removeOffense(target)}>
               <X aria-hidden="true" size={14} />
             </button>
           </div>
         ))}
-        {comment.offenseTargets.length === 0 && <p className="grid-hint">No offending objects highlighted yet.</p>}
+        {comment.offenseTargets.length === 0 && <p className={styles.gridHint}>No offending objects highlighted yet.</p>}
       </div>
-      <div className="rule-offense-add">
+      <div className={styles.ruleOffenseAdd}>
         <select id="rule-offense-add" defaultValue="" aria-label="Add offending object" onChange={(event) => { addOffense(event.target.value); event.currentTarget.value = ''; }}>
           <option value="">Add offending object…</option>
           {offenseOptions.filter((target) => !selectedOffenseKeys.has(offenseKey(target))).map((target) => <option key={offenseKey(target)} value={offenseKey(target)}>{target.name}</option>)}
@@ -115,11 +116,11 @@ function OffenseTargetEditor({ activeFrame, comment, updateRuleComment }: Offens
 
 export function RuleCommentInspector({ activeFrame, comment, updateRuleComment }: RuleCommentInspectorProps) {
   return (
-    <div className="editor-form">
-      <div className="form-row"><label htmlFor="rule-comment-name">Name</label><input id="rule-comment-name" type="text" value={comment.name} onChange={(event) => updateRuleComment(comment.id, { name: event.target.value })} /></div>
+    <div className={styles.editorForm}>
+      <div className={styles.formRow}><label htmlFor="rule-comment-name">Name</label><input id="rule-comment-name" type="text" value={comment.name} onChange={(event) => updateRuleComment(comment.id, { name: event.target.value })} /></div>
       <RuleReferencePicker activeFrameRules={activeFrame.rules ?? []} comment={comment} updateRuleComment={updateRuleComment} />
-      <div className="form-row"><label htmlFor="rule-comment-color">Highlight color</label><ColorPicker id="rule-comment-color" label="Highlight color" value={comment.color} onChange={(color) => updateRuleComment(comment.id, { color })} /></div>
-      <div className="form-row"><label htmlFor="rule-comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="rule-comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateRuleComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
+      <div className={styles.formRow}><label htmlFor="rule-comment-color">Highlight color</label><ColorPicker id="rule-comment-color" label="Highlight color" value={comment.color} onChange={(color) => updateRuleComment(comment.id, { color })} /></div>
+      <div className={styles.formRow}><label htmlFor="rule-comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="rule-comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateRuleComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
       <OffenseTargetEditor activeFrame={activeFrame} comment={comment} updateRuleComment={updateRuleComment} />
     </div>
   );

@@ -1,4 +1,5 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
+import styles from './Inspector.module.css';
 
 export interface InspectorTabDefinition {
   id: string;
@@ -15,8 +16,8 @@ export function InspectorTabs({ label, tabs }: { label: string; tabs: readonly I
   if (!activeTabDefinition) return null;
 
   return (
-    <div className="inspector-tabbed-section">
-      <div className="inspector-tabs" role="tablist" aria-label={`${label} sections`}>
+    <div>
+      <div className={styles.inspectorTabs} role="tablist" aria-label={`${label} sections`}>
         {tabs.map((tab, index) => {
           const tabPanelId = `${tabId}-${tab.id}-panel`;
           const buttonId = `${tabId}-${tab.id}-tab`;
@@ -29,7 +30,7 @@ export function InspectorTabs({ label, tabs }: { label: string; tabs: readonly I
               }}
               type="button"
               id={buttonId}
-              className="inspector-tab"
+              className={styles.inspectorTab}
               role="tab"
               aria-selected={activeTab === tab.id}
               aria-controls={tabPanelId}
@@ -61,7 +62,7 @@ export function InspectorTabs({ label, tabs }: { label: string; tabs: readonly I
       </div>
       <div
         id={`${tabId}-${activeTabDefinition.id}-panel`}
-        className="inspector-tab-panel"
+        className={styles.inspectorTabPanel}
         role="tabpanel"
         aria-labelledby={`${tabId}-${activeTabDefinition.id}-tab`}
         tabIndex={0}
