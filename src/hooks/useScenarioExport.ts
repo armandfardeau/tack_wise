@@ -47,12 +47,13 @@ export function useScenarioExport({
 
   const triggerImageExport = (type: 'png' | 'jpeg') => {
     const stage = stageRef.current;
-    if (!stage) return;
+    if (!stage) return false;
 
     const mimeType = type === 'png' ? 'image/png' : 'image/jpeg';
     stage.draw();
     const dataUrl = stage.toDataURL({ pixelRatio: 1.5, mimeType });
     downloadBlob(dataUrlToBlob(dataUrl), `tack-wise-diagram-${Date.now()}.${type === 'png' ? 'png' : 'jpg'}`);
+    return true;
   };
 
   const captureStageBlob = async (stage: KonvaStage, pixelRatio: number) => {
@@ -173,7 +174,7 @@ export function useScenarioExport({
           if (offlineVideoBlob) {
             setExportProgress(100);
             downloadBlob(offlineVideoBlob, `regatta-simulation-${Date.now()}.${type}`);
-            return;
+            return true;
           }
         } catch (error) {
           console.warn('Offline video export unavailable; falling back to real-time recording.', error);
@@ -261,11 +262,13 @@ export function useScenarioExport({
           downloadBlob(mp4Blob, `regatta-simulation-${Date.now()}.mp4`);
         }
       }
+      return true;
     } catch (error) {
       console.error('Export error: ', error);
       const message = error instanceof Error ? error.message : 'Please try again.';
       const exportLabel = type === 'gif' ? 'GIF' : type.toUpperCase();
       window.alert(`Could not export ${exportLabel}. ${message}`);
+      return false;
     } finally {
       setCurrentFrameIndex(originalFrame);
       setPlaybackProgress(originalProgress);

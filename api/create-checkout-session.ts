@@ -3,6 +3,8 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 interface DonationRequestBody {
   amount?: number | string;
+  distinct_id?: string;
+  session_id?: string;
 }
 
 function getBody(request: VercelRequest): DonationRequestBody {
@@ -17,6 +19,15 @@ function getBody(request: VercelRequest): DonationRequestBody {
   return request.body as DonationRequestBody ?? {};
 }
 
+function getHeaderValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function getAnalyticsId(value: string | undefined, fallback: string | undefined) {
+  const candidate = value || fallback;
+  return candidate?.trim().slice(0, 200) || null;
+}
+
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'POST');
@@ -28,7 +39,10 @@ export default async function handler(request: VercelRequest, response: VercelRe
     return response.status(500).json({ error: 'Stripe donations are not configured yet.' });
   }
 
-  const amount = Number(getBody(request).amount);
+  const body = getBody(request);
+  const distinctId = getAnalyticsId(body.distinct_id, getHeaderValue(request.headers['x-posthog-distinct-id']));
+  const sessionId = getAnalyticsId(body.session_id, getHeaderValue(request.headers['x-posthog-session-id']));
+  const amount = Number(body.amount);
   const amountInCents = Math.round(amount * 100);
   if (!Number.isFinite(amountInCents) || amountInCents < 100 || amountInCents > 1_000_000) {
     return response.status(400).json({ error: 'Donation amount must be between 1.00 and 10,000.00.' });
@@ -53,7 +67,11 @@ export default async function handler(request: VercelRequest, response: VercelRe
         quantity: 1,
       }],
       submit_type: 'donate',
-      success_url: `${origin}/?donation=success`,
+      metadata: {
+        ...(distinctId ? { posthog_distinct_id: distinctId } : {}),
+        ...(sessionId ? { posthog_session_id: sessionId } : {}),
+      },
+      success_url: `${origin}/?donation=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?donation=cancelled`,
     });
 
