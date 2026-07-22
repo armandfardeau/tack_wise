@@ -800,8 +800,8 @@ describe('boat editor', () => {
     fireEvent.change(screen.getByLabelText('Color'), { target: { value: '#ffffff' } });
     fireEvent.click(screen.getByRole('checkbox', { name: /auto sail trim/i }));
     const sailAngle = screen.getByLabelText(/sail angle \(0°\)/i);
-    expect(sailAngle).toHaveAttribute('min', '-100');
-    expect(sailAngle).toHaveAttribute('max', '100');
+    expect(sailAngle).toHaveAttribute('min', '-110');
+    expect(sailAngle).toHaveAttribute('max', '110');
     fireEvent.change(sailAngle, { target: { value: '100' } });
     fireEvent.change(sailAngle, { target: { value: '-100' } });
     fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
