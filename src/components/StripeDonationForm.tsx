@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react';
+import posthog from 'posthog-js';
 import styles from './SponsorshipActions.module.css';
 
 const QUICK_AMOUNTS = [5, 10, 25, 50];
@@ -30,6 +31,7 @@ export default function StripeDonationForm() {
 
       // Stripe now returns the hosted Checkout URL directly. The publishable
       // key remains a public deployment setting and gates this client flow.
+      posthog.capture('donation_checkout_started', { amount: parsedAmount });
       window.location.assign(payload.url);
     } catch (submitError) {
       setError(submitError instanceof Error ? submitError.message : 'Unable to start Stripe Checkout.');

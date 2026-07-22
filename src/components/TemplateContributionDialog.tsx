@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Clipboard, ExternalLink, FileCode, GitPullRequest, X } from 'lucide-react';
+import posthog from 'posthog-js';
 import type { Frame } from '../types';
 import useModalFocus, { type ModalFocusRef } from '../hooks/useModalFocus';
 import {
@@ -77,6 +78,7 @@ export default function TemplateContributionDialog({
 
   const handleOpenGitHub = () => {
     if (!draft) return;
+    posthog.capture('template_contribution_submitted', { mode });
     window.open(draft.githubEditorUrl, '_blank', 'noopener,noreferrer');
     void copyValue(draft.content, 'template JSON');
   };
