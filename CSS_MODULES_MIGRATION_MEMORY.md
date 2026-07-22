@@ -118,9 +118,17 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 7. Sidebar and frame navigation
 
-- [ ] Migrate .step-panel, .sidebar-backdrop, .sidebar-drawer-handle, .scenario-title-editor, .scenario-title-input, .sidebar-scenario-title-editor, .control-section, .sidebar-frame-section, .sidebar-layers-section, .sidebar-back-btn, .sidebar-layers-heading, .sidebar-layers-frame-name, and .section-title.
-- [ ] Preserve drawer states, mobile transitions, title input states, and responsive layout.
+- [x] Migrate .step-panel, .sidebar-backdrop, .sidebar-drawer-handle, .scenario-title-editor, .scenario-title-input, .sidebar-scenario-title-editor, .control-section, .sidebar-frame-section, .sidebar-layers-section, .sidebar-back-btn, .sidebar-layers-heading, .sidebar-layers-frame-name, and .section-title.
+- [x] Preserve drawer states, mobile transitions, title input states, and responsive layout.
 - Primary file: src/components/Sidebar.tsx.
+
+#### Item 7 migration record (2026-07-22)
+
+- Original global CSS: `.step-panel`, `.sidebar-backdrop`, `.sidebar-drawer-handle`, `.scenario-title-editor`, `.scenario-title-input`, `.sidebar-scenario-title-editor`, `.control-section`, `.sidebar-frame-section`, `.sidebar-layers-section`, `.sidebar-back-btn`, `.sidebar-layers-heading .section-title`, `.sidebar-layers-frame-name`, and `.section-title`, including their print, mobile, open-state, hover/focus, readonly, and layout declarations. The shared global `.control-section` and `.section-title` definitions remain in `src/App.css` because Inspector still consumes them; Sidebar now uses equivalent local module classes.
+- New module: `src/components/Sidebar.module.css` contains the Sidebar drawer, backdrop, title editor/input, local control section and section heading, layers view, back button, frame name, print rules, and mobile drawer transition rules. Open-state modifiers use local `isOpen`; no item 8+ layer-list selectors were moved.
+- React refactor: `Sidebar` imports the module and converts all owned selectors to local class references while preserving the existing DOM structure, ARIA attributes, title editing behavior, frame/layers navigation, and Timeline/LayerList contracts.
+- App.css cleanup: removed the Sidebar-owned global selectors and their responsive/print rules; retained shared `.control-section` and `.section-title` rules plus Inspector-specific global selectors.
+- Verification: targeted Sidebar tests (2 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. Browser checks at 1280×800 and 390×844 confirmed the desktop Sidebar, mobile closed/open drawer states, backdrop close behavior, and Frames → Layers → Back to frames navigation; the temporary viewport override was reset. The build emitted the existing large-chunk warning; no new test or lint failures occurred.
 
 ### 8. Layers list
 
