@@ -50,6 +50,15 @@ Open Collective, Ko-fi, Liberapay, or other public donation page. All support
 links open in a new tab. Use Stripe Payment Links rather than a secret Stripe
 API key in this frontend.
 
+### Feedback
+
+Tack Wise installs the anonymous Featurebase SDK at the application root using
+the workspace App ID from Settings → Developers → Installation. The current
+App ID is configured by default, with `VITE_FEATUREBASE_APP_ID` available as an
+override in Vercel project settings. Dashboard modules boot automatically from
+the shared install. Feedback, updates, and authenticated identity are wired as
+separate opt-in surfaces.
+
 ### Vercel Stripe Checkout
 
 The optional donation form uses a Vercel serverless function at
