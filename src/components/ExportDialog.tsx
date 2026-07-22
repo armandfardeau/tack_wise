@@ -4,6 +4,7 @@ import type { ExportFormat, ExportFps, ExportOptions, ExportQuality, Theme } fro
 import { DEFAULT_EXPORT_FPS, EXPORT_FPS_OPTIONS } from '../types';
 import { EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
 import useModalFocus, { type ModalFocusRef } from '../hooks/useModalFocus';
+import styles from './ExportDialog.module.css';
 
 interface ExportDialogProps {
   theme: Theme;
@@ -63,24 +64,24 @@ export default function ExportDialog({
 
   return (
     <div
-      className="export-dialog-backdrop"
+      className={styles.exportDialogBackdrop}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onCancel();
       }}
     >
-      <form ref={dialogRef} className="export-dialog" role="dialog" aria-modal="true" aria-labelledby="export-dialog-title" tabIndex={-1} onSubmit={handleSubmit}>
-        <header className="export-dialog-header">
+      <form ref={dialogRef} className={styles.exportDialog} role="dialog" aria-modal="true" aria-labelledby="export-dialog-title" tabIndex={-1} onSubmit={handleSubmit}>
+        <header className={styles.exportDialogHeader}>
           <div>
-            <p className="export-dialog-eyebrow">Save your scenario</p>
+            <p className={styles.exportDialogEyebrow}>Save your scenario</p>
             <h2 id="export-dialog-title">Export</h2>
           </div>
-          <button type="button" className="export-dialog-close" aria-label="Close export dialog" onClick={onCancel}>
+          <button type="button" className={styles.exportDialogClose} aria-label="Close export dialog" onClick={onCancel}>
             <X aria-hidden="true" size={18} />
           </button>
         </header>
 
-        <div className="export-dialog-fields">
-          <label className="export-dialog-field">
+        <div className={styles.exportDialogFields}>
+          <label className={styles.exportDialogField}>
             <span>Format</span>
             <select ref={formatSelectRef} aria-label="Export format" value={format} onChange={(event) => setFormat(event.target.value as ExportFormat)}>
               {formatOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
@@ -90,11 +91,11 @@ export default function ExportDialog({
 
           {isVisualFormat(format) && (
             <>
-              <fieldset className="export-dialog-field export-dialog-theme-field">
+              <fieldset className={`${styles.exportDialogField} ${styles.exportDialogThemeField}`}>
                 <legend>Theme</legend>
-                <div className="export-dialog-theme-options">
+                <div className={styles.exportDialogThemeOptions}>
                   {(['dark', 'light'] as Theme[]).map((option) => (
-                    <label key={option} className={`export-theme-option${exportTheme === option ? ' is-selected' : ''}`}>
+                    <label key={option} className={`${styles.exportThemeOption} ${exportTheme === option ? styles.isSelected : ''}`}>
                       <input
                         type="radio"
                         name="export-theme"
@@ -102,7 +103,7 @@ export default function ExportDialog({
                         checked={exportTheme === option}
                         onChange={() => setExportTheme(option)}
                       />
-                      <span className={`export-theme-swatch ${option}-theme`} aria-hidden="true" />
+                      <span className={`${styles.exportThemeSwatch} ${option === 'dark' ? styles.darkTheme : styles.lightTheme}`} aria-hidden="true" />
                       <span>{option === 'dark' ? 'Dark' : 'Light'}</span>
                     </label>
                   ))}
@@ -110,7 +111,7 @@ export default function ExportDialog({
                 <small>Choose the canvas appearance without changing the app theme.</small>
               </fieldset>
 
-              <label className="export-dialog-auto-fit">
+              <label className={styles.exportDialogAutoFit}>
                 <input
                   type="checkbox"
                   aria-label="Auto-fit canvas"
@@ -127,14 +128,14 @@ export default function ExportDialog({
 
           {isAnimatedFormat(format) && (
             <>
-              <label className="export-dialog-field">
+              <label className={styles.exportDialogField}>
                 <span>Frames per second</span>
                 <select aria-label="Export FPS" value={fps} onChange={(event) => setFps(Number(event.target.value) as ExportFps)}>
                   {EXPORT_FPS_OPTIONS.map((option) => <option key={option} value={option}>{option} FPS</option>)}
                 </select>
                 <small>Higher FPS creates smoother motion and larger exports.</small>
               </label>
-              <label className="export-dialog-field">
+              <label className={styles.exportDialogField}>
                 <span>Quality</span>
                 <select
                   aria-label="Export quality"
@@ -147,14 +148,14 @@ export default function ExportDialog({
                 </select>
                 <small>Higher quality uses more processing and memory.</small>
               </label>
-              <p className="export-dialog-preparation-note">Animated exports load their encoder when started. The first export may take a moment to prepare.</p>
+              <p className={styles.exportDialogPreparationNote}>Animated exports load their encoder when started. The first export may take a moment to prepare.</p>
             </>
           )}
         </div>
 
-        <footer className="export-dialog-actions">
-          <button type="button" className="export-dialog-secondary" onClick={onCancel}>Cancel</button>
-          <button type="submit" className="export-dialog-primary">
+        <footer className={styles.exportDialogActions}>
+          <button type="button" className={styles.exportDialogSecondary} onClick={onCancel}>Cancel</button>
+          <button type="submit" className={styles.exportDialogPrimary}>
             <Download aria-hidden="true" size={16} />
             Export {selectedFormat.label}
           </button>
