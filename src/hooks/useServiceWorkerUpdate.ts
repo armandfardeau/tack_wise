@@ -89,8 +89,16 @@ export function useServiceWorkerUpdate(): ServiceWorkerUpdateState {
   const dismissUpdate = useCallback(() => setIsUpdateAvailable(false), []);
 
   const refresh = useCallback(() => {
-    registration?.waiting?.postMessage({ type: 'SKIP_WAITING' });
-    window.location.reload();
+    const waitingWorker = registration?.waiting;
+    if (!waitingWorker) {
+      window.location.reload();
+      return;
+    }
+
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    }, { once: true });
+    waitingWorker.postMessage({ type: 'SKIP_WAITING' });
   }, [registration]);
 
   return { isUpdateAvailable, dismissUpdate, refresh };

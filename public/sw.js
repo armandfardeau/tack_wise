@@ -1,5 +1,7 @@
 const BUILD_VERSION = '__TACK_WISE_BUILD_VERSION__'
 const CACHE_NAME = `tack-wise-shell-${BUILD_VERSION}`
+let shouldClaimClients = false
+
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -12,25 +14,32 @@ const APP_SHELL = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(APP_SHELL))
-      .then(() => self.skipWaiting()),
+      .then((cache) => cache.addAll(APP_SHELL)),
   )
 })
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(
-        keys
-          .filter((key) => key.startsWith('tack-wise-') && key !== CACHE_NAME)
-          .map((key) => caches.delete(key)),
-      ))
-      .then(() => self.clients.claim()),
+    shouldClaimClients ? self.clients.claim() : Promise.resolve(),
   )
 })
 
 self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting()
+  if (event.data?.type === 'SKIP_WAITING') {
+    shouldClaimClients = true
+    self.skipWaiting()
+  }
+
+  if (event.data?.type === 'CLEAN_OLD_CACHES') {
+    event.waitUntil(
+      caches.keys()
+        .then((keys) => Promise.all(
+          keys
+            .filter((key) => key.startsWith('tack-wise-shell-') && key !== CACHE_NAME)
+            .map((key) => caches.delete(key)),
+        )),
+    )
+  }
 })
 
 self.addEventListener('fetch', (event) => {

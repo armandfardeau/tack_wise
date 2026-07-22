@@ -19,6 +19,7 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
     void navigator.serviceWorker.register('/sw.js')
       .then((registration) => {
         window.dispatchEvent(new CustomEvent(SERVICE_WORKER_REGISTERED_EVENT, { detail: registration }))
+        registration.active?.postMessage({ type: 'CLEAN_OLD_CACHES' })
       })
       .catch((error: unknown) => {
         console.warn('Tack Wise could not register its offline app shell.', error)
