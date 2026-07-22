@@ -17,6 +17,7 @@ const FLAG_EMOJI_PRESETS = [
   { emoji: '🟩', label: 'Green flag' },
   { emoji: '🟨', label: 'Yellow flag' },
   { emoji: '🏴', label: 'Black flag' },
+  { emoji: '🏁', label: 'Start flag' },
 ] as const;
 
 type BoatInspectorProps = Extract<InspectorView, { kind: 'boat' }>;

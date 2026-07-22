@@ -749,7 +749,7 @@ describe('playback controls', () => {
 });
 
 describe('boat editor', () => {
-  it('adds red, green, yellow, and black flag emoji from the comic bubble controls row', () => {
+  it('adds red, green, yellow, black, and start flag emoji from the comic bubble controls row', () => {
     const updateBoat = jest.fn();
     const selectedBoat = { ...boat, speechBubble: 'Hold!' };
 
@@ -779,11 +779,13 @@ describe('boat editor', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Use Green flag feeling' }));
     fireEvent.click(screen.getByRole('button', { name: 'Use Yellow flag feeling' }));
     fireEvent.click(screen.getByRole('button', { name: 'Use Black flag feeling' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Use Start flag feeling' }));
 
     expect(updateBoat).toHaveBeenNthCalledWith(1, 'boat-1', { speechBubble: '🟥' });
     expect(updateBoat).toHaveBeenNthCalledWith(2, 'boat-1', { speechBubble: '🟩' });
     expect(updateBoat).toHaveBeenNthCalledWith(3, 'boat-1', { speechBubble: '🟨' });
     expect(updateBoat).toHaveBeenNthCalledWith(4, 'boat-1', { speechBubble: '🏴' });
+    expect(updateBoat).toHaveBeenNthCalledWith(5, 'boat-1', { speechBubble: '🏁' });
   });
 
   it('adds boat info or a preset feeling to the comic bubble', () => {
