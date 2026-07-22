@@ -1,6 +1,7 @@
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Check, Palette, Plus, Trash2 } from 'lucide-react';
+import styles from './ColorPicker.module.css';
 
 const COLOR_PRESETS_STORAGE_KEY = 'tack-wise-color-presets';
 const COLOR_PRESETS_UPDATED_EVENT = 'tack-wise-color-presets-updated';
@@ -216,11 +217,11 @@ export default function ColorPicker({
   };
 
   return (
-    <div ref={pickerRef} className={`color-picker${compact ? ' color-picker-compact' : ''}`} data-open={isOpen}>
+    <div ref={pickerRef} className={`${styles.picker}${compact ? ` ${styles.compact}` : ''}`} data-open={isOpen}>
       <button
         ref={triggerRef}
         type="button"
-        className="color-picker-trigger"
+        className={styles.trigger}
         aria-label={`Open ${accessibleLabel.toLowerCase()} picker`}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
@@ -232,15 +233,15 @@ export default function ColorPicker({
           setSaveFeedback('');
         }}
       >
-        <span className="color-picker-trigger-swatch" style={{ backgroundColor: currentColor }} aria-hidden="true" />
-        <span className="color-picker-trigger-value">{currentColor}</span>
+        <span className={styles.triggerSwatch} style={{ backgroundColor: currentColor }} aria-hidden="true" />
+        <span className={styles.triggerValue}>{currentColor}</span>
         <Palette aria-hidden="true" size={16} />
       </button>
 
       <input
         ref={nativeInputRef}
         id={inputId}
-        className="color-picker-native-input"
+        className={styles.nativeInput}
         type="color"
         value={currentColor}
         aria-label={accessibleLabel}
@@ -251,7 +252,7 @@ export default function ColorPicker({
       {isOpen && typeof document !== 'undefined' && createPortal(
         <div
           ref={menuRef}
-          className="color-picker-menu"
+          className={`${styles.menu} color-picker-menu`}
           role="dialog"
           aria-label={`${accessibleLabel} picker`}
           onKeyDown={handleColorMenuKeyDown}
@@ -261,14 +262,14 @@ export default function ColorPicker({
             visibility: menuPosition ? 'visible' : 'hidden',
           }}
         >
-          <div className="color-picker-menu-heading">
+          <div className={styles.menuHeading}>
             <span>Quick colors</span>
-            <span className="color-picker-menu-value">{currentColor}</span>
+            <span className={styles.menuValue}>{currentColor}</span>
           </div>
 
-          <div className="color-picker-speed-dial" role="group" aria-label="Quick color presets">
-            <span className="color-picker-speed-dial-ring" aria-hidden="true" />
-            <span className="color-picker-speed-dial-center" style={{ backgroundColor: currentColor }} aria-hidden="true" />
+          <div className={styles.speedDial} role="group" aria-label="Quick color presets">
+            <span className={styles.speedDialRing} aria-hidden="true" />
+            <span className={styles.speedDialCenter} style={{ backgroundColor: currentColor }} aria-hidden="true" />
             {QUICK_COLOR_PRESETS.map((color, index) => {
               const angle = (index * 360) / QUICK_COLOR_PRESETS.length;
 
@@ -276,7 +277,7 @@ export default function ColorPicker({
                 <button
                   key={color}
                   type="button"
-                  className="color-picker-dial-button"
+                  className={styles.dialButton}
                   aria-label={`Use color ${color}`}
                   aria-pressed={currentColor === color}
                   title={color}
@@ -286,7 +287,7 @@ export default function ColorPicker({
                   }}
                   onClick={() => selectColor(color)}
                 >
-                  <span className="color-picker-swatch" style={{ backgroundColor: color }} aria-hidden="true" />
+                  <span className={styles.swatch} style={{ backgroundColor: color }} aria-hidden="true" />
                   {currentColor === color && <Check aria-hidden="true" size={12} />}
                 </button>
               );
@@ -295,40 +296,40 @@ export default function ColorPicker({
 
           <button
             type="button"
-            className="color-picker-custom-row"
+            className={styles.customRow}
             aria-label="Choose custom color"
             onClick={() => {
               setIsOpen(true);
               nativeInputRef.current?.click();
             }}
           >
-            <span className="color-picker-custom-label"><Palette aria-hidden="true" size={15} /> Custom color</span>
-            <span className="color-picker-custom-value">{currentColor}</span>
-            <span className="color-picker-swatch" style={{ backgroundColor: currentColor }} aria-hidden="true" />
+            <span className={styles.customLabel}><Palette aria-hidden="true" size={15} /> Custom color</span>
+            <span className={styles.customValue}>{currentColor}</span>
+            <span className={styles.swatch} style={{ backgroundColor: currentColor }} aria-hidden="true" />
           </button>
 
-          <div className="color-picker-saved-heading">
+          <div className={styles.savedHeading}>
             <span>Saved presets</span>
             <span>{savedPresets.length}/{MAX_SAVED_PRESETS}</span>
           </div>
           {savedPresets.length > 0 ? (
-            <div className="color-picker-saved-list" role="group" aria-label="Saved color presets">
+            <div className={styles.savedList} role="group" aria-label="Saved color presets">
               {savedPresets.map((color) => (
-                <div className="color-picker-saved-item" key={color}>
+                <div className={styles.savedItem} key={color}>
                   <button
                     type="button"
-                    className="color-picker-saved-button"
+                    className={styles.savedButton}
                     aria-label={`Use saved color ${color}`}
                     aria-pressed={currentColor === color}
                     title={`Use ${color}`}
                     onClick={() => selectColor(color)}
                   >
-                    <span className="color-picker-swatch" style={{ backgroundColor: color }} aria-hidden="true" />
+                    <span className={styles.swatch} style={{ backgroundColor: color }} aria-hidden="true" />
                     {currentColor === color && <Check aria-hidden="true" size={12} />}
                   </button>
                   <button
                     type="button"
-                    className="color-picker-remove-button"
+                    className={styles.removeButton}
                     aria-label={`Remove saved color ${color}`}
                     title={`Remove ${color}`}
                     onClick={() => removeSavedColor(color)}
@@ -339,21 +340,21 @@ export default function ColorPicker({
               ))}
             </div>
           ) : (
-            <p className="color-picker-empty">Choose a custom color, then save it here for reuse.</p>
+            <p className={styles.empty}>Choose a custom color, then save it here for reuse.</p>
           )}
 
           <button
             type="button"
-            className="color-picker-save-button"
+            className={styles.saveButton}
             disabled={isSaved || isQuickPreset || savedPresets.length >= MAX_SAVED_PRESETS}
             onClick={saveCurrentColor}
           >
             <Plus aria-hidden="true" size={15} />
             {isSaved || isQuickPreset ? 'Already a preset' : savedPresets.length >= MAX_SAVED_PRESETS ? 'Preset limit reached' : 'Save current color'}
           </button>
-          {saveFeedback && <p className="color-picker-feedback" aria-live="polite">{saveFeedback}</p>}
+          {saveFeedback && <p className={styles.feedback} aria-live="polite">{saveFeedback}</p>}
 
-          <p className="color-picker-hint">Pick a quick color or open Custom color for any hex value.</p>
+          <p className={styles.hint}>Pick a quick color or open Custom color for any hex value.</p>
         </div>,
         pickerRef.current?.closest('.app-shell') ?? document.body,
       )}

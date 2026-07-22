@@ -138,11 +138,18 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 10. Color picker
 
-- [ ] Migrate .color-picker, .color-picker-trigger, .color-picker-trigger-swatch, .color-picker-trigger-value, .color-picker-native-input, .color-picker-menu, .color-picker-menu-heading, .color-picker-menu-value, and open/focus states.
-- [ ] Migrate .color-picker-speed-dial, .color-picker-speed-dial-ring, .color-picker-speed-dial-center, .color-picker-dial-button, and swatch states.
-- [ ] Migrate custom, saved-color, feedback, hint, remove, save, and compact-mode selectors.
-- [ ] Preserve light-theme overrides and the data-open state selector.
+- [x] Migrate .color-picker, .color-picker-trigger, .color-picker-trigger-swatch, .color-picker-trigger-value, .color-picker-native-input, .color-picker-menu, .color-picker-menu-heading, .color-picker-menu-value, and open/focus states.
+- [x] Migrate .color-picker-speed-dial, .color-picker-speed-dial-ring, .color-picker-speed-dial-center, .color-picker-dial-button, and swatch states.
+- [x] Migrate custom, saved-color, feedback, hint, remove, save, and compact-mode selectors.
+- [x] Preserve light-theme overrides and the data-open state selector.
 - Primary file: src/components/ColorPicker.tsx.
+
+#### Item 10 migration record (2026-07-22)
+
+- Original global CSS: `.color-picker` and `.color-picker-trigger` supplied the picker container and trigger grid, sizing, typography, border, theme variables, hover/focus state, and `[data-open='true']` trigger state. `.color-picker-trigger-swatch`, `.color-picker-swatch`, `.color-picker-trigger-value`, `.color-picker-menu-value`, and `.color-picker-custom-value` supplied swatch sizing and monospace values. `.color-picker-native-input` and its focus state kept the native color input visually hidden while retaining keyboard focus feedback. `.color-picker-menu`, its `.light-theme` override, `.color-picker-menu-heading`, `.color-picker-saved-heading`, and `.color-picker-menu-value` supplied the portaled menu layout, theme, and headings. `.color-picker-speed-dial`, its `.light-theme` override, `.color-picker-speed-dial-ring`, `.color-picker-speed-dial-center`, `.color-picker-dial-button`, its hover/focus/pressed states, nested swatches, and SVG rules supplied the quick-color dial. The custom row, saved heading/list/item/button/remove rules, save button states, empty/feedback/hint text, and `.color-picker-compact` descendants supplied custom-color, persistence, feedback, and compact-mode behavior.
+- New module: `src/components/ColorPicker.module.css` contains the equivalent declarations under local names (`picker`, `trigger`, `triggerSwatch`, `swatch`, `triggerValue`, `nativeInput`, `menu`, `menuHeading`, `menuValue`, `speedDial`, `speedDialRing`, `speedDialCenter`, `dialButton`, `customRow`, `customLabel`, `customValue`, `savedHeading`, `savedList`, `savedItem`, `savedButton`, `removeButton`, `saveButton`, `empty`, `feedback`, `hint`, and `compact`). The two light-theme rules use narrow `:global(.light-theme)` ancestors. The `data-open` selector and all hover, focus-visible, pressed, disabled, nested swatch, and compact relationships are local to the module.
+- React refactor: `ColorPicker` imports the module and replaces every styling class with its local reference, including the conditional compact root class. The portaled menu composes its generated module class with the unstyled `color-picker-menu` DOM hook used by `CanvasWorkspace` for outside-click and Escape handling; no CanvasWorkspace selectors were migrated or changed.
+- Verification: targeted `ColorPicker.test.tsx` (5 tests), all 35 Jest suites (259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. The build retained the existing Vite large-chunk warning; no functional errors were reported.
 
 ### 11. Canvas workspace and overlays
 
