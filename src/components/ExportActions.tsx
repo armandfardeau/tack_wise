@@ -7,6 +7,7 @@ import ExportDialog from './ExportDialog';
 
 interface ExportActionsProps {
   className?: string;
+  variant?: 'header' | 'panel';
   isExporting: boolean;
   onNewScenario?: () => void;
   onExport: (options: ExportOptions) => void;
@@ -23,6 +24,7 @@ interface ExportActionsProps {
 
 export default function ExportActions({
   className = 'export-actions',
+  variant = 'header',
   isExporting,
   onNewScenario,
   onExport,
@@ -105,6 +107,96 @@ export default function ExportActions({
     closeFileMenu();
     setIsExportDialogOpen(true);
   };
+
+  if (variant === 'panel') {
+    return (
+      <div className={`${className} share-file-actions`}>
+        {onNewScenario && (
+          <button type="button" className="share-action-btn" onClick={onNewScenario} disabled={isExporting}>
+            <FilePlus aria-hidden="true" size={16} />
+            <span>New diagram</span>
+          </button>
+        )}
+        <button type="button" className="share-action-btn" onClick={handleImportClick} disabled={isExporting}>
+          <FolderOpen aria-hidden="true" size={16} />
+          <span>Import JSON</span>
+        </button>
+        <button type="button" className="share-action-btn share-action-btn-primary" onClick={() => setIsExportDialogOpen(true)} disabled={isExporting}>
+          <Upload aria-hidden="true" size={16} />
+          <span>Export</span>
+        </button>
+
+        {templates.length > 0 && (
+          <section className="share-template-section" aria-labelledby="share-templates-heading">
+            <div className="share-panel-subheading" id="share-templates-heading">
+              <LayoutTemplate aria-hidden="true" size={15} />
+              <span>Templates</span>
+            </div>
+            {(onContributeTemplate || onUpdateTemplate) && (
+              <div className="share-template-actions">
+                {onContributeTemplate && (
+                  <button type="button" className="share-secondary-btn" onClick={onContributeTemplate} disabled={isExporting}>
+                    <GitPullRequest aria-hidden="true" size={14} />
+                    <span>Submit current</span>
+                  </button>
+                )}
+                {onUpdateTemplate && (
+                  <button type="button" className="share-secondary-btn" onClick={onUpdateTemplate} disabled={!canUpdateTemplate || isExporting}>
+                    <GitPullRequest aria-hidden="true" size={14} />
+                    <span>Update loaded</span>
+                  </button>
+                )}
+              </div>
+            )}
+            <div className="template-search share-template-search">
+              <Search aria-hidden="true" size={15} />
+              <input
+                type="search"
+                className="template-search-input"
+                aria-label="Search templates"
+                placeholder="Search templates"
+                value={templateSearch}
+                onChange={(event) => setTemplateSearch(event.target.value)}
+              />
+            </div>
+            <div className="share-template-list">
+              {filteredTemplates.map((template) => (
+                <button
+                  key={template.id}
+                  type="button"
+                  className="share-template-btn"
+                  onClick={() => onLoadTemplate?.(template)}
+                >
+                  <LayoutTemplate aria-hidden="true" size={15} />
+                  <span>{template.title}</span>
+                </button>
+              ))}
+              {filteredTemplates.length === 0 && <div className="template-search-empty" role="status">No templates found</div>}
+            </div>
+          </section>
+        )}
+
+        {isExportDialogOpen && <ExportDialog
+          theme={theme}
+          exportQuality={exportQuality}
+          onExportQualityChange={onExportQualityChange}
+          onCancel={() => setIsExportDialogOpen(false)}
+          onExport={(options) => {
+            setIsExportDialogOpen(false);
+            onExport(options);
+          }}
+        />}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/json,.json"
+          aria-label="Import scenario JSON file"
+          onChange={handleImportChange}
+          hidden
+        />
+      </div>
+    );
+  }
 
   return (
     <div className={className}>

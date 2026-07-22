@@ -32,8 +32,7 @@ const frame: Frame = {
 };
 
 describe('CanvasWorkspace', () => {
-  it('closes the controls panel when opening the inspector', async () => {
-    const onCloseControls = jest.fn();
+  it('opens the contextual inspector without hiding the control panel', async () => {
 
     render(
       <CanvasWorkspace
@@ -64,11 +63,7 @@ describe('CanvasWorkspace', () => {
         handleCanvasWheel={jest.fn()}
         maxZoom={2}
         minZoom={0.5}
-        onAddBoat={jest.fn()}
-        onAddMark={jest.fn()}
         onAddArrow={jest.fn()}
-        onAddComment={jest.fn()}
-        onAddImage={jest.fn()}
         onMoveBoat={jest.fn()}
         onRotateBoat={jest.fn()}
         onMoveMark={jest.fn()}
@@ -87,15 +82,11 @@ describe('CanvasWorkspace', () => {
         onRedo={jest.fn()}
         onRestoreAutosave={jest.fn()}
         onTogglePlaying={jest.fn()}
-        onStepBackward={jest.fn()}
-        onStepForward={jest.fn()}
-        onReplayFromStart={jest.fn()}
         onUndo={jest.fn()}
         onSetPlaySpeed={jest.fn()}
         playSpeed={1000}
         onPanCanvasBy={jest.fn()}
         onOpenControls={jest.fn()}
-        onCloseControls={onCloseControls}
         onSelectObject={jest.fn()}
         inspectorRequest={{ id: 'boat-1', type: 'boat', requestId: 1 }}
         onSnapPreview={jest.fn()}
@@ -121,7 +112,7 @@ describe('CanvasWorkspace', () => {
       />,
     );
 
-    await waitFor(() => expect(onCloseControls).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getByTestId('floating-inspector')).toBeInTheDocument());
     expect(screen.getByTestId('floating-inspector')).toBeInTheDocument();
     expect(screen.getByText('Inspector')).toBeInTheDocument();
 
@@ -170,11 +161,7 @@ describe('CanvasWorkspace', () => {
         handleCanvasWheel={jest.fn()}
         maxZoom={2}
         minZoom={0.5}
-        onAddBoat={jest.fn()}
-        onAddMark={jest.fn()}
         onAddArrow={jest.fn()}
-        onAddComment={jest.fn()}
-        onAddImage={jest.fn()}
         onMoveBoat={jest.fn()}
         onRotateBoat={jest.fn()}
         onMoveMark={jest.fn()}
@@ -193,15 +180,11 @@ describe('CanvasWorkspace', () => {
         onRedo={jest.fn()}
         onRestoreAutosave={jest.fn()}
         onTogglePlaying={jest.fn()}
-        onStepBackward={jest.fn()}
-        onStepForward={jest.fn()}
-        onReplayFromStart={jest.fn()}
         onUndo={jest.fn()}
         onSetPlaySpeed={jest.fn()}
         playSpeed={1000}
         onPanCanvasBy={jest.fn()}
         onOpenControls={jest.fn()}
-        onCloseControls={jest.fn()}
         onSelectObject={jest.fn()}
         onSnapPreview={jest.fn()}
         onZoomIn={jest.fn()}

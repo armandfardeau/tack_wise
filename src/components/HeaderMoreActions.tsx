@@ -1,9 +1,8 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Copy, ExternalLink, Heart, Info, MoreHorizontal } from 'lucide-react';
+import { ExternalLink, Heart, Info, MoreHorizontal } from 'lucide-react';
 import { SponsorshipMenuItems, type SponsorshipLinks } from './SponsorshipActions';
 
 interface HeaderMoreActionsProps {
-  onShareScenario?: () => void;
   onOpenAbout?: () => void;
   sponsorship?: SponsorshipLinks;
 }
@@ -16,7 +15,7 @@ interface MenuPosition {
   maxHeight: number;
 }
 
-export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponsorship }: HeaderMoreActionsProps) {
+export default function HeaderMoreActions({ onOpenAbout, sponsorship }: HeaderMoreActionsProps) {
   const menuRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const menuPanelRef = useRef<HTMLDivElement>(null);
@@ -127,15 +126,6 @@ export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponso
             <SponsorshipMenuItems {...sponsorship} />
           </>}
 
-          {onShareScenario && <>
-            <div className="header-more-divider" role="separator" />
-            <button type="button" className="header-more-link" role="menuitem" onClick={() => {
-              onShareScenario();
-              setIsOpen(false);
-            }}>
-              <Copy aria-hidden="true" size={14} /> Copy share link
-            </button>
-          </>}
         </div>
       )}
     </div>

@@ -3,6 +3,7 @@ import { ArrowUpRight, BookOpen, DoorOpen, Flag, Image, MapPin, MessageCircle, P
 import type { Mark } from '../types';
 
 interface FloatingAddMenuProps {
+  variant?: 'floating' | 'panel';
   onAddBoat: () => void;
   onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: () => void;
@@ -11,7 +12,7 @@ interface FloatingAddMenuProps {
   onAddImage: (src: string, name?: string) => void;
 }
 
-export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAddComment, onAddRuleComment, onAddImage }: FloatingAddMenuProps) {
+export default function FloatingAddMenu({ variant = 'floating', onAddBoat, onAddMark, onAddArrow, onAddComment, onAddRuleComment, onAddImage }: FloatingAddMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
@@ -89,9 +90,9 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
   };
 
   return (
-    <div ref={menuRef} className={`floating-add-menu${isOpen ? ' is-open' : ''}`}>
-      {isOpen && (
-        <div className="floating-add-actions" aria-label="Add diagram object">
+    <div ref={menuRef} className={variant === 'panel' ? 'scene-add-actions' : `floating-add-menu${isOpen ? ' is-open' : ''}`}>
+      {(variant === 'panel' || isOpen) && (
+        <div className={variant === 'panel' ? 'scene-add-action-grid' : 'floating-add-actions'} aria-label="Add diagram object">
           <button type="button" className="floating-add-action" onClick={() => runAction(onAddBoat)}><Sailboat aria-hidden="true" size={16} /> <span>Add boat</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark())}><MapPin aria-hidden="true" size={16} /> <span>Add mark</span></button>
           <button type="button" className="floating-add-action" onClick={() => runAction(() => onAddMark('obstruction'))}><TriangleAlert aria-hidden="true" size={16} /> <span>Add obstruction</span></button>
@@ -104,15 +105,15 @@ export default function FloatingAddMenu({ onAddBoat, onAddMark, onAddArrow, onAd
           <input ref={imageInputRef} type="file" accept="image/png,image/jpeg,image/gif,image/webp" onChange={handleImageChange} hidden />
         </div>
       )}
-      <button
-        type="button"
-        className="floating-add-button"
-        aria-label={isOpen ? 'Close add menu' : 'Open add menu'}
-        aria-expanded={isOpen}
-        onClick={() => setIsOpen((open) => !open)}
-      >
-        {isOpen ? <X aria-hidden="true" size={22} /> : <Plus aria-hidden="true" size={22} />}
-      </button>
+      {variant === 'floating' && <button
+          type="button"
+          className="floating-add-button"
+          aria-label={isOpen ? 'Close add menu' : 'Open add menu'}
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((open) => !open)}
+        >
+          {isOpen ? <X aria-hidden="true" size={22} /> : <Plus aria-hidden="true" size={22} />}
+        </button>}
     </div>
   );
 }

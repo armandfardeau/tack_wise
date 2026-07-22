@@ -8,14 +8,8 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
   const flowAngle = (windAngle + 180) % 360;
   const displayAngle = flowAngle < 0 ? flowAngle + 360 : flowAngle;
 
-  return (
-    <button
-      type="button"
-      className="wind-vane-container"
-      aria-label="Edit wind direction and velocity"
-      title="Click to edit wind direction and velocity"
-      onClick={onSelect}
-    >
+  const content = (
+    <>
       <div className="wind-vane-dial">
         <svg
           className="wind-vane-needle"
@@ -38,6 +32,22 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
         <span className="wind-vane-speed">{windSpeed} KTS</span>
         <span className="wind-vane-angle">{windAngle}°</span>
       </div>
+    </>
+  );
+
+  if (!onSelect) {
+    return <div className="wind-vane-container" aria-label={`Wind ${windSpeed} knots at ${windAngle} degrees`}>{content}</div>;
+  }
+
+  return (
+    <button
+      type="button"
+      className="wind-vane-container"
+      aria-label="Edit wind direction and velocity"
+      title="Click to edit wind direction and velocity"
+      onClick={onSelect}
+    >
+      {content}
     </button>
   );
 }

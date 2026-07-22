@@ -11,9 +11,6 @@ import CanvasZoomControls from './CanvasZoomControls';
 import SimulationCanvas from './SimulationCanvas';
 import WindHud from './WindHud';
 import Inspector from './Inspector';
-import GridSettingsButton from './GridSettingsButton';
-import FloatingAddMenu from './FloatingAddMenu';
-import PlaybackButton from './PlaybackButton';
 import CanvasHistoryControls from './CanvasHistoryControls';
 import FrameHeader from './FrameHeader';
 import { getConnectionPoints } from '../utils/markConnections';
@@ -47,12 +44,7 @@ interface CanvasWorkspaceProps {
   handleCanvasWheel: (event: { evt: { preventDefault: () => void; deltaY: number } }) => void;
   maxZoom: number;
   minZoom: number;
-  onAddBoat: () => void;
-  onAddMark: (shape?: Mark['shape']) => void;
   onAddArrow: (start?: Position, end?: Position) => void;
-  onAddComment: () => void;
-  onAddRuleComment?: () => void;
-  onAddImage: (src: string, name?: string) => void;
   onMoveBoat: (boatId: string, position: Position) => void;
   onRotateBoat: (boatId: string, heading: number) => void;
   onMoveMark: (markId: string, position: Position) => void;
@@ -74,15 +66,11 @@ interface CanvasWorkspaceProps {
   onRedo: () => void;
   onRestoreAutosave: () => void;
   onTogglePlaying: () => void;
-  onStepBackward: () => void;
-  onStepForward: () => void;
-  onReplayFromStart: () => void;
   onUndo: () => void;
   onSetPlaySpeed: (speed: number) => void;
   playSpeed: number;
   onPanCanvasBy: (delta: Position) => void;
   onOpenControls: () => void;
-  onCloseControls: () => void;
   onSelectObject: (id: string, type: Exclude<SelectedType, null>) => void;
   inspectorRequest?: InspectorRequest | null;
   onSnapPreview: (target: SnapTarget | null) => void;
@@ -300,12 +288,7 @@ export default function CanvasWorkspace({
   handleCanvasWheel,
   maxZoom,
   minZoom,
-  onAddBoat,
-  onAddMark,
   onAddArrow,
-  onAddComment,
-  onAddRuleComment = () => undefined,
-  onAddImage,
   onMoveBoat,
   onRotateBoat,
   onMoveMark,
@@ -327,15 +310,11 @@ export default function CanvasWorkspace({
   onRedo,
   onRestoreAutosave,
   onTogglePlaying,
-  onStepBackward,
-  onStepForward,
-  onReplayFromStart,
   onUndo,
   onSetPlaySpeed,
   playSpeed,
   onPanCanvasBy,
   onOpenControls,
-  onCloseControls,
   onSelectObject,
   inspectorRequest,
   onSnapPreview,
@@ -437,11 +416,10 @@ export default function CanvasWorkspace({
 
   const handleOpenInspector = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     if (presenterMode) return;
-    onCloseControls();
     resetInspectorPlacement();
     setIsInspectorOpen(true);
     onSelectObject(id, type);
-  }, [onCloseControls, onSelectObject, presenterMode, resetInspectorPlacement]);
+  }, [onSelectObject, presenterMode, resetInspectorPlacement]);
 
   useEffect(() => {
     if (!inspectorRequest || inspectorRequest.requestId === handledInspectorRequestRef.current) return;
@@ -449,25 +427,6 @@ export default function CanvasWorkspace({
     handledInspectorRequestRef.current = inspectorRequest.requestId;
     handleOpenInspector(inspectorRequest.id, inspectorRequest.type);
   }, [handleOpenInspector, inspectorRequest]);
-
-  const handleAddBoat = () => {
-    resetInspectorPlacement();
-    onAddBoat();
-    setIsInspectorOpen(true);
-  };
-
-  const handleAddMark = (shape?: Mark['shape']) => {
-    resetInspectorPlacement();
-    onAddMark(shape);
-    setIsInspectorOpen(true);
-  };
-
-  const handleAddArrow = () => {
-    resetInspectorPlacement();
-    setIsInspectorOpen(false);
-    setArrowDrawingStart(null);
-    setIsAddingArrow(true);
-  };
 
   const handleArrowPoint = (point: Position) => {
     if (!isAddingArrow) return;
@@ -480,24 +439,6 @@ export default function CanvasWorkspace({
     onAddArrow(arrowDrawingStart, point);
     setArrowDrawingStart(null);
     setIsAddingArrow(false);
-    setIsInspectorOpen(true);
-  };
-
-  const handleAddComment = () => {
-    resetInspectorPlacement();
-    onAddComment();
-    setIsInspectorOpen(true);
-  };
-
-  const handleAddRuleComment = () => {
-    resetInspectorPlacement();
-    onAddRuleComment();
-    setIsInspectorOpen(true);
-  };
-
-  const handleAddImage = (src: string, name?: string) => {
-    resetInspectorPlacement();
-    onAddImage(src, name);
     setIsInspectorOpen(true);
   };
 
@@ -728,7 +669,6 @@ export default function CanvasWorkspace({
           </div>
         )}
         <div className="canvas-top-controls">
-          {!presenterMode && <GridSettingsButton onOpenInspector={() => handleOpenInspector('grid', 'grid')} />}
           {!presenterMode && (
             <CanvasHistoryControls
               canRedo={canRedo}
@@ -742,7 +682,6 @@ export default function CanvasWorkspace({
           <WindHud
             windAngle={activeFrame.windAngle}
             windSpeed={activeFrame.windSpeed}
-            onSelect={() => handleOpenInspector('wind', 'wind')}
           />
           <FrameHeader
             frameName={activeFrame.name}
@@ -824,24 +763,6 @@ export default function CanvasWorkspace({
             </div>
           </Rnd>
         )}
-        {!presenterMode && <FloatingAddMenu
-            onAddBoat={handleAddBoat}
-            onAddMark={handleAddMark}
-            onAddArrow={handleAddArrow}
-            onAddComment={handleAddComment}
-            onAddRuleComment={handleAddRuleComment}
-            onAddImage={handleAddImage}
-          />}
-        <PlaybackButton
-          isPlaying={isPlaying}
-          currentFrameIndex={currentFrameIndex}
-          frameCount={frames.length}
-          onTogglePlaying={onTogglePlaying}
-          onStepBackward={onStepBackward}
-          onStepForward={onStepForward}
-          onReplayFromStart={onReplayFromStart}
-          onOpenInspector={() => handleOpenInspector('playback', 'playback')}
-        />
         <CanvasZoomControls
           canvasPosition={canvasPosition}
           canvasZoom={canvasZoom}

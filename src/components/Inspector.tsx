@@ -434,7 +434,7 @@ function BoatInspector({
   );
 }
 
-function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame; updateActiveFrame: (changes: Partial<Frame>) => void }) {
+export function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame; updateActiveFrame: (changes: Partial<Frame>) => void }) {
   return (
     <div className="editor-form">
       <div className="form-row">
@@ -449,7 +449,7 @@ function WindInspector({ activeFrame, updateActiveFrame }: { activeFrame: Frame;
   );
 }
 
-function CanvasSettingsInspector({
+export function CanvasSettingsInspector({
   displayMode,
   gridSnapEnabled,
   onSetDisplayMode,
@@ -555,7 +555,7 @@ function CanvasSettingsInspector({
   );
 }
 
-function PlaybackInspector({
+export function PlaybackInspector({
   isPlaying,
   onSetPlaySpeed,
   onTogglePlaying,

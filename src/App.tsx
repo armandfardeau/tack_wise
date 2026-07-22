@@ -74,6 +74,7 @@ export default function App() {
   const [exportQuality, setExportQuality] = useState<ExportQuality>(DEFAULT_EXPORT_QUALITY);
   const [loadedTemplateId, setLoadedTemplateId] = useState<string | null>(null);
   const [templateContributionMode, setTemplateContributionMode] = useState<TemplateContributionMode | null>(null);
+  const [shareFeedback, setShareFeedback] = useState<string | null>(null);
   const gridSnap = useGridSnap(gridSnapEnabled);
   const { redo, undo } = scenario;
   const { importScenario } = scenario;
@@ -99,7 +100,7 @@ export default function App() {
   }, [page]);
 
   const handleLayerOpenInspector = (id: string, type: Exclude<SelectedType, null>) => {
-    setIsSidebarOpen(false);
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) setIsSidebarOpen(false);
     scenario.selectObject(id, type);
     inspectorRequestIdRef.current += 1;
     setInspectorRequest({ id, type, requestId: inspectorRequestIdRef.current });
@@ -145,6 +146,7 @@ export default function App() {
   };
 
   const handleShareScenario = async () => {
+    setShareFeedback(null);
     const shareUrl = await createScenarioShareUrlAsync({
       version: 2,
       frames: scenario.frames,
@@ -154,9 +156,10 @@ export default function App() {
 
     try {
       await navigator.clipboard.writeText(shareUrl);
-      window.alert('Share link copied to clipboard.');
+      setShareFeedback('Share link copied to clipboard.');
     } catch {
       window.prompt('Copy this share link:', shareUrl);
+      setShareFeedback('Share link ready to copy.');
     }
   };
 
@@ -279,20 +282,7 @@ export default function App() {
       <AppHeader
         isExporting={isCanvasExporting}
         presenterMode={scenario.settings.presenterMode}
-        onNewScenario={handleNewScenario}
-        onExport={handleExport}
-        onImportJson={handleImportJson}
-        onShareScenario={handleShareScenario}
         onOpenAbout={() => navigateTo('about')}
-        onLoadTemplate={handleLoadTemplate}
-        onContributeTemplate={() => setTemplateContributionMode('create')}
-        onUpdateTemplate={() => {
-          if (loadedTemplate) setTemplateContributionMode('update');
-        }}
-        canUpdateTemplate={Boolean(loadedTemplate)}
-        templates={situationTemplates}
-        exportQuality={exportQuality}
-        onExportQualityChange={setExportQuality}
         onToggleTheme={() => setTheme((currentTheme) => currentTheme === 'dark' ? 'light' : 'dark')}
         onTogglePresenter={() => scenario.updateSettings({ presenterMode: !scenario.settings.presenterMode })}
         theme={theme}
@@ -305,6 +295,49 @@ export default function App() {
           frames={scenario.frames}
           scenarioTitle={scenario.settings.title ?? 'Untitled situation'}
           onScenarioTitleChange={(title) => scenario.updateSettings({ title })}
+          activeFrame={scenario.activeFrame}
+          autoSailTrim={scenario.autoSailTrim}
+          displayMode={scenario.settings.displayMode}
+          gridSnapEnabled={gridSnapEnabled}
+          showGrid={showGrid}
+          showFrameTitle={scenario.settings.showFrameTitle ?? true}
+          showFrameNumber={scenario.settings.showFrameNumber ?? true}
+          onSetGridSnapEnabled={setGridSnapEnabled}
+          onSetAutoSailTrim={scenario.setAutoSailTrim}
+          onSetDisplayMode={(displayMode) => scenario.updateSettings({ displayMode })}
+          onSetShowFrameTitle={(showFrameTitle) => scenario.updateSettings({ showFrameTitle })}
+          onSetShowFrameNumber={(showFrameNumber) => scenario.updateSettings({ showFrameNumber })}
+          onSetShowGrid={setShowGrid}
+          isPlaying={scenario.isPlaying}
+          onTogglePlaying={() => scenario.setIsPlaying((isPlaying) => !isPlaying)}
+          onStepBackward={scenario.stepBackward}
+          onStepForward={scenario.stepForward}
+          onReplayFromStart={scenario.replayFromStart}
+          playSpeed={scenario.playSpeed}
+          onSetPlaySpeed={scenario.setPlaySpeed}
+          onAddBoat={scenario.addBoat}
+          onAddMark={scenario.addMark}
+          onAddComment={scenario.addComment}
+          onAddRuleComment={scenario.addRuleComment}
+          onAddImage={scenario.addImage}
+          onAddArrow={scenario.addArrow}
+          updateActiveFrame={scenario.updateActiveFrame}
+          isExporting={isCanvasExporting}
+          theme={theme}
+          exportQuality={exportQuality}
+          onExportQualityChange={setExportQuality}
+          onNewScenario={handleNewScenario}
+          onExport={handleExport}
+          onImportJson={handleImportJson}
+          onShareScenario={handleShareScenario}
+          shareFeedback={shareFeedback}
+          onLoadTemplate={handleLoadTemplate}
+          onContributeTemplate={() => setTemplateContributionMode('create')}
+          onUpdateTemplate={() => {
+            if (loadedTemplate) setTemplateContributionMode('update');
+          }}
+          canUpdateTemplate={Boolean(loadedTemplate)}
+          templates={situationTemplates}
           unanimatableTransitionIndices={scenario.unanimatableTransitionIndices}
           onFixTransition={scenario.fixTransition}
           onAddFrame={scenario.addFrame}
@@ -346,12 +379,7 @@ export default function App() {
           handleCanvasWheel={viewport.handleCanvasWheel}
           maxZoom={viewport.maxZoom}
           minZoom={viewport.minZoom}
-          onAddBoat={scenario.addBoat}
-          onAddMark={scenario.addMark}
           onAddArrow={scenario.addArrow}
-          onAddComment={scenario.addComment}
-          onAddRuleComment={scenario.addRuleComment}
-          onAddImage={scenario.addImage}
           onMoveBoat={scenario.moveBoat}
           onRotateBoat={(boatId, heading) => scenario.updateBoat(boatId, { heading })}
           onMoveMark={scenario.moveMark}
@@ -373,15 +401,11 @@ export default function App() {
           onRedo={scenario.redo}
           onRestoreAutosave={() => scenario.restoreAutosave()}
           onTogglePlaying={() => scenario.setIsPlaying((isPlaying) => !isPlaying)}
-          onStepBackward={scenario.stepBackward}
-          onStepForward={scenario.stepForward}
-          onReplayFromStart={scenario.replayFromStart}
           onSetPlaySpeed={scenario.setPlaySpeed}
           playSpeed={scenario.playSpeed}
           onUndo={scenario.undo}
           onPanCanvasBy={viewport.panCanvasBy}
           onOpenControls={() => setIsSidebarOpen(true)}
-          onCloseControls={() => setIsSidebarOpen(false)}
           onSelectObject={scenario.selectObject}
           inspectorRequest={inspectorRequest}
           onSnapPreview={gridSnap.setSnapPreview}
