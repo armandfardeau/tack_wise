@@ -35,7 +35,7 @@ describe('AppHeader', () => {
     fireEvent.change(screen.getByRole('combobox', { name: /export format/i }), { target: { value: 'json' } });
     fireEvent.click(screen.getByRole('button', { name: /export json scenario/i }));
 
-    expect(onExport).toHaveBeenCalledWith({ format: 'json', theme: 'dark', fps: 20 });
+    expect(onExport).toHaveBeenCalledWith({ format: 'json', theme: 'dark', fps: 20, autoFit: false });
   });
 
   it('keeps Import JSON direct and opens Export as a modal', () => {
@@ -105,8 +105,21 @@ describe('AppHeader', () => {
     fireEvent.change(screen.getByRole('combobox', { name: /export fps/i }), { target: { value: '10' } });
     fireEvent.click(screen.getByRole('button', { name: /export mp4 video/i }));
 
-    expect(onExport).toHaveBeenNthCalledWith(1, { format: 'webm', theme: 'dark', fps: 20 });
-    expect(onExport).toHaveBeenNthCalledWith(2, { format: 'mp4', theme: 'dark', fps: 10 });
+    expect(onExport).toHaveBeenNthCalledWith(1, { format: 'webm', theme: 'dark', fps: 20, autoFit: true });
+    expect(onExport).toHaveBeenNthCalledWith(2, { format: 'mp4', theme: 'dark', fps: 10, autoFit: true });
+  });
+
+  it('allows auto-fitting visual exports', () => {
+    const onExport = jest.fn();
+    renderHeader({ onExport });
+
+    openExportDialog();
+    const autoFit = screen.getByRole('checkbox', { name: /auto-fit canvas/i });
+    expect(autoFit).toBeChecked();
+    fireEvent.click(autoFit);
+    fireEvent.click(screen.getByRole('button', { name: /export png image/i }));
+
+    expect(onExport).toHaveBeenCalledWith({ format: 'png', theme: 'dark', fps: 20, autoFit: false });
   });
 
   it('disables the File menu while another export is running', () => {
