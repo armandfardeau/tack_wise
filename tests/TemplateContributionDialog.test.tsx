@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { useRef, useState } from 'react';
 import TemplateContributionDialog from '../src/components/TemplateContributionDialog';
 import type { Frame } from '../src/types';
 
@@ -17,6 +18,23 @@ const baseProps = {
   existingTemplateIds: ['r18'],
   onClose: jest.fn(),
 };
+
+function FocusHarness() {
+  const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <>
+      <button ref={triggerRef} type="button" onClick={() => setIsOpen(true)}>Open template dialog</button>
+      {isOpen && <TemplateContributionDialog
+        {...baseProps}
+        mode="create"
+        returnFocusRef={triggerRef}
+        onClose={() => setIsOpen(false)}
+      />}
+    </>
+  );
+}
 
 describe('TemplateContributionDialog', () => {
   beforeEach(() => {
@@ -98,5 +116,27 @@ describe('TemplateContributionDialog', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('enters, traps, and returns focus', () => {
+    render(<FocusHarness />);
+
+    const trigger = screen.getByRole('button', { name: /open template dialog/i });
+    fireEvent.click(trigger);
+
+    const closeButton = screen.getByRole('button', { name: /close template contribution dialog/i });
+    const titleInput = screen.getByLabelText(/template title/i);
+    const githubButton = screen.getByRole('button', { name: /open github editor/i });
+
+    expect(titleInput).toHaveFocus();
+
+    fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true });
+    expect(githubButton).toHaveFocus();
+
+    fireEvent.keyDown(githubButton, { key: 'Tab' });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.click(screen.getByRole('button', { name: /^cancel$/i }));
+    expect(trigger).toHaveFocus();
   });
 });

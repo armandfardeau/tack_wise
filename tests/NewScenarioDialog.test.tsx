@@ -1,5 +1,23 @@
 import { fireEvent, render, screen } from '@testing-library/react';
+import { useRef, useState } from 'react';
 import NewScenarioDialog from '../src/components/NewScenarioDialog';
+
+function FocusHarness() {
+  const [isOpen, setIsOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  return (
+    <>
+      <button ref={triggerRef} type="button" onClick={() => setIsOpen(true)}>Open new diagram dialog</button>
+      {isOpen && <NewScenarioDialog
+        returnFocusRef={triggerRef}
+        onCancel={() => setIsOpen(false)}
+        onExportAndContinue={() => setIsOpen(false)}
+        onDiscard={() => setIsOpen(false)}
+      />}
+    </>
+  );
+}
 
 describe('NewScenarioDialog', () => {
   it('offers cancel, export, and discard actions', () => {
@@ -57,5 +75,31 @@ describe('NewScenarioDialog', () => {
     fireEvent.keyDown(document, { key: 'Escape' });
 
     expect(onCancel).toHaveBeenCalledTimes(1);
+  });
+
+  it('enters, traps, and returns focus', () => {
+    render(<FocusHarness />);
+
+    const trigger = screen.getByRole('button', { name: /open new diagram dialog/i });
+    fireEvent.click(trigger);
+
+    const closeButton = screen.getByRole('button', { name: /close new diagram dialog/i });
+    const cancelButton = screen.getByRole('button', { name: /^cancel$/i });
+    const discardButton = screen.getByRole('button', { name: /discard changes/i });
+
+    expect(cancelButton).toHaveFocus();
+
+    fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true });
+    expect(discardButton).toHaveFocus();
+
+    fireEvent.keyDown(discardButton, { key: 'Tab' });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.click(cancelButton);
+    expect(trigger).toHaveFocus();
+
+    fireEvent.click(trigger);
+    fireEvent.click(screen.getByRole('button', { name: /discard changes/i }));
+    expect(trigger).toHaveFocus();
   });
 });

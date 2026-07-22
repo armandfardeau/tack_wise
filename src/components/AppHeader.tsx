@@ -9,13 +9,13 @@ import type { ExportOptions, ExportQuality, Theme } from '../types';
 interface AppHeaderProps {
   isExporting: boolean;
   presenterMode?: boolean;
-  onNewScenario?: () => void;
+  onNewScenario?: (returnFocusTarget: HTMLElement | null) => void;
   onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
   onShareScenario?: () => void;
   onOpenAbout?: () => void;
-  onContributeTemplate?: () => void;
-  onUpdateTemplate?: () => void;
+  onContributeTemplate?: (returnFocusTarget: HTMLElement | null) => void;
+  onUpdateTemplate?: (returnFocusTarget: HTMLElement | null) => void;
   canUpdateTemplate?: boolean;
   onToggleTheme?: () => void;
   onTogglePresenter?: () => void;

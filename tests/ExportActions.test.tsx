@@ -130,6 +130,41 @@ describe('ExportActions menu behavior', () => {
     expect(screen.queryByRole('combobox', { name: /export fps/i })).not.toBeInTheDocument();
   });
 
+  it('enters, traps, and returns focus for the export dialog', () => {
+    render(<ExportActions {...baseProps} />);
+
+    const fileTrigger = screen.getByRole('button', { name: /file options/i });
+    fireEvent.click(fileTrigger);
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+
+    const formatSelect = screen.getByRole('combobox', { name: /export format/i });
+    const closeButton = screen.getByRole('button', { name: /close export dialog/i });
+    const exportButton = screen.getByRole('button', { name: /export png image/i });
+
+    expect(formatSelect).toHaveFocus();
+
+    fireEvent.keyDown(exportButton, { key: 'Tab' });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true });
+    expect(exportButton).toHaveFocus();
+
+    fireEvent.change(formatSelect, { target: { value: 'json' } });
+    const jsonExportButton = screen.getByRole('button', { name: /export json scenario/i });
+    fireEvent.keyDown(jsonExportButton, { key: 'Tab' });
+    expect(closeButton).toHaveFocus();
+    fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true });
+    expect(jsonExportButton).toHaveFocus();
+
+    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    expect(fileTrigger).toHaveFocus();
+
+    fireEvent.click(fileTrigger);
+    fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
+    fireEvent.click(screen.getByRole('button', { name: /export png image/i }));
+    expect(fileTrigger).toHaveFocus();
+  });
+
   it('shows FPS for animation formats and submits all selected options', () => {
     render(<ExportActions {...baseProps} theme="light" />);
 
@@ -169,11 +204,13 @@ describe('ExportActions menu behavior', () => {
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /file options/i })).toHaveFocus();
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
     fireEvent.mouseDown(document.querySelector('.export-dialog-backdrop')!);
     expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /file options/i })).toHaveFocus();
   });
 
   it('closes an open menu and dialog when exporting starts', () => {

@@ -8,12 +8,12 @@ import ExportDialog from './ExportDialog';
 interface ExportActionsProps {
   className?: string;
   isExporting: boolean;
-  onNewScenario?: () => void;
+  onNewScenario?: (returnFocusTarget: HTMLElement | null) => void;
   onExport: (options: ExportOptions) => void;
   onImportJson: (file: File) => void;
   onLoadTemplate?: (template: SituationTemplate) => void;
-  onContributeTemplate?: () => void;
-  onUpdateTemplate?: () => void;
+  onContributeTemplate?: (returnFocusTarget: HTMLElement | null) => void;
+  onUpdateTemplate?: (returnFocusTarget: HTMLElement | null) => void;
   canUpdateTemplate?: boolean;
   templates?: SituationTemplate[];
   theme?: Theme;
@@ -37,6 +37,7 @@ export default function ExportActions({
   onExportQualityChange = () => undefined,
 }: ExportActionsProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const fileMenuTriggerRef = useRef<HTMLButtonElement>(null);
   const fileMenuRef = useRef<HTMLDivElement>(null);
   const [isFileMenuOpen, setIsFileMenuOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
@@ -96,8 +97,8 @@ export default function ExportActions({
     closeFileMenu();
   };
 
-  const closeAfterExport = (exportAction: () => void) => {
-    exportAction();
+  const closeAfterExport = (exportAction: (returnFocusTarget: HTMLElement | null) => void) => {
+    exportAction(fileMenuTriggerRef.current);
     closeFileMenu();
   };
 
@@ -110,6 +111,7 @@ export default function ExportActions({
     <div className={className}>
       <div ref={fileMenuRef} className="file-dropdown">
         <button
+          ref={fileMenuTriggerRef}
           type="button"
           className="action-btn file-menu-trigger"
           aria-expanded={isFileMenuOpen}
@@ -151,14 +153,14 @@ export default function ExportActions({
             </button>
             {openSubmenu === 'templates' && <div className="file-submenu-menu" role="menu" aria-label="Templates">
               {onContributeTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title="Submit the current diagram as a template" onClick={() => {
-                onContributeTemplate();
+                onContributeTemplate(fileMenuTriggerRef.current);
                 closeFileMenu();
               }}>
                 <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
                 <span className="action-label">Submit current diagram</span>
               </button>}
               {onUpdateTemplate && <button type="button" className="action-btn file-menu-item template-contribute-btn" role="menuitem" title={canUpdateTemplate ? 'Update the loaded template through a pull request' : 'Load a built-in template to update it through a pull request'} disabled={!canUpdateTemplate} onClick={() => {
-                onUpdateTemplate();
+                onUpdateTemplate(fileMenuTriggerRef.current);
                 closeFileMenu();
               }}>
                 <span className="action-icon" aria-hidden="true"><GitPullRequest size={16} /></span>
@@ -211,6 +213,7 @@ export default function ExportActions({
         theme={theme}
         exportQuality={exportQuality}
         onExportQualityChange={onExportQualityChange}
+        returnFocusRef={fileMenuTriggerRef}
         onCancel={() => setIsExportDialogOpen(false)}
         onExport={(options) => {
           setIsExportDialogOpen(false);
