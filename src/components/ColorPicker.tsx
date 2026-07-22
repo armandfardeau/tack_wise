@@ -1,4 +1,5 @@
-import { useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { Check, Palette, Plus, Trash2 } from 'lucide-react';
 
 const COLOR_PRESETS_STORAGE_KEY = 'tack-wise-color-presets';
@@ -80,9 +81,12 @@ export default function ColorPicker({
   const generatedId = useId();
   const inputId = id ?? `color-picker-${generatedId.replace(/:/g, '')}`;
   const pickerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const nativeInputRef = useRef<HTMLInputElement>(null);
   const currentColor = normalizeHexColor(value);
   const [isOpen, setIsOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<{ left: number; top: number } | null>(null);
   const [savedPresets, setSavedPresets] = useState<string[]>(readSavedPresets);
   const [saveFeedback, setSaveFeedback] = useState('');
   const accessibleLabel = ariaLabel ?? label;
@@ -93,9 +97,9 @@ export default function ColorPicker({
     if (!isOpen) return undefined;
 
     const closeOnOutsidePointer = (event: PointerEvent) => {
-      if (pickerRef.current && !pickerRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
+      const target = event.target as Node;
+      if (pickerRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setIsOpen(false);
     };
 
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -107,6 +111,45 @@ export default function ColorPicker({
     return () => {
       document.removeEventListener('pointerdown', closeOnOutsidePointer);
       document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isOpen]);
+
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setMenuPosition(null);
+      return undefined;
+    }
+
+    const updateMenuPosition = () => {
+      const trigger = triggerRef.current;
+      const menu = menuRef.current;
+      if (!trigger || !menu) return;
+
+      const triggerRect = trigger.getBoundingClientRect();
+      const menuRect = menu.getBoundingClientRect();
+      const viewportMargin = 12;
+      const maxLeft = Math.max(viewportMargin, window.innerWidth - menuRect.width - viewportMargin);
+      const maxTop = Math.max(viewportMargin, window.innerHeight - menuRect.height - viewportMargin);
+      const belowTop = triggerRect.bottom + 8;
+      const aboveTop = triggerRect.top - menuRect.height - 8;
+      const top = belowTop + menuRect.height <= window.innerHeight - viewportMargin
+        ? Math.min(Math.max(viewportMargin, belowTop), maxTop)
+        : aboveTop >= viewportMargin
+          ? aboveTop
+          : maxTop;
+
+      setMenuPosition({
+        left: Math.min(Math.max(viewportMargin, triggerRect.right - menuRect.width), maxLeft),
+        top,
+      });
+    };
+
+    updateMenuPosition();
+    window.addEventListener('resize', updateMenuPosition);
+    window.addEventListener('scroll', updateMenuPosition, true);
+    return () => {
+      window.removeEventListener('resize', updateMenuPosition);
+      window.removeEventListener('scroll', updateMenuPosition, true);
     };
   }, [isOpen]);
 
@@ -137,13 +180,16 @@ export default function ColorPicker({
   return (
     <div ref={pickerRef} className={`color-picker${compact ? ' color-picker-compact' : ''}`} data-open={isOpen}>
       <button
+        ref={triggerRef}
         type="button"
         className="color-picker-trigger"
         aria-label={`Open ${accessibleLabel.toLowerCase()} picker`}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
         onClick={() => {
-          setIsOpen((open) => !open);
+          const nextOpen = !isOpen;
+          setIsOpen(nextOpen);
+          if (nextOpen) setMenuPosition(null);
           setSaveFeedback('');
         }}
       >
@@ -163,8 +209,18 @@ export default function ColorPicker({
         onChange={(event) => selectColor(event.target.value)}
       />
 
-      {isOpen && (
-        <div className="color-picker-menu" role="dialog" aria-label={`${accessibleLabel} picker`}>
+      {isOpen && typeof document !== 'undefined' && createPortal(
+        <div
+          ref={menuRef}
+          className="color-picker-menu"
+          role="dialog"
+          aria-label={`${accessibleLabel} picker`}
+          style={{
+            left: menuPosition?.left ?? 0,
+            top: menuPosition?.top ?? 0,
+            visibility: menuPosition ? 'visible' : 'hidden',
+          }}
+        >
           <div className="color-picker-menu-heading">
             <span>Quick colors</span>
             <span className="color-picker-menu-value">{currentColor}</span>
@@ -258,7 +314,8 @@ export default function ColorPicker({
           {saveFeedback && <p className="color-picker-feedback" aria-live="polite">{saveFeedback}</p>}
 
           <p className="color-picker-hint">Pick a quick color or open Custom color for any hex value.</p>
-        </div>
+        </div>,
+        pickerRef.current?.closest('.app-shell') ?? document.body,
       )}
     </div>
   );

@@ -402,6 +402,7 @@ export default function CanvasWorkspace({
 
     const handlePointerOutside = (event: PointerEvent) => {
       if (event.target instanceof Node && inspectorRef.current?.contains(event.target)) return;
+      if (event.target instanceof Element && event.target.closest('.color-picker-menu')) return;
       handleCloseInspector();
     };
 
