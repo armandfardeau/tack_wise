@@ -1,0 +1,83 @@
+.historyControls {
+  grid-area: history;
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px;
+  background-color: rgba(15, 23, 42, 0.88);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+}
+
+.historyButton,
+.restoreButton {
+  border: 1px solid var(--border-color);
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.historyButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.restoreButton {
+  min-height: 34px;
+  padding: 0 9px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.historyButton:hover:not(:disabled),
+.historyButton:focus-visible,
+.restoreButton:hover:not(:disabled),
+.restoreButton:focus-visible {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan-hover);
+  background-color: rgba(6, 182, 212, 0.1);
+}
+
+.historyButton:disabled,
+.restoreButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+:global(.light-theme) .historyControls {
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
+}
+
+@media (max-width: 768px) {
+  .historyControls {
+    gap: 4px;
+    padding: 4px;
+    border-radius: 10px;
+  }
+
+  .historyButton {
+    width: 44px;
+    height: 44px;
+    font-size: 1rem;
+  }
+
+  .restoreButton {
+    min-height: 44px;
+    padding: 0 10px;
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+}

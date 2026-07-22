@@ -1,4 +1,5 @@
 import type { ExportPhase, VideoExportType } from '../types';
+import styles from './ExportOverlay.module.css';
 
 interface ExportOverlayProps {
   exportProgress: number;
@@ -15,9 +16,9 @@ export default function ExportOverlay({ exportProgress, exportPhase, exportType 
       : exportType === 'gif' ? 'Building GIF...' : 'Encoding video...';
 
   return (
-    <div className="export-overlay" role="status" aria-live="polite">
-      <div className="export-spinner-box">
-        <div className="spinner" />
+    <div className={styles.exportOverlay} role="status" aria-live="polite">
+      <div className={styles.exportSpinnerBox}>
+        <div className={styles.spinner} />
         <h3>Exporting Scenario as {exportLabel}...</h3>
         <p>{exportMessage}{exportPhase === 'preparing' ? '' : ` ${exportProgress}%`}</p>
       </div>

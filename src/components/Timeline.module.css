@@ -1,0 +1,548 @@
+.timelineBar {
+  background-color: var(--bg-sidebar);
+  border-top: 1px solid var(--border-color);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sidebarTimeline {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  padding: 0;
+  border-top: 0;
+}
+
+.sidebarTimeline .playbackControls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sidebarTimeline .playPauseButton,
+.sidebarTimeline .speedSelector,
+.sidebarTimeline .timelineActionButton {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.sidebarTimeline .deleteFrameButton {
+  margin-left: 0;
+}
+
+.sidebarTimeline .timelineControlLabel {
+  display: inline;
+}
+
+.sidebarTimeline .framesScrubber {
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  max-height: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
+.sidebarTimeline .frameThumbnail {
+  flex: 0 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+  height: 44px;
+}
+
+.sidebarAddFrameButton {
+  display: inline-flex;
+  align-items: center;
+  align-self: stretch;
+  flex: 0 0 auto;
+  justify-content: center;
+  width: auto;
+  gap: 7px;
+  margin-top: 4px;
+}
+
+.playbackControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timelineControlIcon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.playPauseButton {
+  background-color: var(--accent-green);
+  color: white;
+  border: none;
+  font-weight: 700;
+  width: 38px;
+  padding: 8px 0;
+  border-radius: 6px;
+  min-height: 38px;
+  transition: all 0.2s ease;
+}
+
+.playbackStepButton,
+.playbackReplayButton {
+  min-width: 38px;
+  padding: 8px 10px;
+}
+
+.playbackStepButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.playPauseButton:hover {
+  background-color: var(--accent-green-hover);
+  transform: translateY(-1px);
+}
+
+.playPauseButton.playing {
+  background-color: #3b82f6;
+}
+
+.speedSelector {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+}
+
+.timelineActionButton {
+  background-color: var(--bg-card);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  min-height: 38px;
+  transition: all 0.2s ease;
+}
+
+.timelineActionButton:hover:not(:disabled) {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.05);
+}
+
+.deleteFrameButton {
+  margin-left: auto;
+  border-color: rgba(244, 63, 94, 0.4);
+  color: var(--accent-red);
+}
+
+.deleteFrameButton:hover:not(:disabled) {
+  border-color: var(--accent-red);
+  background-color: rgba(244, 63, 94, 0.05);
+}
+
+.framesScrubber {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.framesScrubber::-webkit-scrollbar {
+  height: 6px;
+}
+
+.framesScrubber::-webkit-scrollbar-track {
+  background: var(--bg-sidebar);
+}
+
+.framesScrubber::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+
+.frameThumbnail {
+  flex: 0 0 130px;
+  height: 52px;
+  background-color: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  appearance: none;
+  color: var(--text-main);
+  font-family: inherit;
+  text-align: left;
+}
+
+.frameThumbnailRow {
+  position: relative;
+  display: flex;
+  flex: 0 0 130px;
+  min-width: 0;
+}
+
+.frameThumbnailRow > .frameThumbnail {
+  width: 100%;
+  flex: 1 1 auto;
+  padding-right: 70px;
+}
+
+.frameThumbnailRow.hasLayersButton > .frameThumbnail {
+  padding-right: 100px;
+}
+
+.frameThumbnailRow.hasEditButton > .frameThumbnail {
+  padding-right: 122px;
+}
+
+.frameThumbnailRow.hasEditButton.hasLayersButton > .frameThumbnail {
+  padding-right: 152px;
+}
+
+.sidebarTimeline .frameThumbnailRow {
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.frameTransitionWarning {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 0 0 auto;
+  min-height: 28px;
+  padding: 4px 8px;
+  border: 1px solid rgba(244, 63, 94, 0.48);
+  border-radius: 6px;
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--accent-red-hover);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.frameTransitionWarning svg {
+  flex: 0 0 auto;
+}
+
+.sidebarTimeline .frameTransitionWarning {
+  margin: 2px 0;
+}
+
+.frameTransitionFixButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 22px;
+  padding: 2px 7px;
+  border: 1px solid rgba(244, 63, 94, 0.62);
+  border-radius: 4px;
+  background: rgba(244, 63, 94, 0.16);
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.frameTransitionFixButton:hover,
+.frameTransitionFixButton:focus-visible {
+  border-color: currentColor;
+  background: rgba(244, 63, 94, 0.28);
+}
+
+.frameDuplicateButton {
+  position: absolute;
+  top: 6px;
+  right: 36px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-cyan-hover);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.frameDuplicateButton:hover {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+}
+
+.frameLayersButton {
+  position: absolute;
+  top: 6px;
+  right: 66px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-cyan-hover);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.frameLayersButton:hover,
+.frameLayersButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+}
+
+.frameEditButton {
+  position: absolute;
+  top: 6px;
+  right: 66px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 48px;
+  height: 26px;
+  padding: 0 6px;
+  border: 1px solid rgba(6, 182, 212, 0.5);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.94);
+  color: var(--accent-cyan-hover);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.frameEditButton:hover,
+.frameEditButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.14);
+}
+
+.frameThumbnailRow.hasLayersButton .frameEditButton {
+  right: 96px;
+}
+
+:global(.light-theme) .frameEditButton,
+:global(.light-theme) .frameLayersButton,
+:global(.light-theme) .frameDuplicateButton {
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
+}
+
+.frameDeleteButton {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  border-radius: 5px;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: var(--accent-red);
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.frameDeleteButton:hover:not(:disabled) {
+  border-color: var(--accent-red);
+  background-color: rgba(244, 63, 94, 0.12);
+}
+
+:global(.light-theme) .frameDeleteButton {
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
+}
+
+.frameDeleteButton:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.frameThumbnail:hover {
+  border-color: #475569;
+  background-color: #24334a;
+}
+
+:global(.light-theme) .frameThumbnail:hover {
+  border-color: #94a3b8;
+  background-color: #edf4f3;
+}
+
+.frameThumbnail.active {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.08);
+}
+
+.frameThumbnailRow.hasUnanimatableTransition > .frameThumbnail {
+  border-color: rgba(244, 63, 94, 0.7);
+}
+
+.frameThumbnailRow.hasUnanimatableTransition > .frameThumbnail.active {
+  border-color: var(--accent-red);
+  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.22);
+}
+
+:global(.light-theme) .frameTransitionWarning {
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--accent-red);
+}
+
+.thumbnailNum {
+  width: 22px;
+  height: 22px;
+  background-color: var(--border-color);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-main);
+  transition: background-color 0.2s ease;
+}
+
+.frameThumbnail.active .thumbnailNum {
+  background-color: var(--accent-cyan);
+  color: #000;
+}
+
+.thumbnailTitle {
+  min-width: 0;
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-main);
+  cursor: text;
+  touch-action: manipulation;
+}
+
+.frameThumbnail.active .thumbnailTitle {
+  color: var(--accent-cyan-hover);
+}
+
+.thumbnailTitleInput {
+  min-width: 0;
+  flex: 1;
+  width: 100%;
+  padding: 3px 5px;
+  border: 1px solid var(--accent-cyan);
+  border-radius: 4px;
+  background-color: var(--bg-sidebar);
+  color: var(--text-main);
+  font: inherit;
+  outline: 2px solid rgba(6, 182, 212, 0.2);
+}
+
+.timelineContextHint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.timelineContextHint svg {
+  flex: 0 0 auto;
+  color: var(--accent-cyan-hover);
+}
+
+@media print {
+  .timelineBar {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .timelineBar {
+    width: 100%;
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .playbackControls {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: nowrap;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .playPauseButton,
+  .speedSelector,
+  .timelineActionButton {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 32px;
+    height: 32px;
+    padding: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  .sidebarTimeline .sidebarAddFrameButton {
+    flex: 0 0 auto;
+  }
+
+  .sidebarTimeline .sidebarAddFrameButton .timelineControlIcon {
+    width: auto;
+  }
+
+  .playbackControls .deleteFrameButton {
+    margin-left: 0;
+  }
+
+  .timelineControlLabel {
+    display: none;
+  }
+
+  .timelineControlIcon {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    gap: 4px;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  .speedSelector {
+    padding-right: 0;
+    padding-left: 2px;
+  }
+}

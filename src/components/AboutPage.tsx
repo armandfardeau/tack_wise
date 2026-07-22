@@ -12,6 +12,7 @@ import {
 import BrandMark from './BrandMark';
 import type { Theme } from '../types';
 import headerStyles from './AppHeader.module.css';
+import styles from './AboutPage.module.css';
 
 interface AboutPageProps {
   theme: Theme;
@@ -23,8 +24,8 @@ const repositoryUrl = 'https://github.com/armandfardeau/tack_wise';
 
 export default function AboutPage({ theme, onBackToEditor, onToggleTheme }: AboutPageProps) {
   return (
-    <main className={`app-shell ${theme}-theme about-shell`}>
-      <header className={`${headerStyles.appHeader} about-header`}>
+    <main className={`app-shell ${theme}-theme ${styles.aboutShell}`}>
+      <header className={`${headerStyles.appHeader} ${styles.aboutHeader}`}>
         <div className={headerStyles.headerMain}>
           <div className={headerStyles.branding}>
             <span className={headerStyles.eyebrow}>Tactical Sailing Simulator</span>
@@ -40,54 +41,54 @@ export default function AboutPage({ theme, onBackToEditor, onToggleTheme }: Abou
             <GitBranch aria-hidden="true" size={15} />
             GitHub
           </a>
-          <button type="button" className="about-back-btn" onClick={onBackToEditor}>
+          <button type="button" className={styles.aboutBackButton} onClick={onBackToEditor}>
             <ArrowLeft aria-hidden="true" size={15} />
             Back to simulator
           </button>
         </div>
       </header>
 
-      <div className="about-page">
-        <section className="about-hero" aria-labelledby="about-title">
-          <div className="about-hero-copy">
-            <p className="about-eyebrow">About the project</p>
+      <div className={styles.aboutPage}>
+        <section className={styles.hero} aria-labelledby="about-title">
+          <div className={styles.heroCopy}>
+            <p className={styles.eyebrow}>About the project</p>
             <h2 id="about-title">Make the situation<br /><span>the lesson.</span></h2>
-            <p className="about-lede">
+            <p className={styles.lede}>
               Tack Wise is a browser-based workspace for drawing, animating, explaining,
               and sharing tactical sailing situations.
             </p>
-            <div className="about-hero-actions">
-              <button type="button" className="about-primary-btn" onClick={onBackToEditor}>
+            <div className={styles.heroActions}>
+              <button type="button" className={styles.primaryButton} onClick={onBackToEditor}>
                 Open the simulator
                 <ArrowRight aria-hidden="true" size={16} />
               </button>
-              <a className="about-text-link" href={repositoryUrl} target="_blank" rel="noreferrer">
+              <a className={styles.textLink} href={repositoryUrl} target="_blank" rel="noreferrer">
                 Explore the source <ExternalLink aria-hidden="true" size={14} />
               </a>
             </div>
           </div>
 
-          <div className="about-hero-board" aria-label="A tactical sailing situation diagram">
-            <div className="about-board-label">Situation 01 <span>•</span> Port-starboard</div>
-            <div className="about-board-wind"><span>WIND</span><i aria-hidden="true" /></div>
-            <div className="about-board-grid" aria-hidden="true" />
-            <div className="about-course-line about-course-line-one" aria-hidden="true" />
-            <div className="about-course-line about-course-line-two" aria-hidden="true" />
-            <div className="about-mark about-mark-top" aria-hidden="true" />
-            <div className="about-mark about-mark-bottom" aria-hidden="true" />
-            <div className="about-boat about-boat-blue"><Sailboat aria-hidden="true" size={29} /></div>
-            <div className="about-boat about-boat-red"><Sailboat aria-hidden="true" size={29} /></div>
-            <div className="about-board-note">Who has room?</div>
-            <div className="about-board-footer"><span>01</span><span>02</span><span>03</span><span className="is-active">04</span></div>
+          <div className={styles.heroBoard} aria-label="A tactical sailing situation diagram">
+            <div className={styles.boardLabel}>Situation 01 <span>•</span> Port-starboard</div>
+            <div className={styles.boardWind}><span>WIND</span><i aria-hidden="true" /></div>
+            <div className={styles.boardGrid} aria-hidden="true" />
+            <div className={`${styles.courseLine} ${styles.courseLineOne}`} aria-hidden="true" />
+            <div className={`${styles.courseLine} ${styles.courseLineTwo}`} aria-hidden="true" />
+            <div className={`${styles.mark} ${styles.markTop}`} aria-hidden="true" />
+            <div className={`${styles.mark} ${styles.markBottom}`} aria-hidden="true" />
+            <div className={`${styles.boat} ${styles.boatBlue}`}><Sailboat aria-hidden="true" size={29} /></div>
+            <div className={`${styles.boat} ${styles.boatRed}`}><Sailboat aria-hidden="true" size={29} /></div>
+            <div className={styles.boardNote}>Who has room?</div>
+            <div className={styles.boardFooter}><span>01</span><span>02</span><span>03</span><span className={styles.isActive}>04</span></div>
           </div>
         </section>
 
-        <section className="about-story" aria-labelledby="story-title">
+        <section className={styles.story} aria-labelledby="story-title">
           <div>
-            <p className="about-eyebrow">Why Tack Wise exists</p>
+            <p className={styles.eyebrow}>Why Tack Wise exists</p>
             <h3 id="story-title">Clearer debriefs.<br />Better decisions.</h3>
           </div>
-          <div className="about-story-copy">
+          <div className={styles.storyCopy}>
             <p>
               Sailing situations are spatial, fast-moving, and often difficult to reconstruct
               after the fact. Tack Wise gives coaches, sailors, umpires, and protest committees
@@ -101,52 +102,52 @@ export default function AboutPage({ theme, onBackToEditor, onToggleTheme }: Abou
           </div>
         </section>
 
-        <section className="about-capabilities" aria-labelledby="capabilities-title">
-          <div className="about-section-heading">
-            <p className="about-eyebrow">The toolkit</p>
+        <section className={styles.capabilities} aria-labelledby="capabilities-title">
+          <div className={styles.sectionHeading}>
+            <p className={styles.eyebrow}>The toolkit</p>
             <h3 id="capabilities-title">From first mark to final replay.</h3>
           </div>
-          <div className="about-capability-grid">
-            <article className="about-capability-card">
-              <div className="about-capability-icon"><Layers3 aria-hidden="true" size={20} /></div>
+          <div className={styles.capabilityGrid}>
+            <article className={styles.capabilityCard}>
+              <div className={styles.capabilityIcon}><Layers3 aria-hidden="true" size={20} /></div>
               <h4>Author the scene</h4>
               <p>Place boats, marks, gates, arrows, comments, and rule cards on a flexible tactical canvas.</p>
             </article>
-            <article className="about-capability-card">
-              <div className="about-capability-icon"><Play aria-hidden="true" size={20} /></div>
+            <article className={styles.capabilityCard}>
+              <div className={styles.capabilityIcon}><Play aria-hidden="true" size={20} /></div>
               <h4>Explain the movement</h4>
               <p>Turn a static diagram into a step-by-step or cumulative replay that makes the geometry easy to follow.</p>
             </article>
-            <article className="about-capability-card">
-              <div className="about-capability-icon"><Share2 aria-hidden="true" size={20} /></div>
+            <article className={styles.capabilityCard}>
+              <div className={styles.capabilityIcon}><Share2 aria-hidden="true" size={20} /></div>
               <h4>Share the learning</h4>
               <p>Export a diagram, animation, video, or portable scenario link for the next debrief or classroom.</p>
             </article>
           </div>
         </section>
 
-        <section className="about-author" aria-labelledby="author-title">
-          <div className="about-author-mark" aria-hidden="true">AF</div>
-          <div className="about-author-copy">
-            <p className="about-eyebrow">The author</p>
+        <section className={styles.author} aria-labelledby="author-title">
+          <div className={styles.authorMark} aria-hidden="true">AF</div>
+          <div className={styles.authorCopy}>
+            <p className={styles.eyebrow}>The author</p>
             <h3 id="author-title">Built by Armand Fardeau.</h3>
             <p>
               Tack Wise is developed and maintained by Armand Fardeau as an open-source project
               for making sailing knowledge easier to see, discuss, and pass on.
             </p>
-            <a className="about-text-link" href="https://github.com/armandfardeau" target="_blank" rel="noreferrer">
+            <a className={styles.textLink} href="https://github.com/armandfardeau" target="_blank" rel="noreferrer">
               Visit Armand on GitHub <ExternalLink aria-hidden="true" size={14} />
             </a>
           </div>
-          <div className="about-author-cta">
+          <div className={styles.authorCta}>
             <span>Have a situation to explain?</span>
-            <button type="button" className="about-primary-btn" onClick={onBackToEditor}>
+            <button type="button" className={styles.primaryButton} onClick={onBackToEditor}>
               Start drawing <ArrowRight aria-hidden="true" size={16} />
             </button>
           </div>
         </section>
 
-        <footer className="about-footer">
+        <footer className={styles.footer}>
           <span><BrandMark aria-hidden="true" size={15} /> Tack Wise</span>
           <span>Draw the moment. Understand the move.</span>
         </footer>

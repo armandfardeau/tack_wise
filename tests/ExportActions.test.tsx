@@ -239,7 +239,9 @@ describe('ExportActions menu behavior', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /file options/i }));
     fireEvent.click(screen.getByRole('menuitem', { name: /^export$/i }));
-    fireEvent.mouseDown(document.querySelector('.export-dialog-backdrop')!);
+    const dialog = screen.getByRole('dialog', { name: /export/i });
+    expect(dialog.parentElement).not.toBeNull();
+    fireEvent.mouseDown(dialog.parentElement!);
     expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: /file options/i })).toHaveFocus();
   });

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Clipboard, ExternalLink, FileCode, GitPullRequest, X } from 'lucide-react';
 import type { Frame } from '../types';
 import useModalFocus, { type ModalFocusRef } from '../hooks/useModalFocus';
+import styles from './TemplateContributionDialog.module.css';
 import {
   buildTemplateContributionDraft,
   DEFAULT_TEMPLATE_REPOSITORY,
@@ -83,31 +84,31 @@ export default function TemplateContributionDialog({
 
   return (
     <div
-      className="template-contribution-backdrop"
+      className={styles.templateContributionBackdrop}
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <section ref={dialogRef} className="template-contribution-dialog" role="dialog" aria-modal="true" aria-labelledby="template-contribution-title" tabIndex={-1}>
-        <div className="template-contribution-header">
+      <section ref={dialogRef} className={styles.templateContributionDialog} role="dialog" aria-modal="true" aria-labelledby="template-contribution-title" tabIndex={-1}>
+        <div className={styles.templateContributionHeader}>
           <div>
-            <p className="template-contribution-eyebrow">GitHub contribution</p>
+            <p className={styles.templateContributionEyebrow}>GitHub contribution</p>
             <h2 id="template-contribution-title">
               {mode === 'create' ? 'Submit a template pull request' : 'Update template pull request'}
             </h2>
           </div>
-          <button type="button" className="template-contribution-close" aria-label="Close template contribution dialog" onClick={onClose}>
+          <button type="button" className={styles.templateContributionClose} aria-label="Close template contribution dialog" onClick={onClose}>
             <X aria-hidden="true" size={18} />
           </button>
         </div>
 
-        <p className="template-contribution-intro">
+        <p className={styles.templateContributionIntro}>
           The app will prepare the source JSON and open GitHub&apos;s editor. Paste the copied JSON, commit it to a new branch, then choose the option to open a pull request.
         </p>
 
-        <div className="template-contribution-form">
-          <label className="template-contribution-field">
+        <div className={styles.templateContributionForm}>
+          <label className={styles.templateContributionField}>
             <span>Template title</span>
             <input
               aria-label="Template title"
@@ -116,7 +117,7 @@ export default function TemplateContributionDialog({
               ref={titleInputRef}
             />
           </label>
-          <label className="template-contribution-field">
+          <label className={styles.templateContributionField}>
             <span>Source filename</span>
             <input
               aria-label="Template filename"
@@ -128,21 +129,21 @@ export default function TemplateContributionDialog({
         </div>
 
         {errors.length > 0 && (
-          <div className="template-contribution-errors" role="alert">
+          <div className={styles.templateContributionErrors} role="alert">
             {errors.map((error) => <p key={`${error.field}-${error.message}`}>{error.message}</p>)}
           </div>
         )}
 
         {draft && <>
-          <div className="template-contribution-path">
+          <div className={styles.templateContributionPath}>
             <FileCode aria-hidden="true" size={15} />
             <code>{draft.path}</code>
           </div>
-          <label className="template-contribution-preview">
+          <label className={styles.templateContributionPreview}>
             <span>Template JSON preview</span>
             <textarea aria-label="Template JSON preview" readOnly value={draft.content} rows={7} />
           </label>
-          <div className="template-contribution-metadata">
+          <div className={styles.templateContributionMetadata}>
             <label>
               <span>Suggested commit message</span>
               <input aria-label="Suggested commit message" readOnly value={draft.commitMessage} />
@@ -158,24 +159,24 @@ export default function TemplateContributionDialog({
           </div>
         </>}
 
-        {fallbackValue && <label className="template-contribution-fallback">
+        {fallbackValue && <label className={styles.templateContributionFallback}>
           <span>{fallbackLabel}</span>
           <textarea aria-label={`${fallbackLabel} fallback`} value={fallbackValue} readOnly rows={5} onFocus={(event) => event.currentTarget.select()} />
         </label>}
 
-        {copyFeedback && <p className="template-contribution-feedback" role="status">{copyFeedback}</p>}
+        {copyFeedback && <p className={styles.templateContributionFeedback} role="status">{copyFeedback}</p>}
 
-        <div className="template-contribution-actions">
-          <button type="button" className="template-contribution-secondary" onClick={onClose}>Cancel</button>
-          <div className="template-contribution-copy-actions">
-            <button type="button" className="template-contribution-secondary" disabled={!draft} onClick={() => draft && void copyValue(draft.content, 'template JSON')}>
+        <div className={styles.templateContributionActions}>
+          <button type="button" className={styles.templateContributionSecondary} onClick={onClose}>Cancel</button>
+          <div className={styles.templateContributionCopyActions}>
+            <button type="button" className={styles.templateContributionSecondary} disabled={!draft} onClick={() => draft && void copyValue(draft.content, 'template JSON')}>
               <Clipboard aria-hidden="true" size={15} /> Copy JSON
             </button>
-            <button type="button" className="template-contribution-secondary" disabled={!draft} onClick={() => draft && void copyValue(`${draft.commitMessage}\n\n${draft.pullRequestTitle}\n\n${draft.pullRequestBody}`, 'pull request details')}>
+            <button type="button" className={styles.templateContributionSecondary} disabled={!draft} onClick={() => draft && void copyValue(`${draft.commitMessage}\n\n${draft.pullRequestTitle}\n\n${draft.pullRequestBody}`, 'pull request details')}>
               <Clipboard aria-hidden="true" size={15} /> Copy PR details
             </button>
           </div>
-          <button type="button" className="template-contribution-primary" disabled={!draft} onClick={() => void handleOpenGitHub()}>
+          <button type="button" className={styles.templateContributionPrimary} disabled={!draft} onClick={() => void handleOpenGitHub()}>
             <GitPullRequest aria-hidden="true" size={16} /> Open GitHub editor <ExternalLink aria-hidden="true" size={14} />
           </button>
         </div>

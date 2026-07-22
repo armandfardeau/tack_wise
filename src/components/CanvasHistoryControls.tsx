@@ -1,4 +1,5 @@
 import { Redo2, Undo2 } from 'lucide-react';
+import styles from './CanvasHistoryControls.module.css';
 
 interface CanvasHistoryControlsProps {
   canRedo: boolean;
@@ -18,10 +19,10 @@ export default function CanvasHistoryControls({
   onUndo,
 }: CanvasHistoryControlsProps) {
   return (
-    <div className="canvas-history-controls" aria-label="Canvas history controls">
+    <div className={styles.historyControls} aria-label="Canvas history controls">
       <button
         type="button"
-        className="canvas-history-btn"
+        className={styles.historyButton}
         onClick={onUndo}
         disabled={!canUndo}
         title="Undo (Ctrl/Cmd+Z)"
@@ -31,7 +32,7 @@ export default function CanvasHistoryControls({
       </button>
       <button
         type="button"
-        className="canvas-history-btn"
+        className={styles.historyButton}
         onClick={onRedo}
         disabled={!canRedo}
         title="Redo (Ctrl/Cmd+Shift+Z)"
@@ -42,7 +43,7 @@ export default function CanvasHistoryControls({
       {hasAutosave && (
         <button
           type="button"
-          className="canvas-history-restore-btn"
+          className={styles.restoreButton}
           onClick={onRestoreAutosave}
           title="Restore the last autosaved scenario"
         >

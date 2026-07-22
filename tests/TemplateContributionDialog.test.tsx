@@ -85,7 +85,7 @@ describe('TemplateContributionDialog', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
 
     rerender(<TemplateContributionDialog {...baseProps} mode="create" onClose={onClose} />);
-    const backdrop = document.querySelector('.template-contribution-backdrop');
+    const backdrop = screen.getByRole('dialog').parentElement;
     expect(backdrop).not.toBeNull();
     fireEvent.mouseDown(backdrop!);
     expect(onClose).toHaveBeenCalledTimes(2);

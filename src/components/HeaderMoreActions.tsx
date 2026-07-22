@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Copy, ExternalLink, Heart, Info, MoreHorizontal } from 'lucide-react';
 import { SponsorshipMenuItems, type SponsorshipLinks } from './SponsorshipActions';
 import headerStyles from './AppHeader.module.css';
+import styles from './HeaderMoreActions.module.css';
 
 interface HeaderMoreActionsProps {
   onShareScenario?: () => void;
@@ -81,10 +82,10 @@ export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponso
   }, [isOpen]);
 
   return (
-    <div className="header-more-actions" ref={menuRef}>
+    <div className={styles.headerMoreActions} ref={menuRef}>
       <button
         type="button"
-        className={`${headerStyles.headerToolButton} header-more-trigger`}
+        className={`${headerStyles.headerToolButton} ${styles.headerMoreTrigger}`}
         ref={triggerRef}
         aria-expanded={isOpen}
         aria-haspopup="menu"
@@ -92,12 +93,12 @@ export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponso
         onClick={() => setIsOpen((open) => !open)}
       >
         <MoreHorizontal aria-hidden="true" size={16} />
-        <span className="header-more-trigger-label">More</span>
+        <span className={styles.headerMoreTriggerLabel}>More</span>
       </button>
 
       {isOpen && (
         <div
-          className="header-more-menu"
+          className={styles.headerMoreMenu}
           ref={menuPanelRef}
           role="menu"
           aria-label="About and support"
@@ -108,29 +109,29 @@ export default function HeaderMoreActions({ onShareScenario, onOpenAbout, sponso
             visibility: 'visible',
           } : { visibility: 'hidden' }}
         >
-          <div className="header-more-about">
-            <div className="header-more-section-heading"><Info aria-hidden="true" size={15} /> About Tack Wise</div>
+          <div className={styles.headerMoreAbout}>
+            <div className={styles.headerMoreSectionHeading}><Info aria-hidden="true" size={15} /> About Tack Wise</div>
             <p>A browser-based workspace for drawing, explaining, and sharing tactical sailing situations.</p>
-            {onOpenAbout && <button type="button" className="header-more-link" role="menuitem" onClick={() => {
+            {onOpenAbout && <button type="button" className={styles.headerMoreLink} role="menuitem" onClick={() => {
               onOpenAbout();
               setIsOpen(false);
             }}>
               <Info aria-hidden="true" size={14} /> Open About page
             </button>}
-            <a className="header-more-link" role="menuitem" href={repositoryUrl} target="_blank" rel="noreferrer" onClick={() => setIsOpen(false)}>
+            <a className={styles.headerMoreLink} role="menuitem" href={repositoryUrl} target="_blank" rel="noreferrer" onClick={() => setIsOpen(false)}>
               <ExternalLink aria-hidden="true" size={14} /> Explore the project
             </a>
           </div>
 
           {hasSupport && <>
-            <div className="header-more-divider" role="separator" />
-            <div className="header-more-section-heading"><Heart aria-hidden="true" size={15} /> Support</div>
+            <div className={styles.headerMoreDivider} role="separator" />
+            <div className={styles.headerMoreSectionHeading}><Heart aria-hidden="true" size={15} /> Support</div>
             <SponsorshipMenuItems {...sponsorship} />
           </>}
 
           {onShareScenario && <>
-            <div className="header-more-divider" role="separator" />
-            <button type="button" className="header-more-link" role="menuitem" onClick={() => {
+            <div className={styles.headerMoreDivider} role="separator" />
+            <button type="button" className={styles.headerMoreLink} role="menuitem" onClick={() => {
               onShareScenario();
               setIsOpen(false);
             }}>

@@ -1,0 +1,235 @@
+@media print {
+  .stepPanel,
+  .sidebarBackdrop {
+    display: none !important;
+  }
+}
+
+.stepPanel {
+  background-color: var(--bg-sidebar);
+  border-right: 1px solid var(--border-color);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.sidebarBackdrop {
+  display: none;
+}
+
+.sidebarDrawerHandle {
+  display: none;
+}
+
+.scenarioTitleEditor {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.scenarioTitleEditor label {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.scenarioTitleInput {
+  width: 100%;
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.scenarioTitleInput:focus {
+  border-color: var(--accent-cyan);
+  outline: 2px solid rgba(6, 182, 212, 0.2);
+}
+
+.scenarioTitleInput[readonly] {
+  cursor: default;
+  opacity: 0.85;
+}
+
+.sidebarScenarioTitleEditor {
+  min-width: 0;
+  flex: 0 0 auto;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.sidebarScenarioTitleEditor .scenarioTitleInput {
+  width: 100%;
+}
+
+.controlSection {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 20px;
+}
+
+.controlSection:last-child {
+  border-bottom: none;
+}
+
+.sidebarFrameSection {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.sidebarFrameSection .sectionTitle {
+  flex: 0 0 auto;
+}
+
+.sidebarLayersSection {
+  flex: 0 0 auto;
+}
+
+.sidebarBackBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  margin-bottom: 18px;
+  padding: 6px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.sidebarBackBtn:hover,
+.sidebarBackBtn:focus-visible {
+  border-color: var(--accent-cyan);
+  color: var(--accent-cyan-hover);
+}
+
+.sidebarLayersHeading .sectionTitle {
+  margin-bottom: 5px;
+}
+
+.sidebarLayersFrameName {
+  margin: 0 0 14px;
+  overflow: hidden;
+  color: var(--text-main);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .stepPanel {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: min(320px, 88vw);
+    border-right: none;
+    border-bottom: none;
+    max-height: none;
+    z-index: 20;
+    visibility: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease, visibility 0.2s ease;
+    box-shadow: 12px 0 30px rgba(0, 0, 0, 0.35);
+  }
+
+  .stepPanel.isOpen {
+    visibility: visible;
+    transform: translateX(0);
+  }
+
+  .sidebarBackdrop {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    display: block;
+    border: 0;
+    padding: 0;
+    background: rgba(9, 13, 22, 0.62);
+    cursor: pointer;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .sidebarBackdrop.isOpen {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebarDrawerHandle {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    z-index: 21;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    min-height: 92px;
+    padding: 8px 5px;
+    border: 1px solid var(--border-color);
+    border-left: 0;
+    border-radius: 0 8px 8px 0;
+    background: var(--bg-sidebar);
+    color: var(--text-main);
+    box-shadow: 8px 0 20px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transform: translateY(-50%);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transition: left 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+  }
+
+  .sidebarDrawerHandle span:first-child {
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+
+  .sidebarDrawerHandle span:last-child {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sidebarDrawerHandle:hover,
+  .sidebarDrawerHandle:focus-visible {
+    border-color: var(--accent-cyan);
+    color: var(--accent-cyan-hover);
+  }
+
+  .sidebarDrawerHandle.isOpen {
+    left: min(320px, 88vw);
+  }
+}

@@ -1,3 +1,5 @@
+import styles from './WindHud.module.css';
+
 interface WindHudProps {
   windAngle: number;
   windSpeed: number;
@@ -11,14 +13,14 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
   return (
     <button
       type="button"
-      className="wind-vane-container"
+      className={styles.windVaneContainer}
       aria-label="Edit wind direction and velocity"
       title="Click to edit wind direction and velocity"
       onClick={onSelect}
     >
-      <div className="wind-vane-dial">
+      <div className={styles.windVaneDial}>
         <svg
-          className="wind-vane-needle"
+          className={styles.windVaneNeedle}
           viewBox="0 0 100 100"
           style={{ transform: `rotate(${displayAngle}deg)` }}
           aria-label={`Wind direction ${displayAngle} degrees`}
@@ -29,14 +31,14 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
           <polygon points="50,8 40,28 50,23 60,28" fill="#ef4444" />
           <circle cx="50" cy="50" r="7" fill="#f8fafc" stroke="#0f172a" strokeWidth="3" />
         </svg>
-        <span className="compass-n">N</span>
-        <span className="compass-s">S</span>
-        <span className="compass-e">E</span>
-        <span className="compass-w">W</span>
+        <span className={styles.compassN}>N</span>
+        <span className={styles.compassS}>S</span>
+        <span className={styles.compassE}>E</span>
+        <span className={styles.compassW}>W</span>
       </div>
-      <div className="wind-vane-info">
-        <span className="wind-vane-speed">{windSpeed} KTS</span>
-        <span className="wind-vane-angle">{windAngle}°</span>
+      <div className={styles.windVaneInfo}>
+        <span className={styles.windVaneSpeed}>{windSpeed} KTS</span>
+        <span className={styles.windVaneAngle}>{windAngle}°</span>
       </div>
     </button>
   );

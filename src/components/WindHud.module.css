@@ -1,0 +1,122 @@
+.windVaneContainer {
+  grid-area: wind;
+  justify-self: start;
+  background-color: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-color);
+  padding: 8px 20px;
+  border-radius: 36px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  z-index: 5;
+}
+
+.windVaneDial {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  border: 2.5px solid rgba(148, 163, 184, 0.25);
+  border-radius: 50%;
+  background-color: rgba(9, 13, 22, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.windVaneNeedle {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.compassN,
+.compassS,
+.compassE,
+.compassW {
+  position: absolute;
+  font-size: 9px;
+  font-weight: 900;
+  color: var(--text-muted);
+}
+
+.compassN {
+  top: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--accent-red);
+}
+
+.compassS {
+  bottom: 3px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.compassE {
+  right: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.compassW {
+  left: 4px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.windVaneInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.windVaneSpeed {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--text-main);
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+}
+
+.windVaneAngle {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+:global(.light-theme) .windVaneContainer {
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 30px rgba(20, 35, 38, 0.14);
+}
+
+@media print {
+  .windVaneContainer {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .windVaneContainer {
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .windVaneDial {
+    width: 44px;
+    height: 44px;
+  }
+
+  .windVaneSpeed {
+    font-size: 0.8rem;
+  }
+
+  .windVaneAngle {
+    font-size: 0.68rem;
+  }
+}

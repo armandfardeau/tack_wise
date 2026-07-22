@@ -1,0 +1,46 @@
+.canvasFrameHeader {
+  grid-area: title;
+  justify-self: center;
+  max-width: min(100%, 560px);
+  padding: 8px 18px 9px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background-color: rgba(15, 23, 42, 0.88);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  color: var(--text-main);
+  pointer-events: none;
+  text-align: center;
+}
+
+.canvasFrameHeader h2 {
+  overflow: hidden;
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvasFrameHeader span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+:global(.light-theme) .canvasFrameHeader {
+  background-color: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
+}
+
+@media (max-width: 768px) {
+  .canvasFrameHeader {
+    justify-self: end;
+    max-width: 100%;
+    padding: 6px 10px 7px;
+  }
+}
