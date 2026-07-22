@@ -3827,6 +3827,8 @@ body {
   }
 
   .app-header {
+    position: relative;
+    z-index: 50;
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
