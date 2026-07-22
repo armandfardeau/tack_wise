@@ -1545,105 +1545,6 @@
   background-color: rgba(255, 255, 255, 0.94);
   box-shadow: 0 6px 14px rgba(20, 35, 38, 0.12);
 }
-
-.frame-delete-btn:disabled {
-  cursor: default;
-  opacity: 0.4;
-}
-
-.frame-thumbnail:hover {
-  border-color: #475569;
-  background-color: #24334a;
-}
-
-.light-theme .frame-thumbnail:hover {
-  border-color: #94a3b8;
-  background-color: #edf4f3;
-}
-
-.frame-thumbnail.active {
-  border-color: var(--accent-cyan);
-  background-color: rgba(6, 182, 212, 0.08);
-}
-
-.frame-thumbnail-row.has-unanimatable-transition > .frame-thumbnail {
-  border-color: rgba(244, 63, 94, 0.7);
-}
-
-.frame-thumbnail-row.has-unanimatable-transition > .frame-thumbnail.active {
-  border-color: var(--accent-red);
-  box-shadow: 0 0 0 1px rgba(244, 63, 94, 0.22);
-}
-
-.light-theme .frame-transition-warning {
-  background: rgba(244, 63, 94, 0.08);
-  color: var(--accent-red);
-}
-
-.thumbnail-num {
-  width: 22px;
-  height: 22px;
-  background-color: var(--border-color);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-main);
-  transition: background-color 0.2s ease;
-}
-
-.frame-thumbnail.active .thumbnail-num {
-  background-color: var(--accent-cyan);
-  color: #000;
-}
-
-.thumbnail-title {
-  min-width: 0;
-  flex: 1;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text-main);
-  cursor: text;
-  touch-action: manipulation;
-}
-
-.frame-thumbnail.active .thumbnail-title {
-  color: var(--accent-cyan-hover);
-}
-
-.thumbnail-title-input {
-  min-width: 0;
-  flex: 1;
-  width: 100%;
-  padding: 3px 5px;
-  border: 1px solid var(--accent-cyan);
-  border-radius: 4px;
-  background-color: var(--bg-sidebar);
-  color: var(--text-main);
-  font: inherit;
-  outline: 2px solid rgba(6, 182, 212, 0.2);
-}
-
-.timeline-context-hint {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: -4px 0 0;
-  color: var(--text-muted);
-  font-size: 0.78rem;
-  line-height: 1.35;
-}
-
-.timeline-context-hint svg {
-  flex: 0 0 auto;
-  color: var(--accent-cyan-hover);
-}
-
 /* Export Progress Glass Overlay */
 .export-overlay {
   position: fixed;
@@ -2449,63 +2350,6 @@
     font-size: 0.7rem;
   }
   
-  .timeline-bar {
-    width: 100%;
-    gap: 8px;
-    padding: 8px;
-  }
-
-  .playback-controls {
-    width: 100%;
-    min-width: 0;
-    flex-wrap: nowrap;
-    gap: 4px;
-    overflow: hidden;
-  }
-
-  .play-pause-btn,
-  .speed-selector,
-  .timeline-action-btn {
-    flex: 1 1 0;
-    min-width: 0;
-    min-height: 32px;
-    height: 32px;
-    padding: 4px;
-    font-size: 0.7rem;
-    white-space: nowrap;
-  }
-
-  .sidebar-timeline .sidebar-add-frame-btn {
-    flex: 0 0 auto;
-  }
-
-  .sidebar-timeline .sidebar-add-frame-btn .timeline-control-icon {
-    width: auto;
-  }
-
-  .playback-controls .delete-frame-btn {
-    margin-left: 0;
-  }
-
-  .timeline-control-label {
-    display: none;
-  }
-
-  .timeline-control-icon {
-    justify-content: center;
-    width: 100%;
-    font-size: 0.95rem;
-    line-height: 1;
-  }
-
-  @media (max-width: 768px) {
-    .timeline-control-icon {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-}
-
 }
 
 /* About page */
@@ -3079,12 +2923,5 @@
     align-items: flex-start;
     flex-direction: column;
     gap: 8px;
-  }
-}
-
-@media (max-width: 768px) {
-  .speed-selector {
-    padding-right: 0;
-    padding-left: 2px;
   }
 }

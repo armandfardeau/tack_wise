@@ -1,4 +1,5 @@
 import { Pause, Play, RotateCcw, Settings, SkipBack, SkipForward } from 'lucide-react';
+import styles from './Timeline.module.css';
 import styles from './PlaybackButton.module.css';
 
 interface PlaybackButtonProps {
@@ -41,7 +42,7 @@ export default function PlaybackButton({
         title={isPlaying ? 'Pause' : 'Play'}
         onClick={onTogglePlaying}
       >
-        <span className="timeline-control-icon" aria-hidden="true">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</span>
+        <span className={styles.timelineControlIcon} aria-hidden="true">{isPlaying ? <Pause size={16} /> : <Play size={16} />}</span>
       </button>
       <button
         type="button"

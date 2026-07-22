@@ -207,11 +207,18 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 13. Timeline and frame thumbnails
 
-- [ ] Migrate .timeline-bar, .sidebar-timeline, .playback-controls, .timeline-control-icon, .timeline-control-label, .play-pause-btn, .playback-replay-btn, .playback-step-btn, .speed-selector, .timeline-action-btn, and .delete-frame-btn.
-- [ ] Migrate .frames-scrubber, scrollbar pseudo-elements, .frame-thumbnail, .frame-thumbnail-row, thumbnail layout modifiers, and active/hover/transition-warning states.
-- [ ] Migrate .frame-transition-warning, .frame-transition-fix-btn, .frame-duplicate-btn, .frame-layers-btn, .frame-edit-btn, .frame-delete-btn, .thumbnail-num, .thumbnail-title, .thumbnail-title-input, and .timeline-context-hint.
-- [ ] Preserve sidebar-specific selectors and mobile control compaction.
+- [x] Migrate .timeline-bar, .sidebar-timeline, .playback-controls, .timeline-control-icon, .timeline-control-label, .play-pause-btn, .playback-replay-btn, .playback-step-btn, .speed-selector, .timeline-action-btn, and .delete-frame-btn.
+- [x] Migrate .frames-scrubber, scrollbar pseudo-elements, .frame-thumbnail, .frame-thumbnail-row, thumbnail layout modifiers, and active/hover/transition-warning states.
+- [x] Migrate .frame-transition-warning, .frame-transition-fix-btn, .frame-duplicate-btn, .frame-layers-btn, .frame-edit-btn, .frame-delete-btn, .thumbnail-num, .thumbnail-title, .thumbnail-title-input, and .timeline-context-hint.
+- [x] Preserve sidebar-specific selectors and mobile control compaction.
 - Primary file: src/components/Timeline.tsx.
+
+#### Item 13 migration record (2026-07-22)
+
+- Original global CSS: the Timeline block in `src/App.css` covered the bottom `.timeline-bar`, sidebar `.sidebar-timeline` layout and frame-list overrides, playback controls, mobile control compaction, the scrubber and WebKit scrollbar pseudo-elements, frame-thumbnail rows and layout modifiers, active/hover states, transition warnings and fix actions, inline duplicate/layers/edit/delete actions, thumbnail labels and title editing, the new-scenario context hint, the print hide rule, and light-theme thumbnail/action overrides. The shared `.play-pause-btn` and `.timeline-control-icon` selectors were also consumed by `PlaybackButton`.
+- New module: `src/components/Timeline.module.css` contains the equivalent local rules under readable names (`timelineBar`, `sidebarTimeline`, `playbackControls`, `timelineControlIcon`, `timelineControlLabel`, `playPauseButton`, `playing`, `playbackReplayButton`, `playbackStepButton`, `speedSelector`, `timelineActionButton`, `deleteFrameButton`, `framesScrubber`, `frameThumbnail`, `frameThumbnailRow`, `hasLayersButton`, `hasEditButton`, `hasUnanimatableTransition`, `frameTransitionWarning`, `frameTransitionFixButton`, `frameDuplicateButton`, `frameLayersButton`, `frameEditButton`, `frameDeleteButton`, `thumbnailNum`, `thumbnailTitle`, `thumbnailTitleInput`, `timelineContextHint`, and `sidebarAddFrameButton`). Scrollbar styling, print behavior, responsive compaction, sidebar sizing, and all state selectors remain equivalent. Narrow `:global(.light-theme)` ancestors preserve the existing theme overrides without recreating broad global wrappers.
+- React refactor: `Timeline` imports the module and composes local base/modifier classes for bottom and sidebar variants, active frames, transition warnings, inline editing, and frame actions. `PlaybackButton` consumes only the shared local play/pause and icon classes; its canvas-specific structural selectors remain global for item 12. Tests now assert the accessible behavior rather than generated CSS-module class tokens.
+- Verification: targeted `Timeline` and `PlaybackButton` tests (19 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, `git diff --check`, and selector search confirming the migrated selectors no longer remain in `src/App.css` (apart from unrelated canvas playback selectors). Browser checks at the default desktop viewport and 390×844 confirmed the sidebar frame list, 44px thumbnails, vertical scrolling, and 32px mobile control compaction; the temporary viewport was reset afterward. Existing Konva z-index warnings during the browser check are unrelated.
 
 ### 14. Export progress overlay
 

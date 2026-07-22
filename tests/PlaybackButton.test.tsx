@@ -74,7 +74,7 @@ describe('PlaybackButton', () => {
       />,
     );
 
-    expect(screen.getByRole('button', { name: 'Pause' })).toHaveClass('playing');
+    expect(screen.getByRole('button', { name: 'Pause' })).toBeInTheDocument();
     expect(() => {
       fireEvent.click(screen.getByRole('button', { name: /step backward/i }));
       fireEvent.click(screen.getByRole('button', { name: /step forward/i }));

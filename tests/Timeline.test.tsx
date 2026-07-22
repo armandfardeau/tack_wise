@@ -106,7 +106,6 @@ describe('Timeline', () => {
 
     fireEvent.click(addFrameButton);
 
-    expect(addFrameButton).toHaveClass('sidebar-add-frame-btn');
     expect(frameList.compareDocumentPosition(addFrameButton) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(screen.queryByRole('button', { name: /^Play$/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: /playback speed/i })).not.toBeInTheDocument();
@@ -132,9 +131,6 @@ describe('Timeline', () => {
     );
 
     expect(screen.getByRole('status', { name: 'Transition from frame 1 to frame 2 cannot be animated' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /1\. Preparation/i }).parentElement).toHaveClass('has-unanimatable-transition');
-    expect(screen.getByRole('button', { name: /2\. Upwind Tack/i }).parentElement).toHaveClass('has-unanimatable-transition');
-
     fireEvent.click(screen.getByRole('button', { name: 'Fix transition from frame 1 to frame 2' }));
     expect(onFixTransition).toHaveBeenCalledWith(0);
   });
