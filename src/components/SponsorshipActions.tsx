@@ -11,6 +11,43 @@ export interface SponsorshipLinks {
 
 interface SponsorshipActionsProps extends SponsorshipLinks {}
 
+export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUrl, donationUrl }: SponsorshipLinks) {
+  return (
+    <>
+      {stripeUrl && (
+        <a className="sponsorship-menu-item" role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
+          <CreditCard aria-hidden="true" size={16} />
+          <span>
+            <strong>Support with Stripe</strong>
+            <small>One-time or recurring support</small>
+          </span>
+        </a>
+      )}
+      {!stripeUrl && stripePublishableKey && (
+        <StripeDonationForm />
+      )}
+      {githubUrl && (
+        <a className="sponsorship-menu-item" role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
+          <GitFork aria-hidden="true" size={16} />
+          <span>
+            <strong>Sponsor on GitHub</strong>
+            <small>Support the open-source project</small>
+          </span>
+        </a>
+      )}
+      {donationUrl && (
+        <a className="sponsorship-menu-item" role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
+          <Heart aria-hidden="true" size={16} />
+          <span>
+            <strong>Donate to open source</strong>
+            <small>Help fund future Tack Wise development</small>
+          </span>
+        </a>
+      )}
+    </>
+  );
+}
+
 interface MenuPosition {
   top: number;
   left: number;
@@ -111,36 +148,7 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
           } : { visibility: 'hidden' }}
         >
           <p className="sponsorship-menu-title">Help keep Tack Wise sailing</p>
-          {stripeUrl && (
-            <a className="sponsorship-menu-item" role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
-              <CreditCard aria-hidden="true" size={16} />
-              <span>
-                <strong>Support with Stripe</strong>
-                <small>One-time or recurring support</small>
-              </span>
-            </a>
-          )}
-          {!stripeUrl && stripePublishableKey && (
-            <StripeDonationForm />
-          )}
-          {githubUrl && (
-            <a className="sponsorship-menu-item" role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
-              <GitFork aria-hidden="true" size={16} />
-              <span>
-                <strong>Sponsor on GitHub</strong>
-                <small>Support the open-source project</small>
-              </span>
-            </a>
-          )}
-          {donationUrl && (
-            <a className="sponsorship-menu-item" role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
-              <Heart aria-hidden="true" size={16} />
-              <span>
-                <strong>Donate to open source</strong>
-                <small>Help fund future Tack Wise development</small>
-              </span>
-            </a>
-          )}
+          <SponsorshipMenuItems stripeUrl={stripeUrl} stripePublishableKey={stripePublishableKey} githubUrl={githubUrl} donationUrl={donationUrl} />
         </div>
       )}
     </div>

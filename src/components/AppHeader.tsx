@@ -1,4 +1,5 @@
 import ExportActions from './ExportActions';
+import HeaderMoreActions from './HeaderMoreActions';
 import ViewActions from './ViewActions';
 import SponsorshipActions, { type SponsorshipLinks } from './SponsorshipActions';
 import type { SituationTemplate } from '../data/situationTemplates';
@@ -77,9 +78,12 @@ export default function AppHeader({
           onToggleTheme={onToggleTheme}
           onTogglePresenter={onTogglePresenter}
         />
-        {onOpenAbout && <button type="button" className="header-tool-btn" onClick={onOpenAbout}><Info aria-hidden="true" size={15} /> About</button>}
-        <SponsorshipActions {...sponsorship} />
-        <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
+        {onOpenAbout && <button type="button" className="header-tool-btn header-about-btn" onClick={onOpenAbout}><Info aria-hidden="true" size={15} /> About</button>}
+        <div className="header-standard-utility-actions">
+          <SponsorshipActions {...sponsorship} />
+          <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
+        </div>
+        <HeaderMoreActions onShareScenario={onShareScenario} sponsorship={sponsorship} />
       </div>
     </header>
   );

@@ -162,6 +162,27 @@ describe('AppHeader', () => {
     expect(onShareScenario).toHaveBeenCalledTimes(1);
   });
 
+  it('groups about, support, and sharing in the compact More menu', () => {
+    const onShareScenario = jest.fn();
+
+    renderHeader({
+      onShareScenario,
+      sponsorship: {
+        stripeUrl: 'https://buy.stripe.com/test-link',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+
+    expect(screen.getByRole('menu', { name: /about and support/i })).toBeInTheDocument();
+    expect(screen.getByText('About Tack Wise')).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /support with stripe/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /copy share link/i }));
+
+    expect(onShareScenario).toHaveBeenCalledTimes(1);
+  });
+
   it('shows Stripe and GitHub sponsorship links when configured', () => {
     renderHeader({
       sponsorship: {
