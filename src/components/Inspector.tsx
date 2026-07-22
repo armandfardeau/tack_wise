@@ -5,6 +5,7 @@ import { ensureCurvedArrowControlPoint, toTacticalArrowPoints } from '../utils/a
 import { DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
 import { getMarkConnectionAnchors } from '../utils/markConnections';
 import { Copy, Pencil, Pause, Play, Plus, RotateCcw, Search, Trash2, X } from 'lucide-react';
+import ColorPicker from './ColorPicker';
 
 const QUICK_HEADING_ANGLES = [0, 45, 90, 135, 180, -135, -90, -45] as const;
 const SPEECH_BUBBLE_PRESETS = [
@@ -363,7 +364,7 @@ function BoatInspector({
               </div>
               <div className="form-row">
                 <label htmlFor="boat-color">Color</label>
-                <input id="boat-color" type="color" value={boat.color} onChange={(event) => updateBoat(boat.id, { color: event.target.value })} />
+                <ColorPicker id="boat-color" label="Color" value={boat.color} onChange={(color) => updateBoat(boat.id, { color })} />
               </div>
               <div className="form-row flex-row">
                 <label className="checkbox-label">
@@ -638,7 +639,7 @@ function MarkInspector({ activeFrame, mark, updateMark, onConnectMarks, onRemove
               </div>
               <div className="form-row">
                 <label htmlFor="mark-color">Color</label>
-                <input id="mark-color" type="color" value={mark.color} onChange={(event) => updateMark(mark.id, { color: event.target.value })} />
+                <ColorPicker id="mark-color" label="Color" value={mark.color} onChange={(color) => updateMark(mark.id, { color })} />
               </div>
               <div className="form-row">
                 <label htmlFor="mark-shape">Shape</label>
@@ -896,7 +897,12 @@ function ConnectionInspector({
       </div>
       <div className="form-row">
         <label htmlFor="connection-line-color">Line Color</label>
-        <input id="connection-line-color" type="color" value={connection.color ?? sourceMark?.color ?? '#38bdf8'} onChange={(event) => updateConnection(connection.id, { color: event.target.value })} />
+        <ColorPicker
+          id="connection-line-color"
+          label="Line Color"
+          value={connection.color ?? sourceMark?.color ?? '#38bdf8'}
+          onChange={(color) => updateConnection(connection.id, { color })}
+        />
       </div>
       <div className="form-row">
         <label htmlFor="connection-line-style">Line Style</label>
@@ -939,7 +945,7 @@ function ArrowInspector({ arrow, updateArrow }: { arrow: TacticalArrow; updateAr
           content: (
             <div className="editor-form">
               <div className="form-row"><label htmlFor="arrow-name">Name</label><input id="arrow-name" type="text" value={arrow.name} onChange={(event) => updateArrow(arrow.id, { name: event.target.value })} /></div>
-              <div className="form-row"><label htmlFor="arrow-color">Color</label><input id="arrow-color" type="color" value={arrow.color} onChange={(event) => updateArrow(arrow.id, { color: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="arrow-color">Color</label><ColorPicker id="arrow-color" label="Color" value={arrow.color} onChange={(color) => updateArrow(arrow.id, { color })} /></div>
               <div className="form-row"><label htmlFor="arrow-width">Line width ({arrow.lineWidth ?? 3}px)</label><input id="arrow-width" type="range" min="1" max="12" value={arrow.lineWidth ?? 3} onChange={(event) => updateArrow(arrow.id, { lineWidth: Number(event.target.value) })} /></div>
               <div className="form-row"><label htmlFor="arrow-style">Line style</label><select id="arrow-style" value={arrow.lineStyle ?? 'solid'} onChange={(event) => updateArrow(arrow.id, { lineStyle: event.target.value as TacticalArrow['lineStyle'] })}><option value="solid">Solid</option><option value="dashed">Dashed</option><option value="dotted">Dotted</option></select></div>
             </div>
@@ -1043,7 +1049,7 @@ function RuleCommentInspector({
         </select>
         <p className="grid-hint">Select one or more rules.</p>
       </div>
-      <div className="form-row"><label htmlFor="rule-comment-color">Highlight color</label><input id="rule-comment-color" type="color" value={comment.color} onChange={(event) => updateRuleComment(comment.id, { color: event.target.value })} /></div>
+      <div className="form-row"><label htmlFor="rule-comment-color">Highlight color</label><ColorPicker id="rule-comment-color" label="Highlight color" value={comment.color} onChange={(color) => updateRuleComment(comment.id, { color })} /></div>
       <div className="form-row"><label htmlFor="rule-comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="rule-comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateRuleComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
       <div className="inspector-subsection">
         <h4 className="inspector-subsection-title">Highlight offending objects</h4>
@@ -1051,11 +1057,11 @@ function RuleCommentInspector({
           {comment.offenseTargets.map((target) => (
             <div className="rule-offense-row" key={offenseKey(target)}>
               <span className="rule-offense-name">{getOffenseName(target)}</span>
-              <input
-                type="color"
-                value={target.color ?? '#ef4444'}
+              <ColorPicker
+                compact
                 aria-label={`Color for ${getOffenseName(target)}`}
-                onChange={(event) => updateOffenseColor(target, event.target.value)}
+                value={target.color ?? '#ef4444'}
+                onChange={(color) => updateOffenseColor(target, color)}
               />
               <button
                 type="button"
@@ -1110,7 +1116,7 @@ function CommentInspector({ comment, updateComment }: { comment: CommentNote; up
           label: 'Display',
           content: (
             <div className="editor-form">
-              <div className="form-row"><label htmlFor="comment-color">Text color</label><input id="comment-color" type="color" value={comment.color} onChange={(event) => updateComment(comment.id, { color: event.target.value })} /></div>
+              <div className="form-row"><label htmlFor="comment-color">Text color</label><ColorPicker id="comment-color" label="Text color" value={comment.color} onChange={(color) => updateComment(comment.id, { color })} /></div>
               <div className="form-row"><label htmlFor="comment-size">Font size ({comment.fontSize ?? 14}px)</label><input id="comment-size" type="range" min="10" max="32" value={comment.fontSize ?? 14} onChange={(event) => updateComment(comment.id, { fontSize: Number(event.target.value) })} /></div>
             </div>
           ),
