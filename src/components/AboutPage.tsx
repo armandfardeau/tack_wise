@@ -9,6 +9,7 @@ import {
   Share2,
   Sun,
 } from 'lucide-react';
+import BrandMark from './BrandMark';
 import type { Theme } from '../types';
 
 interface AboutPageProps {
@@ -26,7 +27,7 @@ export default function AboutPage({ theme, onBackToEditor, onToggleTheme }: Abou
         <div className="header-main">
           <div className="branding">
             <span className="eyebrow">Tactical Sailing Simulator</span>
-            <h1>Tack Wise <Sailboat className="brand-icon" aria-hidden="true" size={24} /></h1>
+            <h1>Tack Wise <BrandMark className="brand-icon" aria-hidden="true" size={24} /></h1>
           </div>
         </div>
         <div className="header-tools" aria-label="About page tools">
@@ -145,7 +146,7 @@ export default function AboutPage({ theme, onBackToEditor, onToggleTheme }: Abou
         </section>
 
         <footer className="about-footer">
-          <span><Sailboat aria-hidden="true" size={15} /> Tack Wise</span>
+          <span><BrandMark aria-hidden="true" size={15} /> Tack Wise</span>
           <span>Draw the moment. Understand the move.</span>
         </footer>
       </div>

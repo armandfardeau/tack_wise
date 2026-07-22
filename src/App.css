@@ -137,7 +137,7 @@ body {
 .brand-icon {
   display: inline-block;
   vertical-align: -0.2em;
-  stroke: currentColor;
+  flex: 0 0 auto;
 }
 
 .branding .eyebrow {

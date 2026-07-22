@@ -2,8 +2,9 @@ import ExportActions from './ExportActions';
 import HeaderMoreActions from './HeaderMoreActions';
 import ViewActions from './ViewActions';
 import SponsorshipActions, { type SponsorshipLinks } from './SponsorshipActions';
+import BrandMark from './BrandMark';
 import type { SituationTemplate } from '../data/situationTemplates';
-import { Copy, Info, Sailboat } from 'lucide-react';
+import { Copy, Info } from 'lucide-react';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
 
 interface AppHeaderProps {
@@ -52,7 +53,7 @@ export default function AppHeader({
       <div className="header-main">
         <div className="branding">
           <span className="eyebrow">Tactical Sailing Simulator</span>
-          <h1>Tack Wise <Sailboat className="brand-icon" aria-hidden="true" size={24} /></h1>
+          <h1>Tack Wise <BrandMark className="brand-icon" aria-hidden="true" size={24} /></h1>
         </div>
       </div>
       <div className="header-tools" aria-label="Scenario tools">

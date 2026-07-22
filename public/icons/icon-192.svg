@@ -1,11 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 512 512" fill="none">
+  <title>Tack Wise</title>
   <rect width="512" height="512" rx="112" fill="#090D16"/>
-  <path d="M111 191.5h173.5c36.7 0 66.5-29.8 66.5-66.5" stroke="#47BFFF" stroke-width="24" stroke-linecap="round"/>
-  <path d="M111 256h120.5c36.7 0 66.5-29.8 66.5-66.5" stroke="#06B6D4" stroke-width="24" stroke-linecap="round"/>
-  <path d="M111 320.5h68c36.7 0 66.5-29.8 66.5-66.5" stroke="#863BFF" stroke-width="24" stroke-linecap="round"/>
-  <path d="M273 110v261" stroke="#F8FAFC" stroke-width="18" stroke-linecap="round"/>
-  <path d="M273 119 178 346h95V119Z" fill="#F8FAFC"/>
-  <path d="M273 145v201h95l-95-201Z" fill="#47BFFF" fill-opacity=".9"/>
-  <path d="M142 376h262" stroke="#F8FAFC" stroke-width="18" stroke-linecap="round"/>
-  <path d="m273 365 34 25-34 25-34-25 34-25Z" fill="#F43F5E"/>
+  <circle cx="256" cy="256" r="190" fill="#0B1322" stroke="#06B6D4" stroke-width="26"/>
+  <circle cx="256" cy="256" r="132" stroke="#3B82F6" stroke-width="18" stroke-dasharray="28 28"/>
+  <text x="256" y="312" text-anchor="middle" fill="#F8FAFC" font-family="Inter, ui-sans-serif, system-ui, sans-serif" font-size="158" font-weight="900" letter-spacing="-19">T<tspan fill="#06B6D4">W</tspan></text>
+  <path d="M78 426 190 314" stroke="#F43F5E" stroke-width="28" stroke-linecap="round"/>
+  <path d="m190 314-45 8 37 37Z" fill="#F43F5E"/>
 </svg>
