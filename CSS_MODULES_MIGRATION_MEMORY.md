@@ -118,23 +118,45 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 7. Sidebar and frame navigation
 
-- [ ] Migrate .step-panel, .sidebar-backdrop, .sidebar-drawer-handle, .scenario-title-editor, .scenario-title-input, .sidebar-scenario-title-editor, .control-section, .sidebar-frame-section, .sidebar-layers-section, .sidebar-back-btn, .sidebar-layers-heading, .sidebar-layers-frame-name, and .section-title.
-- [ ] Preserve drawer states, mobile transitions, title input states, and responsive layout.
+- [x] Migrate .step-panel, .sidebar-backdrop, .sidebar-drawer-handle, .scenario-title-editor, .scenario-title-input, .sidebar-scenario-title-editor, .control-section, .sidebar-frame-section, .sidebar-layers-section, .sidebar-back-btn, .sidebar-layers-heading, .sidebar-layers-frame-name, and .section-title.
+- [x] Preserve drawer states, mobile transitions, title input states, and responsive layout.
 - Primary file: src/components/Sidebar.tsx.
+
+#### Item 7 migration record (2026-07-22)
+
+- Original global CSS: `.step-panel`, `.sidebar-backdrop`, `.sidebar-drawer-handle`, `.scenario-title-editor`, `.scenario-title-input`, `.sidebar-scenario-title-editor`, `.control-section`, `.sidebar-frame-section`, `.sidebar-layers-section`, `.sidebar-back-btn`, `.sidebar-layers-heading .section-title`, `.sidebar-layers-frame-name`, and `.section-title`, including their print, mobile, open-state, hover/focus, readonly, and layout declarations. The shared global `.control-section` and `.section-title` definitions remain in `src/App.css` because Inspector still consumes them; Sidebar now uses equivalent local module classes.
+- New module: `src/components/Sidebar.module.css` contains the Sidebar drawer, backdrop, title editor/input, local control section and section heading, layers view, back button, frame name, print rules, and mobile drawer transition rules. Open-state modifiers use local `isOpen`; no item 8+ layer-list selectors were moved.
+- React refactor: `Sidebar` imports the module and converts all owned selectors to local class references while preserving the existing DOM structure, ARIA attributes, title editing behavior, frame/layers navigation, and Timeline/LayerList contracts.
+- App.css cleanup: removed the Sidebar-owned global selectors and their responsive/print rules; retained shared `.control-section` and `.section-title` rules plus Inspector-specific global selectors.
+- Verification: targeted Sidebar tests (2 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. Browser checks at 1280×800 and 390×844 confirmed the desktop Sidebar, mobile closed/open drawer states, backdrop close behavior, and Frames → Layers → Back to frames navigation; the temporary viewport override was reset. The build emitted the existing large-chunk warning; no new test or lint failures occurred.
 
 ### 8. Layers list
 
-- [ ] Migrate .layers-list, .layers-summary, .layer-group, .layer-group-title, .layer-group-count, .layer-group-items, .layer-row, .layer-row-icon, .layer-row-copy, .layer-row-name, .layer-row-detail, and .layers-empty.
-- [ ] Preserve .is-selected and .is-wind modifiers, keyboard focus, and dynamic inline color behavior.
+- [x] Migrate .layers-list, .layers-summary, .layer-group, .layer-group-title, .layer-group-count, .layer-group-items, .layer-row, .layer-row-icon, .layer-row-copy, .layer-row-name, .layer-row-detail, and .layers-empty.
+- [x] Preserve .is-selected and .is-wind modifiers, keyboard focus, and dynamic inline color behavior.
 - Primary file: src/components/LayerList.tsx.
+
+#### Item 8 migration record (2026-07-22)
+
+- Original global CSS: `.layers-list`, `.layers-summary`, `.layer-group`, `.layer-group-title`, `.layer-group-count`, `.layer-group-items`, `.layer-row` with hover/focus-visible and `.is-selected` states, `.layer-row-icon` with `.is-wind`, `.layer-row-copy`, `.layer-row-name`, `.layer-row-detail`, and `.layers-empty`. These rules had no responsive, theme, print, animation, or cross-component overrides.
+- New module: `src/components/LayerList.module.css` contains the equivalent declarations under local names (`layersList`, `layersSummary`, `layerGroup`, `layerGroupTitle`, `layerGroupCount`, `layerGroupItems`, `layerRow`, `layerRowIcon`, `layerRowCopy`, `layerRowName`, `layerRowDetail`, `layersEmpty`, `isSelected`, and `isWind`). The hover/focus-visible behavior remains local, and the two state modifiers are composed only on their owning elements.
+- React refactor: `LayerList` imports the module and converts every LayerList-owned class reference to the corresponding module class. Selected rows preserve `aria-pressed` and the selected modifier; the wind icon preserves its modifier; object colors continue to be applied through the existing dynamic inline `color` style. Sidebar and Inspector class contracts are unchanged.
+- Verification: targeted LayerList tests, `npm run build`, `npm run lint`, `git diff --check`, and a repository search confirming no LayerList runtime usage remains dependent on the removed global selectors.
 
 ### 9. Inspector forms and object controls
 
-- [ ] Migrate .editor-form, .form-row, form labels/selects/textareas, .connection-list-heading, .connection-section-label, .connection-add-btn, .connection-list, .connection-row, .connection-target-name, .connection-row-btn, .connection-row-delete-btn, and .connection-empty.
-- [ ] Migrate .quick-angle-dial, .quick-angle-button, .direction-btn, .flex-row, .checkbox-label, and .grid-hint.
-- [ ] Migrate .inspector-tabs, .inspector-tab, .inspector-tab-panel, .inspector-subsection, .inspector-subsection-title, .inspector-actions, .inspector-close-btn, .inspector-duplicate-btn, .inspector-delete-btn, .inspector-object-name, .inspector-drag-handle, .inspector-title-content, and .no-selection.
-- [ ] Migrate .speech-bubble-presets, .speech-bubble-preset, .speech-bubble-clear, .rule-offense-list, .rule-offense-row, .rule-offense-name, .rule-offense-remove, and #rule-offense-add.
+- [x] Migrate .editor-form, .form-row, form labels/selects/textareas, .connection-list-heading, .connection-section-label, .connection-add-btn, .connection-list, .connection-row, .connection-target-name, .connection-row-btn, .connection-row-delete-btn, and .connection-empty.
+- [x] Migrate .quick-angle-dial, .quick-angle-button, .direction-btn, .flex-row, .checkbox-label, and .grid-hint.
+- [x] Migrate .inspector-tabs, .inspector-tab, .inspector-tab-panel, .inspector-subsection, .inspector-subsection-title, .inspector-actions, .inspector-close-btn, .inspector-duplicate-btn, .inspector-delete-btn, .inspector-object-name, .inspector-drag-handle, .inspector-title-content, and .no-selection.
+- [x] Migrate .speech-bubble-presets, .speech-bubble-preset, .speech-bubble-clear, .rule-offense-list, .rule-offense-row, .rule-offense-name, .rule-offense-remove, and #rule-offense-add.
 - Primary file: src/components/Inspector.tsx.
+
+#### Item 9 migration record (2026-07-22)
+
+- Original global CSS: `.editor-form`, `.form-row` with its label, text/search/select, focus, and textarea rules; connection selectors `.connection-list-heading`, `.connection-section-label`, `.connection-add-btn` with hover/focus/disabled states, `.connection-list`, `.connection-row` with nested select, `.connection-target-name`, `.connection-row-btn` with hover/focus and delete modifiers, and `.connection-empty`; object controls `.quick-angle-dial` with its `::before`/`::after` decorations, `.quick-angle-button` with hover/pressed/focus states, `.direction-btn`, `.flex-row`, `.checkbox-label` with checkbox sizing, and `.grid-hint`; tabs and rule-offense selectors; speech-bubble preset/clear controls; and Inspector header/fallback selectors. The `#rule-offense-add` width rule was paired with `.rule-offense-add select`. Floating-inspector overrides supplied drag behavior, local section padding/title layout, and title-content/object-name truncation. Light-theme overrides supplied the Inspector action-button background and shadow. There were no Inspector-specific responsive, print, animation, or presenter-mode rules to move; the global `.floating-inspector` container and its responsive max-height remain with item 11.
+- New module: `src/components/inspector/Inspector.module.css` contains the complete equivalent under local names: `controlSection`, `sectionTitle`, `editorForm`, `formRow`, `connectionListHeading`, `connectionSectionLabel`, `connectionAddButton`, `connectionList`, `connectionRow`, `connectionTargetName`, `connectionRowButton`, `connectionRowDeleteButton`, `connectionEmpty`, `quickAngleDial`, `quickAngleButton`, `directionButton`, `flexRow`, `checkboxLabel`, `gridHint`, `inspectorTabs`, `inspectorTab`, `inspectorTabPanel`, `inspectorSubsection`, `inspectorSubsectionTitle`, `ruleOffenseList`, `ruleOffenseRow`, `ruleOffenseName`, `ruleOffenseRemove`, `ruleOffenseAdd`, `speechBubblePresets`, `speechBubblePreset`, `speechBubbleClear`, `actions`, `closeButton`, `duplicateButton`, `deleteButton`, `dragHandle`, `titleContent`, `objectName`, and `noSelection`. Narrow `:global(.floating-inspector)` selectors preserve the floating panel contract, and `:global(.light-theme)` scopes the moved action-button theme overrides. The global `.control-section` and `.section-title` base rules remain intentionally in `App.css` for Sidebar item 7; Inspector uses its local equivalents.
+- React refactor: `Inspector` and all existing inspector form/object subcomponents import the module and convert their static and composed class names. The `quick-angle-button-*` class suffix had no CSS declaration and was removed while preserving inline angle positioning and `aria-pressed`. The rule-offense wrapper now owns the width rule through `ruleOffenseAdd`; the public `rule-offense-add` element id remains unchanged for accessibility. `CanvasWorkspace` now passes generated Inspector module classes to `react-rnd` for its cancel and drag-handle contracts. ColorPicker usage and selectors remain untouched. Inspector tests assert accessible roles, labels, and relationships instead of generated module class names.
+- Verification: targeted `Inspector.test.tsx` (30 tests), full Jest suite (35 suites / 259 tests), `npm run build`, `npm run lint`, and `git diff --check` passed. A selector search confirmed the migrated Inspector selectors are no longer referenced by the Inspector components or `App.css`; the shared Sidebar `.control-section`/`.section-title` rules and ColorPicker selectors remain intentionally global.
 
 ### 10. Color picker
 

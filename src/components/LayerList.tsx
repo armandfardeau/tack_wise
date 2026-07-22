@@ -2,6 +2,7 @@ import type { ComponentType } from 'react';
 import { ArrowUpRight, Image, MapPin, MessageSquare, ShipWheel, Wind } from 'lucide-react';
 import type { SelectedType } from '../hooks/useScenario';
 import { getRuleReferences, type Frame } from '../types';
+import styles from './LayerList.module.css';
 
 type LayerObjectType = 'boat' | 'mark' | 'arrow' | 'comment' | 'image';
 type LayerIcon = ComponentType<{ 'aria-hidden'?: boolean; size?: number; strokeWidth?: number }>;
@@ -89,18 +90,18 @@ export default function LayerList({
   const layerCount = entries.length + 1;
 
   return (
-    <div className="layers-list">
-      <p className="layers-summary">{layerCount} {layerCount === 1 ? 'layer' : 'layers'} in this frame</p>
+    <div className={styles.layersList}>
+      <p className={styles.layersSummary}>{layerCount} {layerCount === 1 ? 'layer' : 'layers'} in this frame</p>
       <button
         type="button"
-        className={`layer-row${selectedId === 'wind' && selectedType === 'wind' ? ' is-selected' : ''}`}
+        className={`${styles.layerRow}${selectedId === 'wind' && selectedType === 'wind' ? ` ${styles.isSelected}` : ''}`}
         aria-pressed={selectedId === 'wind' && selectedType === 'wind'}
         onClick={() => onOpenInspector('wind', 'wind')}
       >
-        <span className="layer-row-icon is-wind"><Wind aria-hidden="true" size={15} /></span>
-        <span className="layer-row-copy">
-          <span className="layer-row-name">Wind</span>
-          <span className="layer-row-detail">{activeFrame.windSpeed} kts · {activeFrame.windAngle}°</span>
+        <span className={`${styles.layerRowIcon} ${styles.isWind}`}><Wind aria-hidden="true" size={15} /></span>
+        <span className={styles.layerRowCopy}>
+          <span className={styles.layerRowName}>Wind</span>
+          <span className={styles.layerRowDetail}>{activeFrame.windSpeed} kts · {activeFrame.windAngle}°</span>
         </span>
       </button>
 
@@ -110,13 +111,13 @@ export default function LayerList({
         const GroupIcon = group.icon;
 
         return (
-          <section key={group.type} className="layer-group" aria-labelledby={`layer-group-${group.type}`}>
-            <h4 id={`layer-group-${group.type}`} className="layer-group-title">
+          <section key={group.type} className={styles.layerGroup} aria-labelledby={`layer-group-${group.type}`}>
+            <h4 id={`layer-group-${group.type}`} className={styles.layerGroupTitle}>
               <GroupIcon aria-hidden={true} size={13} />
               <span>{group.label}</span>
-              <span className="layer-group-count">{groupEntries.length}</span>
+              <span className={styles.layerGroupCount}>{groupEntries.length}</span>
             </h4>
-            <div className="layer-group-items">
+            <div className={styles.layerGroupItems}>
               {groupEntries.map((entry) => {
                 const EntryIcon = entry.icon;
                 const isSelected = selectedId === entry.id && selectedType === entry.type;
@@ -125,16 +126,16 @@ export default function LayerList({
                   <button
                     key={entry.id}
                     type="button"
-                    className={`layer-row${isSelected ? ' is-selected' : ''}`}
+                    className={`${styles.layerRow}${isSelected ? ` ${styles.isSelected}` : ''}`}
                     aria-pressed={isSelected}
                     onClick={() => onOpenInspector(entry.id, entry.type)}
                   >
-                    <span className="layer-row-icon" style={entry.color ? { color: entry.color } : undefined}>
+                    <span className={styles.layerRowIcon} style={entry.color ? { color: entry.color } : undefined}>
                       <EntryIcon aria-hidden={true} size={15} />
                     </span>
-                    <span className="layer-row-copy">
-                      <span className="layer-row-name">{entry.name}</span>
-                      {entry.detail && <span className="layer-row-detail">{entry.detail}</span>}
+                    <span className={styles.layerRowCopy}>
+                      <span className={styles.layerRowName}>{entry.name}</span>
+                      {entry.detail && <span className={styles.layerRowDetail}>{entry.detail}</span>}
                     </span>
                   </button>
                 );
@@ -144,7 +145,7 @@ export default function LayerList({
         );
       })}
 
-      {entries.length === 0 && <p className="layers-empty">Add an object to the canvas and it will appear here.</p>}
+      {entries.length === 0 && <p className={styles.layersEmpty}>Add an object to the canvas and it will appear here.</p>}
     </div>
   );
 }

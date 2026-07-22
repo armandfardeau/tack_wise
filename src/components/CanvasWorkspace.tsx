@@ -18,6 +18,7 @@ import PlaybackButton from './PlaybackButton';
 import CanvasHistoryControls from './CanvasHistoryControls';
 import FrameHeader from './FrameHeader';
 import { getConnectionPoints } from '../utils/markConnections';
+import inspectorStyles from './inspector/Inspector.module.css';
 
 interface CanvasWorkspaceProps {
   activeFrame: Frame;
@@ -779,8 +780,8 @@ export default function CanvasWorkspace({
           <Rnd
             bounds="parent"
             className="floating-inspector"
-            cancel=".inspector-close-btn, .inspector-delete-btn, .inspector-duplicate-btn"
-            dragHandleClassName="inspector-drag-handle"
+            cancel={`.${inspectorStyles.closeButton}, .${inspectorStyles.deleteButton}, .${inspectorStyles.duplicateButton}`}
+            dragHandleClassName={inspectorStyles.dragHandle}
             enableResizing={false}
             position={{
               x: inspectorPosition?.x ?? inspectorStyle.left,
