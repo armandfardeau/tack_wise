@@ -1,5 +1,5 @@
 import { ChevronDown, CreditCard, GitFork, Heart } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import StripeDonationForm from './StripeDonationForm';
 
 export interface SponsorshipLinks {
@@ -11,9 +11,18 @@ export interface SponsorshipLinks {
 
 interface SponsorshipActionsProps extends SponsorshipLinks {}
 
+interface MenuPosition {
+  top: number;
+  left: number;
+  maxHeight: number;
+}
+
 export default function SponsorshipActions({ stripeUrl, stripePublishableKey, githubUrl, donationUrl }: SponsorshipActionsProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [menuPosition, setMenuPosition] = useState<MenuPosition | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -33,6 +42,43 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
     };
   }, [isOpen]);
 
+  useLayoutEffect(() => {
+    if (!isOpen) {
+      setMenuPosition(null);
+      return undefined;
+    }
+
+    const updateMenuPosition = () => {
+      const triggerRect = triggerRef.current?.getBoundingClientRect();
+      const menu = menuRef.current;
+      if (!triggerRect || !menu) return;
+
+      const viewportMargin = 12;
+      const menuGap = 8;
+      const menuRect = menu.getBoundingClientRect();
+      const menuWidth = Math.min(menuRect.width, window.innerWidth - viewportMargin * 2);
+      const maxLeft = Math.max(viewportMargin, window.innerWidth - menuWidth - viewportMargin);
+      const left = Math.min(Math.max(viewportMargin, triggerRect.right - menuWidth), maxLeft);
+      const spaceBelow = Math.max(0, window.innerHeight - triggerRect.bottom - menuGap - viewportMargin);
+      const spaceAbove = Math.max(0, triggerRect.top - menuGap - viewportMargin);
+      const opensAbove = menuRect.height > spaceBelow && spaceAbove > spaceBelow;
+      const maxHeight = opensAbove ? spaceAbove : spaceBelow;
+      const top = opensAbove
+        ? Math.max(viewportMargin, triggerRect.top - menuGap - Math.min(menuRect.height, maxHeight))
+        : triggerRect.bottom + menuGap;
+
+      setMenuPosition({ top, left, maxHeight });
+    };
+
+    updateMenuPosition();
+    window.addEventListener('resize', updateMenuPosition);
+    window.addEventListener('scroll', updateMenuPosition, true);
+    return () => {
+      window.removeEventListener('resize', updateMenuPosition);
+      window.removeEventListener('scroll', updateMenuPosition, true);
+    };
+  }, [isOpen]);
+
   if (!stripeUrl && !stripePublishableKey && !githubUrl && !donationUrl) return null;
 
   return (
@@ -40,6 +86,7 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
       <button
         type="button"
         className="header-tool-btn sponsorship-trigger"
+        ref={triggerRef}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-label="Support Tack Wise"
@@ -51,7 +98,18 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
       </button>
 
       {isOpen && (
-        <div className="sponsorship-menu" role="menu" aria-label="Support Tack Wise">
+        <div
+          ref={menuRef}
+          className="sponsorship-menu"
+          role="menu"
+          aria-label="Support Tack Wise"
+          style={menuPosition ? {
+            top: menuPosition.top,
+            left: menuPosition.left,
+            maxHeight: menuPosition.maxHeight,
+            visibility: 'visible',
+          } : { visibility: 'hidden' }}
+        >
           <p className="sponsorship-menu-title">Help keep Tack Wise sailing</p>
           {stripeUrl && (
             <a className="sponsorship-menu-item" role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
