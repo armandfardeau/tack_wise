@@ -56,8 +56,9 @@ Tack Wise installs the anonymous Featurebase SDK at the application root using
 the workspace App ID from Settings → Developers → Installation. The current
 App ID is configured by default, with `VITE_FEATUREBASE_APP_ID` available as an
 override in Vercel project settings. Dashboard modules boot automatically from
-the shared install. Feedback, updates, and authenticated identity are wired as
-separate opt-in surfaces.
+the shared install. The in-app Feedback widget is mounted as a floating button
+in the bottom-right corner; the Messenger chat launcher remains controlled by
+the Featurebase Support module.
 
 ### Vercel Stripe Checkout
 
