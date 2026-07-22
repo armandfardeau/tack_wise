@@ -262,10 +262,17 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 17. Template contribution dialog
 
-- [ ] Migrate .template-contribution-backdrop, .template-contribution-dialog, .template-contribution-header, .template-contribution-eyebrow, .template-contribution-close, .template-contribution-intro, .template-contribution-form, .template-contribution-field, .template-contribution-errors, .template-contribution-path, .template-contribution-preview, .template-contribution-metadata, and .template-contribution-fallback.
-- [ ] Migrate .template-contribution-feedback, .template-contribution-actions, .template-contribution-copy-actions, .template-contribution-primary, and .template-contribution-secondary.
-- [ ] Preserve disabled, focus, fallback, and feedback states.
+- [x] Migrate .template-contribution-backdrop, .template-contribution-dialog, .template-contribution-header, .template-contribution-eyebrow, .template-contribution-close, .template-contribution-intro, .template-contribution-form, .template-contribution-field, .template-contribution-errors, .template-contribution-path, .template-contribution-preview, .template-contribution-metadata, and .template-contribution-fallback.
+- [x] Migrate .template-contribution-feedback, .template-contribution-actions, .template-contribution-copy-actions, .template-contribution-primary, and .template-contribution-secondary.
+- [x] Preserve disabled, focus, fallback, and feedback states.
 - Primary file: src/components/TemplateContributionDialog.tsx.
+
+#### Item 17 migration record (2026-07-22)
+
+- Original global CSS: `.template-contribution-backdrop` supplied the fixed, centered, scrollable blurred overlay with dark background; `.light-theme .template-contribution-backdrop` supplied its light-theme background. `.template-contribution-dialog` supplied the 720px max-width modal, viewport-limited scrolling, padding, border, surface, and shadow. Header, path, action-row, and copy-action selectors supplied flex alignment; the header and typography selectors supplied spacing, colors, and uppercase eyebrow styling. The close button preserved its 34px control, border, surface, hover, and focus behavior. Form, field, preview, metadata, and fallback selectors supplied the two-column grid, stacked labels, inputs/textareas, disabled filename state, margins, preview monospace sizing, path truncation, validation errors, feedback, and action button layout. Primary/secondary button selectors preserved hover lift and disabled opacity/cursor behavior.
+- New module: `src/components/TemplateContributionDialog.module.css` contains the equivalent rules under local names (`templateContributionBackdrop`, `templateContributionDialog`, `templateContributionHeader`, `templateContributionEyebrow`, `templateContributionClose`, `templateContributionIntro`, `templateContributionForm`, `templateContributionField`, `templateContributionErrors`, `templateContributionPath`, `templateContributionPreview`, `templateContributionMetadata`, `templateContributionFallback`, `templateContributionFeedback`, `templateContributionActions`, `templateContributionCopyActions`, `templateContributionPrimary`, and `templateContributionSecondary`). The narrow `:global(.light-theme)` ancestor is retained solely for the app-wide theme override.
+- React refactor: `TemplateContributionDialog` imports the colocated module and converts every template-contribution class reference, including the modal backdrop, preview/metadata/fallback sections, copy feedback, action groups, and disabled buttons. The backdrop test now derives the presentation element from the dialog relationship instead of depending on a removed global class hook. Modal focus, Escape/backdrop/cancel close actions, copy fallback, status feedback, preview, and GitHub editor behavior are unchanged.
+- Verification: targeted `TemplateContributionDialog` tests, `npm run build`, `npm run lint`, `git diff --check`, and a selector audit confirming no runtime or test dependency remains on the removed `.template-contribution-*` global selectors.
 
 ### 18. About page
 
