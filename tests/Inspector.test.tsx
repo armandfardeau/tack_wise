@@ -1,6 +1,14 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import Inspector from '../src/components/Inspector';
+import InspectorComponent, { type InspectorProps } from '../src/components/Inspector';
+import { createInspectorView, type InspectorViewInputs } from '../src/components/inspector/createInspectorView';
 import type { Boat, CommentNote, DiagramImage, Frame, Mark, MarkConnection, RuleComment, TacticalArrow } from '../src/types';
+
+type TestInspectorProps = InspectorViewInputs & Pick<InspectorProps, 'onDelete' | 'onDuplicate' | 'onClose'>;
+
+function Inspector(props: TestInspectorProps) {
+  const { onDelete, onDuplicate, onClose, ...viewInputs } = props;
+  return <InspectorComponent view={createInspectorView(viewInputs)} onDelete={onDelete} onDuplicate={onDuplicate} onClose={onClose} />;
+}
 
 const mark: Mark = {
   id: 'mark-1',
