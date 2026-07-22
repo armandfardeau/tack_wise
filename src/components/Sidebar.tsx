@@ -10,6 +10,9 @@ type SidebarView = 'frames' | 'layers';
 interface SidebarProps {
   currentFrameIndex: number;
   frames: Frame[];
+  scenarioTitle: string;
+  onScenarioTitleChange: (title: string) => void;
+  presenterMode?: boolean;
   unanimatableTransitionIndices?: number[];
   onFixTransition: (transitionIndex: number) => void;
   isOpen: boolean;
@@ -28,6 +31,9 @@ interface SidebarProps {
 export default function Sidebar({
   currentFrameIndex,
   frames,
+  scenarioTitle,
+  onScenarioTitleChange,
+  presenterMode = false,
   unanimatableTransitionIndices = [],
   onFixTransition,
   isOpen,
@@ -71,6 +77,19 @@ export default function Sidebar({
       </button>
       <button type="button" className={`sidebar-backdrop${isOpen ? ' is-open' : ''}`} aria-label="Close frames drawer" onClick={onClose} />
       <aside id="controls-sidebar" className={`step-panel${isOpen ? ' is-open' : ''}`}>
+        <div className="scenario-title-editor sidebar-scenario-title-editor">
+          <label htmlFor="scenario-title">Scenario title</label>
+          <input
+            id="scenario-title"
+            className="scenario-title-input"
+            type="text"
+            value={scenarioTitle}
+            placeholder="Untitled situation"
+            readOnly={presenterMode}
+            onChange={(event) => onScenarioTitleChange(event.target.value)}
+            onBlur={(event) => onScenarioTitleChange(event.target.value.trim() || 'Untitled situation')}
+          />
+        </div>
         {view === 'frames' ? (
           <div className="control-section sidebar-frame-section">
             <h3 className="section-title"><Film aria-hidden="true" size={16} /> Frames</h3>

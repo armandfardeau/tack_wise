@@ -17,27 +17,6 @@ function openExportDialog() {
 }
 
 describe('AppHeader', () => {
-  it('renders and updates the scenario title', () => {
-    const onScenarioTitleChange = jest.fn();
-
-    render(
-      <AppHeader
-        isExporting={false}
-        scenarioTitle="Mark Room"
-        onScenarioTitleChange={onScenarioTitleChange}
-        onExport={jest.fn()}
-        onImportJson={jest.fn()}
-      />,
-    );
-
-    const titleInput = screen.getByRole('textbox', { name: /scenario title/i });
-    expect(titleInput).toHaveValue('Mark Room');
-
-    fireEvent.change(titleInput, { target: { value: 'Upwind Crossing' } });
-
-    expect(onScenarioTitleChange).toHaveBeenCalledWith('Upwind Crossing');
-  });
-
   it('renders the File menu in the top-level scenario tools bar', () => {
     renderHeader();
 
@@ -179,6 +158,34 @@ describe('AppHeader', () => {
     renderHeader({ onShareScenario });
 
     fireEvent.click(screen.getByRole('button', { name: /copy share link/i }));
+
+    expect(onShareScenario).toHaveBeenCalledTimes(1);
+  });
+
+  it('groups about, support, and sharing in the compact More menu', () => {
+    const onShareScenario = jest.fn();
+    const onOpenAbout = jest.fn();
+
+    renderHeader({
+      onShareScenario,
+      onOpenAbout,
+      sponsorship: {
+        stripeUrl: 'https://buy.stripe.com/test-link',
+      },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+
+    expect(screen.getByRole('menu', { name: /about and support/i })).toBeInTheDocument();
+    expect(screen.getByText('About Tack Wise')).toBeInTheDocument();
+    expect(screen.getByRole('menuitem', { name: /support with stripe/i })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /open about page/i }));
+    expect(onOpenAbout).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole('button', { name: /more options/i }));
+
+    fireEvent.click(screen.getByRole('menuitem', { name: /copy share link/i }));
 
     expect(onShareScenario).toHaveBeenCalledTimes(1);
   });
