@@ -3,7 +3,7 @@ import HeaderMoreActions from './HeaderMoreActions';
 import ViewActions from './ViewActions';
 import SponsorshipActions, { type SponsorshipLinks } from './SponsorshipActions';
 import type { SituationTemplate } from '../data/situationTemplates';
-import { Copy, Info, MessageSquare, Sailboat } from 'lucide-react';
+import { Copy, Info, Sailboat } from 'lucide-react';
 import type { ExportOptions, ExportQuality, Theme } from '../types';
 
 interface AppHeaderProps {
@@ -14,7 +14,6 @@ interface AppHeaderProps {
   onImportJson: (file: File) => void;
   onShareScenario?: () => void;
   onOpenAbout?: () => void;
-  feedbackEnabled?: boolean;
   onContributeTemplate?: () => void;
   onUpdateTemplate?: () => void;
   canUpdateTemplate?: boolean;
@@ -36,7 +35,6 @@ export default function AppHeader({
   onImportJson,
   onShareScenario,
   onOpenAbout,
-  feedbackEnabled = false,
   onContributeTemplate,
   onUpdateTemplate,
   canUpdateTemplate,
@@ -82,14 +80,12 @@ export default function AppHeader({
         />
         {onOpenAbout && <button type="button" className="header-tool-btn header-about-btn" onClick={onOpenAbout}><Info aria-hidden="true" size={15} /> About</button>}
         <div className="header-standard-utility-actions">
-          {feedbackEnabled && <button type="button" className="header-tool-btn" data-featurebase-feedback><MessageSquare aria-hidden="true" size={15} /> Send feedback</button>}
           <SponsorshipActions {...sponsorship} />
           <button type="button" className="header-tool-btn" onClick={() => onShareScenario?.()}><Copy aria-hidden="true" size={15} /> Copy share link</button>
         </div>
         <HeaderMoreActions
           onShareScenario={onShareScenario}
           onOpenAbout={onOpenAbout}
-          feedbackEnabled={feedbackEnabled}
           sponsorship={sponsorship}
         />
       </div>

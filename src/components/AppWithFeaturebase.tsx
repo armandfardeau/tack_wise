@@ -1,13 +1,12 @@
 import { FeaturebaseProvider } from 'featurebase-js/react';
 import App from '../App';
 
-const featurebaseAppId = import.meta.env.VITE_FEATUREBASE_APP_ID;
+const DEFAULT_FEATUREBASE_APP_ID = '6a60928825dbb0ae9df349c2';
+const featurebaseAppId = import.meta.env.VITE_FEATUREBASE_APP_ID || DEFAULT_FEATUREBASE_APP_ID;
 
 export default function AppWithFeaturebase() {
-  if (!featurebaseAppId) return <App />;
-
   return (
-    <FeaturebaseProvider appId={featurebaseAppId} messenger={false}>
+    <FeaturebaseProvider appId={featurebaseAppId}>
       <App />
     </FeaturebaseProvider>
   );
