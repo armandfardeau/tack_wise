@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode, type RefObject } from 'react';
-import { TriangleAlert, X } from 'lucide-react';
+import { Pencil, TriangleAlert, X } from 'lucide-react';
 import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { Rnd } from 'react-rnd';
 import type { Boat, CommentNote, DiagramImage, FrameComment, Mark, MarkConnection, RuleComment, TacticalArrow } from '../types';
@@ -712,6 +712,12 @@ export default function CanvasWorkspace({
           stageRef={stageRef}
           stageSize={stageSize}
         />
+        {!presenterMode && !isExporting && !isAddingArrow && !isInspectorOpen && selectedPosition && (
+          <div className="canvas-edit-hint" role="status" aria-live="polite">
+            <Pencil aria-hidden="true" size={14} />
+            <span>Double-click or double-tap an object to edit it.</span>
+          </div>
+        )}
         {isAddingArrow && (
           <div className="arrow-drawing-hint" role="status" aria-live="polite">
             <span>{arrowDrawingStart ? 'Click the end point for the arrow.' : 'Click the start point for the arrow.'}</span>
