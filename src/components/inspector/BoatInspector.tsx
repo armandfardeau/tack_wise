@@ -12,6 +12,12 @@ const SPEECH_BUBBLE_PRESETS = [
   { emoji: '😡', label: 'Frustrated' },
   { emoji: '👍', label: 'Agree' },
 ] as const;
+const FLAG_EMOJI_PRESETS = [
+  { emoji: '🟥', label: 'Red flag' },
+  { emoji: '🟩', label: 'Green flag' },
+  { emoji: '🟨', label: 'Yellow flag' },
+  { emoji: '🏴', label: 'Black flag' },
+] as const;
 
 type BoatInspectorProps = Extract<InspectorView, { kind: 'boat' }>;
 
@@ -113,6 +119,20 @@ export function BoatInspector({ autoSailTrim, boat, onSetAutoSailTrim, updateBoa
                     <button key={emoji} type="button" className="speech-bubble-preset" aria-label={`Use ${label} feeling`} title={label} onClick={() => updateBoat(boat.id, { speechBubble: emoji })}>{emoji}</button>
                   ))}
                   {boat.speechBubble && <button type="button" className="speech-bubble-clear" onClick={() => updateBoat(boat.id, { speechBubble: '' })}>Clear</button>}
+                </div>
+                <div className="speech-bubble-presets speech-bubble-flag-presets" aria-label="Flag presets">
+                  {FLAG_EMOJI_PRESETS.map(({ emoji, label }) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      className="speech-bubble-preset"
+                      aria-label={`Use ${label} feeling`}
+                      title={label}
+                      onClick={() => updateBoat(boat.id, { speechBubble: emoji })}
+                    >
+                      {emoji}
+                    </button>
+                  ))}
                 </div>
                 <p className="grid-hint">Type a message or pick a feeling. Leave it blank to hide the bubble.</p>
               </div>
