@@ -11,6 +11,7 @@ import CanvasZoomControls from './CanvasZoomControls';
 import SimulationCanvas from './SimulationCanvas';
 import WindHud from './WindHud';
 import Inspector from './Inspector';
+import { createInspectorView } from './inspector/createInspectorView';
 import GridSettingsButton from './GridSettingsButton';
 import FloatingAddMenu from './FloatingAddMenu';
 import PlaybackButton from './PlaybackButton';
@@ -790,45 +791,47 @@ export default function CanvasWorkspace({
           >
             <div ref={inspectorRef}>
             <Inspector
-              activeFrame={inspectorFrame}
-              autoSailTrim={autoSailTrim}
-              displayMode={displayMode}
-              gridSnapEnabled={gridSnapEnabled}
-              isPlaying={isPlaying}
+              view={createInspectorView({
+                activeFrame: inspectorFrame,
+                autoSailTrim,
+                displayMode,
+                gridSnapEnabled,
+                isPlaying,
+                onSetGridSnapEnabled,
+                onSetAutoSailTrim,
+                onSetDisplayMode,
+                onSetShowFrameTitle,
+                onSetShowFrameNumber,
+                onSetShowGrid,
+                onTogglePlaying,
+                onSetPlaySpeed,
+                playSpeed,
+                selectedBoat,
+                selectedMark,
+                selectedConnection,
+                selectedArrow,
+                selectedComment,
+                selectedImage,
+                selectedType,
+                showGrid,
+                showFrameTitle,
+                showFrameNumber,
+                updateBoat,
+                updateActiveFrame,
+                updateMark,
+                updateMarkRoomZone,
+                onConnectMarks,
+                onRemoveMarkConnection,
+                onReplaceMarkConnection,
+                updateConnection,
+                updateArrow,
+                updateComment,
+                updateRuleComment,
+                updateImage,
+              })}
               onDelete={onDeleteSelected}
               onDuplicate={onDuplicateSelected}
               onClose={handleCloseInspector}
-              onSetGridSnapEnabled={onSetGridSnapEnabled}
-              onSetAutoSailTrim={onSetAutoSailTrim}
-              onSetDisplayMode={onSetDisplayMode}
-              onSetShowFrameTitle={onSetShowFrameTitle}
-              onSetShowFrameNumber={onSetShowFrameNumber}
-              onSetShowGrid={onSetShowGrid}
-              showFrameTitle={showFrameTitle}
-              showFrameNumber={showFrameNumber}
-              onTogglePlaying={onTogglePlaying}
-              onSetPlaySpeed={onSetPlaySpeed}
-              playSpeed={playSpeed}
-              selectedBoat={selectedBoat}
-              selectedMark={selectedMark}
-              selectedConnection={selectedConnection}
-              selectedArrow={selectedArrow}
-              selectedComment={selectedComment}
-              selectedImage={selectedImage}
-              selectedType={selectedType}
-              showGrid={showGrid}
-              updateBoat={updateBoat}
-              updateActiveFrame={updateActiveFrame}
-              updateMark={updateMark}
-              updateMarkRoomZone={updateMarkRoomZone}
-              updateConnection={updateConnection}
-              onConnectMarks={onConnectMarks}
-              onRemoveMarkConnection={onRemoveMarkConnection}
-              onReplaceMarkConnection={onReplaceMarkConnection}
-              updateArrow={updateArrow}
-              updateComment={updateComment}
-              updateRuleComment={updateRuleComment}
-              updateImage={updateImage}
             />
             </div>
           </Rnd>
