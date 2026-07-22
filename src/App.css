@@ -2921,6 +2921,48 @@ body {
   background: #f8fafc;
 }
 
+.export-dialog-auto-fit {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 11px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--bg-card);
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.export-dialog-auto-fit:hover {
+  border-color: var(--accent-cyan);
+}
+
+.export-dialog-auto-fit input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 auto;
+  margin: 1px 0 0;
+  accent-color: var(--accent-cyan);
+}
+
+.export-dialog-auto-fit > span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.export-dialog-auto-fit strong {
+  font-size: 0.84rem;
+}
+
+.export-dialog-auto-fit small {
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
 .export-dialog-actions {
   justify-content: flex-end;
   gap: 8px;

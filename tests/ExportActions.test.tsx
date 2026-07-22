@@ -140,7 +140,7 @@ describe('ExportActions menu behavior', () => {
     fireEvent.change(screen.getByRole('combobox', { name: /export fps/i }), { target: { value: '30' } });
     fireEvent.click(screen.getByRole('button', { name: /export webm video/i }));
 
-    expect(baseProps.onExport).toHaveBeenCalledWith({ format: 'webm', theme: 'dark', fps: 30 });
+    expect(baseProps.onExport).toHaveBeenCalledWith({ format: 'webm', theme: 'dark', fps: 30, autoFit: true });
     expect(screen.queryByRole('dialog', { name: /export/i })).not.toBeInTheDocument();
   });
 
@@ -154,6 +154,7 @@ describe('ExportActions menu behavior', () => {
     expect(screen.queryByRole('radio', { name: /dark/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('radio', { name: /light/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('combobox', { name: /export fps/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('checkbox', { name: /auto-fit canvas/i })).not.toBeInTheDocument();
   });
 
   it('supports cancel, Escape, and backdrop dismissal', () => {

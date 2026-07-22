@@ -16,9 +16,9 @@ import type { SelectedType } from './hooks/useScenario';
 import { useScenarioExport } from './hooks/useScenarioExport';
 import { scenarioPayloadFromTemplate, situationTemplates } from './data/situationTemplates';
 import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
-import { getCanvasContentBounds, getCanvasContentRect } from './utils/simulation';
+import { getCanvasContentBounds, getCanvasContentRect, type CanvasContentRect } from './utils/simulation';
 import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
-import type { ExportOptions, ExportQuality, Theme } from './types';
+import type { ExportFormat, ExportOptions, ExportQuality, Theme } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
@@ -30,6 +30,10 @@ const sponsorshipLinks = {
   donationUrl: import.meta.env.VITE_DONATION_URL,
 };
 const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
+
+function isStillImageFormat(format: ExportFormat): format is 'png' | 'jpeg' {
+  return format === 'png' || format === 'jpeg';
+}
 
 function getInitialTheme(): Theme {
   if (typeof window === 'undefined') return 'dark';
@@ -47,6 +51,7 @@ function getInitialTheme(): Theme {
 export default function App() {
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
+  const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
   const visibleCanvasContentRect = useMemo(() => {
     const visibleFrames = scenario.settings.displayMode === 'cumulative'
       ? scenario.frames.slice(0, scenario.currentFrameIndex + 1)
@@ -117,6 +122,22 @@ export default function App() {
   }, [importScenario]);
 
   const loadedTemplate = situationTemplates.find((template) => template.id === loadedTemplateId);
+
+  const saveViewportAndFitCanvas = (autoFit: boolean, contentRect: CanvasContentRect) => {
+    if (!autoFit) return null;
+
+    const previousViewport = {
+      position: { ...viewport.canvasPosition },
+      zoom: viewport.canvasZoom,
+    };
+
+    flushSync(() => viewport.fitCanvasToContent(contentRect));
+    return previousViewport;
+  };
+
+  const restoreViewport = (previousViewport: ReturnType<typeof saveViewportAndFitCanvas>) => {
+    if (previousViewport) viewport.setCanvasViewport(previousViewport.position, previousViewport.zoom);
+  };
 
   const handleLoadTemplate = (template: typeof situationTemplates[number]) => {
     scenario.importScenario(scenarioPayloadFromTemplate(template));
@@ -215,7 +236,12 @@ export default function App() {
       return;
     }
 
-    if (options.format === 'png' || options.format === 'jpeg') {
+    const previousViewport = saveViewportAndFitCanvas(
+      options.autoFit,
+      isStillImageFormat(options.format) ? visibleCanvasContentRect : exportContentRect,
+    );
+
+    if (isStillImageFormat(options.format)) {
       flushSync(() => {
         setExportTheme(options.theme);
         setIsImageExporting(true);
@@ -223,6 +249,7 @@ export default function App() {
       try {
         exportState.triggerImageExport(options.format);
       } finally {
+        restoreViewport(previousViewport);
         setIsImageExporting(false);
         setExportTheme(null);
       }
@@ -230,7 +257,10 @@ export default function App() {
     }
 
     flushSync(() => setExportTheme(options.theme));
-    void exportState.triggerExport(options.format, options.fps).finally(() => setExportTheme(null));
+    void exportState.triggerExport(options.format, options.fps).finally(() => {
+      restoreViewport(previousViewport);
+      setExportTheme(null);
+    });
   };
 
   const handleImportJson = async (file: File) => {

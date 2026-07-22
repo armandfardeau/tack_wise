@@ -33,6 +33,7 @@ export default function ExportDialog({ theme, exportQuality = 'standard', onExpo
   const [format, setFormat] = useState<ExportFormat>('png');
   const [exportTheme, setExportTheme] = useState<Theme>(theme);
   const [fps, setFps] = useState<ExportFps>(DEFAULT_EXPORT_FPS);
+  const [autoFit, setAutoFit] = useState(true);
   const selectedFormat = formatOptions.find((option) => option.value === format) ?? formatOptions[0];
 
   useEffect(() => {
@@ -46,7 +47,7 @@ export default function ExportDialog({ theme, exportQuality = 'standard', onExpo
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onExport({ format, theme: exportTheme, fps });
+    onExport({ format, theme: exportTheme, fps, autoFit: isVisualFormat(format) && autoFit });
   };
 
   return (
@@ -77,25 +78,40 @@ export default function ExportDialog({ theme, exportQuality = 'standard', onExpo
           </label>
 
           {isVisualFormat(format) && (
-            <fieldset className="export-dialog-field export-dialog-theme-field">
-              <legend>Theme</legend>
-              <div className="export-dialog-theme-options">
-                {(['dark', 'light'] as Theme[]).map((option) => (
-                  <label key={option} className={`export-theme-option${exportTheme === option ? ' is-selected' : ''}`}>
-                    <input
-                      type="radio"
-                      name="export-theme"
-                      value={option}
-                      checked={exportTheme === option}
-                      onChange={() => setExportTheme(option)}
-                    />
-                    <span className={`export-theme-swatch ${option}-theme`} aria-hidden="true" />
-                    <span>{option === 'dark' ? 'Dark' : 'Light'}</span>
-                  </label>
-                ))}
-              </div>
-              <small>Choose the canvas appearance without changing the app theme.</small>
-            </fieldset>
+            <>
+              <fieldset className="export-dialog-field export-dialog-theme-field">
+                <legend>Theme</legend>
+                <div className="export-dialog-theme-options">
+                  {(['dark', 'light'] as Theme[]).map((option) => (
+                    <label key={option} className={`export-theme-option${exportTheme === option ? ' is-selected' : ''}`}>
+                      <input
+                        type="radio"
+                        name="export-theme"
+                        value={option}
+                        checked={exportTheme === option}
+                        onChange={() => setExportTheme(option)}
+                      />
+                      <span className={`export-theme-swatch ${option}-theme`} aria-hidden="true" />
+                      <span>{option === 'dark' ? 'Dark' : 'Light'}</span>
+                    </label>
+                  ))}
+                </div>
+                <small>Choose the canvas appearance without changing the app theme.</small>
+              </fieldset>
+
+              <label className="export-dialog-auto-fit">
+                <input
+                  type="checkbox"
+                  aria-label="Auto-fit canvas"
+                  checked={autoFit}
+                  onChange={(event) => setAutoFit(event.target.checked)}
+                />
+                <span>
+                  <strong>Auto-fit canvas</strong>
+                  <small>Fit all scenario items in the export without changing your canvas view.</small>
+                </span>
+              </label>
+            </>
           )}
 
           {isAnimatedFormat(format) && (

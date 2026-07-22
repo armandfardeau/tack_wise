@@ -18,6 +18,7 @@ export interface ExportOptions {
   format: ExportFormat;
   theme: Theme;
   fps: ExportFps;
+  autoFit: boolean;
 }
 
 export interface Boat {
