@@ -154,13 +154,20 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 12. Canvas controls
 
-- [ ] Migrate history controls: .canvas-history-controls, .canvas-history-btn, and .canvas-history-restore-btn.
-- [ ] Migrate zoom controls: .canvas-zoom-controls, .canvas-zoom-btn, .canvas-zoom-fit, .canvas-zoom-reset, and .canvas-zoom-level.
-- [ ] Migrate .canvas-settings-btn.
-- [ ] Migrate playback controls: .canvas-playback-controls, .canvas-playback-action-btn, .canvas-play-btn, and .canvas-playback-options-btn.
-- [ ] Migrate wind HUD selectors .wind-vane-container, .wind-vane-dial, .wind-vane-needle, .compass-n, .compass-s, .compass-e, .compass-w, .wind-vane-info, .wind-vane-speed, and .wind-vane-angle.
-- [ ] Preserve mobile sizing, grid areas, light-theme overrides, and pointer-event behavior.
+- [x] Migrate history controls: .canvas-history-controls, .canvas-history-btn, and .canvas-history-restore-btn.
+- [x] Migrate zoom controls: .canvas-zoom-controls, .canvas-zoom-btn, .canvas-zoom-fit, .canvas-zoom-reset, and .canvas-zoom-level.
+- [x] Migrate .canvas-settings-btn.
+- [x] Migrate playback controls: .canvas-playback-controls, .canvas-playback-action-btn, .canvas-play-btn, and .canvas-playback-options-btn.
+- [x] Migrate wind HUD selectors .wind-vane-container, .wind-vane-dial, .wind-vane-needle, .compass-n, .compass-s, .compass-e, .compass-w, .wind-vane-info, .wind-vane-speed, and .wind-vane-angle.
+- [x] Preserve mobile sizing, grid areas, light-theme overrides, and pointer-event behavior.
 - Primary files: src/components/CanvasHistoryControls.tsx, src/components/CanvasZoomControls.tsx, src/components/GridSettingsButton.tsx, src/components/PlaybackButton.tsx, src/components/WindHud.tsx.
+
+#### Item 12 migration record (2026-07-22)
+
+- Original global CSS: history layout/buttons and autosave states; zoom panel, zoom buttons, Fit/Reset actions, disabled states, and percentage label; the grid settings button; playback panel, play button, step/replay actions, playback options button, presenter-mode hiding, and light-theme variants; and the wind HUD container, dial, needle, compass labels, speed/angle readouts, light-theme shadow, print hiding, and mobile sizing. The `.canvas-top-controls` child pointer-event contract and the desktop/mobile grid-area placement were also component-owned behavior.
+- New modules: `src/components/CanvasHistoryControls.module.css`, `CanvasZoomControls.module.css`, `GridSettingsButton.module.css`, `PlaybackButton.module.css`, and `WindHud.module.css` contain the equivalent local rules. Narrow `:global(.canvas-top-controls)`, `:global(.presenter-mode)`, and `:global(.light-theme)` ancestors preserve the existing cross-component contracts; print rules now hide the local zoom and wind controls.
+- React refactor: all five components import their colocated module and use local class references for the migrated controls. `PlaybackButton` deliberately retains the global `play-pause-btn`, `playing`, and `timeline-control-icon` classes because those belong to Timeline item 13; the unused `canvas-playback-replay-btn` hook was removed without changing the button semantics.
+- Verification: targeted CanvasHistoryControls, GridSettingsButton, PlaybackButton, and WindHud tests (11 tests), all 35 Jest suites (259 tests), `npm run build`, `npm run lint`, `git diff --check`, and a search confirming the migrated selector names no longer remain in `src/App.css` or the migrated components/tests all passed. Mobile sizing, grid areas, light-theme overrides, pointer-event behavior, and print hiding are represented in the new modules.
 
 ### 13. Timeline and frame thumbnails
 

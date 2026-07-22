@@ -1,0 +1,109 @@
+.playbackControls {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.playButton {
+  width: 42px;
+  min-width: 42px;
+  padding: 0;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+
+.playbackActionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: rgba(15, 23, 42, 0.88);
+  color: var(--text-main);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.playbackActionButton:hover:not(:disabled),
+.playbackActionButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+.playbackActionButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.playbackOptionsButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: rgba(15, 23, 42, 0.88);
+  color: var(--text-main);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  font-size: 1.05rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+}
+
+.playbackOptionsButton:hover,
+.playbackOptionsButton:focus-visible {
+  border-color: var(--accent-cyan);
+  background-color: rgba(6, 182, 212, 0.12);
+  color: var(--accent-cyan-hover);
+}
+
+:global(.light-theme) .playbackOptionsButton,
+:global(.light-theme) .playbackActionButton {
+  background-color: rgba(255, 255, 255, 0.94);
+}
+
+:global(.presenter-mode) .playbackOptionsButton {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .playbackControls {
+    left: 8px;
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    width: auto;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background-color: rgba(15, 23, 42, 0.88);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3);
+  }
+
+  .playbackControls .playbackActionButton,
+  .playbackControls .playbackOptionsButton,
+  .playbackControls .playButton {
+    width: auto;
+    min-width: 44px;
+    height: 44px;
+    min-height: 44px;
+    flex: 1 1 0;
+  }
+
+  :global(.light-theme) .playbackControls {
+    background-color: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 10px 24px rgba(20, 35, 38, 0.16);
+  }
+}
