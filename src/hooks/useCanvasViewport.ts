@@ -130,13 +130,26 @@ export function useCanvasViewport(contentBounds?: CanvasContentBounds) {
     setCanvasViewport({ x: 0, y: 0 }, 1);
   };
 
+  const getCurrentStageSize = () => {
+    const canvasWrap = canvasWrapRef.current;
+    if (!canvasWrap) return stageSizeRef.current;
+
+    const { width, height } = canvasWrap.getBoundingClientRect();
+    const measuredStageSize = {
+      width: Math.max(Math.round(width), 320),
+      height: Math.max(Math.round(height), 240),
+    };
+    stageSizeRef.current = measuredStageSize;
+    return measuredStageSize;
+  };
+
   const fitCanvasToContent = (contentRect: CanvasContentRect) => {
     if (contentRect.minX === contentRect.maxX && contentRect.minY === contentRect.maxY) {
       resetCanvasZoom();
       return;
     }
 
-    const currentStageSize = stageSizeRef.current;
+    const currentStageSize = getCurrentStageSize();
     const topFitInset = CANVAS_FIT_PADDING + CANVAS_FIT_TOP_CONTROL_OFFSET;
     const bottomFitInset = CANVAS_FIT_PADDING + CANVAS_FIT_BOTTOM_CONTROL_OFFSET;
     const availableWidth = Math.max(currentStageSize.width - CANVAS_FIT_PADDING * 2, 1);

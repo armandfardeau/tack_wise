@@ -17,19 +17,12 @@ import { useScenarioExport } from './hooks/useScenarioExport';
 import { scenarioPayloadFromTemplate, situationTemplates } from './data/situationTemplates';
 import { createScenarioShareUrlAsync, parseScenarioFromJson, parseScenarioShareUrlAsync } from './utils/exporter';
 import { getCanvasContentBounds, getCanvasContentRect, type CanvasContentRect } from './utils/simulation';
-import { parseTemplateRepository, type TemplateContributionMode } from './utils/templateContribution';
+import { sponsorshipLinks, templateRepository } from './utils/appConfig';
+import type { TemplateContributionMode } from './utils/templateContribution';
 import type { DisplayMode, ExportFormat, ExportOptions, ExportQuality, ScenarioExportPayload, Theme } from './types';
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
-const DEFAULT_GITHUB_SPONSORS_URL = 'https://github.com/sponsors/armandfardeau';
-const sponsorshipLinks = {
-  stripeUrl: import.meta.env.VITE_STRIPE_PAYMENT_LINK,
-  stripePublishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY,
-  githubUrl: import.meta.env.VITE_GITHUB_SPONSORS_URL || DEFAULT_GITHUB_SPONSORS_URL,
-  donationUrl: import.meta.env.VITE_DONATION_URL,
-};
-const templateRepository = parseTemplateRepository(import.meta.env.VITE_TEMPLATE_REPOSITORY, import.meta.env.VITE_TEMPLATE_BRANCH);
 
 function isStillImageFormat(format: ExportFormat): format is 'png' | 'jpeg' {
   return format === 'png' || format === 'jpeg';
@@ -87,6 +80,7 @@ export default function App() {
   const { redo, undo } = scenario;
   const { importScenario } = scenario;
   const shareScenarioPromiseRef = useRef<Promise<ScenarioExportPayload | null> | null>(null);
+  const loadScenarioAndFitRef = useRef<((payload: ScenarioExportPayload, templateId?: string | null) => void) | null>(null);
   const inspectorRequestIdRef = useRef(0);
 
   const navigateTo = (nextPage: 'editor' | 'about') => {
@@ -123,10 +117,11 @@ export default function App() {
 
     flushSync(() => {
       importScenario(payload);
-      viewport.fitCanvasToContent(contentRect);
       setLoadedTemplateId(templateId);
     });
+    viewport.fitCanvasToContent(contentRect);
   };
+  loadScenarioAndFitRef.current = loadScenarioAndFit;
 
   useEffect(() => {
     let isMounted = true;
@@ -134,7 +129,7 @@ export default function App() {
 
     void shareScenarioPromiseRef.current.then((sharedScenario) => {
       if (!isMounted || !sharedScenario) return;
-      loadScenarioAndFit(sharedScenario);
+      loadScenarioAndFitRef.current?.(sharedScenario);
     });
 
     return () => {

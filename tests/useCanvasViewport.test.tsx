@@ -53,3 +53,50 @@ describe('useCanvasViewport pinch zoom', () => {
     expect(result.current.canvasPosition).toEqual({ x: 50, y: 0 });
   });
 });
+
+describe('useCanvasViewport fitting', () => {
+  const originalResizeObserver = globalThis.ResizeObserver;
+
+  beforeEach(() => {
+    Object.defineProperty(globalThis, 'ResizeObserver', {
+      configurable: true,
+      value: class TestResizeObserver {
+        constructor(_callback: () => void) {}
+        observe() {}
+        disconnect() {}
+      },
+    });
+  });
+
+  afterEach(() => {
+    if (originalResizeObserver) {
+      Object.defineProperty(globalThis, 'ResizeObserver', {
+        configurable: true,
+        value: originalResizeObserver,
+      });
+    } else {
+      delete (globalThis as { ResizeObserver?: typeof ResizeObserver }).ResizeObserver;
+    }
+  });
+
+  it('uses the current wrapper size before the resize observer updates state', () => {
+    let size = { width: 720, height: 500 };
+    const canvasWrap = document.createElement('div');
+    canvasWrap.getBoundingClientRect = () => size as DOMRect;
+
+    const { result } = renderHook(() => {
+      const viewport = useCanvasViewport();
+      viewport.canvasWrapRef.current = canvasWrap;
+      return viewport;
+    });
+    const fitFromInitialRender = result.current.fitCanvasToContent;
+
+    size = { width: 360, height: 640 };
+
+    act(() => {
+      fitFromInitialRender({ minX: 0, minY: 0, maxX: 600, maxY: 200 });
+    });
+
+    expect(result.current.canvasZoom).toBe(0.5);
+  });
+});
