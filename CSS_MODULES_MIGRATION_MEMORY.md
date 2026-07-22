@@ -85,9 +85,15 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 6. Sponsorship and donation UI
 
-- [ ] Migrate .sponsorship-actions, .sponsorship-trigger, .sponsorship-menu, .sponsorship-menu-title, .sponsorship-menu-item, and interaction states.
-- [ ] Migrate .stripe-donation-form, .stripe-donation-amount-field, .stripe-donation-quick-amounts, .stripe-donation-submit, .stripe-donation-error, and selected/disabled states.
+- [x] Migrate .sponsorship-actions, .sponsorship-trigger, .sponsorship-menu, .sponsorship-menu-title, .sponsorship-menu-item, and interaction states.
+- [x] Migrate .stripe-donation-form, .stripe-donation-amount-field, .stripe-donation-quick-amounts, .stripe-donation-submit, .stripe-donation-error, and selected/disabled states.
 - Primary files: src/components/SponsorshipActions.tsx, src/components/StripeDonationForm.tsx.
+
+#### Item 6 migration record (2026-07-22)
+
+- Original global CSS: sponsorship trigger/menu/item rules and Stripe donation form rules from `src/App.css`.
+- New module: `src/components/SponsorshipActions.module.css` contains the equivalent scoped rules with readable local names, including green Support trigger, menu interactions, selected quick amounts, and disabled submit states.
+- React refactor: `SponsorshipActions` and `StripeDonationForm` import the module and use its classes. The layout test identifies the trigger and menu through their accessible attributes rather than removed global class hooks.
 
 ### 7. Sidebar and frame navigation
 

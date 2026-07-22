@@ -2,6 +2,7 @@ import { ChevronDown, CreditCard, GitFork, Heart } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import StripeDonationForm from './StripeDonationForm';
 import headerStyles from './AppHeader.module.css';
+import styles from './SponsorshipActions.module.css';
 
 export interface SponsorshipLinks {
   stripeUrl?: string;
@@ -16,7 +17,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
   return (
     <>
       {stripeUrl && (
-        <a className="sponsorship-menu-item" role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
           <CreditCard aria-hidden="true" size={16} />
           <span>
             <strong>Support with Stripe</strong>
@@ -28,7 +29,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
         <StripeDonationForm />
       )}
       {githubUrl && (
-        <a className="sponsorship-menu-item" role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
           <GitFork aria-hidden="true" size={16} />
           <span>
             <strong>Sponsor on GitHub</strong>
@@ -37,7 +38,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
         </a>
       )}
       {donationUrl && (
-        <a className="sponsorship-menu-item" role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
           <Heart aria-hidden="true" size={16} />
           <span>
             <strong>Donate to open source</strong>
@@ -120,10 +121,10 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
   if (!stripeUrl && !stripePublishableKey && !githubUrl && !donationUrl) return null;
 
   return (
-    <div className="sponsorship-actions" ref={containerRef}>
+    <div className={styles.sponsorshipActions} ref={containerRef}>
       <button
         type="button"
-        className={`${headerStyles.headerToolButton} sponsorship-trigger`}
+        className={`${headerStyles.headerToolButton} ${styles.sponsorshipTrigger}`}
         ref={triggerRef}
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -138,7 +139,7 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
       {isOpen && (
         <div
           ref={menuRef}
-          className="sponsorship-menu"
+          className={styles.sponsorshipMenu}
           role="menu"
           aria-label="Support Tack Wise"
           style={menuPosition ? {
@@ -148,7 +149,7 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
             visibility: 'visible',
           } : { visibility: 'hidden' }}
         >
-          <p className="sponsorship-menu-title">Help keep Tack Wise sailing</p>
+          <p className={styles.sponsorshipMenuTitle}>Help keep Tack Wise sailing</p>
           <SponsorshipMenuItems stripeUrl={stripeUrl} stripePublishableKey={stripePublishableKey} githubUrl={githubUrl} donationUrl={donationUrl} />
         </div>
       )}
