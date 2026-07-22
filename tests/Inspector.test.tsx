@@ -180,6 +180,38 @@ describe('inspector tabs', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Display' }));
     expect(screen.getByRole('checkbox', { name: /show dotted path line/i })).toBeInTheDocument();
   });
+
+  it('selects a sail plan and edits the active auxiliary trim angle', () => {
+    const updateBoat = jest.fn();
+    const frontSailBoat = { ...boat, sailPlan: 'front-sail' as const, frontSailAngle: 10 };
+
+    render(
+      <Inspector
+        activeFrame={{ ...frame, boats: [frontSailBoat] }}
+        autoSailTrim={false}
+        gridSnapEnabled
+        onDelete={jest.fn()}
+        onSetGridSnapEnabled={jest.fn()}
+        onSetAutoSailTrim={jest.fn()}
+        onSetShowGrid={jest.fn()}
+        selectedBoat={frontSailBoat}
+        selectedMark={undefined}
+        selectedType="boat"
+        showGrid
+        updateActiveFrame={jest.fn()}
+        updateBoat={updateBoat}
+        updateMark={jest.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Settings' }));
+    expect(screen.getByLabelText('Sail plan')).toHaveValue('front-sail');
+    fireEvent.change(screen.getByLabelText('Sail plan'), { target: { value: 'symmetric-spinnaker' } });
+    fireEvent.change(screen.getByLabelText(/front sail angle \(10°\)/i), { target: { value: '25' } });
+
+    expect(updateBoat).toHaveBeenNthCalledWith(1, 'boat-1', { sailPlan: 'symmetric-spinnaker' });
+    expect(updateBoat).toHaveBeenNthCalledWith(2, 'boat-1', { frontSailAngle: 25 });
+  });
 });
 
 describe('rule comment controls', () => {

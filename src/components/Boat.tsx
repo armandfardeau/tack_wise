@@ -30,6 +30,51 @@ interface BoatProps {
 const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
 const SPEECH_BUBBLE_TAIL_LENGTH = 20;
 
+function getTrimmedPoint(length: number, angle: number) {
+  const radians = ((180 + angle) * Math.PI) / 180;
+  return {
+    x: length * Math.sin(radians),
+    y: -length * Math.cos(radians),
+  };
+}
+
+function getForwardPoint(length: number, angle: number) {
+  const radians = (angle * Math.PI) / 180;
+  return {
+    x: length * Math.sin(radians),
+    y: -length * Math.cos(radians),
+  };
+}
+
+function getFrontSailPath(angle: number) {
+  const clew = getTrimmedPoint(38, angle);
+  const control = getTrimmedPoint(22, angle + (Math.sign(angle || 1) * 0.2 * 180) / Math.PI);
+  return `M 0 -12 L 0 -58 Q ${control.x} ${control.y} ${clew.x} ${clew.y} Z`;
+}
+
+function getSymmetricSpinnakerPath(angle: number) {
+  const center = getForwardPoint(74, angle * 0.45);
+  const width = 42;
+  return [
+    `M 0 -18`,
+    `C ${center.x - width} ${center.y + 34} ${center.x - width - 14} ${center.y + 4} ${center.x - width + 3} ${center.y - 12}`,
+    `C ${center.x - 20} ${center.y - 38} ${center.x + 20} ${center.y - 38} ${center.x + width - 3} ${center.y - 12}`,
+    `C ${center.x + width + 14} ${center.y + 4} ${center.x + width} ${center.y + 34} 0 -18 Z`,
+  ].join(' ');
+}
+
+function getAsymmetricSpinnakerPath(angle: number) {
+  const center = getForwardPoint(76, angle * 0.55);
+  const tack = getForwardPoint(61, angle + 26);
+  const clew = getForwardPoint(48, angle - 38);
+  return [
+    `M 0 -18`,
+    `C ${center.x - 24} ${center.y + 32} ${center.x - 42} ${center.y + 5} ${tack.x} ${tack.y}`,
+    `C ${center.x - 18} ${center.y - 40} ${center.x + 28} ${center.y - 42} ${center.x + 44} ${center.y - 8}`,
+    `C ${center.x + 42} ${center.y + 20} ${clew.x} ${clew.y} 0 -18 Z`,
+  ].join(' ');
+}
+
 export function SpeechBubble({
   text,
   heading,
@@ -102,6 +147,9 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
   const boatScale = 0.5;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
   const speechBubble = boat.speechBubble?.trim();
+  const sailPlan = boat.sailPlan ?? 'main-only';
+  const frontSailAngle = boat.frontSailAngle ?? boat.sailAngle;
+  const spinnakerAngle = boat.spinnakerAngle ?? boat.sailAngle;
 
   // Mast is located slightly forward of the center of the boat
   const mastX = 0;
@@ -118,6 +166,9 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
   const ctrlY = mastY - (boomLength / 2) * Math.cos(boomRad + (Math.sign(boat.sailAngle || 1) * 0.4));
 
   const sailPathData = `M ${mastX} ${mastY} Q ${ctrlX} ${ctrlY} ${boomEndX} ${boomEndY}`;
+  const frontSailPathData = getFrontSailPath(frontSailAngle);
+  const symmetricSpinnakerPathData = getSymmetricSpinnakerPath(spinnakerAngle);
+  const asymmetricSpinnakerPathData = getAsymmetricSpinnakerPath(spinnakerAngle);
 
   if (isShadow) {
     return (
@@ -162,6 +213,33 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           strokeWidth={3}
           opacity={0.7}
         />
+        {sailPlan === 'front-sail' && (
+          <Path
+            data={frontSailPathData}
+            fill="#cbd5e1"
+            stroke="#94a3b8"
+            strokeWidth={2}
+            opacity={0.7}
+          />
+        )}
+        {sailPlan === 'symmetric-spinnaker' && (
+          <Path
+            data={symmetricSpinnakerPathData}
+            fill="#cbd5e1"
+            stroke="#94a3b8"
+            strokeWidth={2}
+            opacity={0.7}
+          />
+        )}
+        {sailPlan === 'asymmetric-spinnaker' && (
+          <Path
+            data={asymmetricSpinnakerPathData}
+            fill="#cbd5e1"
+            stroke="#94a3b8"
+            strokeWidth={2}
+            opacity={0.7}
+          />
+        )}
         <Circle cx={mastX} cy={mastY} r={3} fill="#94a3b8" />
       </Group>
     );
@@ -319,6 +397,45 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
         shadowColor="#000"
         shadowBlur={1}
       />
+
+      {sailPlan === 'front-sail' && (
+        <Path
+          data={frontSailPathData}
+          fill="#ffffff"
+          stroke="#f8fafc"
+          strokeWidth={3}
+          lineJoin="round"
+          opacity={0.75}
+          shadowColor="#000"
+          shadowBlur={1}
+        />
+      )}
+
+      {sailPlan === 'symmetric-spinnaker' && (
+        <Path
+          data={symmetricSpinnakerPathData}
+          fill={boat.color}
+          stroke="#f8fafc"
+          strokeWidth={3}
+          lineJoin="round"
+          opacity={0.7}
+          shadowColor="#000"
+          shadowBlur={2}
+        />
+      )}
+
+      {sailPlan === 'asymmetric-spinnaker' && (
+        <Path
+          data={asymmetricSpinnakerPathData}
+          fill={boat.color}
+          stroke="#f8fafc"
+          strokeWidth={3}
+          lineJoin="round"
+          opacity={0.7}
+          shadowColor="#000"
+          shadowBlur={2}
+        />
+      )}
 
       {/* Label Text (Unrotated so it's always readable for the user) */}
       <Group rotation={-boat.heading}>

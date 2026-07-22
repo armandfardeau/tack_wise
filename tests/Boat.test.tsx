@@ -51,3 +51,29 @@ describe('Boat speech bubble', () => {
     expect(onOpenInspector).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('Boat sail plans', () => {
+  it('keeps legacy boats mainsail-only and renders each auxiliary sail plan', () => {
+    const { rerender } = render(<Boat boat={boat} isSelected={false} readOnly />);
+    expect(screen.getAllByTestId('konva-path')).toHaveLength(4);
+
+    rerender(<Boat boat={{ ...boat, sailPlan: 'front-sail', frontSailAngle: 20 }} isSelected={false} readOnly />);
+    expect(screen.getAllByTestId('konva-path')).toHaveLength(5);
+    expect(screen.getAllByTestId('konva-path').some((path) => path.getAttribute('data')?.includes('L 0 -58'))).toBe(true);
+
+    rerender(<Boat boat={{ ...boat, sailPlan: 'symmetric-spinnaker', spinnakerAngle: 20 }} isSelected={false} readOnly />);
+    const symmetricPath = screen.getAllByTestId('konva-path')[4].getAttribute('data');
+    expect(symmetricPath).toContain('C');
+
+    rerender(<Boat boat={{ ...boat, sailPlan: 'asymmetric-spinnaker', spinnakerAngle: -20 }} isSelected={false} readOnly />);
+    const asymmetricPath = screen.getAllByTestId('konva-path')[4].getAttribute('data');
+    expect(asymmetricPath).toContain('C');
+    expect(asymmetricPath).not.toBe(symmetricPath);
+  });
+
+  it('includes the selected auxiliary sail in ghost boats', () => {
+    render(<Boat boat={{ ...boat, sailPlan: 'symmetric-spinnaker' }} isSelected={false} isShadow />);
+
+    expect(screen.getAllByTestId('konva-path')).toHaveLength(3);
+  });
+});

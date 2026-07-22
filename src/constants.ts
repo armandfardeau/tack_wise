@@ -14,6 +14,8 @@ export const MARK_COLORS = ['#ef4444', '#22c55e', '#f97316', '#eab308'] as const
 // Keeping the effective length in one place lets obstruction proximity circles
 // use a meaningful sailing-specific unit without coupling them to Konva paths.
 export const BOAT_LENGTH = 55;
+// Maximum local-world extent of the rendered auxiliary sail geometry.
+export const BOAT_SAIL_EXTENT = 90;
 export const DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS = 3;
 export const DEFAULT_MARK_ZONE_RADIUS = 3;
 

@@ -10,6 +10,8 @@ export type ExportFormat = 'png' | 'jpeg' | 'gif' | VideoExportType | 'json';
 
 export type ExportPhase = 'preparing' | 'capturing' | 'encoding';
 
+export type SailPlan = 'main-only' | 'front-sail' | 'symmetric-spinnaker' | 'asymmetric-spinnaker';
+
 export const EXPORT_FPS_OPTIONS = [10, 15, 20, 30] as const;
 
 export type ExportFps = typeof EXPORT_FPS_OPTIONS[number];
@@ -31,6 +33,12 @@ export interface Boat {
   y: number;
   heading: number; // heading in degrees (0 = North, clockwise)
   sailAngle: number; // sail angle relative to centerline (-90 to +90 degrees)
+  /** Optional auxiliary sail configuration. Missing values are legacy main-only boats. */
+  sailPlan?: SailPlan;
+  /** Trim angle for the front sail, when selected. */
+  frontSailAngle?: number;
+  /** Trim angle shared by symmetric and asymmetric spinnakers. */
+  spinnakerAngle?: number;
   showHeadingLine?: boolean;
   /** Optional comic-style speech bubble shown above the boat. */
   speechBubble?: string;

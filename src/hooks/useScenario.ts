@@ -18,7 +18,7 @@ import type {
 } from '../types';
 import { getRuleReferences } from '../types';
 import {
-  calculateAutoSailAngle,
+  getAutoSailAngles,
   getBoatManeuver,
   getHeadingTowardPosition,
   getUnanimatableTransitionIndices,
@@ -232,7 +232,7 @@ export function useScenario() {
         ...frame,
         boats: frame.boats.map((boat) => ({
           ...boat,
-          sailAngle: calculateAutoSailAngle(boat.heading, frame.windAngle),
+          ...getAutoSailAngles(boat, boat.heading, frame.windAngle),
         })),
       })),
     );
@@ -353,7 +353,7 @@ export function useScenario() {
 
             const updatedBoat = { ...boat, ...changes };
             if (autoSailTrim && (changes.heading !== undefined || changes.sailAngle === undefined)) {
-              updatedBoat.sailAngle = calculateAutoSailAngle(updatedBoat.heading, frame.windAngle);
+              Object.assign(updatedBoat, getAutoSailAngles(updatedBoat, updatedBoat.heading, frame.windAngle));
             }
             return updatedBoat;
           }),
@@ -645,7 +645,7 @@ export function useScenario() {
         return {
           ...nextBoat,
           heading,
-          ...(autoSailTrim ? { sailAngle: calculateAutoSailAngle(heading, nextFrame.windAngle) } : {}),
+          ...(autoSailTrim ? getAutoSailAngles(nextBoat, heading, nextFrame.windAngle) : {}),
         };
       });
 
@@ -755,13 +755,14 @@ export function useScenario() {
       y: 200 + Math.random() * 200,
       heading: 0,
       sailAngle: 0,
+      sailPlan: 'main-only',
     };
 
     updateCurrentAndFutureFrames((frame) => ({
       ...frame,
       boats: [
         ...frame.boats,
-        { ...newBoat, sailAngle: calculateAutoSailAngle(newBoat.heading, frame.windAngle) },
+        { ...newBoat, ...getAutoSailAngles(newBoat, newBoat.heading, frame.windAngle) },
       ],
     }));
     selectObject(newBoat.id, 'boat');

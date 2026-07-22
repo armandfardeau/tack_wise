@@ -78,6 +78,9 @@ function isBoat(value: unknown): value is Boat {
     isFiniteNumber(value.y) &&
     isFiniteNumber(value.heading) &&
     isFiniteNumber(value.sailAngle) &&
+    (value.sailPlan === undefined || value.sailPlan === 'main-only' || value.sailPlan === 'front-sail' || value.sailPlan === 'symmetric-spinnaker' || value.sailPlan === 'asymmetric-spinnaker') &&
+    (value.frontSailAngle === undefined || isFiniteNumber(value.frontSailAngle)) &&
+    (value.spinnakerAngle === undefined || isFiniteNumber(value.spinnakerAngle)) &&
     (value.showHeadingLine === undefined || typeof value.showHeadingLine === 'boolean') &&
     (value.speechBubble === undefined || typeof value.speechBubble === 'string')
   );

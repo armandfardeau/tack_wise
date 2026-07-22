@@ -1,5 +1,5 @@
 import { useId, useRef, useState, type ReactNode } from 'react';
-import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type MarkConnection, type RuleComment, type RuleOffenseTarget, type RuleReference, type TacticalArrow } from '../types';
+import { getRuleReferences, type CommentNote, type DiagramImage, type DisplayMode, type Frame, type FrameComment, type Boat, type Mark, type MarkConnection, type RuleComment, type RuleOffenseTarget, type RuleReference, type SailPlan, type TacticalArrow } from '../types';
 import type { SelectedType } from '../hooks/useScenario';
 import { ensureCurvedArrowControlPoint, toTacticalArrowPoints } from '../utils/arrows';
 import { DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RADIUS } from '../constants';
@@ -26,6 +26,12 @@ const COMMON_RULE_REFERENCES: RuleReference[] = [
   { id: 'rrs-16', label: 'RRS 16' },
   { id: 'rrs-17', label: 'RRS 17' },
   { id: 'rrs-18', label: 'RRS 18' },
+];
+const SAIL_PLAN_OPTIONS: Array<{ value: SailPlan; label: string }> = [
+  { value: 'main-only', label: 'Main only' },
+  { value: 'front-sail', label: 'Front sail' },
+  { value: 'symmetric-spinnaker', label: 'Symmetric spinnaker' },
+  { value: 'asymmetric-spinnaker', label: 'Asymmetric spinnaker' },
 ];
 
 function formatAngle(angle: number) {
@@ -369,6 +375,18 @@ function BoatInspector({
                 <label htmlFor="boat-color">Color</label>
                 <ColorPicker id="boat-color" label="Color" value={boat.color} onChange={(color) => updateBoat(boat.id, { color })} />
               </div>
+              <div className="form-row">
+                <label htmlFor="boat-sail-plan">Sail plan</label>
+                <select
+                  id="boat-sail-plan"
+                  value={boat.sailPlan ?? 'main-only'}
+                  onChange={(event) => updateBoat(boat.id, { sailPlan: event.target.value as SailPlan })}
+                >
+                  {SAIL_PLAN_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+              </div>
               <div className="form-row flex-row">
                 <label className="checkbox-label">
                   <input type="checkbox" checked={autoSailTrim} onChange={(event) => onSetAutoSailTrim(event.target.checked)} />
@@ -379,6 +397,32 @@ function BoatInspector({
                 <div className="form-row">
                   <label htmlFor="boat-sail-angle">Sail Angle ({boat.sailAngle}°)</label>
                   <input id="boat-sail-angle" type="range" min="-90" max="90" value={boat.sailAngle} onChange={(event) => updateBoat(boat.id, { sailAngle: Number(event.target.value) })} />
+                </div>
+              )}
+              {!autoSailTrim && boat.sailPlan === 'front-sail' && (
+                <div className="form-row">
+                  <label htmlFor="boat-front-sail-angle">Front Sail Angle ({boat.frontSailAngle ?? boat.sailAngle}°)</label>
+                  <input
+                    id="boat-front-sail-angle"
+                    type="range"
+                    min="-90"
+                    max="90"
+                    value={boat.frontSailAngle ?? boat.sailAngle}
+                    onChange={(event) => updateBoat(boat.id, { frontSailAngle: Number(event.target.value) })}
+                  />
+                </div>
+              )}
+              {!autoSailTrim && (boat.sailPlan === 'symmetric-spinnaker' || boat.sailPlan === 'asymmetric-spinnaker') && (
+                <div className="form-row">
+                  <label htmlFor="boat-spinnaker-angle">Spinnaker Angle ({boat.spinnakerAngle ?? boat.sailAngle}°)</label>
+                  <input
+                    id="boat-spinnaker-angle"
+                    type="range"
+                    min="-90"
+                    max="90"
+                    value={boat.spinnakerAngle ?? boat.sailAngle}
+                    onChange={(event) => updateBoat(boat.id, { spinnakerAngle: Number(event.target.value) })}
+                  />
                 </div>
               )}
             </div>

@@ -38,6 +38,16 @@ describe('useScenario', () => {
     expect(result.current.frames).toHaveLength(5);
   });
 
+  it('auto-trims a selected auxiliary sail when its boat changes heading', () => {
+    const { result } = renderHook(() => useScenario());
+
+    act(() => result.current.updateBoat('r10-port', { sailPlan: 'front-sail' }));
+    expect(result.current.selectedBoat?.frontSailAngle).toBe(result.current.selectedBoat?.sailAngle);
+
+    act(() => result.current.updateBoat('r10-port', { heading: 90 }));
+    expect(result.current.selectedBoat?.frontSailAngle).toBe(result.current.selectedBoat?.sailAngle);
+  });
+
   it('tracks unsaved changes and resets the state after replacing the scenario', () => {
     const { result } = renderHook(() => useScenario());
 
@@ -630,7 +640,17 @@ describe('useScenario', () => {
     const { result } = renderHook(() => useScenario());
     const frame = {
       id: 'objects', name: 'Objects', windAngle: 0, windSpeed: 12,
-      boats: [{ id: 'boat', name: 'Boat', color: '#fff', x: 1, y: 1, heading: 0, sailAngle: 0 }],
+      boats: [{
+        id: 'boat',
+        name: 'Boat',
+        color: '#fff',
+        x: 1,
+        y: 1,
+        heading: 0,
+        sailAngle: 0,
+        sailPlan: 'symmetric-spinnaker' as const,
+        spinnakerAngle: 30,
+      }],
       marks: [
         { id: 'mark-a', name: 'A', color: '#fff', x: 1, y: 1, shape: 'circle' as const, connectedToMarkId: 'mark-b' },
         { id: 'mark-b', name: 'B', color: '#000', x: 2, y: 2, shape: 'circle' as const },
@@ -664,7 +684,10 @@ describe('useScenario', () => {
     const { result } = renderHook(() => useScenario());
     const frame = {
       id: 'objects', name: 'Objects', windAngle: 0, windSpeed: 12,
-      boats: [{ id: 'boat', name: 'Boat', color: '#fff', x: 1, y: 1, heading: 0, sailAngle: 0 }],
+      boats: [{
+        id: 'boat', name: 'Boat', color: '#fff', x: 1, y: 1, heading: 0, sailAngle: 0,
+        sailPlan: 'symmetric-spinnaker' as const, spinnakerAngle: 30,
+      }],
       marks: [],
       arrows: [],
       comments: [],
@@ -679,6 +702,8 @@ describe('useScenario', () => {
       name: 'Boat (Copy)',
       x: 25,
       y: 25,
+      sailPlan: 'symmetric-spinnaker',
+      spinnakerAngle: 30,
     }));
     expect(duplicate?.id).not.toBe('boat');
     expect(result.current.selectedType).toBe('boat');

@@ -3,6 +3,7 @@ import {
   canvasToWorldPosition,
   clampCanvasZoom,
   constrainCanvasPosition,
+  getAutoSailAngles,
   getBoatManeuver,
   getCommentHeight,
   getCanvasWorldBounds,
@@ -143,6 +144,24 @@ describe('simulation utilities', () => {
     expect(calculateAutoSailAngle(180, 0)).toBe(75);
   });
 
+  it('auto-trims the active auxiliary sail with the mainsail', () => {
+    expect(getAutoSailAngles(boat({ sailPlan: 'front-sail' }), 45, 0)).toEqual({
+      sailAngle: -12,
+      frontSailAngle: -12,
+    });
+    expect(getAutoSailAngles(boat({ sailPlan: 'symmetric-spinnaker' }), 315, 0)).toEqual({
+      sailAngle: 12,
+      spinnakerAngle: 12,
+    });
+  });
+
+  it('interpolates auxiliary sail trim through playback', () => {
+    const start = boat({ sailPlan: 'front-sail', frontSailAngle: 0 });
+    const end = boat({ x: 10, y: -10, heading: 0, sailPlan: 'front-sail', frontSailAngle: 40 });
+
+    expect(interpolateBoatManeuver(start, end, 0.5).frontSailAngle).toBeCloseTo(20);
+  });
+
   it('snaps positions only when they are close enough to a grid intersection', () => {
     expect(getGridSnap({ x: 38, y: 82 })).toEqual({ x: 40, y: 80, distance: Math.hypot(2, 2) });
     expect(isWithinGridSnapRadius({ x: 38, y: 82 })).toBe(true);
@@ -189,6 +208,13 @@ describe('simulation utilities', () => {
 
   it('includes visual extents when calculating the canvas content bounds', () => {
     expect(getCanvasContentBounds([initialFrames[0]])).toEqual({ maxX: 770, maxY: 750 });
+  });
+
+  it('includes spinnaker extents in the canvas content bounds', () => {
+    expect(getCanvasContentBounds([{
+      boats: [boat({ x: 100, y: 100, sailPlan: 'symmetric-spinnaker' })],
+      marks: [],
+    }])).toEqual({ maxX: 190, maxY: 190 });
   });
 
   it('includes an enabled mark-room zone in the content bounds', () => {

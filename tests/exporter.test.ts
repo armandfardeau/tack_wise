@@ -326,6 +326,47 @@ describe('scenario JSON export', () => {
     expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: { ...valid.settings, showFrameNumber: 'yes' } }))).toThrow(/valid Tack Wise scenario export/i);
     expect(() => parseScenarioFromJson(JSON.stringify({ ...valid, settings: null }))).toThrow(/valid Tack Wise scenario export/i);
   });
+
+  it('round-trips auxiliary sail plans and trim angles', () => {
+    const sailBoatFrame: Frame = {
+      ...frames[0],
+      boats: [{
+        id: 'boat-1',
+        name: 'Spinnaker boat',
+        color: '#fff',
+        x: 1,
+        y: 2,
+        heading: 3,
+        sailAngle: 4,
+        sailPlan: 'asymmetric-spinnaker',
+        spinnakerAngle: 35,
+      }],
+    };
+
+    expect(parseScenarioFromJson(serializeScenarioToJson([sailBoatFrame], 0)).frames[0].boats[0]).toEqual(sailBoatFrame.boats[0]);
+  });
+
+  it('rejects invalid auxiliary sail fields', () => {
+    const validBoat = {
+      id: 'boat-1',
+      name: 'Boat',
+      color: '#fff',
+      x: 1,
+      y: 2,
+      heading: 3,
+      sailAngle: 4,
+    };
+    const valid = { version: 1, frames: [{ ...frames[0], boats: [validBoat] }], currentFrameIndex: 0 };
+
+    expect(() => parseScenarioFromJson(JSON.stringify({
+      ...valid,
+      frames: [{ ...valid.frames[0], boats: [{ ...validBoat, sailPlan: 'invalid' }] }],
+    }))).toThrow(/valid Tack Wise scenario export/i);
+    expect(() => parseScenarioFromJson(JSON.stringify({
+      ...valid,
+      frames: [{ ...valid.frames[0], boats: [{ ...validBoat, spinnakerAngle: 'wide' }] }],
+    }))).toThrow(/valid Tack Wise scenario export/i);
+  });
 });
 
 describe('binary exports', () => {

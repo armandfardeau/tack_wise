@@ -1,5 +1,6 @@
 import {
   BOAT_LENGTH,
+  BOAT_SAIL_EXTENT,
   CANVAS_PAN_MARGIN,
   COMMENT_PADDING_X,
   DEFAULT_MARK_ZONE_RADIUS,
@@ -255,6 +256,26 @@ export function interpolateBoatManeuver(
       : startBoat.sailAngle + (endBoat.sailAngle - startBoat.sailAngle) * clampedProgress,
   };
 
+  const usesFrontSail = startBoat.sailPlan === 'front-sail' || endBoat.sailPlan === 'front-sail';
+  const usesSpinnaker = startBoat.sailPlan === 'symmetric-spinnaker'
+    || startBoat.sailPlan === 'asymmetric-spinnaker'
+    || endBoat.sailPlan === 'symmetric-spinnaker'
+    || endBoat.sailPlan === 'asymmetric-spinnaker';
+
+  if (usesFrontSail) {
+    interpolatedBoat.frontSailAngle = autoSailTrim
+      ? calculateAutoSailAngle(normalizeHeading(heading), windAngle)
+      : (startBoat.frontSailAngle ?? startBoat.sailAngle)
+        + ((endBoat.frontSailAngle ?? endBoat.sailAngle) - (startBoat.frontSailAngle ?? startBoat.sailAngle)) * clampedProgress;
+  }
+
+  if (usesSpinnaker) {
+    interpolatedBoat.spinnakerAngle = autoSailTrim
+      ? calculateAutoSailAngle(normalizeHeading(heading), windAngle)
+      : (startBoat.spinnakerAngle ?? startBoat.sailAngle)
+        + ((endBoat.spinnakerAngle ?? endBoat.sailAngle) - (startBoat.spinnakerAngle ?? startBoat.sailAngle)) * clampedProgress;
+  }
+
   return interpolatedBoat;
 }
 
@@ -340,8 +361,10 @@ export function getCanvasContentRect(frames: Array<Pick<Frame, 'boats' | 'marks'
 
     frame.boats.forEach((boat) => {
       const hasSpeechBubble = Boolean(boat.speechBubble?.trim());
-      const horizontalExtent = boat.showHeadingLine ? 360 : hasSpeechBubble ? 110 : 50;
-      const verticalExtent = boat.showHeadingLine ? 360 : hasSpeechBubble ? 140 : 70;
+      const hasSpinnaker = boat.sailPlan === 'symmetric-spinnaker' || boat.sailPlan === 'asymmetric-spinnaker';
+      const sailExtent = hasSpinnaker ? BOAT_SAIL_EXTENT : boat.sailPlan === 'front-sail' ? 60 : 50;
+      const horizontalExtent = boat.showHeadingLine ? 360 : hasSpeechBubble ? 110 : sailExtent;
+      const verticalExtent = boat.showHeadingLine ? 360 : hasSpeechBubble ? 140 : Math.max(70, sailExtent);
       includeRect(boat.x - horizontalExtent, boat.y - verticalExtent, boat.x + horizontalExtent, boat.y + verticalExtent);
     });
 
@@ -429,6 +452,24 @@ export function calculateAutoSailAngle(heading: number, windAngle: number): numb
   else trimAngle = 75;
 
   return isStarboardTack ? -trimAngle : trimAngle;
+}
+
+export function getAutoSailAngles(
+  boat: Pick<Boat, 'sailPlan'>,
+  heading: number,
+  windAngle: number,
+): Pick<Boat, 'sailAngle' | 'frontSailAngle' | 'spinnakerAngle'> {
+  const sailAngle = calculateAutoSailAngle(heading, windAngle);
+
+  return {
+    sailAngle,
+    ...(boat.sailPlan === 'front-sail' ? { frontSailAngle: sailAngle } : {}),
+    ...(
+      boat.sailPlan === 'symmetric-spinnaker' || boat.sailPlan === 'asymmetric-spinnaker'
+        ? { spinnakerAngle: sailAngle }
+        : {}
+    ),
+  };
 }
 
 export function getGridSnap(position: Position): GridSnap {
