@@ -17,7 +17,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
   return (
     <>
       {stripeUrl && (
-        <a className={`${styles.sponsorshipMenuItem} sponsorship-menu-item`} role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={stripeUrl} target="_blank" rel="noreferrer">
           <CreditCard aria-hidden="true" size={16} />
           <span>
             <strong>Support with Stripe</strong>
@@ -29,7 +29,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
         <StripeDonationForm />
       )}
       {githubUrl && (
-        <a className={`${styles.sponsorshipMenuItem} sponsorship-menu-item`} role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={githubUrl} target="_blank" rel="noreferrer">
           <GitFork aria-hidden="true" size={16} />
           <span>
             <strong>Sponsor on GitHub</strong>
@@ -38,7 +38,7 @@ export function SponsorshipMenuItems({ stripeUrl, stripePublishableKey, githubUr
         </a>
       )}
       {donationUrl && (
-        <a className={`${styles.sponsorshipMenuItem} sponsorship-menu-item`} role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
+        <a className={styles.sponsorshipMenuItem} role="menuitem" href={donationUrl} target="_blank" rel="noreferrer">
           <Heart aria-hidden="true" size={16} />
           <span>
             <strong>Donate to open source</strong>
@@ -121,10 +121,10 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
   if (!stripeUrl && !stripePublishableKey && !githubUrl && !donationUrl) return null;
 
   return (
-    <div className={`${styles.sponsorshipActions} sponsorship-actions`} ref={containerRef}>
+    <div className={styles.sponsorshipActions} ref={containerRef}>
       <button
         type="button"
-        className={`${headerStyles.headerToolButton} ${styles.sponsorshipTrigger} sponsorship-trigger`}
+        className={`${headerStyles.headerToolButton} ${styles.sponsorshipTrigger}`}
         ref={triggerRef}
         aria-haspopup="menu"
         aria-expanded={isOpen}
@@ -139,7 +139,7 @@ export default function SponsorshipActions({ stripeUrl, stripePublishableKey, gi
       {isOpen && (
         <div
           ref={menuRef}
-          className={`${styles.sponsorshipMenu} sponsorship-menu`}
+          className={styles.sponsorshipMenu}
           role="menu"
           aria-label="Support Tack Wise"
           style={menuPosition ? {

@@ -16,8 +16,8 @@ const rect = (top: number, right: number, bottom: number, left = 0, width = righ
 describe('SponsorshipActions', () => {
   it('keeps the menu inside a short viewport by opening it above the trigger', () => {
     const getBoundingClientRect = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
-      if (this.classList.contains('sponsorship-trigger')) return rect(700, 934, 734, 900, 34, 34);
-      if (this.classList.contains('sponsorship-menu')) return rect(0, 250, 250, 0, 250, 250);
+      if (this.getAttribute('aria-label') === 'Support Tack Wise' && this.tagName === 'BUTTON') return rect(700, 934, 734, 900, 34, 34);
+      if (this.getAttribute('role') === 'menu' && this.getAttribute('aria-label') === 'Support Tack Wise') return rect(0, 250, 250, 0, 250, 250);
       return rect(0, 0, 0);
     });
     const originalInnerWidth = window.innerWidth;
