@@ -17,7 +17,6 @@
     "@ffmpeg/util": "^0.12.2",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
-    "featurebase-js": "^1.0.3",
     "gifshot": "^0.4.5",
     "konva": "^10.3.0",
     "lucide-react": "^1.25.0",
