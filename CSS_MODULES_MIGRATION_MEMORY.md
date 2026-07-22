@@ -93,9 +93,16 @@ Each checkbox is one migration item. The items are ordered from global/shared fo
 
 ### 5. Header more-actions menu
 
-- [ ] Migrate .header-more-actions, .header-more-trigger, .header-more-trigger-label, .header-more-menu, .header-more-about, .header-more-section-heading, .header-more-about p, .header-more-link, and .header-more-divider.
-- [ ] Preserve mobile-only visibility and compact trigger behavior.
+- [x] Migrate .header-more-actions, .header-more-trigger, .header-more-trigger-label, .header-more-menu, .header-more-about, .header-more-section-heading, .header-more-about p, .header-more-link, and .header-more-divider.
+- [x] Preserve mobile-only visibility and compact trigger behavior.
 - Primary file: src/components/HeaderMoreActions.tsx.
+
+#### Item 5 migration record (2026-07-22)
+
+- Original global CSS: `.header-more-actions` controlled desktop hiding and relative positioning; `.header-more-menu` supplied the fixed, viewport-aware panel styling; `.header-more-about`, `.header-more-section-heading`, `.header-more-about p`, `.header-more-link` and its hover/focus state, and `.header-more-divider` supplied the menu content layout and interactions. The mobile rules made `.header-more-actions` visible, constrained `.header-more-trigger` to a 34px square, and hid `.header-more-trigger-label`.
+- New module: `src/components/HeaderMoreActions.module.css` contains the equivalent local rules under `headerMoreActions`, `headerMoreTrigger`, `headerMoreTriggerLabel`, `headerMoreMenu`, `headerMoreAbout`, `headerMoreSectionHeading`, `headerMoreLink`, and `headerMoreDivider`. The menu’s inline `top`, `left`, `maxHeight`, and `visibility` positioning contract remains unchanged. The existing `AppHeader.module.css` `headerToolButton` class remains composed on the trigger.
+- React refactor: `HeaderMoreActions` imports the module and converts the root, trigger, label, panel, content, headings, links, and dividers to module references. The narrow viewport-positioning logic and sponsorship menu composition are unchanged. The narrow viewport test now observes the stable ARIA label and menu role instead of generated or removed CSS class names.
+- Verification: `npm run build`, `npm run lint`, all 35 Jest suites (259 tests), targeted AppHeader tests (19 tests), `git diff --check`, and browser checks at 1280×800 and 390×844 passed. Desktop hides the More container; mobile shows a 34×32px trigger with the label hidden and keeps the 280px menu inside the viewport. The temporary browser viewport was reset after verification. Existing Konva z-index console warnings remain unrelated.
 
 ### 6. Sponsorship and donation UI
 
@@ -259,5 +266,5 @@ The migration is complete only when:
 
 - Audit: complete.
 - Memory document: created.
-- Component migrations: items 1, 2, 3, and 4 complete; item 5 is next.
-- Next action: wait for confirmation or a specific next item before processing item 5.
+- Component migrations: items 1, 2, 3, 4, 5, and 6 complete; item 7 is next.
+- Next action: wait for confirmation or a specific next item before processing item 7.

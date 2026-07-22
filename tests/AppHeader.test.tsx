@@ -217,8 +217,8 @@ describe('AppHeader', () => {
 
   it('keeps the More menu inside a narrow viewport', () => {
     const getBoundingClientRect = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getRect(this: HTMLElement) {
-      if (this.classList.contains('header-more-trigger')) return rect(40, 318, 74, 284, 34, 34);
-      if (this.classList.contains('header-more-menu')) return rect(0, 280, 250, 0, 280, 250);
+      if (this.getAttribute('aria-label') === 'More options') return rect(40, 318, 74, 284, 34, 34);
+      if (this.getAttribute('role') === 'menu' && this.getAttribute('aria-label') === 'About and support') return rect(0, 280, 250, 0, 280, 250);
       return rect(0, 0, 0);
     });
     const originalInnerWidth = window.innerWidth;
