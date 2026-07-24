@@ -1,32 +1,42 @@
 .windVaneContainer {
   grid-area: wind;
   justify-self: start;
-  background-color: rgba(15, 23, 42, 0.85);
+  background-color: rgba(8, 47, 73, 0.94);
   backdrop-filter: blur(8px);
-  border: 1px solid var(--border-color);
-  padding: 8px 20px;
+  border: 1px solid rgba(103, 232, 249, 0.72);
+  padding: 9px 16px 9px 10px;
   border-radius: 36px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 0 2px rgba(34, 211, 238, 0.12);
   pointer-events: auto;
   cursor: pointer;
   color: inherit;
   font: inherit;
   z-index: 5;
+  text-align: left;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.windVaneContainer:hover,
+.windVaneContainer:focus-visible {
+  border-color: var(--accent-cyan-hover);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 0 3px rgba(34, 211, 238, 0.22);
 }
 
 .windVaneDial {
   position: relative;
-  width: 52px;
-  height: 52px;
-  border: 2.5px solid rgba(148, 163, 184, 0.25);
+  flex: 0 0 auto;
+  width: 64px;
+  height: 64px;
+  border: 2px solid rgba(103, 232, 249, 0.55);
   border-radius: 50%;
-  background-color: rgba(9, 13, 22, 0.6);
+  background-color: rgba(9, 13, 22, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.7);
 }
 
 .windVaneNeedle {
@@ -40,59 +50,89 @@
 .compassE,
 .compassW {
   position: absolute;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 900;
-  color: var(--text-muted);
+  color: #cbd5e1;
 }
 
 .compassN {
-  top: 3px;
+  top: 4px;
   left: 50%;
   transform: translateX(-50%);
-  color: var(--accent-red);
+  color: var(--accent-cyan-hover);
 }
 
 .compassS {
-  bottom: 3px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
 }
 
 .compassE {
-  right: 4px;
+  right: 5px;
   top: 50%;
   transform: translateY(-50%);
 }
 
 .compassW {
-  left: 4px;
+  left: 5px;
   top: 50%;
   transform: translateY(-50%);
 }
 
 .windVaneInfo {
+  min-width: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 2px;
 }
 
-.windVaneSpeed {
-  font-size: 0.95rem;
+.windVaneBearing {
+  font-size: 1rem;
   font-weight: 900;
-  color: var(--text-main);
+  color: #ecfeff;
   line-height: 1.1;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
 }
 
-.windVaneAngle {
-  font-size: 0.75rem;
+.windVaneMeta {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--accent-cyan);
+  color: #a5f3fc;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 :global(.light-theme) .windVaneContainer {
-  background: rgba(255, 255, 255, 0.94);
+  background: rgba(236, 254, 255, 0.96);
+  border-color: rgba(8, 145, 178, 0.62);
   box-shadow: 0 10px 30px rgba(20, 35, 38, 0.14);
+}
+
+:global(.light-theme) .windVaneContainer:hover,
+:global(.light-theme) .windVaneContainer:focus-visible {
+  box-shadow: 0 10px 30px rgba(20, 35, 38, 0.14), 0 0 0 3px rgba(8, 145, 178, 0.18);
+}
+
+:global(.light-theme) .compassN,
+:global(.light-theme) .compassS,
+:global(.light-theme) .compassE,
+:global(.light-theme) .compassW {
+  color: #164e63;
+}
+
+:global(.light-theme) .compassN {
+  color: #0e7490;
+}
+
+:global(.light-theme) .windVaneBearing {
+  color: #164e63;
+}
+
+:global(.light-theme) .windVaneMeta {
+  color: #0e7490;
 }
 
 @media print {
@@ -104,19 +144,19 @@
 @media (max-width: 768px) {
   .windVaneContainer {
     gap: 8px;
-    padding: 6px 10px;
+    padding: 6px 10px 6px 7px;
   }
 
   .windVaneDial {
-    width: 44px;
-    height: 44px;
+    width: 52px;
+    height: 52px;
   }
 
-  .windVaneSpeed {
-    font-size: 0.8rem;
+  .windVaneBearing {
+    font-size: 0.82rem;
   }
 
-  .windVaneAngle {
-    font-size: 0.68rem;
+  .windVaneMeta {
+    font-size: 0.63rem;
   }
 }
