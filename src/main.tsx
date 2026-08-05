@@ -7,9 +7,11 @@ import './index.css'
 import App from './App.tsx'
 import { SERVICE_WORKER_REGISTERED_EVENT } from './utils/serviceWorker'
 import { dropStacklessScriptErrors } from './utils/exceptionFilter'
+import { getOrCreateUserId } from './utils/userIdentity'
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST
+const userId = getOrCreateUserId()
 
 if (posthogKey && posthogHost) {
   posthog.init(posthogKey, {
@@ -19,6 +21,7 @@ if (posthogKey && posthogHost) {
     // error tracking with unactionable, zero-information issues.
     before_send: dropStacklessScriptErrors,
   })
+  posthog.identify(userId)
   posthog.startExceptionAutocapture()
 } else if (import.meta.env.DEV) {
   if (!posthogKey) {

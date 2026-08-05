@@ -1,6 +1,6 @@
 import { normalizeFeatureFlagValue } from '../lib/featureFlagValues';
 
-describe('PostHog feature flags', () => {
+describe('Vercel feature flags', () => {
   it('accepts numeric payloads and rejects invalid values', () => {
     expect(normalizeFeatureFlagValue(72, 68)).toBe(72);
     expect(normalizeFeatureFlagValue({ value: 5 }, 4)).toBe(5);

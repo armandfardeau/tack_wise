@@ -1,4 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { getOrCreateUserId } from '../lib/visitorIdentity.js';
 import { evaluateFeatureFlags } from '../lib/vercelFlags.js';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
@@ -9,5 +10,6 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
   response.setHeader('Cache-Control', 'no-store');
 
-  return response.status(200).json(await evaluateFeatureFlags(request));
+  const userId = getOrCreateUserId(request, response);
+  return response.status(200).json(await evaluateFeatureFlags(request, { user: { id: userId } }));
 }
