@@ -6,6 +6,7 @@ import posthog from 'posthog-js'
 import './index.css'
 import App from './App.tsx'
 import { SERVICE_WORKER_REGISTERED_EVENT } from './utils/serviceWorker'
+import { suppressInjectedExceptions } from './utils/exceptionFilter'
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST
@@ -14,6 +15,7 @@ if (posthogKey && posthogHost) {
   posthog.init(posthogKey, {
     api_host: posthogHost,
     defaults: '2026-05-30',
+    before_send: suppressInjectedExceptions,
   })
   posthog.startExceptionAutocapture()
 } else if (import.meta.env.DEV) {
