@@ -76,3 +76,19 @@ To record verified `donation_completed` events, configure a Stripe webhook for
 `checkout.session.async_payment_succeeded`.
 
 The current scenario JSON format supports version 1 imports and version 2 exports when presentation settings are included.
+
+### Vercel Flags + PostHog
+
+Feature flags are evaluated server-side through the Flags SDK and PostHog. Add
+these public project settings to local development (the Vercel Marketplace
+integration can provide them automatically):
+
+```text
+NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_...
+NEXT_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+```
+
+The app forwards the browser's anonymous PostHog distinct ID when evaluating
+flags, so PostHog rollouts and feature-flag events are attributed per visitor.
+The existing `VITE_PUBLIC_POSTHOG_KEY` and `VITE_PUBLIC_POSTHOG_HOST` variables
+remain supported as local fallbacks.

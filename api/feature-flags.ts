@@ -9,5 +9,5 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
   response.setHeader('Cache-Control', 'no-store');
 
-  return response.status(200).json(await evaluateFeatureFlags());
+  return response.status(200).json(await evaluateFeatureFlags(request));
 }
