@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import posthog from 'posthog-js';
 import { featureFlags, type FeatureFlags } from '../featureFlags';
+import { getOrCreateUserId } from '../utils/userIdentity';
 
 function getDisabledFeatureFlags(): FeatureFlags {
   return Object.fromEntries(
@@ -29,9 +29,8 @@ function normalizeFeatureFlags(value: unknown): FeatureFlags {
 
 async function loadFeatureFlags(): Promise<FeatureFlags> {
   console.log('[Feature Flags] Loading resolved flags from /api/feature-flags.');
-  const distinctId = posthog.get_distinct_id();
-  const headers = distinctId ? { 'x-posthog-distinct-id': distinctId } : undefined;
-  const response = await fetch('/api/feature-flags', { headers });
+  getOrCreateUserId();
+  const response = await fetch('/api/feature-flags');
   if (!response.ok) {
     console.error('[Feature Flags] Unable to load resolved flags.', { status: response.status });
     throw new Error('Unable to load feature flags.');

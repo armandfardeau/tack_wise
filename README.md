@@ -79,16 +79,14 @@ The current scenario JSON format supports version 1 imports and version 2 export
 
 ### Vercel Flags + PostHog
 
-Feature flags are evaluated server-side through the Flags SDK and PostHog. Add
-these public project settings to local development (the Vercel Marketplace
-integration can provide them automatically):
+Feature flags are evaluated server-side through Vercel Flags. Add the `FLAGS`
+SDK key to local development; Vercel provides it automatically when you create
+flags in the dashboard:
 
 ```text
-NEXT_PUBLIC_POSTHOG_PROJECT_TOKEN=phc_...
-NEXT_PUBLIC_POSTHOG_HOST=https://eu.i.posthog.com
+FLAGS=...
 ```
 
-The app forwards the browser's anonymous PostHog distinct ID when evaluating
-flags, so PostHog rollouts and feature-flag events are attributed per visitor.
-The existing `VITE_PUBLIC_POSTHOG_KEY` and `VITE_PUBLIC_POSTHOG_HOST` variables
-remain supported as local fallbacks.
+Create a `User` entity in Vercel Flags with an `id` string attribute. The app
+creates its own `tack_wise_user_id` cookie, sends that value as `user.id` to
+Vercel Flags, and sets the same value as PostHog's distinct ID.
