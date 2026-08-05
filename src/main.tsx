@@ -9,6 +9,7 @@ import { SERVICE_WORKER_REGISTERED_EVENT } from './utils/serviceWorker'
 import { dropStacklessScriptErrors } from './utils/exceptionFilter'
 import { getOrCreateUserId } from './utils/userIdentity'
 import { createExceptionNoiseFilter } from './utils/exceptionFilter'
+import { suppressInjectedExceptions } from './utils/exceptionFilter'
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST
@@ -19,10 +20,12 @@ if (posthogKey && posthogHost) {
     api_host: posthogHost,
     defaults: '2026-05-30',
     before_send: (event) =>
-      dropStacklessScriptErrors(
-        createExceptionNoiseFilter(
-          window.location.origin + window.location.pathname
-        )(event)
+      suppressInjectedExceptions(
+        dropStacklessScriptErrors(
+          createExceptionNoiseFilter(
+            window.location.origin + window.location.pathname
+          )(event)
+        )
       ),
   })
   posthog.identify(userId)
