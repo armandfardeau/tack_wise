@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { featureFlags, type FeatureFlags } from '../featureFlags';
+import { featureFlags, type FeatureFlagLoadSource, type FeatureFlags } from '../featureFlags';
 import { getOrCreateUserId } from '../utils/userIdentity';
 
 function getDisabledFeatureFlags(): FeatureFlags {
@@ -52,17 +52,27 @@ function getFeatureFlags() {
 
 export function useFeatureFlags() {
   const [flags, setFlags] = useState<FeatureFlags>(disabledFlags);
+  const [isResolved, setIsResolved] = useState(false);
+  const [source, setSource] = useState<FeatureFlagLoadSource>('default');
 
   useEffect(() => {
     let isMounted = true;
 
     void getFeatureFlags()
       .then((nextFlags) => {
-        if (isMounted) setFlags(nextFlags);
+        if (isMounted) {
+          setFlags(nextFlags);
+          setSource('vercel');
+          setIsResolved(true);
+        }
       })
       .catch(() => {
         console.log('[Feature Flags] Using local defaults after loading failure.', disabledFlags);
-        if (isMounted) setFlags(disabledFlags);
+        if (isMounted) {
+          setFlags(disabledFlags);
+          setSource('default');
+          setIsResolved(true);
+        }
       });
 
     return () => {
@@ -70,5 +80,5 @@ export function useFeatureFlags() {
     };
   }, []);
 
-  return flags;
+  return { flags, isResolved, source };
 }

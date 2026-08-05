@@ -24,6 +24,7 @@ import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 import UpdateToast from './components/UpdateToast';
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
 import { useFeatureFlags } from './hooks/useFeatureFlags';
+import { getFeatureFlagMetadata } from './featureFlags';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
 type ScenarioStartSource = 'new' | 'template' | 'import' | 'shared_link';
@@ -75,7 +76,11 @@ function getInitialTheme(): Theme {
 
 export default function App() {
   const { dismissUpdate, isUpdateAvailable, refresh } = useServiceWorkerUpdate();
-  const { sailBoomLength, sailStrokeWidth } = useFeatureFlags();
+  const {
+    flags: { sailBoomLength, sailStrokeWidth },
+    isResolved: areFeatureFlagsResolved,
+    source: featureFlagSource,
+  } = useFeatureFlags();
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
   const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
@@ -123,6 +128,15 @@ export default function App() {
   useEffect(() => {
     document.title = page === 'about' ? 'About — Tack Wise' : 'Tack Wise';
   }, [page]);
+
+  useEffect(() => {
+    if (!areFeatureFlagsResolved) return;
+
+    posthog.register(getFeatureFlagMetadata(
+      { sailBoomLength, sailStrokeWidth },
+      featureFlagSource,
+    ));
+  }, [areFeatureFlagsResolved, featureFlagSource, sailBoomLength, sailStrokeWidth]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
