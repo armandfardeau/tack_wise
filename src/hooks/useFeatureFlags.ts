@@ -18,7 +18,10 @@ function normalizeFeatureFlags(value: unknown): FeatureFlags {
   return Object.fromEntries(
     Object.entries(featureFlags).map(([name, definition]) => [
       name,
-      flags[name] === true ? true : definition.defaultValue,
+      typeof flags[name] === typeof definition.defaultValue
+        && (typeof flags[name] !== 'number' || Number.isFinite(flags[name]))
+        ? flags[name]
+        : definition.defaultValue,
     ]),
   ) as FeatureFlags;
 }

@@ -116,6 +116,8 @@ interface CanvasWorkspaceProps {
   stageRef: RefObject<KonvaStage | null>;
   stageSize: { width: number; height: number };
   children?: ReactNode;
+  sailBoomLength?: number;
+  sailStrokeWidth?: number;
 }
 
 interface InspectorPlacement {
@@ -370,6 +372,8 @@ export default function CanvasWorkspace({
   stageRef,
   stageSize,
   children,
+  sailBoomLength = 68,
+  sailStrokeWidth = 4,
 }: CanvasWorkspaceProps) {
   const inspectorRef = useRef<HTMLDivElement | null>(null);
   const autoPanKeyRef = useRef<string | null>(null);
@@ -682,6 +686,8 @@ export default function CanvasWorkspace({
     <section className={styles.canvasContainer}>
       <div ref={canvasWrapRef} data-canvas-wrap="true" className={canvasWrapClassName}>
         <SimulationCanvas
+          sailBoomLength={sailBoomLength}
+          sailStrokeWidth={sailStrokeWidth}
           activeFrame={activeFrame}
           canvasPosition={canvasPosition}
           canvasZoom={canvasZoom}

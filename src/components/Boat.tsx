@@ -25,14 +25,14 @@ interface BoatProps {
   offenseColor?: string;
   showSpeechBubble?: boolean;
   speechBubblePosition?: SpeechBubblePosition;
+  sailBoomLength?: number;
+  sailStrokeWidth?: number;
 }
 
 const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
 const SPEECH_BUBBLE_TAIL_LENGTH = 20;
 const SAILING_HULL_PATH = 'M 0 -58 C 27 -37 31 21 14 52 L -14 52 C -31 21 -27 -37 0 -58 Z';
 const JUDGE_HULL_PATH = 'M 0 -62 C 21 -54 29 -21 24 18 L 14 50 C 11 58 -11 58 -14 50 L -24 18 C -29 -21 -21 -54 0 -62 Z';
-const SAIL_BOOM_LENGTH = 68;
-const SAIL_STROKE_WIDTH =4;
 const SHADOW_SAIL_BOOM_STROKE_WIDTH = 3;
 const SHADOW_SAIL_STROKE_WIDTH = 4.5;
 const MAST_X_OFFSET = 0;
@@ -166,7 +166,7 @@ export function SpeechBubble({
   );
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top' }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top', sailBoomLength = 68, sailStrokeWidth = 4 }: BoatProps) {
   const boatScale = 0.5;
   const isJudge = boat.type === 'judge';
   const hullPath = isJudge ? JUDGE_HULL_PATH : SAILING_HULL_PATH;
@@ -176,7 +176,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
   // Mast is located slightly forward of the center of the boat
   const mastX = MAST_X_OFFSET;
   const mastY = MAST_Y_OFFSET;
-  const boomLength = SAIL_BOOM_LENGTH;
+  const boomLength = sailBoomLength;
 
   // Calculate the boom endpoint
   const boomRad = ((180 + boat.sailAngle) * Math.PI) / 180;
@@ -393,7 +393,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           <Path
             data={sailPathData}
             stroke="#f8fafc"
-            strokeWidth={SAIL_STROKE_WIDTH}
+            strokeWidth={sailStrokeWidth}
             lineCap="round"
             opacity={0.9}
             shadowColor="#000"
