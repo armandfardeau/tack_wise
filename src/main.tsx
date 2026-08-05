@@ -6,15 +6,18 @@ import posthog from 'posthog-js'
 import './index.css'
 import App from './App.tsx'
 import { SERVICE_WORKER_REGISTERED_EVENT } from './utils/serviceWorker'
+import { getOrCreateUserId } from './utils/userIdentity'
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST
+const userId = getOrCreateUserId()
 
 if (posthogKey && posthogHost) {
   posthog.init(posthogKey, {
     api_host: posthogHost,
     defaults: '2026-05-30',
   })
+  posthog.identify(userId)
   posthog.startExceptionAutocapture()
 } else if (import.meta.env.DEV) {
   if (!posthogKey) {

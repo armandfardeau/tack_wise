@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { evaluateFeatureFlags, type FeatureFlagEntities } from '../lib/vercelFlags.js';
-import { getOrCreateVisitorId } from '../lib/visitorIdentity.js';
+import { getOrCreateUserId } from '../lib/visitorIdentity.js';
+import { evaluateFeatureFlags } from '../lib/vercelFlags.js';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'GET') {
@@ -10,12 +10,6 @@ export default async function handler(request: VercelRequest, response: VercelRe
 
   response.setHeader('Cache-Control', 'no-store');
 
-  const entities: FeatureFlagEntities = {
-    visitor: { id: getOrCreateVisitorId(request, response) },
-  };
-
-  return response.status(200).json({
-    ...(await evaluateFeatureFlags(entities)),
-    visitorId: entities.visitor.id,
-  });
+  const userId = getOrCreateUserId(request, response);
+  return response.status(200).json(await evaluateFeatureFlags(request, { user: { id: userId } }));
 }

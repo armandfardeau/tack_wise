@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import posthog from 'posthog-js';
 import { featureFlags, type FeatureFlags } from '../featureFlags';
+import { getOrCreateUserId } from '../utils/userIdentity';
 
 function getDisabledFeatureFlags(): FeatureFlags {
   return Object.fromEntries(
@@ -28,17 +28,17 @@ function normalizeFeatureFlags(value: unknown): FeatureFlags {
 }
 
 async function loadFeatureFlags(): Promise<FeatureFlags> {
+  console.log('[Feature Flags] Loading resolved flags from /api/feature-flags.');
+  getOrCreateUserId();
   const response = await fetch('/api/feature-flags');
-  if (!response.ok) throw new Error('Unable to load feature flags.');
-
-  const payload = await response.json() as Record<string, unknown>;
-  const visitorId = payload.visitorId;
-
-  if (typeof visitorId === 'string' && visitorId.length > 0) {
-    posthog.register({ vercel_visitor_id: visitorId });
+  if (!response.ok) {
+    console.error('[Feature Flags] Unable to load resolved flags.', { status: response.status });
+    throw new Error('Unable to load feature flags.');
   }
 
-  return normalizeFeatureFlags(payload);
+  const flags = normalizeFeatureFlags(await response.json());
+  console.log('[Feature Flags] Resolved flags loaded.', flags);
+  return flags;
 }
 
 function getFeatureFlags() {
@@ -61,6 +61,7 @@ export function useFeatureFlags() {
         if (isMounted) setFlags(nextFlags);
       })
       .catch(() => {
+        console.log('[Feature Flags] Using local defaults after loading failure.', disabledFlags);
         if (isMounted) setFlags(disabledFlags);
       });
 
