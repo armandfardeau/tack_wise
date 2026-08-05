@@ -68,23 +68,23 @@ describe('Boat sail sizing', () => {
     const { rerender } = render(<Boat boat={{ ...boat, sailAngle: 0 }} isSelected={false} readOnly />);
 
     const normalBoom = screen.getAllByTestId('konva-line').find((lineNode) => (
-      lineNode.getAttribute('points')?.startsWith('0,-12,')
+      lineNode.getAttribute('points')?.startsWith('0,-28,')
     ));
     const normalSail = screen.getAllByTestId('konva-path').find((pathNode) => (
-      pathNode.getAttribute('data')?.startsWith('M 0 -12 Q')
+      pathNode.getAttribute('data')?.startsWith('M 0 -28 Q')
     ));
 
     expect(normalBoom).toBeDefined();
     expect(normalSail).toBeDefined();
-    expect(normalSail).toHaveAttribute('data-stroke-width', '6');
+    expect(normalSail).toHaveAttribute('data-stroke-width', '4');
 
     rerender(<Boat boat={{ ...boat, sailAngle: 0 }} isSelected={false} isShadow readOnly />);
 
     const shadowBoom = screen.getAllByTestId('konva-line').find((lineNode) => (
-      lineNode.getAttribute('points')?.startsWith('0,-12,')
+      lineNode.getAttribute('points')?.startsWith('0,-28,')
     ));
     const shadowSail = screen.getAllByTestId('konva-path').find((pathNode) => (
-      pathNode.getAttribute('data')?.startsWith('M 0 -12 Q')
+      pathNode.getAttribute('data')?.startsWith('M 0 -28 Q')
     ));
 
     expect(shadowBoom).toBeDefined();
@@ -97,7 +97,7 @@ describe('Boat sail sizing', () => {
     const { rerender } = render(<Boat boat={{ ...boat, sailAngle: 60 }} isSelected readOnly />);
     const getBoomEndpoint = () => {
       const boom = screen.getAllByTestId('konva-line').find((lineNode) => (
-        lineNode.getAttribute('points')?.startsWith('0,-12,')
+        lineNode.getAttribute('points')?.startsWith('0,-28,')
       ));
       const points = boom?.getAttribute('points')?.split(',').map(Number);
       if (!points || points.length < 4 || points.some((point) => Number.isNaN(point))) {
@@ -108,12 +108,12 @@ describe('Boat sail sizing', () => {
 
     const positiveAngleEndpoint = getBoomEndpoint();
     expect(positiveAngleEndpoint.x).toBeLessThan(0);
-    expect(Math.hypot(positiveAngleEndpoint.x, positiveAngleEndpoint.y + 12)).toBeCloseTo(54);
+    expect(Math.hypot(positiveAngleEndpoint.x, positiveAngleEndpoint.y + 28)).toBeCloseTo(68);
 
     rerender(<Boat boat={{ ...boat, sailAngle: -60 }} isSelected readOnly />);
 
     const negativeAngleEndpoint = getBoomEndpoint();
     expect(negativeAngleEndpoint.x).toBeGreaterThan(0);
-    expect(Math.hypot(negativeAngleEndpoint.x, negativeAngleEndpoint.y + 12)).toBeCloseTo(54);
+    expect(Math.hypot(negativeAngleEndpoint.x, negativeAngleEndpoint.y + 28)).toBeCloseTo(68);
   });
 });

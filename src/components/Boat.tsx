@@ -31,10 +31,12 @@ const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
 const SPEECH_BUBBLE_TAIL_LENGTH = 20;
 const SAILING_HULL_PATH = 'M 0 -58 C 27 -37 31 21 14 52 L -14 52 C -31 21 -27 -37 0 -58 Z';
 const JUDGE_HULL_PATH = 'M 0 -62 C 21 -54 29 -21 24 18 L 14 50 C 11 58 -11 58 -14 50 L -24 18 C -29 -21 -21 -54 0 -62 Z';
-const SAIL_BOOM_LENGTH = 54;
-const SAIL_STROKE_WIDTH = 6;
+const SAIL_BOOM_LENGTH = 68;
+const SAIL_STROKE_WIDTH =4;
 const SHADOW_SAIL_BOOM_STROKE_WIDTH = 3;
 const SHADOW_SAIL_STROKE_WIDTH = 4.5;
+const MAST_X_OFFSET = 0;
+const MAST_Y_OFFSET = -28;
 
 function JudgeBoatBody({ color, isShadow }: { color: string; isShadow: boolean }) {
   const deckColor = isShadow ? '#cbd5e1' : '#e2e8f0';
@@ -172,8 +174,8 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
   const speechBubble = boat.speechBubble?.trim();
 
   // Mast is located slightly forward of the center of the boat
-  const mastX = 0;
-  const mastY = -12;
+  const mastX = MAST_X_OFFSET;
+  const mastY = MAST_Y_OFFSET;
   const boomLength = SAIL_BOOM_LENGTH;
 
   // Calculate the boom endpoint
@@ -370,7 +372,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           {/* Cockpit / Deck features */}
           <Path
             data="M -9 15 L 9 15 L 6 45 L -6 45 Z"
-            fill="#e2e8f0"
+            fill="#e2e8f0ba"
             stroke="#475569"
             strokeWidth={1.5}
             lineJoin="round"
