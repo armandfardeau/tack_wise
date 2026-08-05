@@ -62,15 +62,28 @@ export async function evaluateFeatureFlags(request: VercelRequest): Promise<Feat
     (Object.entries(evaluations) as [keyof FeatureFlags, Flag<FeatureFlags[keyof FeatureFlags], PostHogEntities>][])
       .map(async ([name, evaluate]) => {
         const definition = featureFlags[name];
+        console.log(`[Feature Flags] Evaluating ${definition.key}.`, {
+          defaultValue: definition.defaultValue,
+        });
         try {
           const value = await evaluate(request);
-          return [name, normalizeFeatureFlagValue(value, definition.defaultValue)] as const;
+          const normalizedValue = normalizeFeatureFlagValue(value, definition.defaultValue);
+          console.log(`[Feature Flags] ${definition.key} resolved.`, {
+            value: normalizedValue,
+            usedDefault: normalizedValue === definition.defaultValue,
+          });
+          return [name, normalizedValue] as const;
         } catch (error) {
           console.error(`PostHog flag evaluation failed for ${definition.key}.`, error);
+          console.log(`[Feature Flags] ${definition.key} using default after evaluation failure.`, {
+            defaultValue: definition.defaultValue,
+          });
           return [name, definition.defaultValue] as const;
         }
       }),
   );
 
-  return Object.fromEntries(resolvedFlags) as FeatureFlags;
+  const flags = Object.fromEntries(resolvedFlags) as FeatureFlags;
+  console.log('[Feature Flags] Evaluation complete.', flags);
+  return flags;
 }

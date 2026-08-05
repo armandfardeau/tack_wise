@@ -28,12 +28,18 @@ function normalizeFeatureFlags(value: unknown): FeatureFlags {
 }
 
 async function loadFeatureFlags(): Promise<FeatureFlags> {
+  console.log('[Feature Flags] Loading resolved flags from /api/feature-flags.');
   const distinctId = posthog.get_distinct_id();
   const headers = distinctId ? { 'x-posthog-distinct-id': distinctId } : undefined;
   const response = await fetch('/api/feature-flags', { headers });
-  if (!response.ok) throw new Error('Unable to load feature flags.');
+  if (!response.ok) {
+    console.error('[Feature Flags] Unable to load resolved flags.', { status: response.status });
+    throw new Error('Unable to load feature flags.');
+  }
 
-  return normalizeFeatureFlags(await response.json());
+  const flags = normalizeFeatureFlags(await response.json());
+  console.log('[Feature Flags] Resolved flags loaded.', flags);
+  return flags;
 }
 
 function getFeatureFlags() {
@@ -56,6 +62,7 @@ export function useFeatureFlags() {
         if (isMounted) setFlags(nextFlags);
       })
       .catch(() => {
+        console.log('[Feature Flags] Using local defaults after loading failure.', disabledFlags);
         if (isMounted) setFlags(disabledFlags);
       });
 
