@@ -9,8 +9,14 @@ export const featureFlags = {
   },
 } as const;
 
+type FeatureFlagValue<Value> = Value extends number
+  ? number
+  : Value extends boolean
+    ? boolean
+    : Value;
+
 export type FeatureFlags = {
-  [Name in keyof typeof featureFlags]: (typeof featureFlags)[Name]['defaultValue'];
+  [Name in keyof typeof featureFlags]: FeatureFlagValue<(typeof featureFlags)[Name]['defaultValue']>;
 };
 
 export type FeatureFlagLoadSource = 'vercel' | 'default';
