@@ -8,6 +8,12 @@ interface FeatureFlagDefinition {
 
 type FeatureFlag = () => Promise<boolean | number>;
 
+export interface FeatureFlagEntities {
+  visitor: {
+    id: string;
+  };
+}
+
 const client = createClient();
 let initialization: Promise<void> | undefined;
 
@@ -20,11 +26,14 @@ function initializeClient() {
   return initialization;
 }
 
-export function featureFlag({ key, defaultValue }: FeatureFlagDefinition): FeatureFlag {
+export function featureFlag(
+  { key, defaultValue }: FeatureFlagDefinition,
+  entities: FeatureFlagEntities,
+): FeatureFlag {
   return async () => {
     try {
       await initializeClient();
-      const result = await client.evaluate<boolean | number>(key, defaultValue);
+      const result = await client.evaluate<boolean | number>(key, defaultValue, entities);
       return typeof result.value === typeof defaultValue
         && (typeof result.value !== 'number' || Number.isFinite(result.value))
         ? result.value
@@ -36,12 +45,12 @@ export function featureFlag({ key, defaultValue }: FeatureFlagDefinition): Featu
   };
 }
 
-const evaluations = Object.fromEntries(
-  (Object.entries(featureFlags) as [keyof FeatureFlags, FeatureFlagDefinition][])
-    .map(([name, definition]) => [name, featureFlag(definition)]),
-) as { [Name in keyof FeatureFlags]: FeatureFlag };
+export async function evaluateFeatureFlags(entities: FeatureFlagEntities): Promise<FeatureFlags> {
+  const evaluations = Object.fromEntries(
+    (Object.entries(featureFlags) as [keyof FeatureFlags, FeatureFlagDefinition][])
+      .map(([name, definition]) => [name, featureFlag(definition, entities)]),
+  ) as { [Name in keyof FeatureFlags]: FeatureFlag };
 
-export async function evaluateFeatureFlags(): Promise<FeatureFlags> {
   const resolvedFlags = await Promise.all(
     (Object.entries(evaluations) as [keyof FeatureFlags, FeatureFlag][])
       .map(async ([name, evaluate]) => [name, await evaluate()] as const),
