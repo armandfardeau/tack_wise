@@ -42,12 +42,39 @@ self.addEventListener('message', (event) => {
   }
 })
 
+const isDocumentResponse = (response) =>
+  (response.headers.get('content-type') || '').includes('text/html')
+
+// Hashed build output (Vite emits it under /assets/) is immutable per deploy.
+const isBuildAsset = (url) => url.pathname.startsWith('/assets/')
+
 self.addEventListener('fetch', (event) => {
   const request = event.request
   if (request.method !== 'GET') return
 
   const url = new URL(request.url)
   if (url.origin !== self.location.origin) return
+
+  if (isBuildAsset(url)) {
+    // Go to the network first for hashed chunks so a stale app shell can't pin a
+    // client to assets a newer deploy has removed. Never cache — nor let through
+    // as an asset — the SPA index.html fallback the host serves (200) for a
+    // missing chunk: the browser would parse that HTML as JS and throw a
+    // SyntaxError, blanking the app. Fall back to a cached copy only when the
+    // network is unavailable.
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok && !isDocumentResponse(response)) {
+            const responseCopy = response.clone()
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, responseCopy))
+          }
+          return response
+        })
+        .catch(() => caches.match(request)),
+    )
+    return
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -69,7 +96,7 @@ self.addEventListener('fetch', (event) => {
       if (cached) return cached
 
       return fetch(request).then((response) => {
-        if (response.ok) {
+        if (response.ok && !isDocumentResponse(response)) {
           const responseCopy = response.clone()
           caches.open(CACHE_NAME).then((cache) => cache.put(request, responseCopy))
         }

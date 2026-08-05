@@ -6,6 +6,7 @@ import posthog from 'posthog-js'
 import './index.css'
 import App from './App.tsx'
 import { SERVICE_WORKER_REGISTERED_EVENT } from './utils/serviceWorker'
+import { dropStacklessScriptErrors } from './utils/exceptionFilter'
 import { getOrCreateUserId } from './utils/userIdentity'
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
@@ -16,6 +17,9 @@ if (posthogKey && posthogHost) {
   posthog.init(posthogKey, {
     api_host: posthogHost,
     defaults: '2026-05-30',
+    // Drop stackless cross-origin "Script error." reports so they don't fill
+    // error tracking with unactionable, zero-information issues.
+    before_send: dropStacklessScriptErrors,
   })
   posthog.identify(userId)
   posthog.startExceptionAutocapture()
