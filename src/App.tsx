@@ -23,6 +23,7 @@ import type { DisplayMode, ExportFormat, ExportOptions, ExportQuality, ScenarioE
 import { DEFAULT_EXPORT_QUALITY } from './utils/exportSettings';
 import UpdateToast from './components/UpdateToast';
 import { useServiceWorkerUpdate } from './hooks/useServiceWorkerUpdate';
+import { useFeatureFlags } from './hooks/useFeatureFlags';
 
 const THEME_STORAGE_KEY = 'tack-wise-theme';
 type ScenarioStartSource = 'new' | 'template' | 'import' | 'shared_link';
@@ -74,6 +75,7 @@ function getInitialTheme(): Theme {
 
 export default function App() {
   const { dismissUpdate, isUpdateAvailable, refresh } = useServiceWorkerUpdate();
+  const { newFeatureBanner } = useFeatureFlags();
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
   const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
@@ -448,6 +450,13 @@ export default function App() {
         theme={theme}
         sponsorship={sponsorshipLinks}
       />
+
+      {newFeatureBanner ? (
+        <aside className="feature-banner" role="status">
+          <strong>New feature preview</strong>
+          <span>This experience is currently enabled through Vercel Flags.</span>
+        </aside>
+      ) : null}
 
       <section className="workspace">
         {!scenario.settings.presenterMode && <Sidebar

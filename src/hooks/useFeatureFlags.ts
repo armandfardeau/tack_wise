@@ -1,0 +1,62 @@
+import { useEffect, useState } from 'react';
+import { featureFlags, type FeatureFlags } from '../featureFlags';
+
+function getDisabledFeatureFlags(): FeatureFlags {
+  return Object.fromEntries(
+    Object.entries(featureFlags).map(([name, definition]) => [name, definition.defaultValue]),
+  ) as FeatureFlags;
+}
+
+const disabledFlags = getDisabledFeatureFlags();
+let featureFlagsRequest: Promise<FeatureFlags> | undefined;
+
+function normalizeFeatureFlags(value: unknown): FeatureFlags {
+  const flags = value !== null && typeof value === 'object'
+    ? value as Record<string, unknown>
+    : {};
+
+  return Object.fromEntries(
+    Object.entries(featureFlags).map(([name, definition]) => [
+      name,
+      flags[name] === true ? true : definition.defaultValue,
+    ]),
+  ) as FeatureFlags;
+}
+
+async function loadFeatureFlags(): Promise<FeatureFlags> {
+  const response = await fetch('/api/feature-flags');
+  if (!response.ok) throw new Error('Unable to load feature flags.');
+
+  return normalizeFeatureFlags(await response.json());
+}
+
+function getFeatureFlags() {
+  featureFlagsRequest ??= loadFeatureFlags().catch((error: unknown) => {
+    featureFlagsRequest = undefined;
+    throw error;
+  });
+
+  return featureFlagsRequest;
+}
+
+export function useFeatureFlags() {
+  const [flags, setFlags] = useState<FeatureFlags>(disabledFlags);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    void getFeatureFlags()
+      .then((nextFlags) => {
+        if (isMounted) setFlags(nextFlags);
+      })
+      .catch(() => {
+        if (isMounted) setFlags(disabledFlags);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  return flags;
+}
