@@ -4,9 +4,9 @@ import Boat from '../src/components/Boat';
 import type { Boat as BoatModel } from '../src/types';
 
 jest.mock('react-konva', () => {
-  const KonvaNode = ({ children, nodeType, onDblClick, ...props }: { children?: ReactNode; nodeType: string; onDblClick?: () => void; [key: string]: unknown }) => createElement(
+  const KonvaNode = ({ children, nodeType, onDblClick, strokeWidth, ...props }: { children?: ReactNode; nodeType: string; onDblClick?: () => void; strokeWidth?: unknown; [key: string]: unknown }) => createElement(
     'div',
-    { 'data-testid': `konva-${nodeType}`, onDoubleClick: onDblClick, ...props },
+    { 'data-testid': `konva-${nodeType}`, 'data-stroke-width': strokeWidth, onDoubleClick: onDblClick, ...props },
     children,
   );
 
@@ -60,5 +60,60 @@ describe('Boat speech bubble', () => {
     fireEvent.doubleClick(screen.getAllByTestId('konva-group')[0]);
 
     expect(onOpenInspector).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('Boat sail sizing', () => {
+  it('renders the enlarged sail geometry in normal and shadow layers', () => {
+    const { rerender } = render(<Boat boat={{ ...boat, sailAngle: 0 }} isSelected={false} readOnly />);
+
+    const normalBoom = screen.getAllByTestId('konva-line').find((lineNode) => (
+      lineNode.getAttribute('points')?.startsWith('0,-28,')
+    ));
+    const normalSail = screen.getAllByTestId('konva-path').find((pathNode) => (
+      pathNode.getAttribute('data')?.startsWith('M 0 -28 Q')
+    ));
+
+    expect(normalBoom).toBeDefined();
+    expect(normalSail).toBeDefined();
+    expect(normalSail).toHaveAttribute('data-stroke-width', '4');
+
+    rerender(<Boat boat={{ ...boat, sailAngle: 0 }} isSelected={false} isShadow readOnly />);
+
+    const shadowBoom = screen.getAllByTestId('konva-line').find((lineNode) => (
+      lineNode.getAttribute('points')?.startsWith('0,-28,')
+    ));
+    const shadowSail = screen.getAllByTestId('konva-path').find((pathNode) => (
+      pathNode.getAttribute('data')?.startsWith('M 0 -28 Q')
+    ));
+
+    expect(shadowBoom).toBeDefined();
+    expect(shadowSail).toBeDefined();
+    expect(shadowBoom).toHaveAttribute('data-stroke-width', '3');
+    expect(shadowSail).toHaveAttribute('data-stroke-width', '4.5');
+  });
+
+  it('keeps the enlarged boom anchored while honoring positive and negative sail angles', () => {
+    const { rerender } = render(<Boat boat={{ ...boat, sailAngle: 60 }} isSelected readOnly />);
+    const getBoomEndpoint = () => {
+      const boom = screen.getAllByTestId('konva-line').find((lineNode) => (
+        lineNode.getAttribute('points')?.startsWith('0,-28,')
+      ));
+      const points = boom?.getAttribute('points')?.split(',').map(Number);
+      if (!points || points.length < 4 || points.some((point) => Number.isNaN(point))) {
+        throw new Error('Expected a racing sail boom line');
+      }
+      return { x: points[2], y: points[3] };
+    };
+
+    const positiveAngleEndpoint = getBoomEndpoint();
+    expect(positiveAngleEndpoint.x).toBeLessThan(0);
+    expect(Math.hypot(positiveAngleEndpoint.x, positiveAngleEndpoint.y + 28)).toBeCloseTo(68);
+
+    rerender(<Boat boat={{ ...boat, sailAngle: -60 }} isSelected readOnly />);
+
+    const negativeAngleEndpoint = getBoomEndpoint();
+    expect(negativeAngleEndpoint.x).toBeGreaterThan(0);
+    expect(Math.hypot(negativeAngleEndpoint.x, negativeAngleEndpoint.y + 28)).toBeCloseTo(68);
   });
 });
