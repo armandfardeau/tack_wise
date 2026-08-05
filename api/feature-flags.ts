@@ -1,25 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { randomUUID } from 'node:crypto';
 import { evaluateFeatureFlags, type FeatureFlagEntities } from '../lib/vercelFlags.js';
-
-const visitorCookieName = 'visitor_id';
-const visitorCookieMaxAge = 60 * 60 * 24 * 365;
-
-function getOrCreateVisitorId(request: VercelRequest, response: VercelResponse): string {
-  const existingVisitorId = request.cookies?.[visitorCookieName];
-
-  if (existingVisitorId) return existingVisitorId;
-
-  const visitorId = randomUUID();
-  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
-
-  response.setHeader(
-    'Set-Cookie',
-    `${visitorCookieName}=${visitorId}; Path=/; Max-Age=${visitorCookieMaxAge}; HttpOnly; SameSite=Lax${secure}`,
-  );
-
-  return visitorId;
-}
+import { getOrCreateVisitorId } from '../lib/visitorIdentity.js';
 
 export default async function handler(request: VercelRequest, response: VercelResponse) {
   if (request.method !== 'GET') {
