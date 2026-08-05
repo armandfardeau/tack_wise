@@ -75,7 +75,7 @@ function getInitialTheme(): Theme {
 
 export default function App() {
   const { dismissUpdate, isUpdateAvailable, refresh } = useServiceWorkerUpdate();
-  const { newFeatureBanner } = useFeatureFlags();
+  const { sailBoomLength, sailStrokeWidth } = useFeatureFlags();
   const scenario = useScenario();
   const canvasContentBounds = useMemo(() => getCanvasContentBounds(scenario.frames), [scenario.frames]);
   const exportContentRect = useMemo(() => getCanvasContentRect(scenario.frames), [scenario.frames]);
@@ -451,13 +451,6 @@ export default function App() {
         sponsorship={sponsorshipLinks}
       />
 
-      {newFeatureBanner ? (
-        <aside className="feature-banner" role="status">
-          <strong>New feature preview</strong>
-          <span>This experience is currently enabled through Vercel Flags.</span>
-        </aside>
-      ) : null}
-
       <section className="workspace">
         {!scenario.settings.presenterMode && <Sidebar
           currentFrameIndex={scenario.currentFrameIndex}
@@ -480,6 +473,8 @@ export default function App() {
         />}
 
         <CanvasWorkspace
+          sailBoomLength={sailBoomLength}
+          sailStrokeWidth={sailStrokeWidth}
           activeFrame={scenario.displayFrame}
           inspectorFrame={scenario.activeFrame}
           autoSailTrim={scenario.autoSailTrim}

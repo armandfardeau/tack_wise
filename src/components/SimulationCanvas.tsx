@@ -57,6 +57,8 @@ interface SimulationCanvasProps {
   onCanvasTouchEnd: (event: { evt: TouchEvent }) => void;
   onCanvasTouchMove: (event: { evt: TouchEvent }) => void;
   onCanvasTouchStart: (event: { evt: TouchEvent }) => void;
+  sailBoomLength: number;
+  sailStrokeWidth: number;
 }
 
 interface ConnectionDrag {
@@ -141,6 +143,8 @@ export default function SimulationCanvas({
   onCanvasTouchEnd,
   onCanvasTouchMove,
   onCanvasTouchStart,
+  sailBoomLength,
+  sailStrokeWidth,
 }: SimulationCanvasProps) {
   const [connectionDrag, setConnectionDrag] = useState<ConnectionDrag | null>(null);
   const connectionDragRef = useRef<ConnectionDrag | null>(null);
@@ -354,7 +358,7 @@ export default function SimulationCanvas({
               </Fragment>
             ))}
             {!presenterMode && !isExporting && previousFrame.boats.map((boat) => (
-              <Boat key={`shadow-${shadowIndex}-${boat.id}`} boat={boat} isSelected={false} isShadow showSpeechBubble={false} />
+              <Boat key={`shadow-${shadowIndex}-${boat.id}`} boat={boat} isSelected={false} isShadow showSpeechBubble={false} sailBoomLength={sailBoomLength} sailStrokeWidth={sailStrokeWidth} />
             ))}
             {(previousFrame.arrows ?? []).map((arrow) => (
               <TacticalArrow key={`shadow-${shadowIndex}-${arrow.id}`} arrow={arrow} isSelected={false} isShadow />
@@ -460,6 +464,8 @@ export default function SimulationCanvas({
             boat={boat}
             isSelected={selectedId === boat.id}
             showSpeechBubble={false}
+            sailBoomLength={sailBoomLength}
+            sailStrokeWidth={sailStrokeWidth}
             offenseColor={offenseTargetColors.get(`boat:${boat.id}`)}
             readOnly={readOnly}
             onOpenInspector={readOnly ? undefined : () => onOpenInspector(boat.id, 'boat')}
