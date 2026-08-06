@@ -13,21 +13,27 @@ describe('WindHud', () => {
     expect(screen.getByTitle(/click to edit wind direction and velocity/i)).toBeInTheDocument();
   });
 
-  it('displays the direction the wind is blowing toward', () => {
+  it('displays both the stored from bearing and visible toward bearing', () => {
     render(<WindHud windAngle={240} windSpeed={12} onSelect={jest.fn()} />);
 
-    expect(screen.getByLabelText('Wind direction 60 degrees')).toBeInTheDocument();
+    expect(screen.getByText('TOWARD 060°')).toBeInTheDocument();
+    expect(screen.getByText('FROM 240° · 12 KTS')).toBeInTheDocument();
+    expect(screen.getByLabelText('Wind blowing toward 60 degrees')).toBeInTheDocument();
   });
 
   it('rotates the vane to match the blowing direction', () => {
     render(<WindHud windAngle={0} windSpeed={12} onSelect={jest.fn()} />);
 
-    expect(screen.getByLabelText('Wind direction 180 degrees')).toHaveStyle({ transform: 'rotate(180deg)' });
+    expect(screen.getByLabelText('Wind blowing toward 180 degrees')).toHaveStyle({ transform: 'rotate(180deg)' });
+    expect(screen.getByText('TOWARD 180°')).toBeInTheDocument();
+    expect(screen.getByText('FROM 000° · 12 KTS')).toBeInTheDocument();
   });
 
-  it('wraps a negative flow angle back into the compass range', () => {
+  it('normalizes negative and wrapped bearings into the compass range', () => {
     render(<WindHud windAngle={-200} windSpeed={12} onSelect={jest.fn()} />);
 
-    expect(screen.getByLabelText('Wind direction 340 degrees')).toBeInTheDocument();
+    expect(screen.getByLabelText('Wind blowing toward 340 degrees')).toBeInTheDocument();
+    expect(screen.getByText('TOWARD 340°')).toBeInTheDocument();
+    expect(screen.getByText('FROM 160° · 12 KTS')).toBeInTheDocument();
   });
 });

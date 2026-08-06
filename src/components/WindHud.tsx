@@ -6,15 +6,24 @@ interface WindHudProps {
   onSelect?: () => void;
 }
 
+function normalizeBearing(angle: number) {
+  return ((Math.round(angle) % 360) + 360) % 360;
+}
+
+function formatBearing(angle: number) {
+  return normalizeBearing(angle).toString().padStart(3, '0');
+}
+
 export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps) {
-  const flowAngle = (windAngle + 180) % 360;
-  const displayAngle = flowAngle < 0 ? flowAngle + 360 : flowAngle;
+  const flowAngle = normalizeBearing(windAngle + 180);
+  const fromBearing = formatBearing(windAngle);
+  const towardBearing = formatBearing(flowAngle);
 
   return (
     <button
       type="button"
       className={styles.windVaneContainer}
-      aria-label="Edit wind direction and velocity"
+      aria-label={`Edit wind direction and velocity. Wind blowing toward ${towardBearing} degrees from ${fromBearing} degrees at ${windSpeed} knots.`}
       title="Click to edit wind direction and velocity"
       onClick={onSelect}
     >
@@ -22,14 +31,12 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
         <svg
           className={styles.windVaneNeedle}
           viewBox="0 0 100 100"
-          style={{ transform: `rotate(${displayAngle}deg)` }}
-          aria-label={`Wind direction ${displayAngle} degrees`}
+          style={{ transform: `rotate(${flowAngle}deg)` }}
+          aria-label={`Wind blowing toward ${flowAngle} degrees`}
         >
-          <path d="M 50 80 L 50 50" stroke="#94a3b8" strokeWidth="4" />
-          <path d="M 42 80 L 50 70 L 58 80 Z" fill="#94a3b8" />
-          <path d="M 50 20 L 50 50" stroke="#ef4444" strokeWidth="6" />
-          <polygon points="50,8 40,28 50,23 60,28" fill="#ef4444" />
-          <circle cx="50" cy="50" r="7" fill="#f8fafc" stroke="#0f172a" strokeWidth="3" />
+          <path d="M 50 78 L 50 25" stroke="#67e8f9" strokeWidth="8" strokeLinecap="round" />
+          <polygon points="50,7 35,34 50,27 65,34" fill="#22d3ee" />
+          <circle cx="50" cy="50" r="7" fill="#f8fafc" stroke="#083344" strokeWidth="3" />
         </svg>
         <span className={styles.compassN}>N</span>
         <span className={styles.compassS}>S</span>
@@ -37,8 +44,8 @@ export default function WindHud({ windAngle, windSpeed, onSelect }: WindHudProps
         <span className={styles.compassW}>W</span>
       </div>
       <div className={styles.windVaneInfo}>
-        <span className={styles.windVaneSpeed}>{windSpeed} KTS</span>
-        <span className={styles.windVaneAngle}>{windAngle}°</span>
+        <span className={styles.windVaneBearing}>TOWARD {towardBearing}°</span>
+        <span className={styles.windVaneMeta}>FROM {fromBearing}° · {windSpeed} KTS</span>
       </div>
     </button>
   );

@@ -20,9 +20,12 @@ export default function WindIndicator({ windAngle, windSpeed, stageSize, origin 
   // We can place them at different vertical offsets in a group, then rotate the group.
   const linesCount = 64;
   const spacing = height / (linesCount + 1);
+  const shortestSide = Math.min(width, height);
+  const heroArrowLength = Math.min(shortestSide * 0.62, 420);
+  const heroStrokeWidth = Math.max(5, Math.min(10, 4 + windSpeed / 5));
 
   return (
-    <Group x={origin.x} y={origin.y}>
+    <Group x={origin.x} y={origin.y} listening={false}>
       {/* Background wind flow lines */}
       <Group x={centerX} y={centerY} rotation={flowAngle}>
         {Array.from({ length: linesCount }).map((_, i) => {
@@ -45,6 +48,28 @@ export default function WindIndicator({ windAngle, windSpeed, stageSize, origin 
             />
           );
         })}
+      </Group>
+
+      {/* High-contrast direction cue, rendered below boats and tactical objects. */}
+      <Group x={centerX} y={centerY} rotation={flowAngle}>
+        <Arrow
+          points={[-heroArrowLength / 2, 0, heroArrowLength / 2, 0]}
+          pointerLength={32}
+          pointerWidth={28}
+          stroke="#08111f"
+          fill="#08111f"
+          strokeWidth={heroStrokeWidth + 8}
+          opacity={0.72}
+        />
+        <Arrow
+          points={[-heroArrowLength / 2, 0, heroArrowLength / 2, 0]}
+          pointerLength={28}
+          pointerWidth={24}
+          stroke="#22d3ee"
+          fill="#22d3ee"
+          strokeWidth={heroStrokeWidth}
+          opacity={0.92}
+        />
       </Group>
     </Group>
   );
