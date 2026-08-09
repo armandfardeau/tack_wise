@@ -59,6 +59,7 @@ interface SimulationCanvasProps {
   onCanvasTouchStart: (event: { evt: TouchEvent }) => void;
   sailBoomLength: number;
   sailStrokeWidth: number;
+  darkSailInLightMode: boolean;
 }
 
 interface ConnectionDrag {
@@ -145,6 +146,7 @@ export default function SimulationCanvas({
   onCanvasTouchStart,
   sailBoomLength,
   sailStrokeWidth,
+  darkSailInLightMode,
 }: SimulationCanvasProps) {
   const [connectionDrag, setConnectionDrag] = useState<ConnectionDrag | null>(null);
   const connectionDragRef = useRef<ConnectionDrag | null>(null);
@@ -165,6 +167,7 @@ export default function SimulationCanvas({
     height: worldBounds.bottom - worldBounds.top,
   };
   const isLightTheme = theme === 'light';
+  const useDarkSail = isLightTheme && darkSailInLightMode;
   const offenseTargetColors = new Map(
     (activeFrame.comments ?? [])
       .filter((comment) => comment.type === 'rule')
@@ -466,6 +469,7 @@ export default function SimulationCanvas({
             showSpeechBubble={false}
             sailBoomLength={sailBoomLength}
             sailStrokeWidth={sailStrokeWidth}
+            darkSailInLightMode={useDarkSail}
             offenseColor={offenseTargetColors.get(`boat:${boat.id}`)}
             readOnly={readOnly}
             onOpenInspector={readOnly ? undefined : () => onOpenInspector(boat.id, 'boat')}

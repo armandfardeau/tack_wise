@@ -77,7 +77,7 @@ function getInitialTheme(): Theme {
 export default function App() {
   const { dismissUpdate, isUpdateAvailable, refresh } = useServiceWorkerUpdate();
   const {
-    flags: { sailBoomLength, sailStrokeWidth },
+    flags: { sailBoomLength, sailStrokeWidth, darkSailInLightMode },
     isResolved: areFeatureFlagsResolved,
     source: featureFlagSource,
   } = useFeatureFlags();
@@ -133,10 +133,10 @@ export default function App() {
     if (!areFeatureFlagsResolved) return;
 
     posthog.register(getFeatureFlagMetadata(
-      { sailBoomLength, sailStrokeWidth },
+      { sailBoomLength, sailStrokeWidth, darkSailInLightMode },
       featureFlagSource,
     ));
-  }, [areFeatureFlagsResolved, featureFlagSource, sailBoomLength, sailStrokeWidth]);
+  }, [areFeatureFlagsResolved, darkSailInLightMode, featureFlagSource, sailBoomLength, sailStrokeWidth]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -489,6 +489,7 @@ export default function App() {
         <CanvasWorkspace
           sailBoomLength={sailBoomLength}
           sailStrokeWidth={sailStrokeWidth}
+          darkSailInLightMode={darkSailInLightMode}
           activeFrame={scenario.displayFrame}
           inspectorFrame={scenario.activeFrame}
           autoSailTrim={scenario.autoSailTrim}

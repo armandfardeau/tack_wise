@@ -27,6 +27,7 @@ interface BoatProps {
   speechBubblePosition?: SpeechBubblePosition;
   sailBoomLength?: number;
   sailStrokeWidth?: number;
+  darkSailInLightMode?: boolean;
 }
 
 const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
@@ -166,7 +167,7 @@ export function SpeechBubble({
   );
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top', sailBoomLength = 68, sailStrokeWidth = 4 }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top', sailBoomLength = 68, sailStrokeWidth = 4, darkSailInLightMode = false }: BoatProps) {
   const boatScale = 0.5;
   const isJudge = boat.type === 'judge';
   const hullPath = isJudge ? JUDGE_HULL_PATH : SAILING_HULL_PATH;
@@ -392,7 +393,7 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
           {/* Mainsail (represented as a filled curved canvas) */}
           <Path
             data={sailPathData}
-            stroke="#f8fafc"
+            stroke={darkSailInLightMode ? '#1e293b' : '#f8fafc'}
             strokeWidth={sailStrokeWidth}
             lineCap="round"
             opacity={0.9}

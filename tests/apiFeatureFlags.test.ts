@@ -2,7 +2,7 @@ import handler from '../api/feature-flags';
 import { evaluateFeatureFlags } from '../lib/vercelFlags';
 
 jest.mock('../lib/vercelFlags', () => ({
-  evaluateFeatureFlags: jest.fn().mockResolvedValue({ sailBoomLength: 72, sailStrokeWidth: 5 }),
+  evaluateFeatureFlags: jest.fn().mockResolvedValue({ sailBoomLength: 72, sailStrokeWidth: 5, darkSailInLightMode: true }),
 }));
 
 const mockEvaluateFeatureFlags = jest.mocked(evaluateFeatureFlags);
@@ -31,7 +31,7 @@ describe('/api/feature-flags', () => {
 
     expect(response.setHeader).toHaveBeenCalledWith('Cache-Control', 'no-store');
     expect(response.status).toHaveBeenCalledWith(200);
-    expect(response.json).toHaveBeenCalledWith({ sailBoomLength: 72, sailStrokeWidth: 5 });
+    expect(response.json).toHaveBeenCalledWith({ sailBoomLength: 72, sailStrokeWidth: 5, darkSailInLightMode: true });
     expect(mockEvaluateFeatureFlags).toHaveBeenCalledWith(request, {
       user: { id: 'custom-user-123' },
     });

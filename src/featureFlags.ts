@@ -7,6 +7,10 @@ export const featureFlags = {
     key: 'SAIL_STROKE_WIDTH',
     defaultValue: 4,
   },
+  darkSailInLightMode: {
+    key: 'DARK_SAIL_IN_LIGHT_MODE',
+    defaultValue: false,
+  },
 } as const;
 
 type FeatureFlagValue<Value> = Value extends number
