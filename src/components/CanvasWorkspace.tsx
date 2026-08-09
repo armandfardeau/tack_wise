@@ -118,6 +118,7 @@ interface CanvasWorkspaceProps {
   children?: ReactNode;
   sailBoomLength?: number;
   sailStrokeWidth?: number;
+  darkSailInLightMode?: boolean;
 }
 
 interface InspectorPlacement {
@@ -374,6 +375,7 @@ export default function CanvasWorkspace({
   children,
   sailBoomLength = 68,
   sailStrokeWidth = 4,
+  darkSailInLightMode = false,
 }: CanvasWorkspaceProps) {
   const inspectorRef = useRef<HTMLDivElement | null>(null);
   const autoPanKeyRef = useRef<string | null>(null);
@@ -688,6 +690,7 @@ export default function CanvasWorkspace({
         <SimulationCanvas
           sailBoomLength={sailBoomLength}
           sailStrokeWidth={sailStrokeWidth}
+          darkSailInLightMode={darkSailInLightMode}
           activeFrame={activeFrame}
           canvasPosition={canvasPosition}
           canvasZoom={canvasZoom}

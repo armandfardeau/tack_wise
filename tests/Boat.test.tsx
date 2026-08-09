@@ -64,6 +64,18 @@ describe('Boat speech bubble', () => {
 });
 
 describe('Boat sail sizing', () => {
+  it('uses the dark sail color only when the light-mode flag is enabled', () => {
+    const { rerender } = render(<Boat boat={boat} isSelected={false} readOnly />);
+    const getSail = () => screen.getAllByTestId('konva-path').find((pathNode) => (
+      pathNode.getAttribute('data')?.startsWith('M 0 -28 Q')
+    ));
+
+    expect(getSail()).toHaveAttribute('stroke', '#f8fafc');
+
+    rerender(<Boat boat={boat} isSelected={false} readOnly darkSailInLightMode />);
+    expect(getSail()).toHaveAttribute('stroke', '#1e293b');
+  });
+
   it('renders the enlarged sail geometry in normal and shadow layers', () => {
     const { rerender } = render(<Boat boat={{ ...boat, sailAngle: 0 }} isSelected={false} readOnly />);
 
