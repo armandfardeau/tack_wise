@@ -123,6 +123,8 @@ export function useScenarioExport({
             setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 45));
           });
 
+          await waitForPaint();
+          stage.draw();
           capturedFrames.push(await captureStageBlob(stage, gifPixelRatio));
         }
       }
@@ -154,6 +156,8 @@ export function useScenarioExport({
 
               const stage = stageRef.current;
               if (!stage) throw new Error('Canvas stage not found.');
+              await waitForPaint();
+              stage.draw();
               capturedImageUrls.push(URL.createObjectURL(await captureStageBlob(stage, gifPixelRatio)));
             }
           }

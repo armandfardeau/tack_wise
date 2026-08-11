@@ -147,8 +147,13 @@ describe('useScenarioExport video exports', () => {
   });
 
   it('renders and encodes video frames offline when Konva can export blobs', async () => {
+    const captureOrder: string[] = [];
     const stage = {
-      toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
+      draw: jest.fn(() => captureOrder.push('draw')),
+      toBlob: jest.fn(() => {
+        captureOrder.push('toBlob');
+        return Promise.resolve(new Blob(['png'], { type: 'image/png' }));
+      }),
     } as unknown as KonvaStage;
     const encodedBlob = new Blob(['offline video'], { type: 'video/webm' });
     jest.mocked(encodePngFramesToVideo).mockResolvedValue(encodedBlob);
@@ -159,6 +164,8 @@ describe('useScenarioExport video exports', () => {
     });
 
     expect(stage.toBlob).toHaveBeenCalledWith({ pixelRatio: 1, mimeType: 'image/png' });
+    expect(stage.draw).toHaveBeenCalledTimes(1);
+    expect(captureOrder).toEqual(['draw', 'toBlob']);
     expect(encodePngFramesToVideo).toHaveBeenCalledWith(
       [expect.any(Blob)],
       15,
@@ -229,6 +236,7 @@ describe('useScenarioExport video exports', () => {
 
   it('uses the selected FPS as the GIF frame delay', async () => {
     const stage = {
+      draw: jest.fn(),
       toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
     } as unknown as KonvaStage;
     const { result } = renderVideoExport(frames, 0, stage);
