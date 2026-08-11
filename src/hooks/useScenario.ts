@@ -61,6 +61,45 @@ function cloneScenarioFrames(frames: Frame[]) {
   return cloneFrames(frames);
 }
 
+function samePosition(left: { x: number; y: number }, right: { x: number; y: number }) {
+  return left.x === right.x && left.y === right.y;
+}
+
+function sameArrowPosition(left: TacticalArrow, right: TacticalArrow) {
+  return left.points.length === right.points.length
+    && left.points.every((point, index) => (
+      point.x === right.points[index].x && point.y === right.points[index].y
+    ));
+}
+
+function propagateObjectPositionToUnchangedFutureFrames<T extends { id: string }>(
+  previousFrames: Frame[],
+  nextFrames: Frame[],
+  currentFrameIndex: number,
+  objectId: string,
+  findObject: (frame: Frame, id: string) => T | undefined,
+  positionsMatch: (left: T, right: T) => boolean,
+  updateFramePosition: (frame: Frame, sourceObject: T) => Frame,
+) {
+  const sourceObject = findObject(nextFrames[currentFrameIndex], objectId);
+  if (!sourceObject) return nextFrames;
+
+  let shouldPropagate = true;
+
+  return nextFrames.map((frame, index) => {
+    if (index <= currentFrameIndex || !shouldPropagate) return frame;
+
+    const previousObject = findObject(previousFrames[index - 1], objectId);
+    const futureObject = findObject(previousFrames[index], objectId);
+    if (!previousObject || !futureObject || !positionsMatch(futureObject, previousObject)) {
+      shouldPropagate = false;
+      return frame;
+    }
+
+    return updateFramePosition(frame, sourceObject);
+  });
+}
+
 function scenarioFramesFromPayload(payload: ScenarioExportPayload) {
   return cloneScenarioFrames(payload.frames);
 }
@@ -573,14 +612,153 @@ export function useScenario() {
     );
   };
 
-  const moveBoat = (boatId: string, position: Position) => updateBoat(boatId, position);
-  const moveMark = (markId: string, position: Position) => updateMark(markId, position);
+  const moveBoat = (boatId: string, position: Position) => {
+    commitFrames((previousFrames) => {
+      const nextFrames = previousFrames.map((frame, index) => (
+        index === currentFrameIndex
+          ? {
+              ...frame,
+              boats: frame.boats.map((boat) => boat.id === boatId ? { ...boat, ...position } : boat),
+            }
+          : frame
+      ));
+
+      return propagateObjectPositionToUnchangedFutureFrames<Boat>(
+        previousFrames,
+        nextFrames,
+        currentFrameIndex,
+        boatId,
+        (frame, id) => frame.boats.find((boat) => boat.id === id),
+        samePosition,
+        (frame, sourceBoat) => ({
+          ...frame,
+          boats: frame.boats.map((boat) => boat.id === sourceBoat.id
+            ? { ...boat, x: sourceBoat.x, y: sourceBoat.y }
+            : boat),
+        }),
+      );
+    });
+  };
+
+  const moveMark = (markId: string, position: Position) => {
+    commitFrames((previousFrames) => {
+      const nextFrames = previousFrames.map((frame, index) => (
+        index === currentFrameIndex
+          ? {
+              ...frame,
+              marks: frame.marks.map((mark) => mark.id === markId ? { ...mark, ...position } : mark),
+            }
+          : frame
+      ));
+
+      return propagateObjectPositionToUnchangedFutureFrames<Mark>(
+        previousFrames,
+        nextFrames,
+        currentFrameIndex,
+        markId,
+        (frame, id) => frame.marks.find((mark) => mark.id === id),
+        samePosition,
+        (frame, sourceMark) => ({
+          ...frame,
+          marks: frame.marks.map((mark) => mark.id === sourceMark.id
+            ? { ...mark, x: sourceMark.x, y: sourceMark.y }
+            : mark),
+        }),
+      );
+    });
+  };
+
   const moveArrow = (arrowId: string, points: TacticalArrow['points']) => {
     if (!Array.isArray(points) || points.length < 2) return;
-    updateArrow(arrowId, { points });
+
+    commitFrames((previousFrames) => {
+      const nextFrames = previousFrames.map((frame, index) => (
+        index === currentFrameIndex
+          ? {
+              ...frame,
+              arrows: (frame.arrows ?? []).map((arrow) => arrow.id === arrowId
+                ? { ...arrow, points: cloneTacticalArrowPoints(points) }
+                : arrow),
+            }
+          : frame
+      ));
+
+      return propagateObjectPositionToUnchangedFutureFrames<TacticalArrow>(
+        previousFrames,
+        nextFrames,
+        currentFrameIndex,
+        arrowId,
+        (frame, id) => frame.arrows?.find((arrow) => arrow.id === id),
+        sameArrowPosition,
+        (frame, sourceArrow) => ({
+          ...frame,
+          arrows: (frame.arrows ?? []).map((arrow) => arrow.id === sourceArrow.id
+            ? { ...arrow, points: cloneTacticalArrowPoints(sourceArrow.points) }
+            : arrow),
+        }),
+      );
+    });
   };
-  const moveComment = (commentId: string, position: Position) => updateComment(commentId, position);
-  const moveImage = (imageId: string, position: Position) => updateImage(imageId, position);
+
+  const moveComment = (commentId: string, position: Position) => {
+    commitFrames((previousFrames) => {
+      const nextFrames = previousFrames.map((frame, index) => (
+        index === currentFrameIndex
+          ? {
+              ...frame,
+              comments: (frame.comments ?? []).map((comment) => comment.id === commentId
+                ? { ...comment, ...position }
+                : comment),
+            }
+          : frame
+      ));
+
+      return propagateObjectPositionToUnchangedFutureFrames<FrameComment>(
+        previousFrames,
+        nextFrames,
+        currentFrameIndex,
+        commentId,
+        (frame, id) => frame.comments?.find((comment) => comment.id === id),
+        samePosition,
+        (frame, sourceComment) => ({
+          ...frame,
+          comments: (frame.comments ?? []).map((comment) => comment.id === sourceComment.id
+            ? { ...comment, x: sourceComment.x, y: sourceComment.y }
+            : comment),
+        }),
+      );
+    });
+  };
+
+  const moveImage = (imageId: string, position: Position) => {
+    commitFrames((previousFrames) => {
+      const nextFrames = previousFrames.map((frame, index) => (
+        index === currentFrameIndex
+          ? {
+              ...frame,
+              images: (frame.images ?? []).map((image) => image.id === imageId
+                ? { ...image, ...position }
+                : image),
+            }
+          : frame
+      ));
+
+      return propagateObjectPositionToUnchangedFutureFrames<DiagramImage>(
+        previousFrames,
+        nextFrames,
+        currentFrameIndex,
+        imageId,
+        (frame, id) => frame.images?.find((image) => image.id === id),
+        samePosition,
+        (frame, sourceImage) => ({
+          ...frame,
+          images: (frame.images ?? []).map((image) => image.id === sourceImage.id
+            ? { ...image, x: sourceImage.x, y: sourceImage.y }
+            : image),
+        }),
+      );
+    });
+  };
 
   const updateCurrentAndFutureFrames = (updater: (frame: Frame) => Frame) => {
     commitFrames((previousFrames) => previousFrames.map((frame, index) => (
