@@ -3,6 +3,10 @@ import { BOAT_LENGTH, DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RA
 import type { Mark as MarkModel } from '../types';
 import { getMarkConnectionHandleOffset } from '../utils/markConnections';
 
+const OFFENSE_HALO_OUTER_STROKE_WIDTH = 9;
+const OFFENSE_HALO_INNER_STROKE_WIDTH = 7;
+const OFFENSE_STROKE_WIDTH = 4;
+
 interface MarkProps {
   mark: MarkModel;
   isSelected: boolean;
@@ -187,14 +191,32 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
       {/* Visual representation of the buoy */}
       {renderZone(isConnectionTarget ? '#22d3ee' : isSelected ? '#ffffff' : mark.color)}
       {offenseStroke && (
-        <Circle
-          radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
-          fill="transparent"
-          stroke={offenseStroke}
-          strokeWidth={4}
-          dash={[8, 5]}
-          opacity={0.95}
-        />
+        <>
+          <Circle
+            radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
+            fill="transparent"
+            stroke="#f8fafc"
+            strokeWidth={OFFENSE_HALO_OUTER_STROKE_WIDTH}
+            dash={[8, 5]}
+            opacity={0.95}
+          />
+          <Circle
+            radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
+            fill="transparent"
+            stroke="#0f172a"
+            strokeWidth={OFFENSE_HALO_INNER_STROKE_WIDTH}
+            dash={[8, 5]}
+            opacity={0.95}
+          />
+          <Circle
+            radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
+            fill="transparent"
+            stroke={offenseStroke}
+            strokeWidth={OFFENSE_STROKE_WIDTH}
+            dash={[8, 5]}
+            opacity={0.95}
+          />
+        </>
       )}
       {renderShape()}
 

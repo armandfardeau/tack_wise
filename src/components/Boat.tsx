@@ -38,6 +38,9 @@ const SHADOW_SAIL_BOOM_STROKE_WIDTH = 3;
 const SHADOW_SAIL_STROKE_WIDTH = 4.5;
 const MAST_X_OFFSET = 0;
 const MAST_Y_OFFSET = -28;
+const OFFENSE_HALO_OUTER_STROKE_WIDTH = 10;
+const OFFENSE_HALO_INNER_STROKE_WIDTH = 8;
+const OFFENSE_STROKE_WIDTH = 5;
 
 function JudgeBoatBody({ color, isShadow }: { color: string; isShadow: boolean }) {
   const deckColor = isShadow ? '#cbd5e1' : '#e2e8f0';
@@ -279,14 +282,32 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
 
       {/* Selection Glow / Shadow Ring */}
       {offenseStroke && (
-        <Path
-          data={hullPath}
-          fill="transparent"
-          stroke={offenseStroke}
-          strokeWidth={5}
-          dash={[10, 6]}
-          opacity={0.95}
-        />
+        <>
+          <Path
+            data={hullPath}
+            fill="transparent"
+            stroke="#f8fafc"
+            strokeWidth={OFFENSE_HALO_OUTER_STROKE_WIDTH}
+            dash={[10, 6]}
+            opacity={0.95}
+          />
+          <Path
+            data={hullPath}
+            fill="transparent"
+            stroke="#0f172a"
+            strokeWidth={OFFENSE_HALO_INNER_STROKE_WIDTH}
+            dash={[10, 6]}
+            opacity={0.95}
+          />
+          <Path
+            data={hullPath}
+            fill="transparent"
+            stroke={offenseStroke}
+            strokeWidth={OFFENSE_STROKE_WIDTH}
+            dash={[10, 6]}
+            opacity={0.95}
+          />
+        </>
       )}
 
       {isSelected && (
