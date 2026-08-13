@@ -10,6 +10,7 @@ import {
   serializeScenarioToJson,
 } from '../src/utils/exporter';
 import type { Frame, MarkConnection, ScenarioExportPayload } from '../src/types';
+import { getMarkConnectionAnchors } from '../src/utils/markConnections';
 
 const frames: Frame[] = [
   {
@@ -259,7 +260,12 @@ describe('scenario JSON export', () => {
 
     const result = parseScenarioFromJson(serializeScenarioToJson([markFrame], 0));
 
-    expect(result.frames[0].connections).toEqual(connections);
+    const expectedFirstAnchors = getMarkConnectionAnchors(markFrame.marks[0], markFrame.marks[1]);
+    const expectedSecondAnchors = getMarkConnectionAnchors(markFrame.marks[0], markFrame.marks[2]);
+    expect(result.frames[0].connections).toEqual([
+      { ...connections[0], start: { ...connections[0].start, anchor: expectedFirstAnchors.start }, end: { ...connections[0].end, anchor: expectedFirstAnchors.end } },
+      { ...connections[1], start: { ...connections[1].start, anchor: expectedSecondAnchors.start }, end: { ...connections[1].end, anchor: expectedSecondAnchors.end } },
+    ]);
   });
 
   it('round-trips a scenario through a portable share URL', () => {

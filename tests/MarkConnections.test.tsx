@@ -1,6 +1,6 @@
 import { render } from '@testing-library/react';
 import MarkConnections from '../src/components/MarkConnections';
-import { normalizeFrameConnections } from '../src/utils/markConnections';
+import { getConnectionPoints, getMarkConnectionAnchors, normalizeFrameConnections, reanchorFrameConnections } from '../src/utils/markConnections';
 import type { Frame, Mark, MarkConnection } from '../src/types';
 
 jest.mock('react-konva', () => ({
@@ -84,5 +84,62 @@ describe('MarkConnections', () => {
     const { getByTestId } = render(<MarkConnections marks={marks} connections={relativeConnections} />);
 
     expect(getByTestId('connection-line').getAttribute('data-points')).toBe(JSON.stringify([24, 20, 16, 40]));
+  });
+
+  it('attaches a gate connection to the visible gate boundary', () => {
+    const gate: Mark = { id: 'gate', name: 'Gate', color: '#fff', x: 0, y: 0, shape: 'gate', size: 28 };
+    const mark: Mark = { id: 'mark', name: 'Mark', color: '#000', x: 60, y: 0, shape: 'circle', size: 28 };
+    const connection: MarkConnection = {
+      id: 'gate-connection',
+      start: { markId: gate.id, anchor: getMarkConnectionAnchors(gate, mark).start },
+      end: { markId: mark.id, anchor: getMarkConnectionAnchors(gate, mark).end },
+    };
+
+    expect(getConnectionPoints(connection, [gate, mark])).toEqual([
+      { x: 28 * 5 / 6, y: 0 },
+      { x: 46, y: 0 },
+    ]);
+  });
+
+  it('uses rotated mark-local geometry for connection endpoints', () => {
+    const source: Mark = { id: 'source', name: 'Source', color: '#fff', x: 0, y: 0, shape: 'square', size: 20, rotation: 45 };
+    const target: Mark = { id: 'target', name: 'Target', color: '#000', x: 40, y: 0, shape: 'circle', size: 20 };
+    const anchors = getMarkConnectionAnchors(source, target);
+    const points = getConnectionPoints({
+      id: 'rotated-connection',
+      start: { markId: source.id, anchor: anchors.start },
+      end: { markId: target.id, anchor: anchors.end },
+    }, [source, target]);
+
+    expect(points?.[0].x).toBeCloseTo(10 * Math.sqrt(2));
+    expect(points?.[0].y).toBeCloseTo(0);
+    expect(points?.[1]).toEqual({ x: 30, y: 0 });
+  });
+
+  it('reanchors existing connections when a mark changes size or position', () => {
+    const frame: Frame = {
+      id: 'frame',
+      name: 'Frame',
+      windAngle: 0,
+      windSpeed: 0,
+      boats: [],
+      marks: [
+        { id: 'source', name: 'Source', color: '#fff', x: 0, y: 0, shape: 'circle', size: 20 },
+        { id: 'target', name: 'Target', color: '#000', x: 40, y: 0, shape: 'circle', size: 20 },
+      ],
+      connections: [{
+        id: 'connection',
+        start: { markId: 'source', anchor: { x: 0, y: 1 } },
+        end: { markId: 'target', anchor: { x: 0, y: -1 } },
+      }],
+    };
+
+    const reanchored = reanchorFrameConnections({
+      ...frame,
+      marks: frame.marks.map((mark) => mark.id === 'target' ? { ...mark, x: 80, size: 40 } : mark),
+    });
+    const points = getConnectionPoints(reanchored.connections![0], reanchored.marks);
+
+    expect(points).toEqual([{ x: 10, y: 0 }, { x: 60, y: 0 }]);
   });
 });

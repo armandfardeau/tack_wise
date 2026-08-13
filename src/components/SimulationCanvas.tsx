@@ -246,10 +246,7 @@ export default function SimulationCanvas({
     setActiveConnectionDrag(null);
 
     if (activeDrag?.targetMarkId) {
-      onConnectMarks(activeDrag.sourceMarkId, activeDrag.targetMarkId, {
-        start: activeDrag.startAnchor,
-        end: activeDrag.endAnchor ?? { x: 0, y: 0 },
-      });
+      onConnectMarks(activeDrag.sourceMarkId, activeDrag.targetMarkId);
     }
   }, [onConnectMarks, setActiveConnectionDrag]);
 

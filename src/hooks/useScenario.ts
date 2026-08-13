@@ -26,7 +26,7 @@ import {
   type Position,
 } from '../utils/simulation';
 import { cloneTacticalArrowPoints, getCurvedArrowPoints, toTacticalArrowPoints } from '../utils/arrows';
-import { getMarkConnectionAnchors } from '../utils/markConnections';
+import { getMarkConnectionAnchors, reanchorFrameConnections } from '../utils/markConnections';
 import { parseScenarioFromJson } from '../utils/exporter';
 import { deleteScenarioRepositoryItem, listScenarioRepositoryItems, loadScenarioRepositoryItem, saveScenarioRepositoryItem } from '../utils/repository';
 
@@ -366,12 +366,12 @@ export function useScenario() {
     commitFrames((previousFrames) =>
       previousFrames.map((frame, index) =>
         index === currentFrameIndex
-          ? {
+          ? reanchorFrameConnections({
               ...frame,
               marks: frame.marks.map((mark) =>
                 mark.id === markId ? { ...mark, ...changes } : mark,
               ),
-            }
+            })
           : frame,
       ),
     );
