@@ -3,10 +3,6 @@ import { BOAT_LENGTH, DEFAULT_MARK_ZONE_RADIUS, DEFAULT_OBSTRUCTION_PROXIMITY_RA
 import type { Mark as MarkModel } from '../types';
 import { getMarkConnectionHandleOffset } from '../utils/markConnections';
 
-const OFFENSE_HALO_OUTER_STROKE_WIDTH = 9;
-const OFFENSE_HALO_INNER_STROKE_WIDTH = 7;
-const OFFENSE_STROKE_WIDTH = 4;
-
 interface MarkProps {
   mark: MarkModel;
   isSelected: boolean;
@@ -21,9 +17,10 @@ interface MarkProps {
   isOffense?: boolean;
   offenseColor?: string;
   isConnectionTarget?: boolean;
+  ruleHighlightStrokeWidth?: number;
 }
 
-export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, onStartConnection, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, isConnectionTarget = false }: MarkProps) {
+export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSelect, onStartConnection, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, isConnectionTarget = false, ruleHighlightStrokeWidth = 30 }: MarkProps) {
   const markSize = mark.size ?? 28;
   const offenseStroke = offenseColor ?? (isOffense ? '#ef4444' : undefined);
   const renderZone = (strokeColor: string) => mark.showZone ? (
@@ -196,7 +193,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
             radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
             fill="transparent"
             stroke="#f8fafc"
-            strokeWidth={OFFENSE_HALO_OUTER_STROKE_WIDTH}
+            strokeWidth={ruleHighlightStrokeWidth}
             dash={[8, 5]}
             opacity={0.95}
           />
@@ -204,7 +201,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
             radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
             fill="transparent"
             stroke="#0f172a"
-            strokeWidth={OFFENSE_HALO_INNER_STROKE_WIDTH}
+            strokeWidth={ruleHighlightStrokeWidth}
             dash={[8, 5]}
             opacity={0.95}
           />
@@ -212,7 +209,7 @@ export default function Mark({ mark, isSelected, onMove, onOpenInspector, onSele
             radius={(mark.shape === 'gate' || mark.shape === 'committeeBoat' ? markSize : markSize / 2) + 10}
             fill="transparent"
             stroke={offenseStroke}
-            strokeWidth={OFFENSE_STROKE_WIDTH}
+            strokeWidth={ruleHighlightStrokeWidth}
             dash={[8, 5]}
             opacity={0.95}
           />

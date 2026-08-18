@@ -132,7 +132,7 @@ describe('Boat sail sizing', () => {
 
 describe('Boat rule highlights', () => {
   it('renders a contrasting halo behind the configured offense color', () => {
-    render(<Boat boat={boat} isSelected={false} offenseColor="#22c55e" readOnly />);
+    render(<Boat boat={boat} isSelected={false} offenseColor="#22c55e" ruleHighlightStrokeWidth={24} readOnly />);
 
     const hullPaths = screen.getAllByTestId('konva-path').filter((pathNode) => (
       pathNode.getAttribute('data')?.startsWith('M 0 -58 C 27 -37')
@@ -144,6 +144,6 @@ describe('Boat rule highlights', () => {
       '#0f172a',
       '#22c55e',
     ]);
-    expect(hullPaths.slice(0, 3).map((pathNode) => pathNode.getAttribute('data-stroke-width'))).toEqual(['10', '8', '5']);
+    expect(hullPaths.slice(0, 3).map((pathNode) => pathNode.getAttribute('data-stroke-width'))).toEqual(['24', '24', '24']);
   });
 });

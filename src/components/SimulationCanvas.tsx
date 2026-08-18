@@ -60,6 +60,7 @@ interface SimulationCanvasProps {
   sailBoomLength: number;
   sailStrokeWidth: number;
   darkSailInLightMode: boolean;
+  ruleHighlightStrokeWidth: number;
 }
 
 interface ConnectionDrag {
@@ -147,6 +148,7 @@ export default function SimulationCanvas({
   sailBoomLength,
   sailStrokeWidth,
   darkSailInLightMode,
+  ruleHighlightStrokeWidth,
 }: SimulationCanvasProps) {
   const [connectionDrag, setConnectionDrag] = useState<ConnectionDrag | null>(null);
   const connectionDragRef = useRef<ConnectionDrag | null>(null);
@@ -444,6 +446,7 @@ export default function SimulationCanvas({
               mark={mark}
               isSelected={selectedId === mark.id}
               offenseColor={offenseTargetColors.get(`mark:${mark.id}`)}
+              ruleHighlightStrokeWidth={ruleHighlightStrokeWidth}
               isConnectionTarget={connectionDrag?.targetMarkId === mark.id}
               readOnly={readOnly || isExporting}
               onOpenInspector={readOnly || isExporting ? undefined : () => onOpenInspector(mark.id, 'mark')}
@@ -471,6 +474,7 @@ export default function SimulationCanvas({
             sailStrokeWidth={sailStrokeWidth}
             darkSailInLightMode={useDarkSail}
             offenseColor={offenseTargetColors.get(`boat:${boat.id}`)}
+            ruleHighlightStrokeWidth={ruleHighlightStrokeWidth}
             readOnly={readOnly}
             onOpenInspector={readOnly ? undefined : () => onOpenInspector(boat.id, 'boat')}
             snapFn={
