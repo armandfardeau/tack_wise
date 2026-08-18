@@ -1,7 +1,8 @@
 import coreURL from '@ffmpeg/core?url';
 import wasmURL from '@ffmpeg/core/wasm?url';
 import type { FFmpeg } from '@ffmpeg/ffmpeg';
-import type { VideoExportType } from '../types';
+import type { ExportQuality, VideoExportType } from '../types';
+import { EXPORT_QUALITY_PRESETS } from './exportSettings';
 
 type ProgressHandler = (progress: number) => void;
 
@@ -28,7 +29,7 @@ export async function prepareVideoEncoder() {
   await getFFmpeg();
 }
 
-export async function convertWebmToMp4(webmBlob: Blob, onProgress?: ProgressHandler): Promise<Blob> {
+export async function convertWebmToMp4(webmBlob: Blob, onProgress?: ProgressHandler, quality: ExportQuality = 'standard'): Promise<Blob> {
   const [{ fetchFile }, ffmpeg] = await Promise.all([import('@ffmpeg/util'), getFFmpeg()]);
   const progressHandler = ({ progress }: { progress: number }) => {
     onProgress?.(Math.min(1, Math.max(0, progress)));
@@ -37,12 +38,13 @@ export async function convertWebmToMp4(webmBlob: Blob, onProgress?: ProgressHand
   ffmpeg.on('progress', progressHandler);
 
   try {
+    const { mp4Crf, mp4Preset } = EXPORT_QUALITY_PRESETS[quality];
     await ffmpeg.writeFile('tack-wise-input.webm', await fetchFile(webmBlob));
     const exitCode = await ffmpeg.exec([
       '-i', 'tack-wise-input.webm',
       '-c:v', 'libx264',
-      '-preset', 'veryfast',
-      '-crf', '23',
+      '-preset', mp4Preset,
+      '-crf', String(mp4Crf),
       '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
       '-pix_fmt', 'yuv420p',
       '-movflags', '+faststart',
@@ -68,6 +70,7 @@ export async function encodePngFramesToVideo(
   fps: number,
   type: VideoExportType,
   onProgress?: ProgressHandler,
+  quality: ExportQuality = 'standard',
 ): Promise<Blob> {
   if (frames.length === 0) throw new Error('No frames were captured for the video export.');
 
@@ -88,9 +91,10 @@ export async function encodePngFramesToVideo(
       onProgress?.(((index + 1) / frames.length) * 0.2);
     }
 
+    const { mp4Crf, mp4Preset, webmCrf, webmDeadline, webmCpuUsed } = EXPORT_QUALITY_PRESETS[quality];
     const codecArguments = type === 'mp4'
-      ? ['-c:v', 'libx264', '-preset', 'veryfast', '-crf', '23', '-movflags', '+faststart']
-      : ['-c:v', 'libvpx-vp9', '-deadline', 'realtime', '-cpu-used', '5', '-crf', '32', '-b:v', '0'];
+      ? ['-c:v', 'libx264', '-preset', mp4Preset, '-crf', String(mp4Crf), '-movflags', '+faststart']
+      : ['-c:v', 'libvpx-vp9', '-deadline', webmDeadline, '-cpu-used', String(webmCpuUsed), '-crf', String(webmCrf), '-b:v', '0'];
     const exitCode = await ffmpeg.exec([
       '-framerate', String(fps),
       '-start_number', '1',
