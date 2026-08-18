@@ -113,6 +113,10 @@ export function useScenarioExport({
       const stage = stageRef.current;
       if (!stage || typeof stage.toBlob !== 'function') return null;
 
+      setExportPhase('preparing');
+      const { encodePngFramesToVideo, prepareVideoEncoder } = await import('../utils/mp4');
+      await prepareVideoEncoder();
+
       setExportPhase('capturing');
       const capturedFrames: Blob[] = [];
       const originalPosition = stage.position();
@@ -143,9 +147,6 @@ export function useScenarioExport({
       }
 
       setExportProgress(50);
-      setExportPhase('preparing');
-      const { encodePngFramesToVideo, prepareVideoEncoder } = await import('../utils/mp4');
-      await prepareVideoEncoder();
       setExportPhase('encoding');
       return encodePngFramesToVideo(capturedFrames, exportFps, type, (progress) => {
         setExportProgress(50 + Math.round(progress * 50));

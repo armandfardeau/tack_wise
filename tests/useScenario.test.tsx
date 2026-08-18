@@ -72,6 +72,11 @@ describe('useScenario', () => {
     expect(addedBoatId).toMatch(/^boat-/);
     expect(result.current.frames[0].boats.some((boat) => boat.id === addedBoatId)).toBe(false);
     expect(result.current.frames.slice(1).every((frame) => frame.boats.some((boat) => boat.id === addedBoatId))).toBe(true);
+    const addedBoatPositions = result.current.frames
+      .slice(1)
+      .map((frame) => frame.boats.find((boat) => boat.id === addedBoatId))
+      .map((boat) => ({ x: boat?.x, y: boat?.y }));
+    expect(addedBoatPositions.every((position) => position.x === addedBoatPositions[0].x && position.y === addedBoatPositions[0].y)).toBe(true);
 
     act(() => {
       result.current.deleteSelected();
@@ -79,6 +84,112 @@ describe('useScenario', () => {
 
     expect(result.current.frames.every((frame) => frame.boats.every((boat) => boat.id !== addedBoatId))).toBe(true);
     expect(result.current.selectedId).toBeNull();
+  });
+
+  it('propagates moved positions through unchanged future frames for every draggable object', () => {
+    const createFrame = (id: string, position: number, futureProperties = false) => ({
+      id,
+      name: id,
+      windAngle: 0,
+      windSpeed: 12,
+      boats: [{
+        id: 'boat-a',
+        name: 'Boat',
+        color: '#fff',
+        x: position,
+        y: position + 1,
+        heading: futureProperties ? 90 : 0,
+        sailAngle: 0,
+      }],
+      marks: [{
+        id: 'mark-a',
+        name: 'Mark',
+        color: '#fff',
+        x: position + 2,
+        y: position + 3,
+        shape: 'circle' as const,
+        rotation: futureProperties ? 45 : 0,
+      }],
+      arrows: [{
+        id: 'arrow-a',
+        name: 'Arrow',
+        color: futureProperties ? '#00f' : '#f00',
+        points: [{ x: position + 4, y: position + 5 }, { x: position + 14, y: position + 15 }],
+      }],
+      comments: [{
+        id: 'comment-a',
+        name: 'Comment',
+        text: futureProperties ? 'Future frame' : 'Comment',
+        color: '#fff',
+        x: position + 6,
+        y: position + 7,
+      }],
+      images: [{
+        id: 'image-a',
+        name: 'Image',
+        src: 'data:image/png;base64,AA==',
+        x: position + 8,
+        y: position + 9,
+        width: 30,
+        height: 40,
+        rotation: futureProperties ? 30 : 0,
+      }],
+    });
+    const frames = [
+      createFrame('frame-1', 0),
+      createFrame('frame-2', 10),
+      createFrame('frame-3', 10, true),
+      createFrame('frame-4', 30, true),
+    ];
+    const { result } = renderHook(() => useScenario());
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 1, frames }));
+    act(() => {
+      result.current.moveBoat('boat-a', { x: 20, y: 21 });
+      result.current.moveMark('mark-a', { x: 22, y: 23 });
+      result.current.moveArrow('arrow-a', [{ x: 24, y: 25 }, { x: 34, y: 35 }]);
+      result.current.moveComment('comment-a', { x: 26, y: 27 });
+      result.current.moveImage('image-a', { x: 28, y: 29 });
+    });
+
+    expect(result.current.frames[0]).toMatchObject(frames[0]);
+    expect(result.current.frames[1]).toMatchObject({
+      boats: [{ x: 20, y: 21 }],
+      marks: [{ x: 22, y: 23 }],
+      arrows: [{ points: [{ x: 24, y: 25 }, { x: 34, y: 35 }] }],
+      comments: [{ x: 26, y: 27 }],
+      images: [{ x: 28, y: 29 }],
+    });
+    expect(result.current.frames[2]).toMatchObject({
+      boats: [{ x: 20, y: 21, heading: 90 }],
+      marks: [{ x: 22, y: 23, rotation: 45 }],
+      arrows: [{ points: [{ x: 24, y: 25 }, { x: 34, y: 35 }], color: '#00f' }],
+      comments: [{ x: 26, y: 27, text: 'Future frame' }],
+      images: [{ x: 28, y: 29, rotation: 30 }],
+    });
+    expect(result.current.frames[3]).toMatchObject(frames[3]);
+  });
+
+  it('undoes a propagated position change as one history entry', () => {
+    const frames = [
+      {
+        id: 'frame-1', name: 'One', windAngle: 0, windSpeed: 12,
+        boats: [{ id: 'boat-a', name: 'Boat', color: '#fff', x: 10, y: 20, heading: 0, sailAngle: 0 }], marks: [],
+      },
+      {
+        id: 'frame-2', name: 'Two', windAngle: 0, windSpeed: 12,
+        boats: [{ id: 'boat-a', name: 'Boat', color: '#fff', x: 10, y: 20, heading: 0, sailAngle: 0 }], marks: [],
+      },
+    ];
+    const { result } = renderHook(() => useScenario());
+
+    act(() => result.current.importScenario({ version: 1, currentFrameIndex: 0, frames }));
+    const originalFrames = result.current.frames;
+    act(() => result.current.moveBoat('boat-a', { x: 50, y: 60 }));
+    expect(result.current.frames[1].boats[0]).toMatchObject({ x: 50, y: 60 });
+
+    act(() => result.current.undo());
+    expect(result.current.frames).toEqual(originalFrames);
   });
 
   it('restores a boat deletion after the scenario is reloaded', () => {
