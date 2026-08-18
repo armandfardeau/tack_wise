@@ -80,11 +80,13 @@ export function normalizeFrameConnections(frame: Frame): Frame {
     }
   }
 
-  return {
+  const normalizedFrame = {
     ...frame,
     marks: frame.marks.map(stripLegacyMarkConnections),
     connections,
   };
+
+  return reanchorFrameConnections(normalizedFrame);
 }
 
 export function getMarkConnectionRadius(mark: Pick<Mark, 'shape' | 'size'>): number {
@@ -92,8 +94,9 @@ export function getMarkConnectionRadius(mark: Pick<Mark, 'shape' | 'size'>): num
 
   switch (mark.shape) {
     case 'gate':
+      return markSize * 5 / 6;
     case 'committeeBoat':
-      return markSize + 6;
+      return markSize;
     default:
       return markSize / 2;
   }
@@ -114,11 +117,49 @@ function rotatePoint(point: ConnectionPoint, degrees: number): ConnectionPoint {
   };
 }
 
+function getRectangleBoundary(direction: ConnectionPoint, halfWidth: number, halfHeight: number): ConnectionPoint {
+  const scale = Math.max(
+    Math.abs(direction.x) / halfWidth,
+    Math.abs(direction.y) / halfHeight,
+  );
+
+  return scale === 0
+    ? { x: 0, y: 0 }
+    : { x: direction.x / scale, y: direction.y / scale };
+}
+
+/** Returns the visible mark boundary in mark-local coordinates. */
+function getMarkConnectionBoundaryPoint(mark: Pick<Mark, 'shape' | 'size'>, direction: ConnectionPoint): ConnectionPoint {
+  const markSize = mark.size ?? 28;
+  const length = Math.hypot(direction.x, direction.y);
+  if (length === 0) return { x: 0, y: 0 };
+
+  switch (mark.shape) {
+    case 'square':
+      return getRectangleBoundary(direction, markSize / 2, markSize / 2);
+    case 'gate':
+      // The gate consists of a line from -size to size and circles at +/-size/2.
+      return getRectangleBoundary(direction, markSize * 5 / 6, markSize / 3);
+    case 'committeeBoat':
+      // Include the hull, mast, and flag in the connection hit boundary.
+      return getRectangleBoundary(direction, markSize, markSize * 0.95);
+    case 'triangle': {
+      // A regular triangle is approximated by its circumscribed circle for now;
+      // unlike gates, its rendered and connection extents share the same scale.
+      const radius = markSize / 2;
+      return { x: direction.x * radius / length, y: direction.y * radius / length };
+    }
+    case 'circle':
+    case 'obstruction':
+    default: {
+      const radius = markSize / 2;
+      return { x: direction.x * radius / length, y: direction.y * radius / length };
+    }
+  }
+}
+
 export function getMarkConnectionPoint(mark: Mark, anchor: ConnectionPoint): ConnectionPoint {
-  const localPoint = {
-    x: anchor.x * getMarkConnectionRadius(mark),
-    y: anchor.y * getMarkConnectionRadius(mark),
-  };
+  const localPoint = getMarkConnectionBoundaryPoint(mark, anchor);
   const rotatedPoint = rotatePoint(localPoint, mark.rotation ?? 0);
 
   return {
@@ -130,11 +171,12 @@ export function getMarkConnectionPoint(mark: Mark, anchor: ConnectionPoint): Con
 export function getMarkConnectionAnchor(mark: Mark, point: ConnectionPoint): ConnectionPoint {
   const relativePoint = { x: point.x - mark.x, y: point.y - mark.y };
   const localPoint = rotatePoint(relativePoint, -(mark.rotation ?? 0));
-  const radius = getMarkConnectionRadius(mark);
+  const length = Math.hypot(localPoint.x, localPoint.y);
+  if (length === 0) return { x: 0, y: 0 };
 
   return {
-    x: Math.max(-1.5, Math.min(1.5, localPoint.x / radius)),
-    y: Math.max(-1.5, Math.min(1.5, localPoint.y / radius)),
+    x: Math.max(-1.5, Math.min(1.5, localPoint.x / length)),
+    y: Math.max(-1.5, Math.min(1.5, localPoint.y / length)),
   };
 }
 
@@ -148,17 +190,37 @@ export function getMarkConnectionAnchors(sourceMark: Mark, targetMark: Mark): {
 
   const unitDirection = { x: direction.x / distance, y: direction.y / distance };
   const startPoint = {
-    x: sourceMark.x + unitDirection.x * getMarkConnectionRadius(sourceMark),
-    y: sourceMark.y + unitDirection.y * getMarkConnectionRadius(sourceMark),
+    x: sourceMark.x + unitDirection.x,
+    y: sourceMark.y + unitDirection.y,
   };
   const endPoint = {
-    x: targetMark.x - unitDirection.x * getMarkConnectionRadius(targetMark),
-    y: targetMark.y - unitDirection.y * getMarkConnectionRadius(targetMark),
+    x: targetMark.x - unitDirection.x,
+    y: targetMark.y - unitDirection.y,
   };
 
   return {
     start: getMarkConnectionAnchor(sourceMark, startPoint),
     end: getMarkConnectionAnchor(targetMark, endPoint),
+  };
+}
+
+export function reanchorFrameConnections(frame: Frame): Frame {
+  const markById = new Map(frame.marks.map((mark) => [mark.id, mark]));
+
+  return {
+    ...frame,
+    connections: (frame.connections ?? []).map((connection) => {
+      const sourceMark = markById.get(connection.start.markId);
+      const targetMark = markById.get(connection.end.markId);
+      if (!sourceMark || !targetMark) return connection;
+
+      const anchors = getMarkConnectionAnchors(sourceMark, targetMark);
+      return {
+        ...connection,
+        start: { ...connection.start, anchor: anchors.start },
+        end: { ...connection.end, anchor: anchors.end },
+      };
+    }),
   };
 }
 

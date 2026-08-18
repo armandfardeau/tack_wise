@@ -77,7 +77,7 @@ function getInitialTheme(): Theme {
 export default function App() {
   const { dismissUpdate, isUpdateAvailable, refresh } = useServiceWorkerUpdate();
   const {
-    flags: { sailBoomLength, sailStrokeWidth, darkSailInLightMode, rightInspectorPanel },
+    flags: { sailBoomLength, sailStrokeWidth, darkSailInLightMode, rightInspectorPanel, ruleHighlightStrokeWidth },
     isResolved: areFeatureFlagsResolved,
     source: featureFlagSource,
   } = useFeatureFlags();
@@ -133,10 +133,10 @@ export default function App() {
     if (!areFeatureFlagsResolved) return;
 
     posthog.register(getFeatureFlagMetadata(
-      { sailBoomLength, sailStrokeWidth, darkSailInLightMode, rightInspectorPanel },
+      { sailBoomLength, sailStrokeWidth, darkSailInLightMode, rightInspectorPanel, ruleHighlightStrokeWidth },
       featureFlagSource,
     ));
-  }, [areFeatureFlagsResolved, darkSailInLightMode, featureFlagSource, rightInspectorPanel, sailBoomLength, sailStrokeWidth]);
+  }, [areFeatureFlagsResolved, darkSailInLightMode, featureFlagSource, rightInspectorPanel, ruleHighlightStrokeWidth, sailBoomLength, sailStrokeWidth]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -491,6 +491,7 @@ export default function App() {
           sailBoomLength={sailBoomLength}
           sailStrokeWidth={sailStrokeWidth}
           darkSailInLightMode={darkSailInLightMode}
+          ruleHighlightStrokeWidth={ruleHighlightStrokeWidth}
           activeFrame={scenario.displayFrame}
           inspectorFrame={scenario.activeFrame}
           autoSailTrim={scenario.autoSailTrim}

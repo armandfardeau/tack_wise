@@ -56,4 +56,21 @@ describe('Mark', () => {
 
     expect(screen.getByTestId('konva-circle')).toHaveAttribute('stroke', '#ef4444');
   });
+
+  it('renders a contrasting halo behind the configured offense color', () => {
+    render(<Mark mark={triangleMark} isSelected={false} offenseColor="#22c55e" ruleHighlightStrokeWidth={24} readOnly />);
+
+    const offenseCircles = screen.getAllByTestId('konva-circle').filter((circleNode) => (
+      circleNode.getAttribute('stroke') === '#f8fafc'
+      || circleNode.getAttribute('stroke') === '#0f172a'
+      || circleNode.getAttribute('stroke') === '#22c55e'
+    ));
+
+    expect(offenseCircles.map((circleNode) => circleNode.getAttribute('stroke'))).toEqual([
+      '#f8fafc',
+      '#0f172a',
+      '#22c55e',
+    ]);
+    expect(offenseCircles.map((circleNode) => circleNode.getAttribute('stroke-width'))).toEqual(['24', '24', '24']);
+  });
 });

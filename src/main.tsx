@@ -8,6 +8,7 @@ import App from './App.tsx'
 import { SERVICE_WORKER_REGISTERED_EVENT } from './utils/serviceWorker'
 import { dropStacklessScriptErrors } from './utils/exceptionFilter'
 import { getOrCreateUserId } from './utils/userIdentity'
+import { createExceptionNoiseFilter } from './utils/exceptionFilter'
 
 const posthogKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST
@@ -17,9 +18,12 @@ if (posthogKey && posthogHost) {
   posthog.init(posthogKey, {
     api_host: posthogHost,
     defaults: '2026-05-30',
-    // Drop stackless cross-origin "Script error." reports so they don't fill
-    // error tracking with unactionable, zero-information issues.
-    before_send: dropStacklessScriptErrors,
+    before_send: (event) =>
+      dropStacklessScriptErrors(
+        createExceptionNoiseFilter(
+          window.location.origin + window.location.pathname
+        )(event)
+      ),
   })
   posthog.identify(userId)
   posthog.startExceptionAutocapture()

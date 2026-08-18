@@ -28,6 +28,7 @@ interface BoatProps {
   sailBoomLength?: number;
   sailStrokeWidth?: number;
   darkSailInLightMode?: boolean;
+  ruleHighlightStrokeWidth?: number;
 }
 
 const SPEECH_BUBBLE_X = -SPEECH_BUBBLE_WIDTH / 2;
@@ -38,7 +39,6 @@ const SHADOW_SAIL_BOOM_STROKE_WIDTH = 3;
 const SHADOW_SAIL_STROKE_WIDTH = 4.5;
 const MAST_X_OFFSET = 0;
 const MAST_Y_OFFSET = -28;
-
 function JudgeBoatBody({ color, isShadow }: { color: string; isShadow: boolean }) {
   const deckColor = isShadow ? '#cbd5e1' : '#e2e8f0';
   const detailColor = isShadow ? '#94a3b8' : '#475569';
@@ -167,7 +167,7 @@ export function SpeechBubble({
   );
 }
 
-export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top', sailBoomLength = 68, sailStrokeWidth = 4, darkSailInLightMode = false }: BoatProps) {
+export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSelect, onDragMove, onRotate, snapFn, readOnly = false, isShadow = false, isOffense = false, offenseColor, showSpeechBubble = true, speechBubblePosition = 'top', sailBoomLength = 68, sailStrokeWidth = 4, darkSailInLightMode = false, ruleHighlightStrokeWidth = 30 }: BoatProps) {
   const boatScale = 0.5;
   const isJudge = boat.type === 'judge';
   const hullPath = isJudge ? JUDGE_HULL_PATH : SAILING_HULL_PATH;
@@ -279,14 +279,18 @@ export default function Boat({ boat, isSelected, onMove, onOpenInspector, onSele
 
       {/* Selection Glow / Shadow Ring */}
       {offenseStroke && (
-        <Path
-          data={hullPath}
-          fill="transparent"
-          stroke={offenseStroke}
-          strokeWidth={5}
-          dash={[10, 6]}
-          opacity={0.95}
-        />
+        <>
+          <Path data={hullPath} fill="transparent" stroke="#f8fafc" strokeWidth={ruleHighlightStrokeWidth} dash={[10, 6]} opacity={0.95} />
+          <Path data={hullPath} fill="transparent" stroke="#0f172a" strokeWidth={ruleHighlightStrokeWidth} dash={[10, 6]} opacity={0.95} />
+          <Path
+            data={hullPath}
+            fill="transparent"
+            stroke={offenseStroke}
+            strokeWidth={ruleHighlightStrokeWidth}
+            dash={[10, 6]}
+            opacity={0.95}
+          />
+        </>
       )}
 
       {isSelected && (

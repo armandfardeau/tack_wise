@@ -15,6 +15,10 @@ export const featureFlags = {
     key: 'RIGHT_INSPECTOR_PANEL',
     defaultValue: false,
   },
+  ruleHighlightStrokeWidth: {
+    key: 'RULE_HIGHLIGHT_STROKE_WIDTH',
+    defaultValue: 10,
+  },
 } as const;
 
 type FeatureFlagValue<Value> = Value extends number
