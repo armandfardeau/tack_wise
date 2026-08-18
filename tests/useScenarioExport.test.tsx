@@ -59,19 +59,26 @@ const frames: Frame[] = [{
 }];
 
 const originalRequestAnimationFrame = window.requestAnimationFrame;
+const originalCaptureStream = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'captureStream');
 
 function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, stage: KonvaStage | null = null, exportQuality: 'fast' | 'standard' | 'high' = 'standard') {
-  const track = { stop: jest.fn() };
-  const canvas = document.createElement('canvas');
-  const captureStream = jest.fn(() => ({ getTracks: () => [track] }));
-  Object.defineProperty(canvas, 'captureStream', {
+  const track = { requestFrame: jest.fn(), stop: jest.fn() };
+  const captureStream = jest.fn(() => ({
+    getTracks: () => [track],
+    getVideoTracks: () => [track],
+  }));
+  Object.defineProperty(HTMLCanvasElement.prototype, 'captureStream', {
     configurable: true,
     value: captureStream,
   });
-  const canvasWrap = document.createElement('div');
-  canvasWrap.dataset.canvasWrap = 'true';
-  canvasWrap.appendChild(canvas);
-  document.body.appendChild(canvasWrap);
+  const compositedStageCanvas = document.createElement('canvas');
+  compositedStageCanvas.width = 800;
+  compositedStageCanvas.height = 600;
+  const fallbackStage = {
+    draw: jest.fn(),
+    toCanvas: jest.fn(() => compositedStageCanvas),
+  } as unknown as KonvaStage;
+  const activeStage = stage ?? fallbackStage;
 
   const setCurrentFrameIndex = jest.fn();
   const setPlaybackProgress = jest.fn();
@@ -86,12 +93,12 @@ function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, 
     setIsPlaybackSampling,
     setIsPlaying,
     settings: { displayMode: 'single', presenterMode: false },
-    stageRef: { current: stage } as { current: KonvaStage | null },
+    stageRef: { current: activeStage } as { current: KonvaStage | null },
     stageSize: { width: 800, height: 600 },
     exportQuality,
   }));
 
-  return { ...hook, canvas, captureStream, setCurrentFrameIndex, setPlaybackProgress, setIsPlaybackSampling, setIsPlaying, track };
+  return { ...hook, captureStream, stage: activeStage, setCurrentFrameIndex, setPlaybackProgress, setIsPlaybackSampling, setIsPlaying, track };
 }
 
 describe('useScenarioExport video exports', () => {
@@ -117,6 +124,11 @@ describe('useScenarioExport video exports', () => {
     jest.mocked(convertWebmToMp4).mockReset();
     jest.mocked(encodePngFramesToVideo).mockReset();
     jest.mocked(prepareVideoEncoder).mockReset();
+    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue({
+      clearRect: jest.fn(),
+      drawImage: jest.fn(),
+    } as unknown as CanvasRenderingContext2D);
+    jest.spyOn(console, 'warn').mockImplementation(() => undefined);
     jest.spyOn(Date, 'now').mockReturnValue(123);
   });
 
@@ -126,12 +138,17 @@ describe('useScenarioExport video exports', () => {
       configurable: true,
       value: originalRequestAnimationFrame,
     });
+    if (originalCaptureStream) {
+      Object.defineProperty(HTMLCanvasElement.prototype, 'captureStream', originalCaptureStream);
+    } else {
+      delete (HTMLCanvasElement.prototype as { captureStream?: unknown }).captureStream;
+    }
     document.body.innerHTML = '';
   });
 
   it('records and downloads WEBM without converting it', async () => {
     TestMediaRecorder.supportedMimeTypes.add('video/webm;codecs=vp9');
-    const { result, captureStream, setIsPlaying, setIsPlaybackSampling, track } = renderVideoExport();
+    const { result, captureStream, stage, setIsPlaying, setIsPlaybackSampling, track } = renderVideoExport();
 
     await act(async () => {
       await result.current.triggerExport('webm');
@@ -147,15 +164,22 @@ describe('useScenarioExport video exports', () => {
     expect(setIsPlaybackSampling).toHaveBeenCalledWith(true);
     expect(setIsPlaybackSampling).toHaveBeenLastCalledWith(false);
     expect(captureStream).toHaveBeenCalledWith(15);
+    expect(stage.toCanvas).toHaveBeenCalledWith({ pixelRatio: 1 });
+    expect(track.requestFrame).toHaveBeenCalled();
     expect(track.stop).toHaveBeenCalledTimes(1);
   });
 
   it('renders and encodes video frames offline when Konva can export blobs', async () => {
+    const captureOrder: string[] = [];
     const exportOrder: string[] = [];
     const stage = {
-      toBlob: jest.fn().mockImplementation(async () => {
+      draw: jest.fn(() => captureOrder.push('draw')),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 24, y: 18 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1.25, y: 1.25 }),
+      toBlob: jest.fn(() => {
+        captureOrder.push('toBlob');
         exportOrder.push('capture');
-        return new Blob(['png'], { type: 'image/png' });
+        return Promise.resolve(new Blob(['png'], { type: 'image/png' }));
       }),
     } as unknown as KonvaStage;
     const encodedBlob = new Blob(['offline video'], { type: 'video/webm' });
@@ -173,6 +197,12 @@ describe('useScenarioExport video exports', () => {
     });
 
     expect(stage.toBlob).toHaveBeenCalledWith({ pixelRatio: 1, mimeType: 'image/png' });
+    expect(stage.draw).toHaveBeenCalledTimes(2);
+    expect(stage.position).toHaveBeenCalledWith({ x: 0, y: 0 });
+    expect(stage.scale).toHaveBeenCalledWith({ x: 1, y: 1 });
+    expect(stage.position).toHaveBeenLastCalledWith({ x: 24, y: 18 });
+    expect(stage.scale).toHaveBeenLastCalledWith({ x: 1.25, y: 1.25 });
+    expect(captureOrder).toEqual(['draw', 'toBlob', 'draw']);
     expect(encodePngFramesToVideo).toHaveBeenCalledWith(
       [expect.any(Blob)],
       15,
@@ -187,6 +217,9 @@ describe('useScenarioExport video exports', () => {
 
   it('captures High-quality video frames at 2x pixel ratio and passes the quality preset', async () => {
     const stage = {
+      draw: jest.fn(),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 0, y: 0 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1, y: 1 }),
       toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
     } as unknown as KonvaStage;
     jest.mocked(prepareVideoEncoder).mockResolvedValue(undefined);
@@ -267,6 +300,9 @@ describe('useScenarioExport video exports', () => {
 
   it('uses the selected FPS as the GIF frame delay', async () => {
     const stage = {
+      draw: jest.fn(),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 0, y: 0 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1, y: 1 }),
       toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
     } as unknown as KonvaStage;
     const { result } = renderVideoExport(frames, 0, stage);
@@ -295,6 +331,9 @@ describe('useScenarioExport video exports', () => {
 
   it('passes High-quality GIF dimensions that match the captured 2x frames', async () => {
     const stage = {
+      draw: jest.fn(),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 0, y: 0 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1, y: 1 }),
       toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
     } as unknown as KonvaStage;
     const createObjectURL = jest.fn(() => 'blob:frame-1');
