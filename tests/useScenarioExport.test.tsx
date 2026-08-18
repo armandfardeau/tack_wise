@@ -150,6 +150,8 @@ describe('useScenarioExport video exports', () => {
     const captureOrder: string[] = [];
     const stage = {
       draw: jest.fn(() => captureOrder.push('draw')),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 24, y: 18 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1.25, y: 1.25 }),
       toBlob: jest.fn(() => {
         captureOrder.push('toBlob');
         return Promise.resolve(new Blob(['png'], { type: 'image/png' }));
@@ -164,8 +166,12 @@ describe('useScenarioExport video exports', () => {
     });
 
     expect(stage.toBlob).toHaveBeenCalledWith({ pixelRatio: 1, mimeType: 'image/png' });
-    expect(stage.draw).toHaveBeenCalledTimes(1);
-    expect(captureOrder).toEqual(['draw', 'toBlob']);
+    expect(stage.draw).toHaveBeenCalledTimes(2);
+    expect(stage.position).toHaveBeenCalledWith({ x: 0, y: 0 });
+    expect(stage.scale).toHaveBeenCalledWith({ x: 1, y: 1 });
+    expect(stage.position).toHaveBeenLastCalledWith({ x: 24, y: 18 });
+    expect(stage.scale).toHaveBeenLastCalledWith({ x: 1.25, y: 1.25 });
+    expect(captureOrder).toEqual(['draw', 'toBlob', 'draw']);
     expect(encodePngFramesToVideo).toHaveBeenCalledWith(
       [expect.any(Blob)],
       15,
@@ -237,6 +243,8 @@ describe('useScenarioExport video exports', () => {
   it('uses the selected FPS as the GIF frame delay', async () => {
     const stage = {
       draw: jest.fn(),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 0, y: 0 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1, y: 1 }),
       toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
     } as unknown as KonvaStage;
     const { result } = renderVideoExport(frames, 0, stage);

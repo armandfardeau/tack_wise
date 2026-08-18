@@ -275,6 +275,11 @@ export interface CanvasWorldBounds {
   bottom: number;
 }
 
+export interface CanvasFitTransform {
+  position: Position;
+  zoom: number;
+}
+
 export const RULE_COMMENT_HEADER_HEIGHT = 24;
 
 export function getCommentText(comment: FrameComment): string {
@@ -408,6 +413,41 @@ export function getCanvasContentRect(frames: Array<Pick<Frame, 'boats' | 'marks'
 export function getCanvasContentBounds(frames: Array<Pick<Frame, 'boats' | 'marks' | 'arrows' | 'comments' | 'images'>>): CanvasContentBounds {
   const { maxX, maxY } = getCanvasContentRect(frames);
   return { maxX, maxY };
+}
+
+export function getCanvasFitTransform(
+  contentRect: CanvasContentRect,
+  stageSize: { width: number; height: number },
+  options: { padding?: number; topInset?: number; bottomInset?: number } = {},
+): CanvasFitTransform {
+  const padding = options.padding ?? 32;
+  const topInset = options.topInset ?? 0;
+  const bottomInset = options.bottomInset ?? 0;
+
+  if (contentRect.minX === contentRect.maxX && contentRect.minY === contentRect.maxY) {
+    return { position: { x: 0, y: 0 }, zoom: 1 };
+  }
+
+  const availableWidth = Math.max(stageSize.width - padding * 2, 1);
+  const availableHeight = Math.max(stageSize.height - topInset - bottomInset - padding * 2, 1);
+  const contentWidth = Math.max(contentRect.maxX - contentRect.minX, 1);
+  const contentHeight = Math.max(contentRect.maxY - contentRect.minY, 1);
+  const zoom = clampCanvasZoom(Math.min(
+    availableWidth / contentWidth,
+    availableHeight / contentHeight,
+  ));
+  const contentCenter = {
+    x: (contentRect.minX + contentRect.maxX) / 2,
+    y: (contentRect.minY + contentRect.maxY) / 2,
+  };
+
+  return {
+    zoom,
+    position: {
+      x: stageSize.width / 2 - contentCenter.x * zoom,
+      y: topInset + (stageSize.height - topInset - bottomInset) / 2 - contentCenter.y * zoom,
+    },
+  };
 }
 
 export interface GridSnap extends Position {

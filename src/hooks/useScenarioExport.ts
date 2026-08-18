@@ -4,6 +4,7 @@ import type { Stage as KonvaStage } from 'konva/lib/Stage';
 import { type ExportFps, type ExportPhase, type ExportQuality, type Frame, type ScenarioSettings, type VideoExportType } from '../types';
 import { dataUrlToBlob, downloadBlob, downloadScenarioJson } from '../utils/exporter';
 import { DEFAULT_EXPORT_QUALITY, EXPORT_QUALITY_PRESETS } from '../utils/exportSettings';
+import { getCanvasContentRect, getCanvasFitTransform } from '../utils/simulation';
 
 interface UseScenarioExportProps {
   currentFrameIndex: number;
@@ -114,19 +115,31 @@ export function useScenarioExport({
 
       setExportPhase('capturing');
       const capturedFrames: Blob[] = [];
-      for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
-        const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
-        for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
-          flushSync(() => {
-            setCurrentFrameIndex(frameIndex);
-            setPlaybackProgress(sampleIndex / samplesPerSegment);
-            setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 45));
-          });
+      const originalPosition = stage.position();
+      const originalScale = stage.scale();
+      const exportTransform = getCanvasFitTransform(getCanvasContentRect(frames), stageSize);
+      stage.position(exportTransform.position);
+      stage.scale({ x: exportTransform.zoom, y: exportTransform.zoom });
 
-          await waitForPaint();
-          stage.draw();
-          capturedFrames.push(await captureStageBlob(stage, gifPixelRatio));
+      try {
+        for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+          const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
+          for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
+            flushSync(() => {
+              setCurrentFrameIndex(frameIndex);
+              setPlaybackProgress(sampleIndex / samplesPerSegment);
+              setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 45));
+            });
+
+            await waitForPaint();
+            stage.draw();
+            capturedFrames.push(await captureStageBlob(stage, gifPixelRatio));
+          }
         }
+      } finally {
+        stage.position(originalPosition);
+        stage.scale(originalScale);
+        stage.draw();
       }
 
       setExportProgress(50);
@@ -144,6 +157,13 @@ export function useScenarioExport({
         const { exportToGif } = await import('../utils/gif');
         setExportPhase('capturing');
         const capturedImageUrls: string[] = [];
+        const stage = stageRef.current;
+        if (!stage) throw new Error('Canvas stage not found.');
+        const originalPosition = stage.position();
+        const originalScale = stage.scale();
+        const exportTransform = getCanvasFitTransform(getCanvasContentRect(frames), stageSize);
+        stage.position(exportTransform.position);
+        stage.scale({ x: exportTransform.zoom, y: exportTransform.zoom });
         try {
           for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
             const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
@@ -154,8 +174,6 @@ export function useScenarioExport({
                 setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
               });
 
-              const stage = stageRef.current;
-              if (!stage) throw new Error('Canvas stage not found.');
               await waitForPaint();
               stage.draw();
               capturedImageUrls.push(URL.createObjectURL(await captureStageBlob(stage, gifPixelRatio)));
@@ -171,6 +189,9 @@ export function useScenarioExport({
           downloadBlob(gifBlob, `regatta-simulation-${Date.now()}.gif`);
         } finally {
           capturedImageUrls.forEach((url) => URL.revokeObjectURL(url));
+          stage.position(originalPosition);
+          stage.scale(originalScale);
+          stage.draw();
         }
       } else {
         try {
