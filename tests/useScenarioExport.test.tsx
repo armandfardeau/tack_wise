@@ -25,6 +25,7 @@ jest.mock('../src/utils/mp4', () => ({
 class TestMediaRecorder {
   static supportedMimeTypes = new Set<string>();
   static isTypeSupported = jest.fn((mimeType: string) => TestMediaRecorder.supportedMimeTypes.has(mimeType));
+  static lastOptions: MediaRecorderOptions | null = null;
 
   readonly mimeType: string;
   state: RecordingState = 'inactive';
@@ -33,6 +34,7 @@ class TestMediaRecorder {
   onstop: (() => void) | null = null;
 
   constructor(_stream: MediaStream, options: MediaRecorderOptions) {
+    TestMediaRecorder.lastOptions = options;
     this.mimeType = options.mimeType ?? '';
   }
 
@@ -59,7 +61,7 @@ const frames: Frame[] = [{
 const originalRequestAnimationFrame = window.requestAnimationFrame;
 const originalCaptureStream = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'captureStream');
 
-function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, stage: KonvaStage | null = null) {
+function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, stage: KonvaStage | null = null, exportQuality: 'fast' | 'standard' | 'high' = 'standard') {
   const track = { requestFrame: jest.fn(), stop: jest.fn() };
   const captureStream = jest.fn(() => ({
     getTracks: () => [track],
@@ -93,6 +95,7 @@ function renderVideoExport(exportFrames: Frame[] = frames, exportPlaySpeed = 0, 
     settings: { displayMode: 'single', presenterMode: false },
     stageRef: { current: activeStage } as { current: KonvaStage | null },
     stageSize: { width: 800, height: 600 },
+    exportQuality,
   }));
 
   return { ...hook, captureStream, stage: activeStage, setCurrentFrameIndex, setPlaybackProgress, setIsPlaybackSampling, setIsPlaying, track };
@@ -114,6 +117,7 @@ describe('useScenarioExport video exports', () => {
       value: TestMediaRecorder,
     });
     TestMediaRecorder.supportedMimeTypes = new Set();
+    TestMediaRecorder.lastOptions = null;
     TestMediaRecorder.isTypeSupported.mockClear();
     jest.mocked(downloadBlob).mockClear();
     jest.mocked(exportToGif).mockReset();
@@ -204,10 +208,36 @@ describe('useScenarioExport video exports', () => {
       15,
       'webm',
       expect.any(Function),
+      'standard',
     );
     expect(prepareVideoEncoder).toHaveBeenCalledTimes(1);
     expect(downloadBlob).toHaveBeenCalledWith(encodedBlob, 'regatta-simulation-123.webm');
     expect(exportOrder).toEqual(['prepare', 'capture', 'encode']);
+  });
+
+  it('captures High-quality video frames at 2x pixel ratio and passes the quality preset', async () => {
+    const stage = {
+      draw: jest.fn(),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 0, y: 0 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1, y: 1 }),
+      toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
+    } as unknown as KonvaStage;
+    jest.mocked(prepareVideoEncoder).mockResolvedValue(undefined);
+    jest.mocked(encodePngFramesToVideo).mockResolvedValue(new Blob(['video'], { type: 'video/webm' }));
+    const { result } = renderVideoExport(frames, 0, stage, 'high');
+
+    await act(async () => {
+      await result.current.triggerExport('webm');
+    });
+
+    expect(stage.toBlob).toHaveBeenCalledWith({ pixelRatio: 2, mimeType: 'image/png' });
+    expect(encodePngFramesToVideo).toHaveBeenCalledWith(
+      [expect.any(Blob)],
+      20,
+      'webm',
+      expect.any(Function),
+      'high',
+    );
   });
 
   it('uses the selected FPS for video capture', async () => {
@@ -297,5 +327,45 @@ describe('useScenarioExport video exports', () => {
     expect(revokeObjectURL).toHaveBeenCalledWith('blob:frame-1');
     delete (URL as unknown as { createObjectURL?: unknown }).createObjectURL;
     delete (URL as unknown as { revokeObjectURL?: unknown }).revokeObjectURL;
+  });
+
+  it('passes High-quality GIF dimensions that match the captured 2x frames', async () => {
+    const stage = {
+      draw: jest.fn(),
+      position: jest.fn((value?: { x: number; y: number }) => value ?? { x: 0, y: 0 }),
+      scale: jest.fn((value?: { x: number; y: number }) => value ?? { x: 1, y: 1 }),
+      toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
+    } as unknown as KonvaStage;
+    const createObjectURL = jest.fn(() => 'blob:frame-1');
+    Object.defineProperty(URL, 'createObjectURL', { configurable: true, value: createObjectURL });
+    Object.defineProperty(URL, 'revokeObjectURL', { configurable: true, value: jest.fn() });
+    jest.mocked(exportToGif).mockResolvedValue(new Blob(['gif'], { type: 'image/gif' }));
+    const { result } = renderVideoExport(frames, 0, stage, 'high');
+
+    await act(async () => {
+      await result.current.triggerExport('gif', 10);
+    });
+
+    expect(jest.mocked(exportToGif)).toHaveBeenCalledWith(
+      ['blob:frame-1'],
+      0.1,
+      1600,
+      1200,
+      expect.objectContaining({ sampleInterval: 5 }),
+    );
+  });
+
+  it('uses a higher bitrate for High-quality real-time video fallback', async () => {
+    TestMediaRecorder.supportedMimeTypes.add('video/webm;codecs=vp9');
+    const { result } = renderVideoExport(frames, 0, null, 'high');
+
+    await act(async () => {
+      await result.current.triggerExport('webm');
+    });
+
+    expect(TestMediaRecorder.lastOptions).toEqual(expect.objectContaining({
+      mimeType: 'video/webm;codecs=vp9',
+      videoBitsPerSecond: 12_000_000,
+    }));
   });
 });

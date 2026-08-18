@@ -39,7 +39,12 @@ export function useScenarioExport({
   const [exportProgress, setExportProgress] = useState(0);
   const [exportType, setExportType] = useState<'gif' | VideoExportType | null>(null);
   const [exportPhase, setExportPhase] = useState<ExportPhase>('preparing');
-  const { fps: configuredExportFps, gifPixelRatio, gifSampleInterval } = EXPORT_QUALITY_PRESETS[exportQuality];
+  const {
+    fps: configuredExportFps,
+    pixelRatio,
+    gifSampleInterval,
+    videoBitsPerSecond,
+  } = EXPORT_QUALITY_PRESETS[exportQuality];
   const defaultExportFps = configuredExportFps as ExportFps;
 
   const triggerJsonExport = (exportFrames: Frame[], exportCurrentFrameIndex: number) => {
@@ -137,7 +142,7 @@ export function useScenarioExport({
 
             await waitForPaint();
             stage.draw();
-            capturedFrames.push(await captureStageBlob(stage, gifPixelRatio));
+            capturedFrames.push(await captureStageBlob(stage, pixelRatio));
           }
         }
       } finally {
@@ -150,7 +155,7 @@ export function useScenarioExport({
       setExportPhase('encoding');
       return encodePngFramesToVideo(capturedFrames, exportFps, type, (progress) => {
         setExportProgress(50 + Math.round(progress * 50));
-      });
+      }, exportQuality);
     };
 
     const recordCompositedStage = async (type: VideoExportType) => {
@@ -190,7 +195,9 @@ export function useScenarioExport({
       let recordedBlob: Blob;
 
       try {
-        const recorder = new MediaRecorder(stream, { mimeType });
+        const recorderOptions: MediaRecorderOptions = { mimeType };
+        if (videoBitsPerSecond) recorderOptions.videoBitsPerSecond = videoBitsPerSecond;
+        const recorder = new MediaRecorder(stream, recorderOptions);
         recordedBlob = await new Promise<Blob>((resolve, reject) => {
           const recordedChunks: BlobPart[] = [];
           let settled = false;
@@ -273,13 +280,13 @@ export function useScenarioExport({
 
               await waitForPaint();
               stage.draw();
-              capturedImageUrls.push(URL.createObjectURL(await captureStageBlob(stage, gifPixelRatio)));
+              capturedImageUrls.push(URL.createObjectURL(await captureStageBlob(stage, pixelRatio)));
             }
           }
 
           setExportProgress(60);
           setExportPhase('encoding');
-          const gifBlob = await exportToGif(capturedImageUrls, exportFrameInterval / 1000, stageSize.width, stageSize.height, {
+          const gifBlob = await exportToGif(capturedImageUrls, exportFrameInterval / 1000, stageSize.width * pixelRatio, stageSize.height * pixelRatio, {
             sampleInterval: gifSampleInterval,
           });
           setExportProgress(90);
@@ -309,7 +316,7 @@ export function useScenarioExport({
             setExportPhase('encoding');
             const mp4Blob = await convertWebmToMp4(recordedBlob, (progress) => {
               setExportProgress(60 + Math.round(progress * 35));
-            });
+            }, exportQuality);
             setExportProgress(100);
             downloadBlob(mp4Blob, `regatta-simulation-${Date.now()}.mp4`);
           }
