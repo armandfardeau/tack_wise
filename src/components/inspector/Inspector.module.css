@@ -604,34 +604,12 @@
   color: var(--accent-cyan-hover);
 }
 
-.rightInspectorBackdrop {
-  display: none;
-}
-
 @media (max-width: 768px) {
-  .rightInspectorMode {
-    display: block;
-  }
-
   .rightInspectorPanel {
-    position: absolute;
-    inset: 0 0 0 auto;
-    width: min(320px, 88vw);
-    max-width: 88vw;
-    transform: translateX(0);
-    box-shadow: -12px 0 30px rgba(0, 0, 0, 0.35);
-  }
-
-  .rightInspectorBackdrop {
-    position: absolute;
-    inset: 0;
-    z-index: 7;
-    display: block;
-    width: 100%;
-    padding: 0;
-    border: 0;
-    background: rgba(9, 13, 22, 0.62);
-    cursor: pointer;
+    flex-basis: min(320px, 78vw);
+    width: min(320px, 78vw);
+    max-width: min(320px, 78vw);
+    box-shadow: none;
   }
 
   .floatingInspector {

@@ -654,6 +654,7 @@ export default function CanvasWorkspace({
   const inspectorPanDeltaY = inspectorPlacement?.panDelta.y ?? 0;
 
   useEffect(() => {
+    if (rightInspectorPanel) return undefined;
     if (!shouldShowInspector || inspectorStyleLeft === undefined || inspectorStyleTop === undefined) {
       autoPanKeyRef.current = null;
       setInspectorPosition((position) => position === null ? position : null);
@@ -680,7 +681,44 @@ export default function CanvasWorkspace({
     inspectorStyleLeft,
     inspectorStyleTop,
     onPanCanvasBy,
+    rightInspectorPanel,
     shouldShowInspector,
+  ]);
+
+  useEffect(() => {
+    if (!rightInspectorPanel || !shouldShowRightInspector || !selectedObjectRect || !selectedId) return;
+
+    const objectLeft = canvasPosition.x + selectedObjectRect.left * canvasZoom;
+    const objectTop = canvasPosition.y + selectedObjectRect.top * canvasZoom;
+    const objectRight = objectLeft + selectedObjectRect.width * canvasZoom;
+    const objectBottom = objectTop + selectedObjectRect.height * canvasZoom;
+    const horizontalInset = 40;
+    const topInset = 72;
+    const bottomInset = 56;
+    let deltaX = 0;
+    let deltaY = 0;
+
+    if (objectLeft < horizontalInset) deltaX = horizontalInset - objectLeft;
+    if (objectRight > stageSize.width - horizontalInset) deltaX = stageSize.width - horizontalInset - objectRight;
+    if (objectTop < topInset) deltaY = topInset - objectTop;
+    if (objectBottom > stageSize.height - bottomInset) deltaY = stageSize.height - bottomInset - objectBottom;
+
+    const panKey = `${selectedId}:${selectedType}:${stageSize.width}:${stageSize.height}:${canvasZoom}`;
+    if ((deltaX || deltaY) && autoPanKeyRef.current !== panKey) {
+      autoPanKeyRef.current = panKey;
+      onPanCanvasBy({ x: deltaX, y: deltaY });
+    }
+  }, [
+    canvasPosition,
+    canvasZoom,
+    onPanCanvasBy,
+    rightInspectorPanel,
+    selectedId,
+    selectedObjectRect,
+    selectedType,
+    shouldShowRightInspector,
+    stageSize.height,
+    stageSize.width,
   ]);
 
   const canvasWrapClassName = [styles.canvasWrap, isAddingArrow && styles.isArrowDrawing]
@@ -888,14 +926,6 @@ export default function CanvasWorkspace({
           onReset={onResetZoom}
         />
       </div>
-      {shouldShowRightInspector && (
-        <button
-          type="button"
-          className={inspectorStyles.rightInspectorBackdrop}
-          aria-label="Close inspector"
-          onClick={handleCloseInspector}
-        />
-      )}
       {shouldShowRightInspector && (
         <aside className={inspectorStyles.rightInspectorPanel} aria-label="Object inspector">
           <div ref={inspectorRef} className={inspectorStyles.rightInspectorContent}>
