@@ -11,6 +11,10 @@ export const featureFlags = {
     key: 'DARK_SAIL_IN_LIGHT_MODE',
     defaultValue: false,
   },
+  rightInspectorPanel: {
+    key: 'RIGHT_INSPECTOR_PANEL',
+    defaultValue: false,
+  },
 } as const;
 
 type FeatureFlagValue<Value> = Value extends number

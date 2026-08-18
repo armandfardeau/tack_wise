@@ -253,6 +253,21 @@ describe('CanvasWorkspace', () => {
     await waitFor(() => expect(screen.queryByTestId('floating-inspector')).not.toBeInTheDocument());
   });
 
+  it('renders the inspector in the right panel when the feature flag is enabled', async () => {
+    renderCanvasWorkspace({
+      rightInspectorPanel: true,
+      inspectorRequest: { id: 'boat-1', type: 'boat', requestId: 2 },
+    });
+
+    await waitFor(() => expect(screen.getByRole('complementary', { name: 'Object inspector' })).toBeInTheDocument());
+    expect(screen.queryByTestId('floating-inspector')).not.toBeInTheDocument();
+    expect(screen.getByText('Inspector')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('complementary', { name: 'Object inspector' }).querySelector('button[aria-label="Close inspector"]')!);
+
+    await waitFor(() => expect(screen.queryByRole('complementary', { name: 'Object inspector' })).not.toBeInTheDocument());
+  });
+
   it('allows the playback warning toast to be dismissed', () => {
     render(
       <CanvasWorkspace

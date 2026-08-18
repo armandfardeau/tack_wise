@@ -3,29 +3,31 @@ import { featureFlags, getFeatureFlagMetadata } from '../src/featureFlags';
 describe('feature flag PostHog metadata', () => {
   it('creates metadata for every declared feature flag', () => {
     const metadata = getFeatureFlagMetadata(
-      { sailBoomLength: 72, sailStrokeWidth: 5, darkSailInLightMode: true },
+      { sailBoomLength: 72, sailStrokeWidth: 5, darkSailInLightMode: true, rightInspectorPanel: true },
       'vercel',
     );
 
     expect(Object.keys(featureFlags).map((name) => featureFlags[name as keyof typeof featureFlags].key.toLowerCase()))
-      .toEqual(expect.arrayContaining(['sail_boom_length', 'sail_stroke_width', 'dark_sail_in_light_mode']));
+      .toEqual(expect.arrayContaining(['sail_boom_length', 'sail_stroke_width', 'dark_sail_in_light_mode', 'right_inspector_panel']));
     expect(metadata).toEqual({
       ff_sail_boom_length: 72,
       ff_sail_stroke_width: 5,
       ff_dark_sail_in_light_mode: true,
-      ff_setup: 'sailBoomLength_72__sailStrokeWidth_5__darkSailInLightMode_true',
+      ff_right_inspector_panel: true,
+      ff_setup: 'sailBoomLength_72__sailStrokeWidth_5__darkSailInLightMode_true__rightInspectorPanel_true',
       ff_source: 'vercel',
     });
   });
 
   it('preserves default values and marks fallback metadata', () => {
     expect(getFeatureFlagMetadata(
-      { sailBoomLength: 68, sailStrokeWidth: 4, darkSailInLightMode: false },
+      { sailBoomLength: 68, sailStrokeWidth: 4, darkSailInLightMode: false, rightInspectorPanel: false },
       'default',
     )).toMatchObject({
       ff_sail_boom_length: 68,
       ff_sail_stroke_width: 4,
       ff_dark_sail_in_light_mode: false,
+      ff_right_inspector_panel: false,
       ff_source: 'default',
     });
   });
