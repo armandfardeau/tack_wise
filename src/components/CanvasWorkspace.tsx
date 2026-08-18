@@ -22,6 +22,7 @@ import inspectorStyles from './inspector/Inspector.module.css';
 import styles from './CanvasWorkspace.module.css';
 
 interface CanvasWorkspaceProps {
+  rightInspectorPanel?: boolean;
   activeFrame: Frame;
   inspectorFrame: Frame;
   autoSailTrim: boolean;
@@ -280,6 +281,7 @@ function getInspectorPlacement(
 }
 
 export default function CanvasWorkspace({
+  rightInspectorPanel = false,
   activeFrame,
   inspectorFrame,
   autoSailTrim,
@@ -444,9 +446,9 @@ export default function CanvasWorkspace({
 
   const handleSelectObject = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     resetInspectorPlacement();
-    setIsInspectorOpen(false);
+    if (rightInspectorPanel) setIsInspectorOpen(true);
     onSelectObject(id, type);
-  }, [onSelectObject, resetInspectorPlacement]);
+  }, [onSelectObject, resetInspectorPlacement, rightInspectorPanel]);
 
   const handleOpenInspector = useCallback((id: string, type: Exclude<SelectedType, null>) => {
     if (presenterMode) return;
@@ -644,6 +646,7 @@ export default function CanvasWorkspace({
       : undefined;
 
   const shouldShowInspector = !presenterMode && isInspectorOpen && (selectedType === 'wind' || selectedType === 'grid' || selectedType === 'playback' || Boolean(selectedPosition));
+  const shouldShowRightInspector = rightInspectorPanel && shouldShowInspector;
 
   const inspectorPlacementKey = `${selectedId ?? ''}:${selectedType ?? ''}:${selectedPosition?.x ?? ''}:${selectedPosition?.y ?? ''}`;
   const inspectorStyleLeft = inspectorStyle?.left;
@@ -653,6 +656,7 @@ export default function CanvasWorkspace({
   const inspectorPanDeltaY = inspectorPlacement?.panDelta.y ?? 0;
 
   useEffect(() => {
+    if (rightInspectorPanel) return undefined;
     if (!shouldShowInspector || inspectorStyleLeft === undefined || inspectorStyleTop === undefined) {
       autoPanKeyRef.current = null;
       setInspectorPosition((position) => position === null ? position : null);
@@ -679,6 +683,7 @@ export default function CanvasWorkspace({
     inspectorStyleLeft,
     inspectorStyleTop,
     onPanCanvasBy,
+    rightInspectorPanel,
     shouldShowInspector,
   ]);
 
@@ -686,8 +691,13 @@ export default function CanvasWorkspace({
     .filter(Boolean)
     .join(' ');
 
+  const canvasContainerClassName = [
+    styles.canvasContainer,
+    shouldShowRightInspector && styles.rightInspectorMode,
+  ].filter(Boolean).join(' ');
+
   return (
-    <section className={styles.canvasContainer}>
+    <section className={canvasContainerClassName}>
       <div ref={canvasWrapRef} data-canvas-wrap="true" className={canvasWrapClassName}>
         <SimulationCanvas
           sailBoomLength={sailBoomLength}
@@ -793,7 +803,7 @@ export default function CanvasWorkspace({
             </button>
           </div>
         )}
-        {shouldShowInspector && inspectorStyle && (
+        {!rightInspectorPanel && shouldShowInspector && inspectorStyle && (
           <Rnd
             bounds="parent"
             className={inspectorStyles.floatingInspector}
@@ -883,6 +893,55 @@ export default function CanvasWorkspace({
           onReset={onResetZoom}
         />
       </div>
+      {shouldShowRightInspector && (
+        <aside className={inspectorStyles.rightInspectorPanel} aria-label="Object inspector">
+          <div ref={inspectorRef} className={inspectorStyles.rightInspectorContent}>
+            <Inspector
+              view={createInspectorView({
+                activeFrame: inspectorFrame,
+                autoSailTrim,
+                displayMode,
+                gridSnapEnabled,
+                isPlaying,
+                onSetGridSnapEnabled,
+                onSetAutoSailTrim,
+                onSetDisplayMode,
+                onSetShowFrameTitle,
+                onSetShowFrameNumber,
+                onSetShowGrid,
+                onTogglePlaying,
+                onSetPlaySpeed,
+                playSpeed,
+                selectedBoat,
+                selectedMark,
+                selectedConnection,
+                selectedArrow,
+                selectedComment,
+                selectedImage,
+                selectedType,
+                showGrid,
+                showFrameTitle,
+                showFrameNumber,
+                updateBoat,
+                updateActiveFrame,
+                updateMark,
+                updateMarkRoomZone,
+                onConnectMarks,
+                onRemoveMarkConnection,
+                onReplaceMarkConnection,
+                updateConnection,
+                updateArrow,
+                updateComment,
+                updateRuleComment,
+                updateImage,
+              })}
+              onDelete={onDeleteSelected}
+              onDuplicate={onDuplicateSelected}
+              onClose={handleCloseInspector}
+            />
+          </div>
+        </aside>
+      )}
       {children}
     </section>
   );
