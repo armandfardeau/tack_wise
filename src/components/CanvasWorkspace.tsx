@@ -697,11 +697,15 @@ export default function CanvasWorkspace({
     const horizontalInset = 40;
     const topInset = 72;
     const bottomInset = 56;
+    const inspectorOverlayWidth = isCompactLayout
+      ? Math.min(320, window.innerWidth * 0.78)
+      : 320;
+    const visibleCanvasRight = stageSize.width - inspectorOverlayWidth - horizontalInset;
     let deltaX = 0;
     let deltaY = 0;
 
     if (objectLeft < horizontalInset) deltaX = horizontalInset - objectLeft;
-    if (objectRight > stageSize.width - horizontalInset) deltaX = stageSize.width - horizontalInset - objectRight;
+    if (objectRight > visibleCanvasRight) deltaX = visibleCanvasRight - objectRight;
     if (objectTop < topInset) deltaY = topInset - objectTop;
     if (objectBottom > stageSize.height - bottomInset) deltaY = stageSize.height - bottomInset - objectBottom;
 
@@ -713,6 +717,7 @@ export default function CanvasWorkspace({
   }, [
     canvasPosition,
     canvasZoom,
+    isCompactLayout,
     onPanCanvasBy,
     rightInspectorPanel,
     selectedId,

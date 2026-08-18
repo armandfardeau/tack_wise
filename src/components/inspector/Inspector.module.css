@@ -577,14 +577,18 @@
 }
 
 .rightInspectorPanel {
+  position: absolute;
+  inset: 0 0 0 auto;
   z-index: 8;
   display: flex;
+  width: 320px;
   flex: 0 0 320px;
   min-width: 0;
-  max-width: 320px;
+  max-width: min(320px, 88vw);
   overflow: hidden;
   background: var(--bg-sidebar);
   border-left: 1px solid var(--border-color);
+  box-shadow: -12px 0 30px rgba(0, 0, 0, 0.35);
   pointer-events: auto;
 }
 
@@ -606,10 +610,8 @@
 
 @media (max-width: 768px) {
   .rightInspectorPanel {
-    flex-basis: min(320px, 78vw);
     width: min(320px, 78vw);
-    max-width: min(320px, 78vw);
-    box-shadow: none;
+    max-width: 78vw;
   }
 
   .floatingInspector {

@@ -8,10 +8,6 @@
   overflow: hidden;
 }
 
-.rightInspectorMode {
-  flex-direction: row;
-}
-
 :global(.presenter-mode) .canvasContainer {
   background: var(--bg-app);
 }
