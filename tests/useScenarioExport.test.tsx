@@ -147,11 +147,21 @@ describe('useScenarioExport video exports', () => {
   });
 
   it('renders and encodes video frames offline when Konva can export blobs', async () => {
+    const exportOrder: string[] = [];
     const stage = {
-      toBlob: jest.fn().mockResolvedValue(new Blob(['png'], { type: 'image/png' })),
+      toBlob: jest.fn().mockImplementation(async () => {
+        exportOrder.push('capture');
+        return new Blob(['png'], { type: 'image/png' });
+      }),
     } as unknown as KonvaStage;
     const encodedBlob = new Blob(['offline video'], { type: 'video/webm' });
-    jest.mocked(encodePngFramesToVideo).mockResolvedValue(encodedBlob);
+    jest.mocked(prepareVideoEncoder).mockImplementation(async () => {
+      exportOrder.push('prepare');
+    });
+    jest.mocked(encodePngFramesToVideo).mockImplementation(async () => {
+      exportOrder.push('encode');
+      return encodedBlob;
+    });
     const { result } = renderVideoExport(frames, 0, stage);
 
     await act(async () => {
@@ -167,6 +177,7 @@ describe('useScenarioExport video exports', () => {
     );
     expect(prepareVideoEncoder).toHaveBeenCalledTimes(1);
     expect(downloadBlob).toHaveBeenCalledWith(encodedBlob, 'regatta-simulation-123.webm');
+    expect(exportOrder).toEqual(['prepare', 'capture', 'encode']);
   });
 
   it('uses the selected FPS for video capture', async () => {
