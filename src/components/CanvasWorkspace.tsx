@@ -889,6 +889,14 @@ export default function CanvasWorkspace({
         />
       </div>
       {shouldShowRightInspector && (
+        <button
+          type="button"
+          className={inspectorStyles.rightInspectorBackdrop}
+          aria-label="Close inspector"
+          onClick={handleCloseInspector}
+        />
+      )}
+      {shouldShowRightInspector && (
         <aside className={inspectorStyles.rightInspectorPanel} aria-label="Object inspector">
           <div ref={inspectorRef} className={inspectorStyles.rightInspectorContent}>
             <Inspector
