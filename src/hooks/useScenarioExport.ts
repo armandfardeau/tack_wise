@@ -153,6 +153,102 @@ export function useScenarioExport({
       });
     };
 
+    const recordCompositedStage = async (type: VideoExportType) => {
+      const stage = stageRef.current;
+      if (!stage || typeof stage.toCanvas !== 'function') {
+        throw new Error('Canvas stage cannot be recorded in this browser.');
+      }
+
+      const recordingCanvas = document.createElement('canvas');
+      const drawRecordingFrame = () => {
+        stage.draw();
+        const compositedStageCanvas = stage.toCanvas({ pixelRatio: 1 });
+
+        if (
+          recordingCanvas.width !== compositedStageCanvas.width
+          || recordingCanvas.height !== compositedStageCanvas.height
+        ) {
+          recordingCanvas.width = compositedStageCanvas.width;
+          recordingCanvas.height = compositedStageCanvas.height;
+        }
+
+        const context = recordingCanvas.getContext('2d');
+        if (!context) throw new Error('Could not create a canvas context for video recording.');
+
+        context.clearRect(0, 0, recordingCanvas.width, recordingCanvas.height);
+        context.drawImage(compositedStageCanvas, 0, 0);
+      };
+
+      drawRecordingFrame();
+      if (typeof recordingCanvas.captureStream !== 'function') {
+        throw new Error('Canvas video capture is not supported by this browser.');
+      }
+
+      const mimeType = getRecordingMimeType(type);
+      const stream = recordingCanvas.captureStream(exportFps);
+      const videoTrack = stream.getVideoTracks()[0] as (MediaStreamTrack & { requestFrame?: () => void }) | undefined;
+      let recordedBlob: Blob;
+
+      try {
+        const recorder = new MediaRecorder(stream, { mimeType });
+        recordedBlob = await new Promise<Blob>((resolve, reject) => {
+          const recordedChunks: BlobPart[] = [];
+          let settled = false;
+          const finish = (callback: () => void) => {
+            if (settled) return;
+            settled = true;
+            callback();
+          };
+
+          recorder.ondataavailable = (event) => {
+            if (event.data.size > 0) recordedChunks.push(event.data);
+          };
+          recorder.onerror = () => finish(() => reject(new Error('Video recording failed.')));
+          recorder.onstop = () => finish(() => resolve(new Blob(recordedChunks, { type: recorder.mimeType || mimeType })));
+
+          void (async () => {
+            try {
+              flushSync(() => {
+                setCurrentFrameIndex(0);
+                setPlaybackProgress(0);
+                setExportProgress(0);
+              });
+              await waitForPaint();
+              drawRecordingFrame();
+              recorder.start();
+              videoTrack?.requestFrame?.();
+
+              let nextSampleAt = performance.now();
+              for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
+                const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
+                for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
+                  flushSync(() => {
+                    setCurrentFrameIndex(frameIndex);
+                    setPlaybackProgress(sampleIndex / samplesPerSegment);
+                    setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
+                  });
+                  await waitForPaint();
+                  drawRecordingFrame();
+                  videoTrack?.requestFrame?.();
+                  nextSampleAt += exportFrameInterval;
+                  const remainingDelay = nextSampleAt - performance.now();
+                  if (remainingDelay > 0) await delay(remainingDelay);
+                }
+              }
+              recorder.stop();
+            } catch (error) {
+              finish(() => reject(error));
+              if (recorder.state !== 'inactive') recorder.stop();
+            }
+          })();
+        });
+      } finally {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+
+      return { mimeType, recordedBlob };
+    };
+
     try {
       if (type === 'gif') {
         const { exportToGif } = await import('../utils/gif');
@@ -196,97 +292,37 @@ export function useScenarioExport({
         }
       } else {
         try {
-          const offlineVideoBlob = await renderOfflineVideo(type);
-          if (offlineVideoBlob) {
+          setExportPhase('capturing');
+          const { mimeType, recordedBlob } = await recordCompositedStage(type);
+
+          if (type === 'webm') {
             setExportProgress(100);
-            downloadBlob(offlineVideoBlob, `regatta-simulation-${Date.now()}.${type}`);
-            return true;
+            downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.webm`);
+          } else if (mimeType.startsWith('video/mp4')) {
+            setExportProgress(100);
+            downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.mp4`);
+          } else {
+            setExportProgress(60);
+            setExportPhase('preparing');
+            const { convertWebmToMp4, prepareVideoEncoder } = await import('../utils/mp4');
+            await prepareVideoEncoder();
+            setExportPhase('encoding');
+            const mp4Blob = await convertWebmToMp4(recordedBlob, (progress) => {
+              setExportProgress(60 + Math.round(progress * 35));
+            });
+            setExportProgress(100);
+            downloadBlob(mp4Blob, `regatta-simulation-${Date.now()}.mp4`);
           }
+          return true;
         } catch (error) {
-          console.warn('Offline video export unavailable; falling back to real-time recording.', error);
+          console.warn('Composited video recording unavailable; falling back to offline encoding.', error);
         }
 
-        setExportPhase('capturing');
-        const canvas = document.querySelector('[data-canvas-wrap] canvas') as HTMLCanvasElement | null;
-        if (!canvas) throw new Error('Canvas element not found.');
-        if (typeof canvas.captureStream !== 'function') {
-          throw new Error('Canvas video capture is not supported by this browser.');
-        }
+        const offlineVideoBlob = await renderOfflineVideo(type);
+        if (!offlineVideoBlob) throw new Error('No video export path is available in this browser.');
 
-        const mimeType = getRecordingMimeType(type);
-        const stream = canvas.captureStream(exportFps);
-        let recordedBlob: Blob;
-
-        try {
-          const recorder = new MediaRecorder(stream, { mimeType });
-          recordedBlob = await new Promise<Blob>((resolve, reject) => {
-            const recordedChunks: BlobPart[] = [];
-            let settled = false;
-            const finish = (callback: () => void) => {
-              if (settled) return;
-              settled = true;
-              callback();
-            };
-
-            recorder.ondataavailable = (event) => {
-              if (event.data.size > 0) recordedChunks.push(event.data);
-            };
-            recorder.onerror = () => finish(() => reject(new Error('Video recording failed.')));
-            recorder.onstop = () => finish(() => resolve(new Blob(recordedChunks, { type: recorder.mimeType || mimeType })));
-
-            void (async () => {
-              try {
-                flushSync(() => {
-                  setCurrentFrameIndex(0);
-                  setPlaybackProgress(0);
-                  setExportProgress(0);
-                });
-                await waitForPaint();
-                recorder.start();
-                let nextSampleAt = performance.now();
-                for (let segmentIndex = 0; segmentIndex < segmentCount; segmentIndex += 1) {
-                  const frameIndex = frames.length === 0 ? 0 : segmentIndex % frames.length;
-                  for (let sampleIndex = 0; sampleIndex < samplesPerSegment; sampleIndex += 1) {
-                    flushSync(() => {
-                      setCurrentFrameIndex(frameIndex);
-                      setPlaybackProgress(sampleIndex / samplesPerSegment);
-                      setExportProgress(Math.round(((segmentIndex * samplesPerSegment + sampleIndex) / (segmentCount * samplesPerSegment)) * 50));
-                    });
-                    await waitForPaint();
-                    nextSampleAt += exportFrameInterval;
-                    const remainingDelay = nextSampleAt - performance.now();
-                    if (remainingDelay > 0) await delay(remainingDelay);
-                  }
-                }
-                recorder.stop();
-              } catch (error) {
-                finish(() => reject(error));
-                if (recorder.state !== 'inactive') recorder.stop();
-              }
-            })();
-          });
-        } finally {
-          stream.getTracks().forEach((track) => track.stop());
-        }
-
-        if (type === 'webm') {
-          setExportProgress(100);
-          downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.webm`);
-        } else if (mimeType.startsWith('video/mp4')) {
-          setExportProgress(100);
-          downloadBlob(recordedBlob, `regatta-simulation-${Date.now()}.mp4`);
-        } else {
-          setExportProgress(60);
-          setExportPhase('preparing');
-          const { convertWebmToMp4, prepareVideoEncoder } = await import('../utils/mp4');
-          await prepareVideoEncoder();
-          setExportPhase('encoding');
-          const mp4Blob = await convertWebmToMp4(recordedBlob, (progress) => {
-            setExportProgress(60 + Math.round(progress * 35));
-          });
-          setExportProgress(100);
-          downloadBlob(mp4Blob, `regatta-simulation-${Date.now()}.mp4`);
-        }
+        setExportProgress(100);
+        downloadBlob(offlineVideoBlob, `regatta-simulation-${Date.now()}.${type}`);
       }
       return true;
     } catch (error) {
